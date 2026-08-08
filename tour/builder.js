@@ -1,5 +1,16 @@
 // ============================================================
-// Строитель сцены: превращает данные APT в Three.js-объекты
+// Строитель сцены: превращает данные APT в Three.js-объекты.
+//
+// Структура:
+//   1. Процедурные текстуры (canvas): паркет, мрамор, ткани, картины
+//   2. Материалы (M.*) — единая палитра проекта
+//   3. Стены с проёмами (двери/окна/проходы) + мансардные скосы
+//   4. Полы, потолки, лестница, терраса
+//   5. Мебель (F.*) — параметрические конструкторы + blob-тени
+//   6. Свет: hemisphere + солнце + точечные по комнатам
+//
+// Каждый непроходимый объект добавляет коллайдер (segs — стены,
+// boxes — мебель) с уровнем 'main' | 'upper' | 'terrace' | 'both'.
 // ============================================================
 
 const Builder = (() => {
@@ -478,26 +489,17 @@ const Builder = (() => {
               x1: w.x1 + ux * p.from, z1: w.z1 + uz * p.from,
               x2: w.x1 + ux * p.to, z2: w.z1 + uz * p.to, lvl: colLvl
             });
-          } else {
-            // открытая створка (прижата к стене)
-            const leaf = new T.Mesh(new T.BoxGeometry(0.05, hh - 0.06, o.w - 0.06), M.doorWood);
-            const hx = w.x1 + ux * (p.from + 0.03);
-            const hz = w.z1 + uz * (p.from + 0.03);
-            leaf.position.set(hx - Math.sin(ang) * (0.06 + (o.w - 0.06) / 2) * 0, baseY + hh / 2, hz);
-            leaf.rotation.y = -ang;
-            leaf.translateZ(0.10 + 0); leaf.translateX(0);
-            // повёрнута на ~100° внутрь
-            leaf.rotation.y = -ang + Math.PI * 0.55;
-            leaf.translateZ((o.w - 0.06) / 2);
-            scene.add(leaf);
           }
+          // межкомнатные створки не рендерим: проёмы читаются открытыми
         }
         if (o.slider) {
-          // раздвижная панель рядом с проёмом
-          const sx = w.x1 + ux * (p.from - Math.min(p.from, o.w * 0.9) / 2);
-          const sz = w.z1 + uz * (p.from - Math.min(p.from, o.w * 0.9) / 2);
-          const panel = new T.Mesh(new T.BoxGeometry(o.w * 0.95, (o.type === 'door' ? DOOR_H : PASS_H) + 0.2, 0.05), M.ashV);
-          panel.position.set(sx - Math.sin(ang) * (WALL_TH / 2 + 0.05), baseY + ((o.type === 'door' ? DOOR_H : PASS_H) + 0.2) / 2, sz - Math.cos(ang) * (WALL_TH / 2 + 0.05));
+          // раздвижная панель, полностью запаркованная сбоку от проёма
+          const park = p.from - o.w * 0.42;
+          const sx = w.x1 + ux * park;
+          const sz = w.z1 + uz * park;
+          const ph = (o.type === 'door' ? DOOR_H : PASS_H) + 0.2;
+          const panel = new T.Mesh(new T.BoxGeometry(o.w * 0.8, ph, 0.05), M.ashV);
+          panel.position.set(sx - Math.sin(ang) * (WALL_TH / 2 + 0.06), baseY + ph / 2, sz - Math.cos(ang) * (WALL_TH / 2 + 0.06));
           panel.rotation.y = -ang;
           scene.add(panel);
         }
@@ -1278,15 +1280,11 @@ const Builder = (() => {
     }
   }
 
+  // Точка входа: собирает всю сцену и возвращает коллайдеры для контроллера
   function build(scene) {
     initMaterials();
     buildFloors(scene);
-    for (const w of APT.walls) {
-      buildWall(scene, w);
-      if (w.rail) {
-        // ограждение как низкая стенка уже построено buildWall (h=1.0)
-      }
-    }
+    for (const w of APT.walls) buildWall(scene, w);
     buildStairs(scene);
     buildTerrace(scene);
     buildFurniture(scene);
