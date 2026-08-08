@@ -29,6 +29,39 @@
   resize();
 
   document.getElementById('overlay').addEventListener('click', () => controls.lock());
+
+  // ---------- Меню «Комнаты»: телепорт по точкам ----------
+  const roomsBtn = document.getElementById('roomsBtn');
+  const roomsPanel = document.getElementById('roomsPanel');
+  let lastLvl = null;
+  for (const s of APT.spawns) {
+    const lvl = s.g === 0 ? '1 этаж' : s.g === 2.62 ? 'Улица' : '2 этаж';
+    if (lvl !== lastLvl) {
+      const hdr = document.createElement('div');
+      hdr.className = 'lvl';
+      hdr.textContent = lvl;
+      roomsPanel.appendChild(hdr);
+      lastLvl = lvl;
+    }
+    const b = document.createElement('button');
+    b.textContent = s.name;
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      controls.pos.x = s.x; controls.pos.z = s.z;
+      controls.yaw = s.yaw; controls.pitch = 0;
+      controls.ground = s.g;
+      roomsPanel.style.display = 'none';
+      if (!controls.isTouch && !controls.locked) controls.lock();
+    });
+    roomsPanel.appendChild(b);
+  }
+  roomsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    roomsPanel.style.display = roomsPanel.style.display === 'block' ? 'none' : 'block';
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape') roomsPanel.style.display = 'none';
+  });
   if (controls.isTouch) {
     document.getElementById('overlayText').innerHTML =
       'Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>' +

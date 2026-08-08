@@ -43,9 +43,11 @@ class WalkControls {
           this.touch.ox = t.clientX; this.touch.oy = t.clientY;
           this.touch.mx = 0; this.touch.mz = 0;
           if (joy) {
+            joy.classList.remove('docked');
             joy.style.display = 'block';
             joy.style.left = (t.clientX - JR) + 'px';
             joy.style.top = (t.clientY - JR) + 'px';
+            joy.style.bottom = 'auto';
             knob.style.transform = 'translate(0px,0px)';
           }
         } else if (this.touch.lookId === null) {
@@ -77,7 +79,7 @@ class WalkControls {
       for (const t of e.changedTouches) {
         if (t.identifier === this.touch.moveId) {
           this.touch.moveId = null; this.touch.mx = 0; this.touch.mz = 0;
-          if (joy) joy.style.display = 'none';
+          if (joy) { joy.classList.add('docked'); knob.style.transform = 'translate(0px,0px)'; }
         } else if (t.identifier === this.touch.lookId) {
           this.touch.lookId = null;
         }
@@ -88,6 +90,11 @@ class WalkControls {
     this.dom.addEventListener('touchmove', onMove, { passive: false });
     this.dom.addEventListener('touchend', onEnd, { passive: false });
     this.dom.addEventListener('touchcancel', onEnd, { passive: false });
+    // На тач-устройстве джойстик всегда виден (припаркован в углу)
+    if (this.isTouch && joy) {
+      joy.classList.add('docked');
+      joy.style.display = 'block';
+    }
   }
 
   lock() {
