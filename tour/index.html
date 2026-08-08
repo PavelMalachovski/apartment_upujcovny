@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>3D-тур · Апартаменты</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f12; }
+  #view { width: 100%; height: 100%; display: block; }
+  #overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    background: rgba(10, 12, 16, 0.72); color: #f2efe8; cursor: pointer;
+    font-family: system-ui, sans-serif; text-align: center; z-index: 10;
+  }
+  #overlay h1 { font-size: 26px; font-weight: 600; margin: 0; }
+  #overlay p { margin: 0; font-size: 15px; opacity: 0.85; line-height: 1.7; }
+  #overlay .go {
+    margin-top: 10px; padding: 10px 26px; border: 1px solid #f2efe8;
+    border-radius: 24px; font-size: 15px;
+  }
+  #minimap {
+    position: fixed; top: 14px; right: 14px; border-radius: 10px;
+    z-index: 5; box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+  }
+  #room {
+    position: fixed; left: 16px; bottom: 14px; color: #fff;
+    font-family: system-ui, sans-serif; font-size: 17px; z-index: 5;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8); letter-spacing: 0.02em;
+  }
+  #hint {
+    position: fixed; right: 16px; bottom: 14px; color: rgba(255,255,255,0.55);
+    font-family: system-ui, sans-serif; font-size: 12px; z-index: 5;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<canvas id="minimap" width="300" height="118"></canvas>
+<div id="room"></div>
+<div id="hint">WASD — ходьба · Shift — быстрее · Esc — курсор</div>
+<div id="overlay">
+  <h1>Апартаменты · 3D-тур</h1>
+  <p>Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>
+     WASD / стрелки — ходьба, мышь — осмотр, Shift — быстрый шаг.<br>
+     Лестница на второй этаж — за раздвижной дверью у кухни.</p>
+  <div class="go">Кликни, чтобы войти</div>
+</div>
+<script src="three.min.js"></script>
+<script src="apartment.js"></script>
+<script src="builder.js"></script>
+<script src="controls.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

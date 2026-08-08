@@ -1,0 +1,16 @@
+# Исходные фотографии квартиры — не публикуем
+*.jpeg
+*.jpg
+*.JPEG
+*.JPG
+*.heic
+*.HEIC
+
+# Vercel
+.vercel
+
+# Служебное
+.DS_Store
+Thumbs.db
+node_modules/
+.playwright-mcp/
