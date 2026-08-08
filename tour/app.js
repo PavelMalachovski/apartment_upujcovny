@@ -19,6 +19,18 @@
   const colliders = Builder.build(scene);
   const controls = new WalkControls(camera, canvas, colliders);
 
+  // Запекание света: асинхронно, с прогрессом на оверлее
+  const goBtn = document.getElementById('goBtn');
+  const goText = goBtn.textContent;
+  goBtn.textContent = 'Запекаем свет… 0%';
+  goBtn.style.opacity = '0.6';
+  window.__bakeReady = Baker.run(Builder.bakeData, (p) => {
+    goBtn.textContent = 'Запекаем свет… ' + Math.round(p * 100) + '%';
+  }).then(() => {
+    goBtn.textContent = goText;
+    goBtn.style.opacity = '1';
+  });
+
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);

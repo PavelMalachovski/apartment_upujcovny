@@ -16,6 +16,14 @@
 const Builder = (() => {
   const T = THREE;
   const colliders = { segs: [], boxes: [] }; // segs: {x1,z1,x2,z2,lvl}; boxes: {x1,z1,x2,z2,lvl}
+  // Данные для запекания света (см. bake.js)
+  const bakeData = { occluders: [], lights: [], windows: [], surfaces: [] };
+  function addOccluder(cx, cy, cz, sx, sy, sz) {
+    bakeData.occluders.push({
+      x1: cx - sx / 2, y1: cy - sy / 2, z1: cz - sz / 2,
+      x2: cx + sx / 2, y2: cy + sy / 2, z2: cz + sz / 2
+    });
+  }
 
   // ---------- Процедурные текстуры ----------
   function canvasTex(w, h, draw, repX = 1, repY = 1) {
@@ -379,6 +387,10 @@ const Builder = (() => {
       m.position.set(cx, baseY + (y0 + y1) / 2, cz);
       m.rotation.y = -ang;
       scene.add(m);
+      // стены осепараллельны — AABB для запекания
+      const alongX = Math.abs(ux) > 0.5;
+      addOccluder(cx, baseY + (y0 + y1) / 2, cz,
+        alongX ? len : WALL_TH, y1 - y0, alongX ? WALL_TH : len);
       return m;
     }
     // Кусок стены с учётом мансардного скоса (для upper): режем полосами
@@ -440,6 +452,17 @@ const Builder = (() => {
         // средник
         const mull = new T.Mesh(new T.BoxGeometry(0.05, winTop - WIN_SILL - 0.1, 0.1), M.white);
         mull.position.copy(g.position); mull.rotation.y = -ang; scene.add(mull);
+        // окно — площадной источник дневного света для запекания
+        {
+          // нормаль внутрь помещения: к центру этажа
+          const roomC = w.lvl === 'main' ? { x: 12, z: 3.2 } : { x: 10, z: 2.5 };
+          let nx = uz, nz = -ux;
+          if ((roomC.x - cx) * nx + (roomC.z - cz) * nz < 0) { nx = -nx; nz = -nz; }
+          bakeData.windows.push({
+            x: cx + nx * 0.1, y: baseY + (WIN_SILL + winTop) / 2, z: cz + nz * 0.1,
+            nx, nz, area: o.w * (winTop - WIN_SILL), lvl: w.lvl
+          });
+        }
         // шторы
         const cc = w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null;
         if (cc) {
@@ -507,9 +530,37 @@ const Builder = (() => {
     }
   }
 
-  // ---------- Полы, потолки ----------
+  // ---------- Полы, потолки (с запекаемыми накладками) ----------
+  const albedoCache = {};
+  function bakedPlane(scene, cx, cy, cz, w, h, rotX, matKey, res, lvl, outdoor, tile) {
+    // накладка с uv2 и собственным albedo; lightMap назначит Baker
+    let mat;
+    if (matKey === 'white') {
+      mat = new T.MeshBasicMaterial({ color: 0xf3f2ee });
+    } else {
+      const key = matKey + '|' + Math.round(w / tile * 4) + '|' + Math.round(h / tile * 4);
+      if (!albedoCache[key]) {
+        const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck }[matKey];
+        const map = src.map.clone();
+        map.needsUpdate = true;
+        map.repeat.set(w / tile, h / tile);
+        albedoCache[key] = map;
+      }
+      mat = new T.MeshBasicMaterial({ map: albedoCache[key] });
+    }
+    const geo = new T.PlaneGeometry(w, h);
+    geo.setAttribute('uv2', new T.BufferAttribute(geo.attributes.uv.array.slice(), 2));
+    const mesh = new T.Mesh(geo, mat);
+    mesh.rotation.x = rotX;
+    mesh.position.set(cx, cy, cz);
+    scene.add(mesh);
+    bakeData.surfaces.push({ mesh, w, h, res, lvl, outdoor });
+    return mesh;
+  }
+
   function buildFloors(scene) {
     const matOf = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck };
+    const tiles = { wood: 4.2, marbleW: 2.2, deck: 3.2 };
     for (const [lvlName, list] of Object.entries(APT.floors)) {
       const y = lvlName === 'main' ? APT.mainFloorY : lvlName === 'upper' ? APT.upperFloorY : APT.terraceY;
       for (const f of list) {
@@ -518,34 +569,43 @@ const Builder = (() => {
         const yy = f.over ? y + 0.012 : y;
         mesh.position.set((f.x1 + f.x2) / 2, yy - 0.05, (f.z1 + f.z2) / 2);
         scene.add(mesh);
+        // межэтажное перекрытие заслоняет свет
+        addOccluder((f.x1 + f.x2) / 2, yy - 0.05, (f.z1 + f.z2) / 2, w, 0.1, d);
+        // запекаемая накладка сверху
+        bakedPlane(scene, (f.x1 + f.x2) / 2, yy + 0.004, (f.z1 + f.z2) / 2,
+          w, d, -Math.PI / 2, f.mat, f.mat === 'wood' ? 9 : 7,
+          lvlName, lvlName === 'terrace', tiles[f.mat]);
       }
     }
     // Потолки 1 этажа
-    for (const c of APT.mainCeil) {
+    const ceilRects = [...APT.mainCeil, { x1: 15.6, z1: -2.0, x2: 16.9, z2: 0.0 }];
+    for (const c of ceilRects) {
       const w = c.x2 - c.x1, d = c.z2 - c.z1;
       const mesh = new T.Mesh(new T.BoxGeometry(w, 0.08, d), M.ceil);
       mesh.position.set((c.x1 + c.x2) / 2, APT.mainCeilH + 0.04, (c.z1 + c.z2) / 2);
       scene.add(mesh);
+      addOccluder((c.x1 + c.x2) / 2, APT.mainCeilH + 0.04, (c.z1 + c.z2) / 2, w, 0.08, d);
+      // запекаемая накладка снизу
+      bakedPlane(scene, (c.x1 + c.x2) / 2, APT.mainCeilH - 0.004, (c.z1 + c.z2) / 2,
+        w, d, Math.PI / 2, 'white', 5, 'main', false, 1);
     }
-    // Потолок над площадкой лестницы (x 15.6-16.9)
-    const lc = new T.Mesh(new T.BoxGeometry(1.3, 0.08, 2.0), M.ceil);
-    lc.position.set(16.25, APT.mainCeilH + 0.04, -1.0);
-    scene.add(lc);
 
-    // Мансардный потолок: два ската
+    // Мансардный потолок: два ската (запекаемые)
     const a = APT.attic, y0 = APT.upperFloorY;
     const x1 = 3.9, x2 = 17.2;
     function slope(zA, hA, zB, hB) {
-      const len = Math.hypot(zB - zA, hB - hA);
-      const geo = new T.PlaneGeometry(x2 - x1, len + 0.3);
-      const mesh = new T.Mesh(geo, M.ceil);
+      const len = Math.hypot(zB - zA, hB - hA) + 0.3;
+      const geo = new T.PlaneGeometry(x2 - x1, len);
+      geo.setAttribute('uv2', new T.BufferAttribute(geo.attributes.uv.array.slice(), 2));
+      const mat = new T.MeshBasicMaterial({ color: 0xf3f2ee, side: T.DoubleSide });
+      const mesh = new T.Mesh(geo, mat);
       const zM = (zA + zB) / 2, hM = (hA + hB) / 2;
       mesh.position.set((x1 + x2) / 2, y0 + hM, zM);
       const pitch = Math.atan2(hB - hA, zB - zA);
-      mesh.rotation.x = -Math.PI / 2 - pitch;
-      mesh.material = M.ceil.clone();
-      mesh.material.side = T.DoubleSide;
+      // π/2 - pitch: нормаль плоскости смотрит вниз, в комнату (важно для запекания)
+      mesh.rotation.x = Math.PI / 2 - pitch;
       scene.add(mesh);
+      bakeData.surfaces.push({ mesh, w: x2 - x1, h: len, res: 5, lvl: 'upper', outdoor: false });
     }
     slope(a.northZ, a.northH, a.ridgeZ, a.ridgeH);
     slope(a.ridgeZ, a.ridgeH, a.southZ, a.southH);
@@ -562,6 +622,12 @@ const Builder = (() => {
       const x = s.x2 - tread * (i + 0.5);
       const y = riser * (i + 1);
       box(tread, riser, width, M.floorWood, x, y - riser / 2, zc, scene);
+    }
+    // лестница как окклюдер: 4 ступенчатых блока
+    for (let k = 0; k < 4; k++) {
+      const xa = s.x2 - run * (k + 1) / 4, xb = s.x2 - run * k / 4;
+      addOccluder((xa + xb) / 2, s.rise * (k + 0.5) / 4 / 2 + s.rise * k / 8, zc,
+        xb - xa, s.rise * (k + 1) / 4, width);
     }
     // перила вдоль южного края
     const railY = 0.95;
@@ -601,10 +667,9 @@ const Builder = (() => {
     fence(t.x1, t.z1, t.x2 - 0.9, t.z1);       // север (до дома)
     fence(t.x1, t.z1, t.x1, t.z2);             // запад
     fence(t.x1, t.z2, t.x2, t.z2);             // юг
-    // ступеньки у двери
+    // ступенька у двери
     const st = APT.terraceSteps;
-    box(0.4, 0.16, st.z2 - st.z1, M.deck, st.doorX - 0.2, y + 0.32, (st.z1 + st.z2) / 2, scene);
-    box(0.4, 0.16, st.z2 - st.z1, M.deck, st.doorX - 0.6, y + 0.16, (st.z1 + st.z2) / 2, scene);
+    box(0.8, 0.12, st.z2 - st.z1, M.deck, st.doorX - 0.4, y + 0.06, (st.z1 + st.z2) / 2, scene);
     // окружение: соседние крыши
     const bldg = new T.MeshStandardMaterial({ color: 0xcbb9a4, roughness: 0.95 });
     const bldg2 = new T.MeshStandardMaterial({ color: 0xb5a08c, roughness: 0.95 });
@@ -612,6 +677,9 @@ const Builder = (() => {
     box(12, 5.5, 6, bldg2, -9, y + 0.4, 10, scene);
     box(9, 4.2, 14, bldg, -11, y, 1, scene);
     box(11, 6.0, 6, bldg2, 9, y + 0.6, -11, scene);
+    addOccluder(-5, y + 1.2, -7, 16, 7.0, 7);
+    addOccluder(-9, y + 0.4, 10, 12, 5.5, 6);
+    addOccluder(-11, y, 1, 9, 4.2, 14);
     // дымоходы
     box(0.8, 1.8, 0.8, bldg2, -3.6, y + 5.6, -4.6, scene);
     box(0.6, 1.4, 0.6, bldg, -6.5, y + 3.9, 9.0, scene);
@@ -1209,25 +1277,16 @@ const Builder = (() => {
     return { w: 0.35, d: 0.35 };
   };
 
-  let shadowTex = null;
-  function blobShadow(g, w, d) {
-    if (!shadowTex) {
-      shadowTex = canvasTex(128, 128, (gc) => {
-        const grd = gc.createRadialGradient(64, 64, 8, 64, 64, 62);
-        grd.addColorStop(0, 'rgba(0,0,0,0.32)');
-        grd.addColorStop(0.75, 'rgba(0,0,0,0.16)');
-        grd.addColorStop(1, 'rgba(0,0,0,0)');
-        gc.fillStyle = grd; gc.fillRect(0, 0, 128, 128);
-      });
-      shadowTex.wrapS = shadowTex.wrapT = T.ClampToEdgeWrapping;
-    }
-    const m = new T.Mesh(new T.PlaneGeometry(w * 1.25, d * 1.25),
-      new T.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
-    m.rotation.x = -Math.PI / 2;
-    m.position.y = 0.015;
-    m.renderOrder = 1;
-    g.add(m);
-  }
+  // Высоты мебели для окклюзии света (тени запекаются в пол)
+  const OCC_H = {
+    bed: 0.65, sofaL: 0.8, sofa: 0.8, armchair: 0.85, roundTable: 0.45,
+    diningTable: 0.76, island: 0.95, kitchenRun: 2.45, tallUnits: 2.5,
+    wardrobe: 2.5, wardrobeTv: 2.5, barStool: 0.8, tub: 0.6, vanity: 1.0,
+    wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
+    deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
+    planter: 1.2
+  };
+  const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
 
   function buildFurniture(scene) {
     for (const item of APT.furniture) {
@@ -1238,21 +1297,24 @@ const Builder = (() => {
       g.position.set(item.x, baseY, item.z);
       g.rotation.y = item.rot || 0;
       const res = fn(item, g) || {};
-      const noShadow = ['rug', 'runner', 'pendants', 'hood', 'tvOnWall', 'wallPanel', 'painting',
-        'books', 'vaseFlowers', 'fruitBowl', 'coffeeMachine', 'kettle', 'knifeBlock', 'towels',
-        'towelRoll', 'toiletries', 'bathMat', 'throwBlanket', 'cushions', 'wineSet', 'stringLights'];
-      if (!noShadow.includes(item.type)) {
-        blobShadow(g, res.w || item.w || 0.6, res.d || item.d || 0.6);
-      }
       scene.add(g);
       const clvl = item.lvl;
+      const occH = OCC_H[item.type] || 0.8;
+      const canOcclude = !OCC_SKIP.includes(item.type);
       if (res.custom) {
         // повёрнутые кастомные AABB не поддерживаем — используем как есть (rot=0 для sofaL)
         for (const b of res.custom) {
           colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
+          if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
+            b.x2 - b.x1, occH, b.z2 - b.z1);
         }
       } else if (!res.noCollide) {
         addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
+        if (canOcclude) {
+          const bb = colliders.boxes[colliders.boxes.length - 1];
+          addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
+            bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
+        }
       }
     }
   }
@@ -1273,6 +1335,7 @@ const Builder = (() => {
       const pt = new T.PointLight(0xffe4c0, 0.42, 7.0, 1.6);
       pt.position.set(l.x, y, l.z);
       scene.add(pt);
+      bakeData.lights.push({ x: l.x, y: y - 0.15, z: l.z, int: 1 });
       // маленький плафон
       const dot = new T.Mesh(new T.CylinderGeometry(0.06, 0.08, 0.05, 12), M.lampShade);
       dot.position.set(l.x, y + 0.22, l.z);
@@ -1292,5 +1355,5 @@ const Builder = (() => {
     return colliders;
   }
 
-  return { build, colliders, atticH };
+  return { build, colliders, atticH, bakeData };
 })();
