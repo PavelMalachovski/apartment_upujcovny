@@ -29,6 +29,13 @@
   resize();
 
   document.getElementById('overlay').addEventListener('click', () => controls.lock());
+  if (controls.isTouch) {
+    document.getElementById('overlayText').innerHTML =
+      'Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>' +
+      'Левая половина экрана — джойстик ходьбы, правая — осмотр.<br>' +
+      'Лестница на второй этаж — за раздвижной дверью у кухни.';
+    document.getElementById('goBtn').textContent = 'Коснись, чтобы войти';
+  }
 
   // ---------- Мини-карта ----------
   const mapC = document.getElementById('minimap');
