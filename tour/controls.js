@@ -15,6 +15,8 @@ class WalkControls {
     this.keys = {};
     this.locked = false;
     this.radius = 0.24;
+    this.isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    this.touch = { moveId: null, lookId: null, ox: 0, oy: 0, mx: 0, mz: 0, lx: 0, ly: 0 };
 
     document.addEventListener('keydown', e => { this.keys[e.code] = true; });
     document.addEventListener('keyup', e => { this.keys[e.code] = false; });
@@ -25,12 +27,76 @@ class WalkControls {
       this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
     });
     document.addEventListener('pointerlockchange', () => {
+      if (this.isTouch) return;
       this.locked = document.pointerLockElement === this.dom;
       document.getElementById('overlay').style.display = this.locked ? 'none' : 'flex';
     });
+
+    // --- Сенсорное управление: левая половина — джойстик, правая — осмотр ---
+    const joy = document.getElementById('joy');
+    const knob = document.getElementById('joyKnob');
+    const JR = 55; // радиус джойстика в px
+    const onStart = (e) => {
+      for (const t of e.changedTouches) {
+        if (t.clientX < window.innerWidth / 2 && this.touch.moveId === null) {
+          this.touch.moveId = t.identifier;
+          this.touch.ox = t.clientX; this.touch.oy = t.clientY;
+          this.touch.mx = 0; this.touch.mz = 0;
+          if (joy) {
+            joy.style.display = 'block';
+            joy.style.left = (t.clientX - JR) + 'px';
+            joy.style.top = (t.clientY - JR) + 'px';
+            knob.style.transform = 'translate(0px,0px)';
+          }
+        } else if (this.touch.lookId === null) {
+          this.touch.lookId = t.identifier;
+          this.touch.lx = t.clientX; this.touch.ly = t.clientY;
+        }
+      }
+      e.preventDefault();
+    };
+    const onMove = (e) => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === this.touch.moveId) {
+          let dx = t.clientX - this.touch.ox, dy = t.clientY - this.touch.oy;
+          const d = Math.hypot(dx, dy);
+          if (d > JR) { dx = dx / d * JR; dy = dy / d * JR; }
+          this.touch.mx = dx / JR;
+          this.touch.mz = -dy / JR;
+          if (knob) knob.style.transform = `translate(${dx}px,${dy}px)`;
+        } else if (t.identifier === this.touch.lookId) {
+          this.yaw -= (t.clientX - this.touch.lx) * 0.006;
+          this.pitch -= (t.clientY - this.touch.ly) * 0.006;
+          this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
+          this.touch.lx = t.clientX; this.touch.ly = t.clientY;
+        }
+      }
+      e.preventDefault();
+    };
+    const onEnd = (e) => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === this.touch.moveId) {
+          this.touch.moveId = null; this.touch.mx = 0; this.touch.mz = 0;
+          if (joy) joy.style.display = 'none';
+        } else if (t.identifier === this.touch.lookId) {
+          this.touch.lookId = null;
+        }
+      }
+      e.preventDefault();
+    };
+    this.dom.addEventListener('touchstart', onStart, { passive: false });
+    this.dom.addEventListener('touchmove', onMove, { passive: false });
+    this.dom.addEventListener('touchend', onEnd, { passive: false });
+    this.dom.addEventListener('touchcancel', onEnd, { passive: false });
   }
 
-  lock() { this.dom.requestPointerLock(); }
+  lock() {
+    if (this.isTouch) {
+      document.getElementById('overlay').style.display = 'none';
+      return;
+    }
+    this.dom.requestPointerLock();
+  }
 
   // Высота пола в точке
   groundAt(x, z, current) {
@@ -107,9 +173,11 @@ class WalkControls {
     if (this.keys.KeyS || this.keys.ArrowDown) mz -= 1;
     if (this.keys.KeyA || this.keys.ArrowLeft) mx -= 1;
     if (this.keys.KeyD || this.keys.ArrowRight) mx += 1;
+    if (this.touch.moveId !== null) { mx += this.touch.mx; mz += this.touch.mz; }
     if (mx || mz) {
       const len = Math.hypot(mx, mz);
-      mx /= len; mz /= len;
+      const mag = Math.min(len, 1); // аналоговая скорость с джойстика
+      mx = mx / len * mag; mz = mz / len * mag;
       const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
       // yaw=0 смотрит на -z? Камера ниже задаётся через euler; тут направление «вперёд»:
       const fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw);

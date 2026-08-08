@@ -40,23 +40,128 @@ const Builder = (() => {
     });
   }
 
+  // Паркет: доски с индивидуальным тоном, швами и живым волокном
+  function floorTex() {
+    return canvasTex(1024, 1024, (g) => {
+      const rowH = 128;
+      for (let y = 0; y < 1024; y += rowH) {
+        let x = (y / rowH) % 2 === 0 ? 0 : -180;
+        while (x < 1024) {
+          const len = 260 + Math.random() * 300;
+          const tone = 0.82 + Math.random() * 0.36;
+          const r = Math.min(255, 184 * tone), gr = Math.min(255, 149 * tone), b = Math.min(255, 95 * tone);
+          g.fillStyle = `rgb(${r | 0},${gr | 0},${b | 0})`;
+          g.fillRect(x, y, len, rowH);
+          // волокно
+          for (let i = 0; i < 26; i++) {
+            g.strokeStyle = `rgba(110,80,50,${0.04 + Math.random() * 0.08})`;
+            g.lineWidth = 0.8 + Math.random() * 1.6;
+            const yy = y + Math.random() * rowH;
+            g.beginPath();
+            g.moveTo(x, yy);
+            g.bezierCurveTo(x + len * 0.3, yy + (Math.random() - 0.5) * 10, x + len * 0.7, yy + (Math.random() - 0.5) * 10, x + len, yy);
+            g.stroke();
+          }
+          // редкие сучки
+          if (Math.random() < 0.3) {
+            g.fillStyle = 'rgba(100,70,45,0.35)';
+            g.beginPath();
+            g.ellipse(x + len * (0.2 + Math.random() * 0.6), y + rowH * (0.3 + Math.random() * 0.4),
+              3 + Math.random() * 4, 2 + Math.random() * 2, Math.random() * Math.PI, 0, Math.PI * 2);
+            g.fill();
+          }
+          // торцевой шов
+          g.fillStyle = 'rgba(70,50,30,0.5)';
+          g.fillRect(x + len - 2, y, 2, rowH);
+          x += len;
+        }
+        // продольный шов
+        g.fillStyle = 'rgba(70,50,30,0.55)';
+        g.fillRect(0, y + rowH - 2, 1024, 2);
+      }
+    });
+  }
+
   function marbleTex(bg, vein, n = 26) {
     return canvasTex(512, 512, (g) => {
       g.fillStyle = bg; g.fillRect(0, 0, 512, 512);
+      // крупные мягкие жилы с размытием
+      for (let i = 0; i < Math.max(4, n / 4); i++) {
+        g.save();
+        g.shadowColor = vein.replace('A', '0.5');
+        g.shadowBlur = 10 + Math.random() * 14;
+        g.strokeStyle = vein.replace('A', (0.25 + Math.random() * 0.3).toFixed(2));
+        g.lineWidth = 2 + Math.random() * 3.5;
+        let x = Math.random() * 512, y = -20;
+        g.beginPath(); g.moveTo(x, y);
+        while (y < 540) {
+          x += (Math.random() - 0.5) * 130; y += 60 + Math.random() * 80;
+          g.lineTo(x, y);
+        }
+        g.stroke();
+        g.restore();
+      }
+      // тонкие резкие прожилки
       for (let i = 0; i < n; i++) {
-        g.strokeStyle = vein.replace('A', (0.10 + Math.random() * 0.25).toFixed(2));
-        g.lineWidth = 0.6 + Math.random() * 1.8;
+        g.strokeStyle = vein.replace('A', (0.08 + Math.random() * 0.18).toFixed(2));
+        g.lineWidth = 0.5 + Math.random() * 1.2;
         let x = Math.random() * 512, y = Math.random() * 512;
         g.beginPath(); g.moveTo(x, y);
         for (let s = 0; s < 6; s++) {
-          x += (Math.random() - 0.5) * 240; y += (Math.random() - 0.5) * 240;
+          x += (Math.random() - 0.5) * 200; y += (Math.random() - 0.5) * 200;
           g.lineTo(x, y);
         }
         g.stroke();
       }
-      g.strokeStyle = 'rgba(150,150,150,0.25)'; g.lineWidth = 1.5;
+      // швы плитки
+      g.strokeStyle = 'rgba(150,150,150,0.3)'; g.lineWidth = 1.5;
       g.strokeRect(0, 0, 256, 256); g.strokeRect(256, 256, 256, 256);
     });
+  }
+
+  // Абстрактные картины в духе фото
+  function artTex(style) {
+    return canvasTex(256, 320, (g) => {
+      if (style === 'warm') {
+        g.fillStyle = '#ded7c9'; g.fillRect(0, 0, 256, 320);
+        g.fillStyle = '#c07a33'; g.fillRect(140, 40, 90, 120);
+        g.fillStyle = '#2b2b2b'; g.fillRect(60, 70, 110, 150);
+        g.fillStyle = 'rgba(192,122,51,0.8)'; g.fillRect(100, 190, 100, 80);
+        g.fillStyle = 'rgba(43,43,43,0.6)'; g.fillRect(170, 150, 60, 110);
+      } else if (style === 'leaf') {
+        g.fillStyle = '#f4f2ee'; g.fillRect(0, 0, 256, 320);
+        g.strokeStyle = '#5a6b52'; g.lineWidth = 3;
+        for (let i = 0; i < 7; i++) {
+          const x = 50 + i * 26, len = 80 + Math.random() * 90;
+          g.beginPath(); g.moveTo(x, 280);
+          g.quadraticCurveTo(x + 20, 280 - len / 2, x - 10, 280 - len);
+          g.stroke();
+          for (let j = 0; j < 5; j++) {
+            g.beginPath();
+            g.ellipse(x + 4 - j * 3, 260 - j * len / 5, 8, 3, -0.6, 0, Math.PI * 2);
+            g.stroke();
+          }
+        }
+      } else { // mono
+        g.fillStyle = '#e8e6e1'; g.fillRect(0, 0, 256, 320);
+        g.fillStyle = '#b9bdc2'; g.beginPath(); g.ellipse(120, 130, 75, 95, 0.3, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#2e2e30'; g.beginPath(); g.ellipse(150, 180, 45, 60, -0.2, 0, Math.PI * 2); g.fill();
+        g.fillStyle = 'rgba(255,255,255,0.65)'; g.beginPath(); g.ellipse(110, 110, 40, 50, 0.5, 0, Math.PI * 2); g.fill();
+      }
+    });
+  }
+
+  // Волнистая «ткань» для штор
+  function wavyPlane(w, h, mat, folds = 5) {
+    const geo = new T.PlaneGeometry(w, h, 24, 1);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      pos.setZ(i, Math.sin((x / w) * folds * Math.PI * 2) * 0.05);
+    }
+    geo.computeVertexNormals();
+    const m = new T.Mesh(geo, mat);
+    return m;
   }
 
   function quiltTex(base, line) {
@@ -111,7 +216,7 @@ const Builder = (() => {
 
   function deckTex() {
     return canvasTex(512, 512, (g) => {
-      g.fillStyle = '#9c7a52'; g.fillRect(0, 0, 512, 512);
+      g.fillStyle = '#8a6844'; g.fillRect(0, 0, 512, 512);
       for (let y = 0; y < 512; y += 42) {
         g.fillStyle = `rgba(70,50,30,${0.15 + Math.random() * 0.1})`;
         g.fillRect(0, y, 512, 4);
@@ -127,9 +232,9 @@ const Builder = (() => {
   // ---------- Материалы ----------
   const M = {};
   function initMaterials() {
-    const wood = woodTex('#b8955f', 'rgba(120,88,55,0.65)');
-    wood.repeat.set(4, 4);
-    M.floorWood = new T.MeshStandardMaterial({ map: wood, roughness: 0.7, metalness: 0.02 });
+    const wood = floorTex();
+    wood.repeat.set(3, 3);
+    M.floorWood = new T.MeshStandardMaterial({ map: wood, roughness: 0.55, metalness: 0.04 });
     const ash = woodTex('#cdbc9f', 'rgba(150,130,105,0)', false);
     ash.repeat.set(1.2, 1.2);
     M.ash = new T.MeshStandardMaterial({ map: ash, roughness: 0.75 });
@@ -173,6 +278,17 @@ const Builder = (() => {
     M.doorWood = new T.MeshStandardMaterial({ map: woodTex('#d5c8b2', 'rgba(150,130,105,0)', false), roughness: 0.7 });
     M.lampShade = new T.MeshStandardMaterial({ color: 0xf5f2ea, emissive: 0xffe8c0, emissiveIntensity: 0.5, roughness: 0.9 });
     M.smoke = new T.MeshStandardMaterial({ color: 0x8f9298, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
+    // декор
+    M.yellow = new T.MeshStandardMaterial({ color: 0xd0a23f, roughness: 0.9 });
+    M.olive = new T.MeshStandardMaterial({ color: 0xa8a06b, roughness: 0.9 });
+    M.lightBlue = new T.MeshStandardMaterial({ color: 0xaebfc7, roughness: 0.9 });
+    M.pink = new T.MeshStandardMaterial({ color: 0xd8a0a8, roughness: 0.9 });
+    M.knit = new T.MeshStandardMaterial({ color: 0x8e9499, roughness: 1 });
+    M.pampas = new T.MeshStandardMaterial({ color: 0xcbb493, roughness: 1, side: T.DoubleSide });
+    M.stemGreen = new T.MeshStandardMaterial({ color: 0x476b3f, roughness: 0.9 });
+    M.amberGlass = new T.MeshStandardMaterial({ color: 0x9a6a2f, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.75 });
+    M.artFrame = new T.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.6 });
+    M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
   }
 
   // ---------- Хелперы ----------
@@ -317,14 +433,19 @@ const Builder = (() => {
         const cc = w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null;
         if (cc) {
           for (const side of [-1, 1]) {
-            const cw = 0.5;
-            const px = cx + ux * side * (o.w / 2 + 0.1);
-            const pz = cz + uz * side * (o.w / 2 + 0.1);
-            const cur = new T.Mesh(new T.BoxGeometry(cw, topH - 0.15, 0.12), cc);
-            cur.position.set(px - Math.sin(ang) * 0.18, baseY + (topH - 0.15) / 2 + 0.05, pz - Math.cos(ang) * 0.18);
+            const px = cx + ux * side * (o.w / 2 + 0.14);
+            const pz = cz + uz * side * (o.w / 2 + 0.14);
+            const cur = wavyPlane(0.55, topH - 0.18, cc, 5);
+            cur.position.set(px - Math.sin(ang) * 0.2, baseY + (topH - 0.18) / 2 + 0.06, pz - Math.cos(ang) * 0.2);
             cur.rotation.y = -ang;
             scene.add(cur);
           }
+          // карниз
+          const rod = new T.Mesh(new T.CylinderGeometry(0.012, 0.012, o.w + 1.5, 8), M.metalBlack);
+          rod.rotation.z = Math.PI / 2;
+          rod.rotation.y = -ang;
+          rod.position.set(cx - Math.sin(ang) * 0.2, baseY + topH - 0.06, cz - Math.cos(ang) * 0.2);
+          scene.add(rod);
         }
         // окно непроходимо
         colliders.segs.push({
@@ -497,6 +618,209 @@ const Builder = (() => {
   // ---------- Мебель ----------
   const F = {};
 
+  // ---------- Декор ----------
+  const artCache = {};
+  F.painting = (o, g) => {
+    const w = o.w || 0.8, h = o.h || 1.0;
+    box(w + 0.07, h + 0.07, 0.035, o.light ? M.white : M.artFrame, 0, 1.55, 0, g);
+    if (!artCache[o.style]) artCache[o.style] = new T.MeshStandardMaterial({ map: artTex(o.style), roughness: 0.9 });
+    const art = new T.Mesh(new T.PlaneGeometry(w, h), artCache[o.style]);
+    art.position.set(0, 1.55, 0.022);
+    g.add(art);
+    return { noCollide: true };
+  };
+
+  F.books = (o, g) => {
+    const y = o.h || 0;
+    const n = o.n || 5;
+    for (let i = 0; i < n; i++) {
+      const bh = 0.16 + Math.random() * 0.08;
+      const mat = [M.navy, M.olive, M.pink, M.gray, M.artFrame][i % 5];
+      box(0.028, bh, 0.13, mat, -0.09 + i * 0.033, y + bh / 2, 0, g);
+    }
+    if (o.candle) {
+      cyl(0.032, 0.032, 0.09, M.amberGlass, 0.15, y + 0.045, 0.02, g, 10);
+    }
+    return { noCollide: true };
+  };
+
+  F.vaseFlowers = (o, g) => {
+    const y = o.h || 0;
+    const kind = o.kind || 'gerbera';
+    if (kind === 'pampas') {
+      cyl(0.07, 0.05, 0.32, M.amberGlass, 0, y + 0.16, 0, g, 12);
+      for (let i = 0; i < 6; i++) {
+        const a = i / 6 * Math.PI * 2;
+        const stem = cyl(0.004, 0.004, 0.7, M.pampas, Math.cos(a) * 0.03, y + 0.6, Math.sin(a) * 0.03, g, 5);
+        stem.rotation.z = Math.cos(a) * 0.22; stem.rotation.x = Math.sin(a) * 0.22;
+        const plume = new T.Mesh(new T.ConeGeometry(0.045, 0.3, 7), M.pampas);
+        plume.position.set(Math.cos(a) * 0.14, y + 0.98, Math.sin(a) * 0.14);
+        plume.rotation.z = Math.cos(a) * 0.22; plume.rotation.x = Math.sin(a) * 0.22;
+        g.add(plume);
+      }
+    } else if (kind === 'lily') {
+      cyl(0.05, 0.04, 0.26, M.clearGlass, 0, y + 0.13, 0, g, 12);
+      for (let i = 0; i < 5; i++) {
+        const a = i / 5 * Math.PI * 2;
+        cyl(0.004, 0.004, 0.34, M.stemGreen, Math.cos(a) * 0.02, y + 0.36, Math.sin(a) * 0.02, g, 5);
+        const fl = new T.Mesh(new T.ConeGeometry(0.05, 0.09, 6, 1, true), M.white);
+        fl.position.set(Math.cos(a) * 0.08, y + 0.55, Math.sin(a) * 0.08);
+        fl.rotation.x = Math.PI + Math.sin(a) * 0.4;
+        fl.rotation.z = Math.cos(a) * 0.4;
+        g.add(fl);
+      }
+    } else if (kind === 'roses') {
+      cyl(0.045, 0.035, 0.16, M.pink, 0, y + 0.08, 0, g, 12);
+      for (let i = 0; i < 5; i++) {
+        const a = i / 5 * Math.PI * 2 + 0.4;
+        cyl(0.003, 0.003, 0.2, M.stemGreen, Math.cos(a) * 0.02, y + 0.24, Math.sin(a) * 0.02, g, 5);
+        const bud = new T.Mesh(new T.SphereGeometry(0.028, 8, 6), M.pink);
+        bud.position.set(Math.cos(a) * 0.05, y + 0.35, Math.sin(a) * 0.05);
+        g.add(bud);
+      }
+    } else { // gerbera
+      cyl(0.05, 0.04, 0.22, M.white, 0, y + 0.11, 0, g, 12);
+      for (let i = 0; i < 4; i++) {
+        const a = i / 4 * Math.PI * 2 + 0.3;
+        const st = cyl(0.004, 0.004, 0.3, M.stemGreen, Math.cos(a) * 0.02, y + 0.32, Math.sin(a) * 0.02, g, 5);
+        st.rotation.z = Math.cos(a) * 0.18; st.rotation.x = Math.sin(a) * 0.18;
+        const head = cyl(0.045, 0.045, 0.012, M.white, Math.cos(a) * 0.07, y + 0.47, Math.sin(a) * 0.07, g, 10);
+        head.rotation.x = Math.sin(a) * 0.5; head.rotation.z = Math.cos(a) * 0.5 + 0.2;
+        const core = new T.Mesh(new T.SphereGeometry(0.012, 6, 5), M.artFrame);
+        core.position.set(Math.cos(a) * 0.07, y + 0.478, Math.sin(a) * 0.07);
+        g.add(core);
+      }
+    }
+    return { noCollide: true };
+  };
+
+  F.fruitBowl = (o, g) => {
+    const y = o.h || 0;
+    const bowl = new T.Mesh(new T.SphereGeometry(0.13, 16, 8, 0, Math.PI * 2, Math.PI * 0.55, Math.PI * 0.45), M.white);
+    bowl.position.y = y + 0.1; bowl.scale.y = 0.7;
+    g.add(bowl);
+    cyl(0.05, 0.06, 0.02, M.white, 0, y + 0.01, 0, g, 10);
+    const fruits = [[0xd8462f, 0.038], [0x8bc34a, 0.036], [0xe8a33d, 0.037], [0x7a3fa0, 0.028], [0xd8462f, 0.034]];
+    fruits.forEach(([col, r], i) => {
+      const a = i / fruits.length * Math.PI * 2;
+      const f = new T.Mesh(new T.SphereGeometry(r, 10, 8),
+        new T.MeshStandardMaterial({ color: col, roughness: 0.6 }));
+      f.position.set(Math.cos(a) * 0.05, y + 0.09 + (i % 2) * 0.02, Math.sin(a) * 0.05);
+      g.add(f);
+    });
+    return { noCollide: true };
+  };
+
+  F.coffeeMachine = (o, g) => {
+    const y = o.h || 0.9;
+    box(0.16, 0.24, 0.3, M.black, 0, y + 0.12, 0, g);
+    box(0.05, 0.06, 0.1, M.chrome, 0, y + 0.27, 0.06, g);
+    // чашки рядом
+    for (const s of [-1, 1]) {
+      cyl(0.028, 0.022, 0.05, M.white, s * 0.15, y + 0.025, 0.05, g, 10);
+    }
+    return { noCollide: true };
+  };
+
+  F.kettle = (o, g) => {
+    const y = o.h || 0.9;
+    cyl(0.07, 0.085, 0.16, M.chrome, 0, y + 0.08, 0, g, 14);
+    box(0.02, 0.1, 0.03, M.black, 0.09, y + 0.1, 0, g);
+    return { noCollide: true };
+  };
+
+  F.knifeBlock = (o, g) => {
+    const y = o.h || 0.9;
+    const bl = box(0.09, 0.2, 0.14, M.doorWood, 0, y + 0.1, 0, g);
+    bl.rotation.z = 0.15;
+    for (let i = 0; i < 3; i++) {
+      box(0.008, 0.09, 0.02, M.chrome, -0.02 + i * 0.025, y + 0.24, 0, g);
+    }
+    return { noCollide: true };
+  };
+
+  F.towels = (o, g) => {
+    const y = o.h || 0.9;
+    // стопка сложенных полотенец
+    for (let i = 0; i < (o.n || 3); i++) {
+      box(0.3, 0.05, 0.22, M.bedding, 0, y + 0.03 + i * 0.055, 0, g);
+    }
+    return { noCollide: true };
+  };
+
+  F.towelRoll = (o, g) => {
+    const y = o.h || 0.9;
+    for (let i = 0; i < 2; i++) {
+      const r = new T.Mesh(new T.CylinderGeometry(0.045, 0.045, 0.26, 10), M.bedding);
+      r.rotation.z = Math.PI / 2;
+      r.position.set(0, y + 0.045, i * 0.1 - 0.05);
+      g.add(r);
+    }
+    return { noCollide: true };
+  };
+
+  F.toiletries = (o, g) => {
+    const y = o.h || 0.9;
+    const cols = [M.olive, M.amberGlass, M.white, M.olive, M.amberGlass];
+    for (let i = 0; i < 5; i++) {
+      cyl(0.014, 0.014, 0.07 + (i % 2) * 0.02, cols[i], -0.08 + i * 0.04, y + 0.04, 0, g, 8);
+    }
+    return { noCollide: true };
+  };
+
+  F.bathMat = (o, g) => {
+    box(0.7, 0.015, 0.45, M.bedding, 0, 0.008, 0, g);
+    return { noCollide: true };
+  };
+
+  F.throwBlanket = (o, g) => {
+    const y = o.h || 0.45;
+    const b = box(0.5, 0.05, 0.7, o.col === 'knit' ? M.knit : M.blanket, 0, y, 0, g);
+    b.rotation.y = 0.3;
+    const tail = box(0.42, 0.04, 0.4, o.col === 'knit' ? M.knit : M.blanket, 0.1, y - 0.22, 0.32, g);
+    tail.rotation.x = 1.2;
+    return { noCollide: true };
+  };
+
+  F.cushions = (o, g) => {
+    const y = o.h || 0.5;
+    const mats = { yellow: M.yellow, navy: M.navy, olive: M.olive, blue: M.lightBlue, dots: M.gray };
+    (o.set || ['yellow', 'navy']).forEach((c, i) => {
+      const p = box(0.4, 0.4, 0.12, mats[c] || M.gray, -0.25 + i * 0.42, y + 0.2, 0, g);
+      p.rotation.x = -0.18;
+      p.rotation.y = (i % 2 ? -1 : 1) * 0.12;
+    });
+    return { noCollide: true };
+  };
+
+  F.wineSet = (o, g) => {
+    const y = o.h || 0.44;
+    // ведёрко со льдом
+    cyl(0.07, 0.055, 0.14, M.chrome, -0.12, y + 0.07, 0, g, 12);
+    const bottle = cyl(0.028, 0.028, 0.2, M.stemGreen, -0.12, y + 0.2, 0, g, 10);
+    bottle.rotation.z = 0.35;
+    // бокалы
+    for (const s of [0, 1]) {
+      cyl(0.004, 0.03, 0.07, M.clearGlass, 0.08 + s * 0.09, y + 0.1, 0.02, g, 8);
+      cyl(0.032, 0.03, 0.055, M.clearGlass, 0.08 + s * 0.09, y + 0.16, 0.02, g, 8);
+    }
+    return { noCollide: true };
+  };
+
+  F.stringLights = (o, g) => {
+    // гирлянда с провисанием вдоль оси x группы
+    const L = o.w || 3.5, n = Math.round(L / 0.3);
+    const glow = new T.MeshStandardMaterial({ color: 0xffe9c0, emissive: 0xffd98a, emissiveIntensity: 0.9, roughness: 0.5 });
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const sag = Math.sin(t * Math.PI) * 0.18;
+      const b = new T.Mesh(new T.SphereGeometry(0.022, 8, 6), glow);
+      b.position.set(-L / 2 + t * L, (o.h || 1.55) - sag, 0);
+      g.add(b);
+    }
+    return { noCollide: true };
+  };
+
   F.wallPanel = (o, g) => {
     const mat = o.mat === 'black' ? M.marbleB : M.marbleW;
     const h = o.h || 2.6;
@@ -632,6 +956,19 @@ const Builder = (() => {
     }
     chairAt(o.w / 2 + 0.3, 0, -Math.PI / 2);
     chairAt(-o.w / 2 - 0.3, 0, Math.PI / 2);
+    // сервировка: тарелки, бокалы, салфетки
+    const plateAt = (px, pz) => {
+      cyl(0.115, 0.1, 0.012, M.white, px, 0.762, pz, g, 16);
+      cyl(0.085, 0.085, 0.006, M.counter, px, 0.772, pz, g, 14);
+      box(0.14, 0.008, 0.09, M.bedding, px, 0.76, pz + (pz > 0 ? 0.16 : -0.16), g);
+      cyl(0.004, 0.028, 0.08, M.clearGlass, px + 0.16, 0.8, pz, g, 8);
+      cyl(0.03, 0.028, 0.06, M.clearGlass, px + 0.16, 0.87, pz, g, 8);
+    };
+    for (let i = 0; i < 3; i++) {
+      const x = -o.w / 2 + (i + 0.5) * o.w / 3;
+      plateAt(x, o.d / 2 - 0.22);
+      plateAt(x, -o.d / 2 + 0.22);
+    }
     return { w: o.w + 1.1, d: o.d + 1.1 };
   };
 
@@ -640,7 +977,7 @@ const Builder = (() => {
     for (let i = 0; i < o.n; i++) {
       const x = -o.w / 2 + (i + 0.5) * o.w / o.n;
       const dropH = 1.1 + (i % 2) * 0.15;
-      cyl(0.006, 0.006, dropH, M.metalBlack, x, ceilY - dropH / 2, 0, g, 6);
+      cyl(0.003, 0.003, dropH, M.metalBlack, x, ceilY - dropH / 2, 0, g, 6);
       const globe = new T.Mesh(new T.SphereGeometry(0.11, 18, 14), M.smoke.clone());
       globe.material.emissive = new T.Color(0xffd9a0);
       globe.material.emissiveIntensity = 0.7;
@@ -793,16 +1130,19 @@ const Builder = (() => {
   };
 
   F.plant = (o, g) => {
-    const h = o.big ? 1.3 : 0.8;
-    cyl(0.14, 0.11, 0.3, M.pot, 0, 0.15, 0, g, 14);
+    const y = o.h || 0;
+    const scale = o.h ? 0.4 : 1; // на столешнице — маленький горшок с базиликом
+    const h = (o.big ? 1.3 : 0.8) * scale;
+    cyl(0.14 * scale, 0.11 * scale, 0.3 * scale, M.pot, 0, y + 0.15 * scale, 0, g, 14);
     for (let i = 0; i < 7; i++) {
-      const leaf = new T.Mesh(new T.PlaneGeometry(0.28, h * 0.75), M.plantGreen);
+      const leaf = new T.Mesh(new T.PlaneGeometry(0.28 * scale, h * 0.75), M.plantGreen);
       const a = i / 7 * Math.PI * 2;
-      leaf.position.set(Math.cos(a) * 0.1, 0.35 + h * 0.35, Math.sin(a) * 0.1);
+      leaf.position.set(Math.cos(a) * 0.1 * scale, y + (0.35 + h * 0.35 / scale) * scale, Math.sin(a) * 0.1 * scale);
       leaf.rotation.y = a;
       leaf.rotation.x = -0.3;
       g.add(leaf);
     }
+    if (o.h) return { noCollide: true };
     return { w: 0.35, d: 0.35 };
   };
 
@@ -814,12 +1154,30 @@ const Builder = (() => {
     return { w: 0.4, d: 0.4 };
   };
 
+  let dotsMat = null;
   F.terraceChair = (o, g) => {
     box(0.7, 0.45, 0.7, M.rattan, 0, 0.25, 0, g);
     box(0.7, 0.5, 0.14, M.rattan, 0, 0.65, 0.28, g);
     for (const s of [-1, 1]) box(0.14, 0.35, 0.7, M.rattan, s * 0.28, 0.55, 0, g);
     box(0.55, 0.1, 0.5, M.cream, 0, 0.52, -0.03, g);
     box(0.5, 0.35, 0.08, M.cream, 0, 0.78, 0.24, g);
+    // подушка в горох (фото 18)
+    if (!dotsMat) {
+      dotsMat = new T.MeshStandardMaterial({
+        map: canvasTex(128, 128, (gc) => {
+          gc.fillStyle = '#ece5d8'; gc.fillRect(0, 0, 128, 128);
+          const cols = ['#2b2b2b', '#c07a33', '#8a8f4a', '#d9c26a'];
+          for (let i = 0; i < 14; i++) {
+            gc.fillStyle = cols[i % 4];
+            gc.beginPath();
+            gc.arc(Math.random() * 128, Math.random() * 128, 9 + Math.random() * 5, 0, Math.PI * 2);
+            gc.fill();
+          }
+        }), roughness: 0.95
+      });
+    }
+    const pil = box(0.4, 0.38, 0.1, dotsMat, 0, 0.72, 0.18, g);
+    pil.rotation.x = -0.25;
     return { w: 0.75, d: 0.75 };
   };
 
@@ -878,7 +1236,10 @@ const Builder = (() => {
       g.position.set(item.x, baseY, item.z);
       g.rotation.y = item.rot || 0;
       const res = fn(item, g) || {};
-      if (!['rug', 'runner', 'pendants', 'hood', 'tvOnWall'].includes(item.type)) {
+      const noShadow = ['rug', 'runner', 'pendants', 'hood', 'tvOnWall', 'wallPanel', 'painting',
+        'books', 'vaseFlowers', 'fruitBowl', 'coffeeMachine', 'kettle', 'knifeBlock', 'towels',
+        'towelRoll', 'toiletries', 'bathMat', 'throwBlanket', 'cushions', 'wineSet', 'stringLights'];
+      if (!noShadow.includes(item.type)) {
         blobShadow(g, res.w || item.w || 0.6, res.d || item.d || 0.6);
       }
       scene.add(g);

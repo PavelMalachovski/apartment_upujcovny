@@ -153,6 +153,7 @@ const APT = {
   furniture: [
     // -------- Прихожая --------
     { type: 'bench', x: 22.0, z: 6.15, w: 1.7, d: 0.45, lvl: 'main' },
+    { type: 'painting', x: 22.0, z: 6.5, w: 0.7, h: 0.9, style: 'mono', rot: Math.PI, lvl: 'main' },
     { type: 'wardrobe', x: 23.4, z: 2.15, w: 0.75, d: 2.4, rot: -Math.PI / 2, lvl: 'main' },
     // Санузел у входа: мрамор
     { type: 'wallPanel', x: 21.8, z: 1.0, w: 2.3, mat: 'black', lvl: 'main' },
@@ -161,6 +162,8 @@ const APT = {
     { type: 'shower', x: 21.3, z: 1.55, w: 1.3, d: 1.2, corner: 'nw', lvl: 'main' },
     { type: 'vanity', x: 21.6, z: 3.12, w: 1.3, d: 0.5, rot: Math.PI, lvl: 'main', dark: false },
     { type: 'wc', x: 22.65, z: 1.35, w: 0.42, d: 0.65, rot: Math.PI / 2, lvl: 'main' },
+    { type: 'towelRoll', x: 21.1, z: 3.1, h: 0.93, lvl: 'main' },
+    { type: 'toiletries', x: 22.1, z: 3.15, h: 0.93, lvl: 'main' },
 
     // -------- Кухня --------
     { type: 'kitchenRun', x: 18.75, z: 0.33, w: 3.6, d: 0.65, lvl: 'main' },       // вдоль северной стены
@@ -170,10 +173,17 @@ const APT = {
     { type: 'barStool', x: 17.9, z: 3.35, lvl: 'main' },
     { type: 'barStool', x: 18.7, z: 3.35, lvl: 'main' },
     { type: 'hood', x: 17.9, z: 2.55, w: 1.2, d: 0.5, lvl: 'main' },
+    { type: 'coffeeMachine', x: 19.6, z: 0.35, h: 0.92, lvl: 'main' },
+    { type: 'kettle', x: 18.95, z: 0.33, h: 0.92, lvl: 'main' },
+    { type: 'knifeBlock', x: 17.55, z: 0.33, h: 0.92, lvl: 'main' },
+    { type: 'plant', x: 17.15, z: 0.35, h: 0.92, lvl: 'main' },
+    { type: 'fruitBowl', x: 18.5, z: 2.35, h: 0.95, lvl: 'main' },
 
     // -------- Столовая --------
     { type: 'diningTable', x: 13.6, z: 2.45, w: 2.4, d: 1.05, lvl: 'main', seats: 8 },
     { type: 'pendants', x: 13.6, z: 2.45, w: 1.8, lvl: 'main', n: 3 },
+    { type: 'vaseFlowers', x: 13.6, z: 2.45, h: 0.755, kind: 'lily', lvl: 'main' },
+    { type: 'painting', x: 14.4, z: 0.12, w: 0.8, h: 1.0, style: 'warm', lvl: 'main' },
 
     // -------- Гостиная --------
     { type: 'rug', x: 13.7, z: 5.15, w: 3.8, d: 2.6, lvl: 'main', pat: 'grayblue' },
@@ -184,6 +194,11 @@ const APT = {
     { type: 'tvPanel', x: 11.52, z: 5.2, w: 2.6, lvl: 'main', face: 'e' },
     { type: 'sideboard', x: 12.3, z: 6.3, w: 1.6, d: 0.4, lvl: 'main' },
     { type: 'plant', x: 11.9, z: 3.9, lvl: 'main', big: true },
+    { type: 'cushions', x: 13.9, z: 6.15, h: 0.42, set: ['yellow', 'navy', 'olive'], lvl: 'main' },
+    { type: 'throwBlanket', x: 12.4, z: 5.2, h: 0.48, col: 'knit', lvl: 'main' },
+    { type: 'fruitBowl', x: 13.68, z: 5.0, h: 0.46, lvl: 'main' },
+    { type: 'vaseFlowers', x: 13.95, z: 5.25, h: 0.44, kind: 'gerbera', lvl: 'main' },
+    { type: 'books', x: 12.0, z: 6.28, h: 0.47, n: 6, candle: true, lvl: 'main' },
 
     // -------- Спальня 2 (тёмно-синяя) --------
     { type: 'bed', x: 10.1, z: 4.65, w: 1.8, len: 2.05, rot: 0, lvl: 'main', head: 'navy' },
@@ -191,6 +206,9 @@ const APT = {
     { type: 'sideTable', x: 11.25, z: 3.75, lvl: 'main', skip: true },
     { type: 'rug', x: 10.1, z: 5.2, w: 2.6, d: 2.2, lvl: 'main', pat: 'light' },
     { type: 'armchair', x: 8.15, z: 6.0, rot: Math.PI * 0.25, lvl: 'main', col: 'gray' },
+    { type: 'painting', x: 8.3, z: 5.0, w: 0.7, h: 0.9, style: 'mono', rot: Math.PI / 2, lvl: 'main' },
+    { type: 'books', x: 8.95, z: 3.75, h: 0.42, n: 4, candle: true, lvl: 'main' },
+    { type: 'cushions', x: 10.1, z: 3.85, h: 0.5, set: ['blue', 'blue'], lvl: 'main' },
 
     // -------- Ванная 2 (у спальни 2): мрамор --------
     { type: 'wallPanel', x: 10.0, z: 0.1, w: 2.75, mat: 'black', lvl: 'main' },
@@ -201,6 +219,10 @@ const APT = {
     { type: 'shower', x: 10.8, z: 0.65, w: 1.2, d: 1.3, corner: 'ne', lvl: 'main' },
     { type: 'vanity', x: 9.3, z: 2.28, w: 1.5, d: 0.52, rot: Math.PI, lvl: 'main', dark: true },
     { type: 'wc', x: 8.85, z: 1.3, w: 0.42, d: 0.65, rot: -Math.PI / 2, lvl: 'main' },
+    { type: 'towelRoll', x: 8.85, z: 2.25, h: 0.93, lvl: 'main' },
+    { type: 'toiletries', x: 9.75, z: 2.3, h: 0.93, lvl: 'main' },
+    { type: 'bathMat', x: 9.8, z: 1.45, lvl: 'main' },
+    { type: 'vaseFlowers', x: 9.85, z: 2.32, h: 0.93, kind: 'gerbera', lvl: 'main' },
 
     // -------- Коридор --------
     { type: 'runner', x: 9.4, z: 3.05, w: 3.4, d: 0.7, lvl: 'main' },
@@ -211,6 +233,10 @@ const APT = {
     { type: 'sideTable', x: 5.65, z: 3.5, lvl: 'main' },
     { type: 'rug', x: 4.5, z: 5.0, w: 2.6, d: 2.2, lvl: 'main', pat: 'light' },
     { type: 'deskNook', x: 6.6, z: 5.6, w: 1.5, d: 0.6, lvl: 'main' },  // обои-джунгли + стол
+    { type: 'vaseFlowers', x: 6.3, z: 5.55, h: 0.76, kind: 'roses', lvl: 'main' },
+    { type: 'cushions', x: 4.5, z: 3.75, h: 0.5, set: ['olive', 'olive'], lvl: 'main' },
+    { type: 'books', x: 5.65, z: 3.5, h: 0.44, n: 4, lvl: 'main' },
+    { type: 'painting', x: 2.5, z: 2.72, w: 0.55, h: 0.7, style: 'leaf', light: true, lvl: 'main' },
     { type: 'wardrobe', x: 1.35, z: 4.6, w: 0.65, d: 2.6, rot: Math.PI / 2, lvl: 'main' },
     { type: 'tvOnWall', x: 7.32, z: 5.0, w: 1.1, rot: -Math.PI / 2, lvl: 'main' },
 
@@ -222,8 +248,13 @@ const APT = {
     { type: 'vanity', x: 6.55, z: 0.31, w: 1.3, d: 0.52, rot: 0, lvl: 'main', dark: true },
     { type: 'wc', x: 7.1, z: 2.1, w: 0.42, d: 0.65, rot: Math.PI, lvl: 'main' },
 
+    { type: 'towels', x: 6.85, z: 0.35, h: 0.93, n: 3, lvl: 'main' },
+    { type: 'toiletries', x: 6.25, z: 0.35, h: 0.93, lvl: 'main' },
+    { type: 'bathMat', x: 5.9, z: 1.5, lvl: 'main' },
+
     // -------- Прачечная --------
     { type: 'washerDryer', x: 3.75, z: 0.4, lvl: 'main' },
+    { type: 'towels', x: 3.3, z: 0.4, h: 0.87, n: 4, lvl: 'main' },
 
     // ================= ВЕРХНИЙ УРОВЕНЬ =================
     // Холл
@@ -240,6 +271,12 @@ const APT = {
     { type: 'sideboard', x: 9.0, z: 0.0, w: 2.2, d: 0.42, lvl: 'upper' },
     { type: 'floorLamp', x: 8.9, z: 5.9, lvl: 'upper' },
     { type: 'plant', x: 4.75, z: 5.9, lvl: 'upper' },
+    { type: 'vaseFlowers', x: 9.9, z: 5.6, h: 0, kind: 'pampas', lvl: 'upper' },
+    { type: 'books', x: 8.5, z: 0.02, h: 0.47, n: 7, candle: true, lvl: 'upper' },
+    { type: 'vaseFlowers', x: 7.15, z: 3.9, h: 0.45, kind: 'gerbera', lvl: 'upper' },
+    { type: 'fruitBowl', x: 7.6, z: 4.3, h: 0.45, lvl: 'upper' },
+    { type: 'throwBlanket', x: 5.2, z: 5.85, h: 0.48, col: 'knit', lvl: 'upper' },
+    { type: 'cushions', x: 5.9, z: 6.1, h: 0.42, set: ['olive', 'yellow'], lvl: 'upper' },
 
     // Спальня наверху
     { type: 'bed', x: 14.2, z: 4.35, w: 1.8, len: 2.05, rot: -Math.PI / 2, lvl: 'upper', head: 'navy' },
@@ -247,6 +284,9 @@ const APT = {
     { type: 'sideTable', x: 12.15, z: 3.2, lvl: 'upper' },
     { type: 'wardrobeTv', x: 13.5, z: 2.42, w: 2.6, d: 0.62, lvl: 'upper' },
     { type: 'armchair', x: 11.3, z: 5.7, rot: Math.PI * 0.3, lvl: 'upper', col: 'blue' },
+    { type: 'books', x: 12.15, z: 3.2, h: 0.44, n: 4, candle: true, lvl: 'upper' },
+    { type: 'cushions', x: 14.35, z: 4.35, h: 0.5, set: ['blue', 'olive'], rot: Math.PI / 2, lvl: 'upper' },
+    { type: 'painting', x: 11.6, z: 2.2, w: 0.6, h: 0.75, style: 'mono', lvl: 'upper' },
 
     // Ванная наверху: мрамор
     { type: 'wallPanel', x: 5.5, z: -1.9, w: 2.5, mat: 'black', h: 1.7, lvl: 'upper' },
@@ -255,6 +295,9 @@ const APT = {
     { type: 'shower', x: 4.85, z: -1.35, w: 1.3, d: 1.3, corner: 'nw', lvl: 'upper' },
     { type: 'vanity', x: 6.2, z: -1.68, w: 1.2, d: 0.52, rot: 0, lvl: 'upper', dark: false },
     { type: 'wc', x: 6.45, z: 0.05, w: 0.42, d: 0.65, rot: Math.PI, lvl: 'upper' },
+    { type: 'towels', x: 5.6, z: -1.65, h: 0.93, n: 3, lvl: 'upper' },
+    { type: 'toiletries', x: 6.7, z: -1.6, h: 0.93, lvl: 'upper' },
+    { type: 'bathMat', x: 5.5, z: -0.5, lvl: 'upper' },
 
     // Терраса
     { type: 'terraceChair', x: 1.2, z: 2.2, rot: Math.PI * 0.35, lvl: 'terrace' },
@@ -263,7 +306,12 @@ const APT = {
     { type: 'terraceTable', x: 2.3, z: 3.3, w: 1.1, d: 0.7, lvl: 'terrace' },
     { type: 'planter', x: 0.7, z: 5.9, lvl: 'terrace' },
     { type: 'planter', x: 3.7, z: 5.9, lvl: 'terrace' },
-    { type: 'lantern', x: 3.7, z: 0.9, lvl: 'terrace' }
+    { type: 'lantern', x: 3.7, z: 0.9, lvl: 'terrace' },
+    { type: 'wineSet', x: 2.3, z: 3.3, h: 0.45, lvl: 'terrace' },
+    { type: 'fruitBowl', x: 2.05, z: 3.15, h: 0.45, lvl: 'terrace' },
+    { type: 'stringLights', x: 2.2, z: 0.62, w: 3.6, h: 1.5, lvl: 'terrace' },
+    { type: 'stringLights', x: 0.32, z: 3.5, w: 5.6, h: 1.5, rot: Math.PI / 2, lvl: 'terrace' },
+    { type: 'planter', x: 0.7, z: 1.1, lvl: 'terrace' }
   ],
 
   // Точечные светильники: x, z, y(абс), цвет тёплый

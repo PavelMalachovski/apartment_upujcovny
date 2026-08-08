@@ -5,8 +5,25 @@
 <title>3D-тур · Апартаменты</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f12; }
-  #view { width: 100%; height: 100%; display: block; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f12; overscroll-behavior: none; }
+  #view { width: 100%; height: 100%; display: block; touch-action: none; }
+  #joy {
+    position: fixed; width: 110px; height: 110px; display: none; z-index: 6;
+    border: 2px solid rgba(255,255,255,0.35); border-radius: 50%;
+    background: rgba(255,255,255,0.08); pointer-events: none;
+  }
+  #joyKnob {
+    position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
+    margin: -22px 0 0 -22px; border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+  }
+  @media (max-width: 760px) {
+    #minimap { transform: scale(0.62); transform-origin: top right; }
+    #room { font-size: 14px; }
+    #hint { display: none; }
+    #overlay h1 { font-size: 20px; }
+    #overlay p { font-size: 13px; padding: 0 18px; }
+  }
   #overlay {
     position: fixed; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 14px;
@@ -37,15 +54,16 @@
 </head>
 <body>
 <canvas id="view"></canvas>
+<div id="joy"><div id="joyKnob"></div></div>
 <canvas id="minimap" width="300" height="118"></canvas>
 <div id="room"></div>
 <div id="hint">WASD — ходьба · Shift — быстрее · Esc — курсор</div>
 <div id="overlay">
   <h1>Апартаменты · 3D-тур</h1>
-  <p>Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>
+  <p id="overlayText">Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>
      WASD / стрелки — ходьба, мышь — осмотр, Shift — быстрый шаг.<br>
      Лестница на второй этаж — за раздвижной дверью у кухни.</p>
-  <div class="go">Кликни, чтобы войти</div>
+  <div class="go" id="goBtn">Кликни, чтобы войти</div>
 </div>
 <script src="three.min.js"></script>
 <script src="apartment.js"></script>
