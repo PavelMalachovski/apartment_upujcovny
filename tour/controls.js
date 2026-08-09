@@ -21,17 +21,27 @@ class WalkControls {
 
     document.addEventListener('keydown', e => { this.keys[e.code] = true; });
     document.addEventListener('keyup', e => { this.keys[e.code] = false; });
-    document.addEventListener('mousemove', e => {
-      if (!this.locked) return;
-      this.yaw -= e.movementX * 0.0023;
-      this.pitch -= e.movementY * 0.0023;
-      this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
+
+    // Осмотр перетаскиванием: курсор всегда виден, кнопки всегда кликабельны
+    this.dragLook = false;
+    this._lx = 0; this._ly = 0;
+    dom.style.cursor = 'grab';
+    dom.addEventListener('mousedown', (e) => {
+      if (!this.enabled || e.button !== 0) return;
+      this.dragLook = true;
+      this._lx = e.clientX; this._ly = e.clientY;
+      dom.style.cursor = 'grabbing';
     });
-    document.addEventListener('pointerlockchange', () => {
-      if (this.isTouch) return;
-      this.locked = document.pointerLockElement === this.dom;
-      if (!this.enabled) return; // режим макета сам управляет оверлеем
-      document.getElementById('overlay').style.display = this.locked ? 'none' : 'flex';
+    document.addEventListener('mousemove', (e) => {
+      if (!this.dragLook || !this.enabled) return;
+      this.yaw -= (e.clientX - this._lx) * 0.005;
+      this.pitch -= (e.clientY - this._ly) * 0.005;
+      this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
+      this._lx = e.clientX; this._ly = e.clientY;
+    });
+    document.addEventListener('mouseup', () => {
+      this.dragLook = false;
+      dom.style.cursor = 'grab';
     });
 
     // --- Сенсорное управление: левая половина — джойстик, правая — осмотр ---
@@ -101,11 +111,8 @@ class WalkControls {
   }
 
   lock() {
-    if (this.isTouch) {
-      document.getElementById('overlay').style.display = 'none';
-      return;
-    }
-    this.dom.requestPointerLock();
+    // захвата мыши больше нет — просто скрываем стартовый экран
+    document.getElementById('overlay').style.display = 'none';
   }
 
   // Высота пола в точке
