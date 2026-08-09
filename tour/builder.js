@@ -582,7 +582,7 @@ const Builder = (() => {
       }
     }
     // Потолки 1 этажа
-    const ceilRects = [...APT.mainCeil, { x1: 15.6, z1: -2.0, x2: 16.9, z2: 0.0 }];
+    const ceilRects = APT.mainCeil;
     for (const c of ceilRects) {
       const w = c.x2 - c.x1, d = c.z2 - c.z1;
       const mesh = new T.Mesh(new T.BoxGeometry(w, 0.08, d), M.ceil);
@@ -617,33 +617,38 @@ const Builder = (() => {
   }
 
   // ---------- Лестница ----------
+  // lowX/highX задают направление подъёма (низ -> верх). Без них —
+  // старое поведение: низ на x2, подъём на запад.
   function buildStairs(scene) {
     const s = APT.stairs;
-    const run = s.x2 - s.x1;
+    const lowX = (s.lowX !== undefined) ? s.lowX : s.x2;
+    const highX = (s.highX !== undefined) ? s.highX : s.x1;
+    const run = Math.abs(highX - lowX);
+    const dir = Math.sign(highX - lowX);
     const n = 17, tread = run / n, riser = s.rise / n;
     const width = s.z2 - s.z1;
     const zc = (s.z1 + s.z2) / 2;
     for (let i = 0; i < n; i++) {
-      const x = s.x2 - tread * (i + 0.5);
+      const x = lowX + dir * tread * (i + 0.5);
       const y = riser * (i + 1);
       box(tread, riser, width, M.floorWood, x, y - riser / 2, zc, scene);
     }
     // лестница как окклюдер: 4 ступенчатых блока
     for (let k = 0; k < 4; k++) {
-      const xa = s.x2 - run * (k + 1) / 4, xb = s.x2 - run * k / 4;
-      addOccluder((xa + xb) / 2, s.rise * (k + 0.5) / 4 / 2 + s.rise * k / 8, zc,
-        xb - xa, s.rise * (k + 1) / 4, width);
+      const xa = lowX + dir * run * k / 4, xb = lowX + dir * run * (k + 1) / 4;
+      addOccluder((xa + xb) / 2, s.rise * (k + 1) / 8, zc,
+        Math.abs(xb - xa), s.rise * (k + 1) / 4, width);
     }
     // перила вдоль южного края
     const railY = 0.95;
     for (let i = 0; i <= n; i += 2) {
-      const x = s.x2 - tread * i;
+      const x = lowX + dir * tread * i;
       const y = riser * i;
       cyl(0.015, 0.015, railY, M.metalBlack, x, y + railY / 2, s.z2 - 0.05, scene, 8);
     }
     const rail = new T.Mesh(new T.BoxGeometry(Math.hypot(run, s.rise) + 0.3, 0.04, 0.06), M.ash);
-    rail.position.set((s.x1 + s.x2) / 2, s.rise / 2 + railY, s.z2 - 0.05);
-    rail.rotation.z = Math.atan2(s.rise, -run);
+    rail.position.set((lowX + highX) / 2, s.rise / 2 + railY, s.z2 - 0.05);
+    rail.rotation.z = Math.atan2(s.rise, run * dir);
     scene.add(rail);
   }
 
