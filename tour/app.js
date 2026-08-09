@@ -178,7 +178,7 @@ window.initApp = function () {
   // ---------- Мини-карта ----------
   const mapC = document.getElementById('minimap');
   const mg = mapC.getContext('2d');
-  const MAP = { x1: 0.0, z1: -2.6, x2: 24.4, z2: 7.2 };
+  const MAP = { x1: -5.4, z1: -2.6, x2: 24.4, z2: 7.2 };
   function mapPt(x, z) {
     const sx = mapC.width / (MAP.x2 - MAP.x1);
     const sz = mapC.height / (MAP.z2 - MAP.z1);
