@@ -208,7 +208,7 @@ const APT = {
     { type: 'sideTable', x: 11.25, z: 3.75, lvl: 'main', skip: true },
     { type: 'rug', x: 10.1, z: 5.2, w: 2.6, d: 2.2, lvl: 'main', pat: 'light' },
     { type: 'armchair', x: 8.15, z: 6.0, rot: Math.PI * 0.25, lvl: 'main', col: 'gray' },
-    { type: 'painting', x: 8.3, z: 5.0, w: 0.7, h: 0.9, style: 'mono', rot: Math.PI / 2, lvl: 'main' },
+    { type: 'painting', x: 7.5, z: 5.0, w: 0.7, h: 0.9, style: 'mono', rot: Math.PI / 2, lvl: 'main' },
     { type: 'books', x: 8.95, z: 3.75, h: 0.42, n: 4, candle: true, lvl: 'main' },
     { type: 'cushions', x: 10.1, z: 3.85, h: 0.5, set: ['blue', 'blue'], lvl: 'main' },
 
@@ -240,7 +240,7 @@ const APT = {
     { type: 'books', x: 5.65, z: 3.5, h: 0.44, n: 4, lvl: 'main' },
     { type: 'painting', x: 2.5, z: 2.72, w: 0.55, h: 0.7, style: 'leaf', light: true, lvl: 'main' },
     { type: 'wardrobe', x: 1.35, z: 4.6, w: 0.65, d: 2.6, rot: Math.PI / 2, lvl: 'main' },
-    { type: 'tvOnWall', x: 7.32, z: 5.0, w: 1.1, rot: -Math.PI / 2, lvl: 'main' },
+    { type: 'tvOnWall', x: 7.28, z: 5.0, w: 1.1, rot: -Math.PI / 2, lvl: 'main' },
 
     // -------- Ванная 1: мрамор --------
     { type: 'wallPanel', x: 6.05, z: 0.1, w: 2.6, mat: 'black', lvl: 'main' },

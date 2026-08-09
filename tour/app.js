@@ -24,7 +24,7 @@
   const goText = goBtn.textContent;
   goBtn.textContent = 'Запекаем свет… 0%';
   goBtn.style.opacity = '0.6';
-  window.__bakeReady = Baker.run(Builder.bakeData, (p) => {
+  window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
     goBtn.textContent = 'Запекаем свет… ' + Math.round(p * 100) + '%';
   }).then(() => {
     goBtn.textContent = goText;

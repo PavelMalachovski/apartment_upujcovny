@@ -17,7 +17,7 @@ const Builder = (() => {
   const T = THREE;
   const colliders = { segs: [], boxes: [] }; // segs: {x1,z1,x2,z2,lvl}; boxes: {x1,z1,x2,z2,lvl}
   // Данные для запекания света (см. bake.js)
-  const bakeData = { occluders: [], lights: [], windows: [], surfaces: [] };
+  const bakeData = { occluders: [], lights: [], windows: [], surfaces: [], wallPieces: [] };
   function addOccluder(cx, cy, cz, sx, sy, sz) {
     bakeData.occluders.push({
       x1: cx - sx / 2, y1: cy - sy / 2, z1: cz - sz / 2,
@@ -378,20 +378,23 @@ const Builder = (() => {
     if (cursor < L) pieces.push({ from: cursor, to: L, solid: true });
 
     const segMat = M.wall;
-    function place(from, to, y0, y1, mat) {
+    function place(from, to, y0, y1) {
       const len = to - from;
       if (len <= 0.01 || y1 - y0 <= 0.01) return null;
       const cx = w.x1 + ux * (from + len / 2);
       const cz = w.z1 + uz * (from + len / 2);
-      const m = new T.Mesh(new T.BoxGeometry(len, y1 - y0, WALL_TH), mat);
-      m.position.set(cx, baseY + (y0 + y1) / 2, cz);
-      m.rotation.y = -ang;
-      scene.add(m);
-      // стены осепараллельны — AABB для запекания
+      const cy = baseY + (y0 + y1) / 2;
+      // стены осепараллельны: регистрируем AABB-кусок, меши строит и
+      // запекает Baker (слитая геометрия с повершинным светом)
       const alongX = Math.abs(ux) > 0.5;
-      addOccluder(cx, baseY + (y0 + y1) / 2, cz,
-        alongX ? len : WALL_TH, y1 - y0, alongX ? WALL_TH : len);
-      return m;
+      const sx = alongX ? len : WALL_TH, sz = alongX ? WALL_TH : len;
+      addOccluder(cx, cy, cz, sx, y1 - y0, sz);
+      bakeData.wallPieces.push({
+        x1: cx - sx / 2, y1: cy - (y1 - y0) / 2, z1: cz - sz / 2,
+        x2: cx + sx / 2, y2: cy + (y1 - y0) / 2, z2: cz + sz / 2,
+        alongX
+      });
+      return null;
     }
     // Кусок стены с учётом мансардного скоса (для upper): режем полосами
     // Верхняя часть стены (над проёмом) с учётом мансардного скоса
