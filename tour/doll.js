@@ -17,7 +17,129 @@ class DollMode {
     this.groups = { g1: [], g2: [], roof: [], walls1: null, walls2: null };
     this.ray = new THREE.Raycaster();
     this.drag = { active: false, moved: 0, x: 0, y: 0, dist2: 0 };
+    this.measure = false;
+    this.measurePts = [];
+    this.measureGroup = new THREE.Group();
+    this.measureGroup.visible = false;
+    scene.add(this.measureGroup);
+    this.areaSprites = [];
     this.bindInput();
+  }
+
+  // Метки площадей комнат (создаются лениво при первом входе)
+  buildAreaLabels() {
+    if (this.areaSprites.length) return;
+    for (const a of APT.areas) {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 96;
+      const g = c.getContext('2d');
+      g.fillStyle = 'rgba(20,22,26,0.82)';
+      const r = 18;
+      g.beginPath();
+      g.roundRect(4, 4, 248, 88, r);
+      g.fill();
+      g.fillStyle = '#f2efe8';
+      g.font = '600 30px system-ui';
+      g.textAlign = 'center';
+      g.fillText(a.name, 128, 42);
+      g.font = '26px system-ui';
+      g.fillStyle = '#cbb994';
+      g.fillText(a.m2 + ' м²', 128, 76);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: new THREE.CanvasTexture(c), depthTest: false
+      }));
+      sp.position.set(a.x, a.g + 0.9, a.z);
+      sp.scale.set(1.9, 0.71, 1);
+      sp.visible = false;
+      sp.userData.areaLvl = a.g < 1.5 ? 1 : 2;
+      this.scene.add(sp);
+      this.areaSprites.push(sp);
+    }
+  }
+
+  updateAreaLabels() {
+    for (const sp of this.areaSprites) {
+      sp.visible = this.on &&
+        (this.level === '1' ? sp.userData.areaLvl === 1 : sp.userData.areaLvl === 2);
+    }
+  }
+
+  // ---------- Рулетка ----------
+  setMeasure(on) {
+    this.measure = on;
+    document.getElementById('dollMeasure').classList.toggle('act', on);
+    this.measureGroup.visible = on;
+    if (!on) this.clearMeasure();
+  }
+
+  clearMeasure() {
+    while (this.measureGroup.children.length) {
+      const o = this.measureGroup.children.pop();
+      if (o.material && o.material.map) o.material.map.dispose();
+      if (o.material) o.material.dispose();
+      if (o.geometry) o.geometry.dispose();
+    }
+    this.measurePts = [];
+  }
+
+  addMeasurePoint(pt) {
+    if (this.measurePts.length >= 2) this.clearMeasure();
+    this.measurePts.push(pt.clone());
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 12, 10),
+      new THREE.MeshBasicMaterial({ color: 0xd85c3a })
+    );
+    dot.position.copy(pt).y += 0.06;
+    this.measureGroup.add(dot);
+    if (this.measurePts.length === 2) {
+      const [a, b] = this.measurePts;
+      const len = a.distanceTo(b);
+      const mid = a.clone().lerp(b, 0.5);
+      // линия-цилиндр
+      const cyl = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, len, 8),
+        new THREE.MeshBasicMaterial({ color: 0xd85c3a })
+      );
+      cyl.position.copy(mid).y += 0.06;
+      cyl.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        b.clone().sub(a).normalize()
+      );
+      this.measureGroup.add(cyl);
+      // подпись
+      const c = document.createElement('canvas');
+      c.width = 192; c.height = 72;
+      const g = c.getContext('2d');
+      g.fillStyle = 'rgba(216,92,58,0.95)';
+      g.beginPath(); g.roundRect(4, 4, 184, 64, 14); g.fill();
+      g.fillStyle = '#fff';
+      g.font = '600 34px system-ui';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(len.toFixed(2) + ' м', 96, 38);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: new THREE.CanvasTexture(c), depthTest: false
+      }));
+      sp.position.copy(mid).y += 0.6;
+      sp.scale.set(1.9, 0.71, 1);
+      this.measureGroup.add(sp);
+    }
+  }
+
+  // Точка пола под кликом (для рулетки)
+  floorPoint(clientX, clientY) {
+    const r = this.dom.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((clientX - r.left) / r.width) * 2 - 1,
+      -((clientY - r.top) / r.height) * 2 + 1
+    );
+    this.ray.setFromCamera(ndc, this.camera);
+    const hits = this.ray.intersectObjects(this.scene.children, true);
+    for (const h of hits) {
+      if (!h.object.visible || h.object.parent === this.measureGroup) continue;
+      if (!h.face || h.face.normal.clone().transformDirection(h.object.matrixWorld).y < 0.6) continue;
+      return h.point;
+    }
+    return null;
   }
 
   // Раскладываем меши по «этажам» (после запекания)
@@ -61,7 +183,9 @@ class DollMode {
     this.controls.enabled = false;
     if (document.pointerLockElement) document.exitPointerLock();
     this.camPos.copy(this.camera.position);
+    this.buildAreaLabels();
     this.applyVisibility();
+    this.updateAreaLabels();
     document.getElementById('dollHud').style.display = 'flex';
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('joy').style.display = 'none';
@@ -71,7 +195,9 @@ class DollMode {
   exit(lockPointer) {
     this.on = false;
     this.controls.enabled = true;
+    this.setMeasure(false);
     this.applyVisibility();
+    this.updateAreaLabels();
     document.getElementById('dollHud').style.display = 'none';
     if (this.controls.isTouch) {
       document.getElementById('joy').style.display = 'block';
@@ -83,6 +209,7 @@ class DollMode {
   setLevel(lvl) {
     this.level = lvl;
     this.applyVisibility();
+    this.updateAreaLabels();
     this.syncButtons();
   }
 
@@ -134,7 +261,12 @@ class DollMode {
     d.addEventListener('mouseup', (e) => {
       if (!this.on || !this.drag.active) return;
       this.drag.active = false;
-      if (this.drag.moved < 6) this.teleport(e.clientX, e.clientY);
+      if (this.drag.moved < 6) {
+        if (this.measure) {
+          const p = this.floorPoint(e.clientX, e.clientY);
+          if (p) this.addMeasurePoint(p);
+        } else this.teleport(e.clientX, e.clientY);
+      }
     });
     d.addEventListener('wheel', (e) => {
       if (!this.on) return;
@@ -179,7 +311,10 @@ class DollMode {
       if (!this.on) return;
       if (this.drag.active && this.drag.moved < 8 && e.changedTouches.length === 1) {
         const t = e.changedTouches[0];
-        this.teleport(t.clientX, t.clientY);
+        if (this.measure) {
+          const p = this.floorPoint(t.clientX, t.clientY);
+          if (p) this.addMeasurePoint(p);
+        } else this.teleport(t.clientX, t.clientY);
       }
       this.drag.active = false;
       e.preventDefault();
