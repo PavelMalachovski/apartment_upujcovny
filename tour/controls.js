@@ -211,7 +211,12 @@ class WalkControls {
         if (Math.abs(g - this.ground) < 0.02) this.ground = g;
       }
     }
-    this.camera.position.set(this.pos.x, this.ground + this.eye, this.pos.z);
+    let eyeY = this.ground + this.eye;
+    // на мансарде прижимаем камеру под скат крыши
+    if (this.ground > 2.9 && this.pos.x > 4.2 && this.pos.x < 15.6 && window.Builder) {
+      eyeY = Math.min(eyeY, 3.1 + Builder.atticH(this.pos.z) - 0.12);
+    }
+    this.camera.position.set(this.pos.x, eyeY, this.pos.z);
     this.camera.rotation.order = 'YXZ';
     this.camera.rotation.y = this.yaw;
     this.camera.rotation.x = this.pitch;
