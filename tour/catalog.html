@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Каталог объектов · 3D-туры</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: #0d0f12; color: #f2efe8;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  header {
+    padding: 48px 24px 20px; text-align: center;
+  }
+  header h1 { margin: 0 0 10px; font-size: 30px; font-weight: 650; letter-spacing: 0.01em; }
+  header p { margin: 0; color: rgba(242,239,232,0.6); font-size: 15px; line-height: 1.6; }
+  .grid {
+    max-width: 1080px; margin: 28px auto 60px; padding: 0 20px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px;
+  }
+  .card {
+    background: #16191e; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    display: flex; flex-direction: column;
+    transition: transform 0.15s ease;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card .coverWrap { position: relative; aspect-ratio: 3 / 2; overflow: hidden; }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .badge {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(20,22,26,0.82); color: #e8e2d5;
+    padding: 6px 12px; border-radius: 14px; font-size: 12px;
+  }
+  .card .body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .card h2 { margin: 0; font-size: 19px; font-weight: 640; }
+  .card .subtitle { color: rgba(242,239,232,0.65); font-size: 14px; margin: -4px 0 0; }
+  .specs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .specs span {
+    background: rgba(232,226,213,0.1); border-radius: 12px;
+    padding: 4px 10px; font-size: 12px; color: #cbb994;
+  }
+  .card .highlights { color: rgba(242,239,232,0.55); font-size: 13px; line-height: 1.55; flex: 1; }
+  .card a.open {
+    display: block; text-align: center; text-decoration: none;
+    background: #e8e2d5; color: #1a1c20; font-weight: 600; font-size: 15px;
+    padding: 12px; border-radius: 12px;
+  }
+  .card a.open:hover { background: #fff; }
+  footer {
+    text-align: center; padding: 0 20px 40px;
+    color: rgba(242,239,232,0.4); font-size: 13px; line-height: 1.7;
+  }
+  #empty { text-align: center; color: rgba(242,239,232,0.5); padding: 60px 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏠 Каталог объектов</h1>
+  <p>Интерактивные 3D-туры: прогулка от первого лица, режим макета,<br>
+     реальные фотографии, площади комнат и рулетка — в браузере, без установки.</p>
+</header>
+<div class="grid" id="grid"></div>
+<div id="empty" style="display:none">Каталог пуст — добавь квартиру в <b>apartments/index.json</b></div>
+<footer>
+  Новый объект = JSON-конфиг + папка фотографий.<br>
+  Управление в туре: мышь/палец — осмотр, WASD/джойстик — ходьба, ⌂ — макет.
+</footer>
+<script>
+(async function () {
+  const grid = document.getElementById('grid');
+  try {
+    const resp = await fetch('apartments/index.json');
+    const data = await resp.json();
+    const list = data.apartments || [];
+    if (!list.length) throw new Error('empty');
+    for (const a of list) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="coverWrap">' +
+          '<img src="' + a.cover + '" alt="' + a.title + '" loading="lazy">' +
+          '<div class="badge">3D-тур</div>' +
+        '</div>' +
+        '<div class="body">' +
+          '<h2>' + a.title + '</h2>' +
+          '<p class="subtitle">' + (a.subtitle || '') + '</p>' +
+          '<div class="specs">' + (a.specs || []).map(s => '<span>' + s + '</span>').join('') + '</div>' +
+          '<p class="highlights">' + (a.highlights || '') + '</p>' +
+          '<a class="open" href="index.html?apt=' + a.id + '">Открыть 3D-тур →</a>' +
+        '</div>';
+      grid.appendChild(card);
+    }
+  } catch (e) {
+    document.getElementById('empty').style.display = 'block';
+  }
+})();
+</script>
+</body>
+</html>
