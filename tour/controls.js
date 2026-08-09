@@ -15,6 +15,7 @@ class WalkControls {
     this.keys = {};
     this.locked = false;
     this.radius = 0.24;
+    this.enabled = true;   // false в режиме макета
     this.isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     this.touch = { moveId: null, lookId: null, ox: 0, oy: 0, mx: 0, mz: 0, lx: 0, ly: 0 };
 
@@ -29,6 +30,7 @@ class WalkControls {
     document.addEventListener('pointerlockchange', () => {
       if (this.isTouch) return;
       this.locked = document.pointerLockElement === this.dom;
+      if (!this.enabled) return; // режим макета сам управляет оверлеем
       document.getElementById('overlay').style.display = this.locked ? 'none' : 'flex';
     });
 
@@ -37,6 +39,7 @@ class WalkControls {
     const knob = document.getElementById('joyKnob');
     const JR = 55; // радиус джойстика в px
     const onStart = (e) => {
+      if (!this.enabled) return;
       for (const t of e.changedTouches) {
         if (t.clientX < window.innerWidth / 2 && this.touch.moveId === null) {
           this.touch.moveId = t.identifier;
@@ -174,6 +177,7 @@ class WalkControls {
   }
 
   update(dt) {
+    if (!this.enabled) return;
     const speed = (this.keys.ShiftLeft || this.keys.ShiftRight) ? 3.4 : 1.9;
     let mx = 0, mz = 0;
     if (this.keys.KeyW || this.keys.ArrowUp) mz += 1;

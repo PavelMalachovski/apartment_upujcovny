@@ -24,11 +24,28 @@
   const goText = goBtn.textContent;
   goBtn.textContent = 'Запекаем свет… 0%';
   goBtn.style.opacity = '0.6';
+  const doll = new DollMode(scene, camera, controls, canvas);
   window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
     goBtn.textContent = 'Запекаем свет… ' + Math.round(p * 100) + '%';
   }).then(() => {
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';
+    doll.classify();
+  });
+
+  // ---------- Режим макета ----------
+  document.getElementById('dollBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!doll.on) doll.enter();
+  });
+  document.getElementById('dollExit').addEventListener('click', (e) => {
+    e.stopPropagation();
+    doll.exit(true);
+  });
+  document.getElementById('dollLvl1').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('1'); });
+  document.getElementById('dollLvlAll').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('all'); });
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape' && doll.on) doll.exit(false);
   });
 
   function resize() {
@@ -59,6 +76,7 @@
     b.textContent = s.name;
     b.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (doll.on) doll.exit(false);
       controls.pos.x = s.x; controls.pos.z = s.z;
       controls.yaw = s.yaw; controls.pitch = 0;
       controls.ground = s.g;
@@ -156,7 +174,7 @@
     return '';
   }
 
-  window.__app = { scene, camera, renderer, controls, drawMap, roomName };
+  window.__app = { scene, camera, renderer, controls, doll, drawMap, roomName };
 
   let last = performance.now();
   let frame = 0;
@@ -164,10 +182,11 @@
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     controls.update(dt);
+    doll.update();
     renderer.render(scene, camera);
     if ((frame++ & 3) === 0) {
       drawMap();
-      roomEl.textContent = roomName();
+      roomEl.textContent = doll.on ? 'Режим макета · клик по полу — войти' : roomName();
     }
     requestAnimationFrame(loop);
   }
