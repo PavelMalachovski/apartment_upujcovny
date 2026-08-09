@@ -7,6 +7,14 @@
 // (удобно править руками), здесь переводятся в радианы.
 // ============================================================
 
+// Версия берётся из ?v= собственного тега <script> — тем же значением
+// версионируется и конфиг, иначе браузер отдаёт старый JSON из кеша,
+// и правки геометрии не доезжают до телефонов.
+const BUILD_V = (function () {
+  try { return new URL(document.currentScript.src).searchParams.get('v') || ''; }
+  catch (e) { return ''; }
+})();
+
 (async function () {
   const goBtn = document.getElementById('goBtn');
   const params = new URLSearchParams(location.search);
@@ -14,7 +22,8 @@
 
   let cfg;
   try {
-    const resp = await fetch('apartments/' + id + '.json');
+    const url = 'apartments/' + id + '.json' + (BUILD_V ? '?v=' + BUILD_V : '');
+    const resp = await fetch(url, { cache: 'no-cache' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     cfg = await resp.json();
   } catch (err) {
