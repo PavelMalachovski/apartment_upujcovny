@@ -44,6 +44,10 @@
   });
   document.getElementById('dollLvl1').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('1'); });
   document.getElementById('dollLvlAll').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('all'); });
+  document.getElementById('dollMeasure').addEventListener('click', (e) => {
+    e.stopPropagation();
+    doll.setMeasure(!doll.measure);
+  });
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Escape' && doll.on) doll.exit(false);
   });
@@ -96,9 +100,63 @@
     document.getElementById('overlayText').innerHTML =
       'Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>' +
       'Левая половина экрана — джойстик ходьбы, правая — осмотр.<br>' +
-      'Лестница на второй этаж — за раздвижной дверью у кухни.';
+      'Кнопки сверху слева: <b>☰ Комнаты</b> — телепорт, <b>⌂ Макет</b> — вид сверху.<br>' +
+      'Значки 📷 в комнатах показывают реальные фотографии.';
     document.getElementById('goBtn').textContent = 'Коснись, чтобы войти';
   }
+
+  // ---------- Фото-споты: маркеры + просмотр ----------
+  const photoBtn = document.getElementById('photoBtn');
+  const photoView = document.getElementById('photoView');
+  const camTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = 96; c.height = 96;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgba(20,22,26,0.85)';
+    g.beginPath(); g.arc(48, 48, 44, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#e8e2d5'; g.lineWidth = 5;
+    g.beginPath(); g.arc(48, 48, 44, 0, Math.PI * 2); g.stroke();
+    g.font = '44px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('📷', 48, 52);
+    return new THREE.CanvasTexture(c);
+  })();
+  for (const s of APT.photoSpots) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: camTex, depthTest: true }));
+    sp.position.set(s.x, s.g + 1.9, s.z);
+    sp.scale.set(0.34, 0.34, 1);
+    scene.add(sp);
+  }
+  let nearSpot = null;
+  function checkPhotoSpot() {
+    if (doll.on) { photoBtn.style.display = 'none'; nearSpot = null; return; }
+    let best = null, bd = 1.6;
+    for (const s of APT.photoSpots) {
+      if (Math.abs(s.g - controls.ground) > 0.6) continue;
+      const d = Math.hypot(s.x - controls.pos.x, s.z - controls.pos.z);
+      if (d < bd) { bd = d; best = s; }
+    }
+    nearSpot = best;
+    photoBtn.style.display = best ? 'block' : 'none';
+    if (best) photoBtn.textContent = '📷 Фото: ' + best.name;
+  }
+  function openPhoto(s) {
+    document.getElementById('photoImg').src = 'photos/' + s.file;
+    document.getElementById('photoCap').textContent = s.name + ' — реальное фото квартиры';
+    photoView.style.display = 'flex';
+    if (document.pointerLockElement) document.exitPointerLock();
+  }
+  photoBtn.addEventListener('click', (e) => { e.stopPropagation(); if (nearSpot) openPhoto(nearSpot); });
+  photoView.addEventListener('click', () => {
+    photoView.style.display = 'none';
+    if (!controls.isTouch) controls.lock();
+  });
+  // F — фото рядом (когда курсор захвачен и кнопку не нажать)
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyF' && nearSpot && photoView.style.display !== 'flex') openPhoto(nearSpot);
+    if (e.code === 'KeyM' && photoView.style.display !== 'flex') {
+      if (doll.on) doll.exit(false); else doll.enter();
+    }
+  });
 
   // ---------- Мини-карта ----------
   const mapC = document.getElementById('minimap');
@@ -186,7 +244,10 @@
     renderer.render(scene, camera);
     if ((frame++ & 3) === 0) {
       drawMap();
-      roomEl.textContent = doll.on ? 'Режим макета · клик по полу — войти' : roomName();
+      checkPhotoSpot();
+      roomEl.textContent = doll.on
+        ? (doll.measure ? 'Рулетка · два клика по полу — расстояние' : 'Режим макета · клик по полу — войти')
+        : roomName();
     }
     requestAnimationFrame(loop);
   }

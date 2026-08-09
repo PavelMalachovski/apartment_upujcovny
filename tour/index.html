@@ -57,6 +57,28 @@
     box-shadow: 0 4px 18px rgba(0,0,0,0.4);
   }
   #dollHud button.act { background: #e8e2d5; color: #1a1c20; }
+  #photoBtn {
+    position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    display: none; z-index: 7; padding: 11px 20px; border-radius: 22px;
+    background: rgba(232,226,213,0.95); color: #1a1c20; cursor: pointer;
+    font-family: system-ui, sans-serif; font-size: 15px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.45); user-select: none;
+  }
+  #photoView {
+    position: fixed; inset: 0; display: none; z-index: 20; cursor: pointer;
+    background: rgba(8,10,13,0.93);
+    align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+  }
+  #photoView img {
+    max-width: 92vw; max-height: 84vh; border-radius: 10px;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.6);
+  }
+  #photoCap { color: #e8e2d5; font-family: system-ui, sans-serif; font-size: 15px; }
+  @media (max-width: 760px) {
+    #roomsBtn, #dollBtn { font-size: 15px; padding: 11px 18px; }
+    #dollBtn { left: 14px; top: 62px; }
+    #dollHud button { font-size: 13px; padding: 9px 13px; }
+  }
   #joyKnob {
     position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
     margin: -22px 0 0 -22px; border-radius: 50%;
@@ -105,25 +127,32 @@
 <div id="dollHud">
   <button id="dollLvl1">1 этаж</button>
   <button id="dollLvlAll" class="act">Весь дом</button>
+  <button id="dollMeasure">📏 Рулетка</button>
   <button id="dollExit">✕ Прогулка</button>
+</div>
+<div id="photoBtn">📷 Фото этого места</div>
+<div id="photoView">
+  <img id="photoImg" alt="">
+  <div id="photoCap"></div>
 </div>
 <div id="joy"><div id="joyKnob"></div></div>
 <canvas id="minimap" width="300" height="118"></canvas>
 <div id="room"></div>
-<div id="hint">WASD — ходьба · Shift — быстрее · Esc — курсор</div>
+<div id="hint">WASD — ходьба · Esc — курсор и меню · M — макет · F — фото рядом</div>
 <div id="overlay">
   <h1>Апартаменты · 3D-тур</h1>
   <p id="overlayText">Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>
-     WASD / стрелки — ходьба, мышь — осмотр, Shift — быстрый шаг.<br>
-     Лестница на второй этаж — за раздвижной дверью у кухни.</p>
+     WASD / стрелки — ходьба, мышь — осмотр, Esc возвращает курсор.<br>
+     Кнопки сверху слева: <b>☰ Комнаты</b> — телепорт, <b>⌂ Макет</b> — вид сверху.<br>
+     Значки 📷 в комнатах показывают реальные фотографии.</p>
   <div class="go" id="goBtn">Кликни, чтобы войти</div>
 </div>
-<script src="three.min.js?v=6"></script>
-<script src="apartment.js?v=6"></script>
-<script src="bake.js?v=6"></script>
-<script src="builder.js?v=6"></script>
-<script src="controls.js?v=6"></script>
-<script src="doll.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="three.min.js?v=7"></script>
+<script src="apartment.js?v=7"></script>
+<script src="bake.js?v=7"></script>
+<script src="builder.js?v=7"></script>
+<script src="controls.js?v=7"></script>
+<script src="doll.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

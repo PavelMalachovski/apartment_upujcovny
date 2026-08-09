@@ -63,9 +63,9 @@ const APT = {
     { lvl: 'main', x1: 7.4, z1: 2.6, x2: 11.4, z2: 2.6, h: 2.8, openings: [
       { at: 3.0, w: 0.85, type: 'door' }
     ]},
-    // Коридор: южная стена (дверь в спальню 2)
+    // Коридор: южная стена (дверь в спальню 2, западнее тумбочки)
     { lvl: 'main', x1: 7.4, z1: 3.5, x2: 11.4, z2: 3.5, h: 2.8, openings: [
-      { at: 1.3, w: 0.95, type: 'door' }
+      { at: 0.35, w: 0.95, type: 'door' }
     ]},
     // Спальня 1: восточная стена (дверь из коридора)
     { lvl: 'main', x1: 7.4, z1: 2.6, x2: 7.4, z2: 6.6, h: 2.8, openings: [
@@ -102,7 +102,7 @@ const APT = {
     // Ванная наверху
     { lvl: 'upper', x1: 6.8, z1: -2.0, x2: 6.8, z2: 0.5, h: 2.6 },
     { lvl: 'upper', x1: 4.2, z1: 0.5, x2: 6.8, z2: 0.5, h: 2.6, openings: [
-      { at: 1.9, w: 0.85, type: 'door' }
+      { at: 1.2, w: 0.85, type: 'door' }
     ]},
     // Перегородка спальни (раздвижная дверь из холла)
     { lvl: 'upper', x1: 10.4, z1: 2.1, x2: 15.6, z2: 2.1, h: 2.6, openings: [
@@ -162,10 +162,10 @@ const APT = {
     { type: 'wallPanel', x: 20.68, z: 2.15, w: 2.4, mat: 'white', rot: Math.PI / 2, lvl: 'main' },
     { type: 'wallPanel', x: 21.8, z: 3.32, w: 2.3, mat: 'white', lvl: 'main' },
     { type: 'shower', x: 21.3, z: 1.55, w: 1.3, d: 1.2, corner: 'nw', lvl: 'main' },
-    { type: 'vanity', x: 21.6, z: 3.12, w: 1.3, d: 0.5, rot: Math.PI, lvl: 'main', dark: false },
-    { type: 'wc', x: 22.65, z: 1.35, w: 0.42, d: 0.65, rot: Math.PI / 2, lvl: 'main' },
-    { type: 'towelRoll', x: 21.1, z: 3.1, h: 0.93, lvl: 'main' },
-    { type: 'toiletries', x: 22.1, z: 3.15, h: 0.93, lvl: 'main' },
+    { type: 'vanity', x: 22.62, z: 2.2, w: 1.3, d: 0.5, rot: Math.PI / 2, lvl: 'main', dark: false },
+    { type: 'wc', x: 21.0, z: 2.9, w: 0.42, d: 0.65, rot: Math.PI / 2, lvl: 'main' },
+    { type: 'towelRoll', x: 22.6, z: 1.85, h: 0.93, lvl: 'main' },
+    { type: 'toiletries', x: 22.6, z: 2.6, h: 0.93, lvl: 'main' },
 
     // -------- Кухня --------
     { type: 'kitchenRun', x: 18.75, z: 0.33, w: 3.6, d: 0.65, lvl: 'main' },       // вдоль северной стены
@@ -248,7 +248,7 @@ const APT = {
     { type: 'wallPanel', x: 7.32, z: 1.3, w: 2.5, mat: 'white', rot: Math.PI / 2, lvl: 'main' },
     { type: 'shower', x: 5.35, z: 0.65, w: 1.3, d: 1.3, corner: 'nw', lvl: 'main' },
     { type: 'vanity', x: 6.55, z: 0.31, w: 1.3, d: 0.52, rot: 0, lvl: 'main', dark: true },
-    { type: 'wc', x: 7.1, z: 2.1, w: 0.42, d: 0.65, rot: Math.PI, lvl: 'main' },
+    { type: 'wc', x: 4.95, z: 2.2, w: 0.42, d: 0.65, rot: Math.PI, lvl: 'main' },
 
     { type: 'towels', x: 6.85, z: 0.35, h: 0.93, n: 3, lvl: 'main' },
     { type: 'toiletries', x: 6.25, z: 0.35, h: 0.93, lvl: 'main' },
@@ -265,7 +265,7 @@ const APT = {
 
     // Гостиная наверху
     { type: 'rug', x: 7.3, z: 3.6, w: 3.4, d: 2.6, lvl: 'upper', pat: 'light' },
-    { type: 'armchair', x: 6.6, z: 2.9, rot: Math.PI * 0.85, lvl: 'upper', col: 'sage' },
+    { type: 'armchair', x: 6.9, z: 3.4, rot: Math.PI * 0.85, lvl: 'upper', col: 'sage' },
     { type: 'armchair', x: 8.3, z: 5.3, rot: Math.PI * 1.8, lvl: 'upper', col: 'graybrown' },
     { type: 'roundTable', x: 7.4, z: 4.1, r: 0.5, lvl: 'upper', glass: false },
     { type: 'sofa', x: 5.6, z: 5.9, w: 2.2, d: 0.95, rot: 0, lvl: 'upper', col: 'taupe' },
@@ -296,7 +296,7 @@ const APT = {
     { type: 'wallPanel', x: 6.72, z: -0.75, w: 2.2, mat: 'white', rot: Math.PI / 2, h: 2.2, lvl: 'upper' },
     { type: 'shower', x: 4.85, z: -1.35, w: 1.3, d: 1.3, corner: 'nw', lvl: 'upper' },
     { type: 'vanity', x: 6.2, z: -1.68, w: 1.2, d: 0.52, rot: 0, lvl: 'upper', dark: false },
-    { type: 'wc', x: 6.45, z: 0.05, w: 0.42, d: 0.65, rot: Math.PI, lvl: 'upper' },
+    { type: 'wc', x: 6.5, z: -1.0, w: 0.42, d: 0.65, rot: -Math.PI / 2, lvl: 'upper' },
     { type: 'towels', x: 5.6, z: -1.65, h: 0.93, n: 3, lvl: 'upper' },
     { type: 'toiletries', x: 6.7, z: -1.6, h: 0.93, lvl: 'upper' },
     { type: 'bathMat', x: 5.5, z: -0.5, lvl: 'upper' },
@@ -368,6 +368,43 @@ const APT = {
   ],
 
   start: { x: 22.6, z: 5.0, yaw: Math.PI / 2 },  // у входной двери, смотрим на запад
+
+  // Фото-споты: реальные фотографии, привязанные к точкам квартиры
+  photoSpots: [
+    { file: '2.webp', name: 'Гостиная', x: 14.5, z: 5.4, g: 0, yaw: Math.PI * 0.55 },
+    { file: '7.webp', name: 'Столовая', x: 13.6, z: 4.4, g: 0, yaw: 0.05 },
+    { file: '20.webp', name: 'Кухня', x: 16.3, z: 4.6, g: 0, yaw: -Math.PI * 0.15 },
+    { file: '4.webp', name: 'Кофе-станция', x: 19.5, z: 1.8, g: 0, yaw: 0 },
+    { file: '8.webp', name: 'Спальня 1', x: 4.6, z: 5.7, g: 0, yaw: -0.1 },
+    { file: '11.webp', name: 'Кабинет в спальне 1', x: 5.8, z: 4.6, g: 0, yaw: Math.PI * 0.8 },
+    { file: '12.webp', name: 'Спальня 2', x: 10.2, z: 5.8, g: 0, yaw: 0.15 },
+    { file: '14.webp', name: 'Ванная 2', x: 10.9, z: 2.1, g: 0, yaw: Math.PI * 0.55 },
+    { file: '17.webp', name: 'Санузел', x: 21.6, z: 2.6, g: 0, yaw: Math.PI },
+    { file: '19.webp', name: 'Прачечная', x: 3.7, z: 1.7, g: 0, yaw: 0.05 },
+    { file: '3.webp', name: 'Гостиная · 2 этаж', x: 7.6, z: 4.2, g: 3.1, yaw: Math.PI * 1.5 },
+    { file: '10.webp', name: 'Спальня · 2 этаж', x: 12.2, z: 5.3, g: 3.1, yaw: -Math.PI * 0.35 },
+    { file: '13.webp', name: 'Ванная · 2 этаж', x: 5.6, z: -0.2, g: 3.1, yaw: 0.1 },
+    { file: '18.webp', name: 'Терраса', x: 2.9, z: 4.9, g: 2.98, yaw: Math.PI * 1.2 }
+  ],
+
+  // Площади комнат для меток в режиме макета
+  areas: [
+    { name: 'Прихожая', m2: 10, x: 22.2, z: 5.0, g: 0 },
+    { name: 'Кухня', m2: 22, x: 18.0, z: 1.8, g: 0 },
+    { name: 'Столовая', m2: 13, x: 13.6, z: 2.4, g: 0 },
+    { name: 'Гостиная', m2: 14, x: 13.7, z: 5.2, g: 0 },
+    { name: 'Спальня 1', m2: 26, x: 4.5, z: 4.8, g: 0 },
+    { name: 'Спальня 2', m2: 10, x: 9.6, z: 5.2, g: 0 },
+    { name: 'Ванная 2', m2: 7, x: 10.0, z: 1.3, g: 0 },
+    { name: 'Ванная 1', m2: 7, x: 6.0, z: 1.3, g: 0 },
+    { name: 'Прачечная', m2: 5, x: 3.7, z: 1.3, g: 0 },
+    { name: 'Санузел', m2: 6, x: 21.8, z: 2.1, g: 0 },
+    { name: 'Гостиная', m2: 32, x: 7.3, z: 3.6, g: 3.1 },
+    { name: 'Спальня', m2: 23, x: 13.2, z: 4.4, g: 3.1 },
+    { name: 'Ванная', m2: 6, x: 5.5, z: -0.7, g: 3.1 },
+    { name: 'Холл', m2: 11, x: 13.5, z: 0.8, g: 3.1 },
+    { name: 'Терраса', m2: 24, x: 2.2, z: 3.5, g: 2.98 }
+  ],
 
   // Точки телепортации для меню «Комнаты»
   spawns: [
