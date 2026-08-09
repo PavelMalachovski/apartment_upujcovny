@@ -59,6 +59,61 @@ const Baker = (() => {
   // Смещения для мягких теней (джиттер позиции источника)
   const JIT = [[0, 0], [0.14, -0.1], [-0.12, 0.13]];
   const SUN = { x: -0.55, y: 0.72, z: 0.42 }; // нормированное направление НА солнце
+  const EXP = 1.7; // запас HDR: lightMapIntensity компенсирует
+
+  // Освещённость точки P с нормалью N (общая для лайтмапов и вершин стен)
+  const _Q = new T.Vector3();
+  function lightAt(P, N, occ, data, outdoor) {
+    let r, g, b;
+    if (outdoor) { r = 0.66; g = 0.70; b = 0.78; }
+    else { r = 0.40; g = 0.385; b = 0.36; }
+
+    for (const L of data.lights) {
+      const ddx = L.x - P.x, ddy = L.y - P.y, ddz = L.z - P.z;
+      const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+      if (d2 > 70) continue;
+      const d = Math.sqrt(d2);
+      const cos = (ddx * N.x + ddy * N.y + ddz * N.z) / d;
+      if (cos <= 0) continue;
+      let vis = 0;
+      for (const [jx, jz] of JIT) {
+        _Q.set(L.x + jx, L.y, L.z + jz);
+        if (!blocked(P, _Q, occ)) vis++;
+      }
+      if (!vis) continue;
+      const e = (L.int || 1) * 2.1 / (1 + d2 * 0.55) * cos * (vis / JIT.length);
+      r += e; g += e * 0.90; b += e * 0.74;
+    }
+
+    for (const Wn of data.windows) {
+      const ddx = Wn.x - P.x, ddy = Wn.y - P.y, ddz = Wn.z - P.z;
+      const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+      if (d2 > 55) continue;
+      const d = Math.sqrt(d2);
+      const cos = (ddx * N.x + ddy * N.y + ddz * N.z) / d;
+      if (cos <= 0) continue;
+      if ((P.x - Wn.x) * Wn.nx + (P.z - Wn.z) * Wn.nz < 0) continue;
+      let vis = 0;
+      for (const [jx, jz] of JIT) {
+        _Q.set(Wn.x + jx * 0.5, Wn.y + jz, Wn.z + jx * 0.5 * Math.abs(Wn.nx));
+        if (!blocked(P, _Q, occ)) vis++;
+      }
+      if (!vis) continue;
+      const e = Wn.area * 0.16 / (1 + d2 * 0.5) * cos * (vis / JIT.length);
+      r += e * 0.82; g += e * 0.90; b += e;
+    }
+
+    if (outdoor) {
+      const cos = SUN.x * N.x + SUN.y * N.y + SUN.z * N.z;
+      if (cos > 0) {
+        _Q.set(P.x + SUN.x * 40, P.y + SUN.y * 40, P.z + SUN.z * 40);
+        if (!blocked(P, _Q, occ)) {
+          r += 0.62 * cos; g += 0.59 * cos; b += 0.52 * cos;
+        }
+      }
+    }
+    return [r, g, b];
+  }
 
   function bakeSurface(surf, data) {
     const { mesh, w, h, res, outdoor } = surf;
@@ -72,7 +127,7 @@ const Baker = (() => {
     const img = ctx.createImageData(W, H);
     const px = img.data;
 
-    const P = new T.Vector3(), Q = new T.Vector3(), N = new T.Vector3();
+    const P = new T.Vector3(), N = new T.Vector3();
     // нормаль поверхности в мире
     N.set(0, 0, 1).transformDirection(mw);
 
@@ -84,70 +139,14 @@ const Baker = (() => {
       b.y2 > bb.min.y - 4 && b.y1 < bb.max.y + 4 &&
       b.z2 > bb.min.z && b.z1 < bb.max.z);
 
-    const EXP = 1.7; // запас HDR: lightMapIntensity компенсирует
-
     for (let j = 0; j < H; j++) {
       // PlaneGeometry: v растёт вверх, канвас — вниз
       const v = 1 - (j + 0.5) / H;
       for (let i = 0; i < W; i++) {
         const u = (i + 0.5) / W;
         P.set((u - 0.5) * w, (v - 0.5) * h, 0).applyMatrix4(mw);
-        // отступ от поверхности вдоль нормали
         P.x += N.x * 0.03; P.y += N.y * 0.03; P.z += N.z * 0.03;
-
-        let r, g, b;
-        if (outdoor) { r = 0.66; g = 0.70; b = 0.78; }       // небо на террасе
-        else { r = 0.40; g = 0.385; b = 0.36; }              // переотражения в комнатах
-
-        // --- лампы ---
-        for (const L of data.lights) {
-          const ddx = L.x - P.x, ddy = L.y - P.y, ddz = L.z - P.z;
-          const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-          if (d2 > 70) continue;
-          const d = Math.sqrt(d2);
-          const cos = (ddx * N.x + ddy * N.y + ddz * N.z) / d;
-          if (cos <= 0) continue;
-          let vis = 0;
-          for (const [jx, jz] of JIT) {
-            Q.set(L.x + jx, L.y, L.z + jz);
-            if (!blocked(P, Q, occ)) vis++;
-          }
-          if (!vis) continue;
-          const e = (L.int || 1) * 2.1 / (1 + d2 * 0.55) * cos * (vis / JIT.length);
-          r += e; g += e * 0.90; b += e * 0.74;              // тёплый свет
-        }
-
-        // --- окна: холодный дневной свет ---
-        for (const Wn of data.windows) {
-          const ddx = Wn.x - P.x, ddy = Wn.y - P.y, ddz = Wn.z - P.z;
-          const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-          if (d2 > 55) continue;
-          const d = Math.sqrt(d2);
-          const cos = (ddx * N.x + ddy * N.y + ddz * N.z) / d;
-          if (cos <= 0) continue;
-          // приёмник должен быть с внутренней стороны окна
-          if ((P.x - Wn.x) * Wn.nx + (P.z - Wn.z) * Wn.nz < 0) continue;
-          let vis = 0;
-          for (const [jx, jz] of JIT) {
-            Q.set(Wn.x + jx * 0.5, Wn.y + jz, Wn.z + jx * 0.5 * Math.abs(Wn.nx));
-            if (!blocked(P, Q, occ)) vis++;
-          }
-          if (!vis) continue;
-          const e = Wn.area * 0.16 / (1 + d2 * 0.5) * cos * (vis / JIT.length);
-          r += e * 0.82; g += e * 0.90; b += e;              // холодный свет
-        }
-
-        // --- солнце на террасе ---
-        if (outdoor) {
-          const cos = SUN.x * N.x + SUN.y * N.y + SUN.z * N.z;
-          if (cos > 0) {
-            Q.set(P.x + SUN.x * 40, P.y + SUN.y * 40, P.z + SUN.z * 40);
-            if (!blocked(P, Q, occ)) {
-              r += 0.62 * cos; g += 0.59 * cos; b += 0.52 * cos;
-            }
-          }
-        }
-
+        const [r, g, b] = lightAt(P, N, occ, data, outdoor);
         const o = (j * W + i) * 4;
         px[o] = Math.min(255, r / EXP * 255);
         px[o + 1] = Math.min(255, g / EXP * 255);
@@ -170,11 +169,88 @@ const Baker = (() => {
     mesh.material.needsUpdate = true;
   }
 
-  // Асинхронный проход по поверхностям, чтобы страница успевала рисоваться
-  function run(data, onProgress) {
+  // ---------- Стены: слитая геометрия с повершинным светом ----------
+  // Все куски стен собираются в ОДИН меш (1 draw call). Каждая грань
+  // сегментируется ~0.45м, в вершины пишется запечённая освещённость.
+  function bakeWalls(scene, data) {
+    const pos = [], nrm = [], col = [];
+    const P = new T.Vector3(), N = new T.Vector3();
+    const SEG = 0.45;
+    const WEXP = 1.25; // стены не пересвечиваются — меньший HDR-запас, чем у полов
+
+    // квадратная сетка: origin + u*uVec + v*vVec, нормаль n
+    function grid(o, uVec, vVec, n, su, sv, occ, shade) {
+      N.set(n[0], n[1], n[2]);
+      const c = [];
+      for (let j = 0; j <= sv; j++) {
+        c.push([]);
+        for (let i = 0; i <= su; i++) {
+          P.set(
+            o[0] + uVec[0] * i / su + vVec[0] * j / sv + N.x * 0.03,
+            o[1] + uVec[1] * i / su + vVec[1] * j / sv + N.y * 0.03,
+            o[2] + uVec[2] * i / su + vVec[2] * j / sv + N.z * 0.03
+          );
+          const L = shade ? lightAt(P, N, occ, data, false) : [0.5, 0.48, 0.46];
+          c[j].push(L);
+        }
+      }
+      for (let j = 0; j < sv; j++) {
+        for (let i = 0; i < su; i++) {
+          const pts = [[i, j], [i + 1, j], [i + 1, j + 1], [i, j], [i + 1, j + 1], [i, j + 1]];
+          for (const [ii, jj] of pts) {
+            pos.push(
+              o[0] + uVec[0] * ii / su + vVec[0] * jj / sv,
+              o[1] + uVec[1] * ii / su + vVec[1] * jj / sv,
+              o[2] + uVec[2] * ii / su + vVec[2] * jj / sv
+            );
+            nrm.push(N.x, N.y, N.z);
+            const L = c[jj][ii];
+            col.push(Math.min(1, L[0] / WEXP), Math.min(1, L[1] / WEXP), Math.min(1, L[2] / WEXP));
+          }
+        }
+      }
+    }
+
+    for (const p of data.wallPieces) {
+      const w = p.x2 - p.x1, h = p.y2 - p.y1, d = p.z2 - p.z1;
+      const occ = data.occluders.filter(b =>
+        b.x2 > p.x1 - 8 && b.x1 < p.x2 + 8 &&
+        b.y2 > p.y1 - 4 && b.y1 < p.y2 + 4 &&
+        b.z2 > p.z1 - 8 && b.z1 < p.z2 + 8);
+      const su = Math.max(1, Math.round((p.alongX ? w : d) / SEG));
+      const sv = Math.max(1, Math.round(h / SEG));
+      if (p.alongX) {
+        grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, h, 0], [0, 0, 1], su, sv, occ, true);   // юг
+        grid([p.x2, p.y1, p.z1], [-w, 0, 0], [0, h, 0], [0, 0, -1], su, sv, occ, true); // север
+        // торцы (откосы) и верх/низ — по одному кваду
+        grid([p.x1, p.y1, p.z1], [0, 0, d], [0, h, 0], [-1, 0, 0], 1, 1, occ, true);
+        grid([p.x2, p.y1, p.z2], [0, 0, -d], [0, h, 0], [1, 0, 0], 1, 1, occ, true);
+        grid([p.x1, p.y2, p.z1], [w, 0, 0], [0, 0, d], [0, 1, 0], 1, 1, occ, false);
+        grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, 0, -d], [0, -1, 0], 1, 1, occ, true);
+      } else {
+        grid([p.x2, p.y1, p.z1], [0, 0, d], [0, h, 0], [1, 0, 0], su, sv, occ, true);   // восток
+        grid([p.x1, p.y1, p.z2], [0, 0, -d], [0, h, 0], [-1, 0, 0], su, sv, occ, true); // запад
+        grid([p.x1, p.y1, p.z1], [w, 0, 0], [0, h, 0], [0, 0, -1], 1, 1, occ, true);
+        grid([p.x2, p.y1, p.z2], [-w, 0, 0], [0, h, 0], [0, 0, 1], 1, 1, occ, true);
+        grid([p.x1, p.y2, p.z1], [w, 0, 0], [0, 0, d], [0, 1, 0], 1, 1, occ, false);
+        grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, 0, -d], [0, -1, 0], 1, 1, occ, true);
+      }
+    }
+
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new T.Float32BufferAttribute(nrm, 3));
+    geo.setAttribute('color', new T.Float32BufferAttribute(col, 3));
+    const mat = new T.MeshBasicMaterial({ vertexColors: true, color: 0xfdfbf6 });
+    const mesh = new T.Mesh(geo, mat);
+    scene.add(mesh);
+  }
+
+  // Асинхронный проход, чтобы страница успевала рисоваться
+  function run(scene, data, onProgress) {
     return new Promise((resolve) => {
       const list = data.surfaces.slice();
-      const total = list.length;
+      const total = list.length + 3; // стены ~3 «шага» прогресса
       let done = 0;
       const step = () => {
         const t0 = performance.now();
@@ -183,8 +259,13 @@ const Baker = (() => {
           done++;
         }
         if (onProgress) onProgress(done / total);
-        if (list.length) setTimeout(step, 0);
-        else resolve();
+        if (list.length) { setTimeout(step, 0); return; }
+        // финальный этап — стены единым мешем
+        setTimeout(() => {
+          bakeWalls(scene, data);
+          if (onProgress) onProgress(1);
+          resolve();
+        }, 0);
       };
       step();
     });
