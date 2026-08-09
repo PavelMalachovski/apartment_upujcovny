@@ -39,6 +39,24 @@
     font-family: system-ui, sans-serif; font-size: 11px;
     text-transform: uppercase; letter-spacing: 0.08em;
   }
+  #dollBtn {
+    position: fixed; top: 14px; left: 132px; z-index: 7;
+    padding: 9px 16px; border-radius: 20px; cursor: pointer;
+    background: rgba(20,22,26,0.78); color: #f2efe8;
+    font-family: system-ui, sans-serif; font-size: 14px; user-select: none;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+  }
+  #dollHud {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    display: none; gap: 8px; z-index: 7;
+  }
+  #dollHud button {
+    padding: 10px 18px; border: 0; border-radius: 20px; cursor: pointer;
+    background: rgba(20,22,26,0.82); color: #f2efe8;
+    font-family: system-ui, sans-serif; font-size: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+  }
+  #dollHud button.act { background: #e8e2d5; color: #1a1c20; }
   #joyKnob {
     position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
     margin: -22px 0 0 -22px; border-radius: 50%;
@@ -82,7 +100,13 @@
 <body>
 <canvas id="view"></canvas>
 <div id="roomsBtn">☰ Комнаты</div>
+<div id="dollBtn">⌂ Макет</div>
 <div id="roomsPanel"></div>
+<div id="dollHud">
+  <button id="dollLvl1">1 этаж</button>
+  <button id="dollLvlAll" class="act">Весь дом</button>
+  <button id="dollExit">✕ Прогулка</button>
+</div>
 <div id="joy"><div id="joyKnob"></div></div>
 <canvas id="minimap" width="300" height="118"></canvas>
 <div id="room"></div>
@@ -94,11 +118,12 @@
      Лестница на второй этаж — за раздвижной дверью у кухни.</p>
   <div class="go" id="goBtn">Кликни, чтобы войти</div>
 </div>
-<script src="three.min.js?v=5"></script>
-<script src="apartment.js?v=5"></script>
-<script src="bake.js?v=5"></script>
-<script src="builder.js?v=5"></script>
-<script src="controls.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="three.min.js?v=6"></script>
+<script src="apartment.js?v=6"></script>
+<script src="bake.js?v=6"></script>
+<script src="builder.js?v=6"></script>
+<script src="controls.js?v=6"></script>
+<script src="doll.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

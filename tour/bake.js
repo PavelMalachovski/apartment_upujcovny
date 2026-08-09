@@ -173,7 +173,12 @@ const Baker = (() => {
   // Все куски стен собираются в ОДИН меш (1 draw call). Каждая грань
   // сегментируется ~0.45м, в вершины пишется запечённая освещённость.
   function bakeWalls(scene, data) {
-    const pos = [], nrm = [], col = [];
+    // два ведра: стены нижнего уровня и верхнего — для среза в режиме макета
+    const buckets = { low: { pos: [], nrm: [], col: [] }, high: { pos: [], nrm: [], col: [] } };
+    let cur;
+    const pos = { push: (...a) => cur.pos.push(...a) };
+    const nrm = { push: (...a) => cur.nrm.push(...a) };
+    const col = { push: (...a) => cur.col.push(...a) };
     const P = new T.Vector3(), N = new T.Vector3();
     const SEG = 0.45;
     const WEXP = 1.25; // стены не пересвечиваются — меньший HDR-запас, чем у полов
@@ -212,6 +217,7 @@ const Baker = (() => {
     }
 
     for (const p of data.wallPieces) {
+      cur = ((p.y1 + p.y2) / 2 < 2.55) ? buckets.low : buckets.high;
       const w = p.x2 - p.x1, h = p.y2 - p.y1, d = p.z2 - p.z1;
       const occ = data.occluders.filter(b =>
         b.x2 > p.x1 - 8 && b.x1 < p.x2 + 8 &&
@@ -237,13 +243,16 @@ const Baker = (() => {
       }
     }
 
-    const geo = new T.BufferGeometry();
-    geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
-    geo.setAttribute('normal', new T.Float32BufferAttribute(nrm, 3));
-    geo.setAttribute('color', new T.Float32BufferAttribute(col, 3));
-    const mat = new T.MeshBasicMaterial({ vertexColors: true, color: 0xfdfbf6 });
-    const mesh = new T.Mesh(geo, mat);
-    scene.add(mesh);
+    for (const [key, b] of Object.entries(buckets)) {
+      const geo = new T.BufferGeometry();
+      geo.setAttribute('position', new T.Float32BufferAttribute(b.pos, 3));
+      geo.setAttribute('normal', new T.Float32BufferAttribute(b.nrm, 3));
+      geo.setAttribute('color', new T.Float32BufferAttribute(b.col, 3));
+      const mat = new T.MeshBasicMaterial({ vertexColors: true, color: 0xfdfbf6 });
+      const mesh = new T.Mesh(geo, mat);
+      mesh.userData.doll = key === 'low' ? 'walls1' : 'walls2';
+      scene.add(mesh);
+    }
   }
 
   // Асинхронный проход, чтобы страница успевала рисоваться
