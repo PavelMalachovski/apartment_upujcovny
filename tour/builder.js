@@ -911,6 +911,39 @@ const Builder = (() => {
   };
   F.runner = (o, g) => F.rug(Object.assign({ pat: 'light' }, o), g);
 
+  const throwMats = {};
+  function throwMat(pat) {
+    if (throwMats[pat]) return throwMats[pat];
+    const tex = canvasTex(256, 256, (g) => {
+      if (pat === 'zigzag') {
+        // жёлто-чёрный зигзаг (фото 11)
+        g.fillStyle = '#e8e2d2'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#2b2b2b', '#d9b23c', '#9a9488', '#2b2b2b', '#cfc7b4'];
+        for (let r = 0; r < 10; r++) {
+          g.strokeStyle = cols[r % 5]; g.lineWidth = 7;
+          g.beginPath();
+          for (let x = 0; x <= 256; x += 16) {
+            const y = r * 26 + ((x / 16) % 2 ? 8 : -8);
+            x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+          }
+          g.stroke();
+        }
+      } else {
+        // сине-серые квадратики (фото 12)
+        g.fillStyle = '#e9e6df'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#31456e', '#7b8794', '#4a6076', '#b9b2a4'];
+        for (let yy = 8; yy < 256; yy += 24) {
+          for (let xx = 8; xx < 256; xx += 24) {
+            g.fillStyle = cols[(xx * 7 + yy * 13) % 4 | 0];
+            g.fillRect(xx, yy, 11, 11);
+          }
+        }
+      }
+    }, 2, 2);
+    throwMats[pat] = new T.MeshStandardMaterial({ map: tex, roughness: 0.95 });
+    return throwMats[pat];
+  }
+
   F.bed = (o, g) => {
     const L = o.len, W = o.w;
     // изголовье
@@ -918,7 +951,13 @@ const Builder = (() => {
     box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
     box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // база
     box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // матрас+бельё
-    box(W - 0.06, 0.08, L * 0.45, M.blanket, 0, 0.55, L * 0.22, g); // покрывало
+    const bl = o.throwPat ? throwMat(o.throwPat) : M.blanket;
+    box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // покрывало
+    if (o.throwPat) {
+      // свисающие края покрывала
+      const drape = box(W - 0.04, 0.42, 0.05, bl, 0, 0.32, L * 0.445, g);
+      drape.rotation.x = 0.06;
+    }
     for (const s of [-1, 1]) {
       const p = new T.Mesh(new T.BoxGeometry(W / 2 - 0.12, 0.12, 0.4), M.bedding);
       p.position.set(s * W / 4, 0.60, -L / 2 + 0.28);
@@ -1093,7 +1132,9 @@ const Builder = (() => {
   };
 
   F.hood = (o, g) => {
-    box(o.w, 0.06, o.d, M.chrome, 0, 2.3, 0, g);
+    // потолочный короб со встроенной вытяжкой (фото 6)
+    box(o.w + 0.3, 0.22, o.d + 0.35, M.wall, 0, 2.69, 0, g);
+    box(o.w * 0.55, 0.02, o.d * 0.5, M.metalBlack, 0, 2.57, 0, g);
     return { noCollide: true };
   };
 
@@ -1114,6 +1155,82 @@ const Builder = (() => {
     box(0.02, 0.75, 1.3, M.tv, sign * 0.045, Math.min(h * 0.62, h - 0.45), 0, g);
     box(0.35, 0.35, o.w * 0.85, M.ash, sign * 0.22, 0.18, 0, g); // тумба
     return { w: 0.6, d: o.w };
+  };
+
+  // ТВ-стена гостиной с боковыми нишами-стеллажами (фото 2)
+  F.tvWallUnit = (o, g) => {
+    const sign = o.face === 'e' ? 1 : -1;
+    const W = o.w || 3.0;
+    box(0.07, 2.35, W, M.ashV, 0, 1.35, 0, g);
+    box(0.02, 0.78, 1.35, M.tv, sign * 0.05, 1.5, 0, g);
+    // ниши по бокам: тёмный фон + полки + декор
+    for (const side of [-1, 1]) {
+      const zc = side * (W / 2 - 0.26);
+      box(0.06, 1.7, 0.4, M.artFrame, sign * 0.012, 1.45, zc, g);
+      for (let i = 0; i < 4; i++) {
+        const y = 0.85 + i * 0.44;
+        box(0.1, 0.025, 0.4, M.ashV, sign * 0.03, y, zc, g);
+        // мини-декор: книги или вазочка
+        if (i % 2 === 0) {
+          for (let b = 0; b < 3; b++) {
+            box(0.02, 0.16, 0.08, [M.navy, M.olive, M.pink][b], sign * 0.06, y + 0.1, zc - 0.1 + b * 0.05, g);
+          }
+        } else {
+          cyl(0.035, 0.028, 0.12, M.white, sign * 0.06, y + 0.08, zc, g, 10);
+        }
+      }
+    }
+    // длинная низкая тумба
+    box(0.38, 0.32, W * 0.9, M.white, sign * 0.22, 0.17, 0, g);
+    return { w: 0.65, d: W };
+  };
+
+  // Узкий стеллаж-колонна с декором (спальня 1, фото 8)
+  F.shelfTower = (o, g) => {
+    box(0.36, 2.45, 0.5, M.ash, 0, 1.225, 0, g);
+    for (let i = 0; i < 5; i++) {
+      const y = 0.35 + i * 0.44;
+      box(0.3, 0.02, 0.42, M.ashV, 0.02, y, 0, g);
+      if (i % 2 === 0) {
+        for (let b = 0; b < 3; b++) {
+          box(0.02, 0.17, 0.09, [M.olive, M.gray, M.navy][b], 0.05, y + 0.1, -0.1 + b * 0.06, g);
+        }
+      } else if (i === 1) {
+        cyl(0.04, 0.032, 0.13, M.white, 0.04, y + 0.08, 0, g, 10);
+      } else {
+        const leaf = new T.Mesh(new T.PlaneGeometry(0.16, 0.2), M.plantGreen);
+        leaf.position.set(0.04, y + 0.12, 0);
+        g.add(leaf);
+        cyl(0.035, 0.028, 0.07, M.pot, 0.04, y + 0.045, 0, g, 10);
+      }
+    }
+    return { w: 0.4, d: 0.55 };
+  };
+
+  // Чашки и стаканы на открытой полке кухни (фото 6)
+  F.cups = (o, g) => {
+    const y = o.h || 1.63;
+    for (let i = 0; i < 5; i++) {
+      cyl(0.032, 0.026, 0.07, M.white, -0.4 + i * 0.16, y + 0.035, 0, g, 10);
+    }
+    for (let i = 0; i < 4; i++) {
+      cyl(0.026, 0.024, 0.1, M.clearGlass, -0.32 + i * 0.16, y + 0.28, 0, g, 10);
+    }
+    return { noCollide: true };
+  };
+
+  // Подвесное кашпо со свисающей зеленью (терраса, фото 18)
+  F.hangingPlant = (o, g) => {
+    const y = o.h || 1.45;
+    cyl(0.07, 0.055, 0.1, M.pot, 0, y, 0, g, 10);
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2;
+      const vine = new T.Mesh(new T.PlaneGeometry(0.07, 0.3 + (i % 3) * 0.12), M.plantGreen);
+      vine.position.set(Math.cos(a) * 0.06, y - 0.18 - (i % 3) * 0.05, Math.sin(a) * 0.06);
+      vine.rotation.y = a;
+      g.add(vine);
+    }
+    return { noCollide: true };
   };
 
   F.tvOnWall = (o, g) => {

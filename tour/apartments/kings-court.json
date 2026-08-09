@@ -858,10 +858,10 @@
    "glass": true
   },
   {
-   "type": "tvPanel",
+   "type": "tvWallUnit",
    "x": 11.52,
    "z": 5.2,
-   "w": 2.6,
+   "w": 3.0,
    "lvl": "main",
    "face": "e"
   },
@@ -932,7 +932,8 @@
    "len": 2.05,
    "rot": 0,
    "lvl": "main",
-   "head": "navy"
+   "head": "navy",
+   "throwPat": "squares"
   },
   {
    "type": "sideTable",
@@ -1108,7 +1109,8 @@
    "len": 2.05,
    "rot": 0,
    "lvl": "main",
-   "head": "beige"
+   "head": "beige",
+   "throwPat": "zigzag"
   },
   {
    "type": "sideTable",
@@ -1427,7 +1429,8 @@
    "len": 2.05,
    "rot": 180,
    "lvl": "upper",
-   "head": "navy"
+   "head": "navy",
+   "throwPat": "squares"
   },
   {
    "type": "rug",
@@ -1650,6 +1653,40 @@
    "type": "planter",
    "x": 0.7,
    "z": 1.1,
+   "lvl": "terrace"
+  },
+  {
+   "type": "cups",
+   "x": 18.35,
+   "z": 0.44,
+   "h": 1.62,
+   "lvl": "main"
+  },
+  {
+   "type": "shelfTower",
+   "x": 5.15,
+   "z": 2.92,
+   "lvl": "main"
+  },
+  {
+   "type": "hangingPlant",
+   "x": 1.0,
+   "z": 0.68,
+   "h": 1.5,
+   "lvl": "terrace"
+  },
+  {
+   "type": "hangingPlant",
+   "x": 2.1,
+   "z": 0.68,
+   "h": 1.5,
+   "lvl": "terrace"
+  },
+  {
+   "type": "hangingPlant",
+   "x": 3.2,
+   "z": 0.68,
+   "h": 1.5,
    "lvl": "terrace"
   }
  ],
