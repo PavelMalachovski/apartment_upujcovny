@@ -149,6 +149,10 @@ class DollMode {
       if (!o.isMesh || o.parent !== this.scene) return;
       if (o.userData.doll === 'walls1') { this.groups.walls1 = o; return; }
       if (o.userData.doll === 'walls2') { this.groups.walls2 = o; return; }
+      if (o.userData.mergeLvl) {
+        (o.userData.mergeLvl === 1 ? this.groups.g1 : this.groups.g2).push(o);
+        return;
+      }
       box.setFromObject(o);
       if (box.isEmpty()) return;
       const cy = (box.min.y + box.max.y) / 2;

@@ -2,7 +2,7 @@
 // Инициализация сцены, цикл, мини-карта, подпись комнаты
 // ============================================================
 
-(function () {
+window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -17,7 +17,11 @@
   const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 120);
 
   const colliders = Builder.build(scene);
+  Builder.mergeStatic(scene);
   const controls = new WalkControls(camera, canvas, colliders);
+  // на тач-устройствах ограничиваем плотность пикселей ради FPS
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, controls.isTouch ? 1.6 : 2));
+  resize();
 
   // Запекание света: асинхронно, с прогрессом на оверлее
   const goBtn = document.getElementById('goBtn');
@@ -85,7 +89,6 @@
       controls.yaw = s.yaw; controls.pitch = 0;
       controls.ground = s.g;
       roomsPanel.style.display = 'none';
-      if (!controls.isTouch && !controls.locked) controls.lock();
     });
     roomsPanel.appendChild(b);
   }
@@ -108,17 +111,31 @@
   // ---------- Фото-споты: маркеры + просмотр ----------
   const photoBtn = document.getElementById('photoBtn');
   const photoView = document.getElementById('photoView');
+  // Чёткая векторная иконка камеры (256px + мипмапы)
   const camTex = (() => {
     const c = document.createElement('canvas');
-    c.width = 96; c.height = 96;
+    c.width = 256; c.height = 256;
     const g = c.getContext('2d');
-    g.fillStyle = 'rgba(20,22,26,0.85)';
-    g.beginPath(); g.arc(48, 48, 44, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = '#e8e2d5'; g.lineWidth = 5;
-    g.beginPath(); g.arc(48, 48, 44, 0, Math.PI * 2); g.stroke();
-    g.font = '44px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('📷', 48, 52);
-    return new THREE.CanvasTexture(c);
+    g.fillStyle = 'rgba(22,24,28,0.88)';
+    g.beginPath(); g.arc(128, 128, 118, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#e8e2d5'; g.lineWidth = 10;
+    g.beginPath(); g.arc(128, 128, 118, 0, Math.PI * 2); g.stroke();
+    // корпус камеры
+    g.fillStyle = '#f2efe8';
+    g.beginPath(); g.roundRect(58, 96, 140, 92, 16); g.fill();
+    // выступ видоискателя
+    g.beginPath(); g.roundRect(98, 74, 60, 30, 10); g.fill();
+    // объектив
+    g.fillStyle = '#16181c';
+    g.beginPath(); g.arc(128, 142, 34, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#f2efe8'; g.lineWidth = 8;
+    g.beginPath(); g.arc(128, 142, 20, 0, Math.PI * 2); g.stroke();
+    // вспышка
+    g.fillStyle = '#16181c';
+    g.beginPath(); g.arc(180, 112, 8, 0, Math.PI * 2); g.fill();
+    const t = new THREE.CanvasTexture(c);
+    t.anisotropy = 4;
+    return t;
   })();
   for (const s of APT.photoSpots) {
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: camTex, depthTest: true }));
@@ -140,7 +157,8 @@
     if (best) photoBtn.textContent = '📷 Фото: ' + best.name;
   }
   function openPhoto(s) {
-    document.getElementById('photoImg').src = 'photos/' + s.file;
+    const base = (APT.meta && APT.meta.photoBase) || 'photos/';
+    document.getElementById('photoImg').src = base + s.file;
     document.getElementById('photoCap').textContent = s.name + ' — реальное фото квартиры';
     photoView.style.display = 'flex';
     if (document.pointerLockElement) document.exitPointerLock();
@@ -148,7 +166,6 @@
   photoBtn.addEventListener('click', (e) => { e.stopPropagation(); if (nearSpot) openPhoto(nearSpot); });
   photoView.addEventListener('click', () => {
     photoView.style.display = 'none';
-    if (!controls.isTouch) controls.lock();
   });
   // F — фото рядом (когда курсор захвачен и кнопку не нажать)
   document.addEventListener('keydown', (e) => {
@@ -252,4 +269,4 @@
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-})();
+};

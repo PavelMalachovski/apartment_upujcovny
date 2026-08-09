@@ -556,6 +556,7 @@ const Builder = (() => {
     const mesh = new T.Mesh(geo, mat);
     mesh.rotation.x = rotX;
     mesh.position.set(cx, cy, cz);
+    mesh.userData.baked = 1; // не сливать: собственный lightMap
     scene.add(mesh);
     bakeData.surfaces.push({ mesh, w, h, res, lvl, outdoor });
     return mesh;
@@ -607,6 +608,7 @@ const Builder = (() => {
       const pitch = Math.atan2(hB - hA, zB - zA);
       // π/2 - pitch: нормаль плоскости смотрит вниз, в комнату (важно для запекания)
       mesh.rotation.x = Math.PI / 2 - pitch;
+      mesh.userData.baked = 1;
       scene.add(mesh);
       bakeData.surfaces.push({ mesh, w: x2 - x1, h: len, res: 5, lvl: 'upper', outdoor: false });
     }
@@ -1291,11 +1293,13 @@ const Builder = (() => {
   };
   const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
 
+  const furnGroups = [];
   function buildFurniture(scene) {
     for (const item of APT.furniture) {
       const fn = F[item.type];
       if (!fn) continue;
       const g = new T.Group();
+      furnGroups.push(g);
       const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
       g.position.set(item.x, baseY, item.z);
       g.rotation.y = item.rot || 0;
@@ -1335,14 +1339,74 @@ const Builder = (() => {
       if (l.lvl === 'main') y = APT.mainCeilH - 0.3;
       else if (l.lvl === 'stair') y = 4.6;
       else y = APT.upperFloorY + Math.min(2.3, atticH(l.z) - 0.3);
-      const pt = new T.PointLight(0xffe4c0, 0.42, 7.0, 1.6);
-      pt.position.set(l.x, y, l.z);
-      scene.add(pt);
+      // динамическими остаются только помеченные dyn — остальные живут в запечённом свете
+      if (l.dyn) {
+        const pt = new T.PointLight(0xffe4c0, 0.42, 7.0, 1.6);
+        pt.position.set(l.x, y, l.z);
+        scene.add(pt);
+      }
       bakeData.lights.push({ x: l.x, y: y - 0.15, z: l.z, int: 1 });
       // маленький плафон
       const dot = new T.Mesh(new T.CylinderGeometry(0.06, 0.08, 0.05, 12), M.lampShade);
       dot.position.set(l.x, y + 0.22, l.z);
       scene.add(dot);
+    }
+  }
+
+  // ---------- Слияние статики: главный источник FPS ----------
+  // Все меши мебели, рам, штор, лестницы и забора сливаются по парам
+  // (материал, этаж) в несколько больших мешей. Пропускаются только меши с
+  // собственными лайтмапами (userData.baked) и слитые стены (userData.doll).
+  function mergeStatic(scene) {
+    const buckets = new Map();
+    const toRemove = [];
+    const box = new T.Box3();
+
+    function collect(mesh) {
+      if (!mesh.isMesh || mesh.userData.doll || mesh.userData.baked) return;
+      mesh.updateWorldMatrix(true, false);
+      const geo = (mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone());
+      geo.applyMatrix4(mesh.matrixWorld);
+      box.setFromBufferAttribute(geo.attributes.position);
+      const lvl = (box.min.y + box.max.y) / 2 < 2.55 ? 1 : 2;
+      const key = mesh.material.uuid + '|' + lvl;
+      let b = buckets.get(key);
+      if (!b) { b = { mat: mesh.material, lvl, chunks: [] }; buckets.set(key, b); }
+      b.chunks.push(geo);
+    }
+
+    for (const child of scene.children.slice()) {
+      if (child.isGroup && furnGroups.includes(child)) {
+        child.traverse((m) => collect(m));
+        toRemove.push(child);
+      } else if (child.isMesh && !child.userData.doll && !child.userData.baked) {
+        collect(child);
+        toRemove.push(child);
+      }
+    }
+    for (const o of toRemove) scene.remove(o);
+
+    for (const b of buckets.values()) {
+      let vtx = 0;
+      for (const c of b.chunks) vtx += c.attributes.position.count;
+      const geo = new T.BufferGeometry();
+      for (const name of ['position', 'normal', 'uv']) {
+        const item = b.chunks[0].attributes[name];
+        if (!item) continue;
+        const size = item.itemSize;
+        const arr = new Float32Array(vtx * size);
+        let off = 0;
+        for (const c of b.chunks) {
+          const a = c.attributes[name];
+          if (a) arr.set(a.array, off);
+          off += c.attributes.position.count * size;
+        }
+        geo.setAttribute(name, new T.BufferAttribute(arr, size));
+      }
+      const mesh = new T.Mesh(geo, b.mat);
+      mesh.userData.mergeLvl = b.lvl;
+      scene.add(mesh);
+      for (const c of b.chunks) c.dispose();
     }
   }
 
@@ -1358,5 +1422,5 @@ const Builder = (() => {
     return colliders;
   }
 
-  return { build, colliders, atticH, bakeData };
+  return { build, colliders, atticH, bakeData, mergeStatic };
 })();
