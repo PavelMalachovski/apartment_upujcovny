@@ -1,5 +1,5 @@
 // ============================================================
-// Инициализация сцены, цикл, мини-карта, подпись комнаты
+// Scene init, render loop, minimap, current-room label
 // ============================================================
 
 window.initApp = function () {
@@ -17,28 +17,28 @@ window.initApp = function () {
   const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 120);
 
   const colliders = Builder.build(scene);
-  window.__issues = Validate.run(colliders);   // автопроверка планировки
+  window.__issues = Validate.run(colliders);   // automatic layout check
   Builder.mergeStatic(scene);
   const controls = new WalkControls(camera, canvas, colliders);
-  // на тач-устройствах ограничиваем плотность пикселей ради FPS
+  // cap pixel density on touch devices for FPS
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, controls.isTouch ? 1.6 : 2));
   resize();
 
-  // Запекание света: асинхронно, с прогрессом на оверлее
+  // Light baking: async, with progress on the overlay
   const goBtn = document.getElementById('goBtn');
   const goText = goBtn.textContent;
-  goBtn.textContent = 'Запекаем свет… 0%';
+  goBtn.textContent = 'Baking light… 0%';
   goBtn.style.opacity = '0.6';
   const doll = new DollMode(scene, camera, controls, canvas);
   window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
-    goBtn.textContent = 'Запекаем свет… ' + Math.round(p * 100) + '%';
+    goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
   }).then(() => {
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';
     doll.classify();
   });
 
-  // ---------- Режим макета ----------
+  // ---------- Dollhouse mode ----------
   document.getElementById('dollBtn').addEventListener('click', (e) => {
     e.stopPropagation();
     if (!doll.on) doll.enter();
@@ -68,12 +68,12 @@ window.initApp = function () {
 
   document.getElementById('overlay').addEventListener('click', () => controls.lock());
 
-  // ---------- Меню «Комнаты»: телепорт по точкам ----------
+  // ---------- Rooms menu: teleport points ----------
   const roomsBtn = document.getElementById('roomsBtn');
   const roomsPanel = document.getElementById('roomsPanel');
   let lastLvl = null;
   for (const s of APT.spawns) {
-    const lvl = s.g === 0 ? '1 этаж' : s.g === 2.62 ? 'Улица' : '2 этаж';
+    const lvl = s.g === 0 ? 'Ground floor' : 'Upper floor & terrace';
     if (lvl !== lastLvl) {
       const hdr = document.createElement('div');
       hdr.className = 'lvl';
@@ -102,17 +102,17 @@ window.initApp = function () {
   });
   if (controls.isTouch) {
     document.getElementById('overlayText').innerHTML =
-      'Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>' +
-      'Левая половина экрана — джойстик ходьбы, правая — осмотр.<br>' +
-      'Кнопки сверху слева: <b>☰ Комнаты</b> — телепорт, <b>⌂ Макет</b> — вид сверху.<br>' +
-      'Значки 📷 в комнатах показывают реальные фотографии.';
-    document.getElementById('goBtn').textContent = 'Коснись, чтобы войти';
+      'A two-level apartment with a roof terrace, rebuilt from photos and the floor plan.<br>' +
+      'Left half of the screen — walk joystick, right half — look around.<br>' +
+      'Buttons top left: <b>☰ Rooms</b> — teleport, <b>⌂ Dollhouse</b> — top view.<br>' +
+      '📷 markers in rooms show real photographs.';
+    document.getElementById('goBtn').textContent = 'Tap to enter';
   }
 
-  // ---------- Фото-споты: маркеры + просмотр ----------
+  // ---------- Photo spots: markers + viewer ----------
   const photoBtn = document.getElementById('photoBtn');
   const photoView = document.getElementById('photoView');
-  // Чёткая векторная иконка камеры (256px + мипмапы)
+  // Crisp vector camera icon (256px + mipmaps)
   const camTex = (() => {
     const c = document.createElement('canvas');
     c.width = 256; c.height = 256;
@@ -121,17 +121,17 @@ window.initApp = function () {
     g.beginPath(); g.arc(128, 128, 118, 0, Math.PI * 2); g.fill();
     g.strokeStyle = '#e8e2d5'; g.lineWidth = 10;
     g.beginPath(); g.arc(128, 128, 118, 0, Math.PI * 2); g.stroke();
-    // корпус камеры
+    // camera body
     g.fillStyle = '#f2efe8';
     g.beginPath(); g.roundRect(58, 96, 140, 92, 16); g.fill();
-    // выступ видоискателя
+    // viewfinder bump
     g.beginPath(); g.roundRect(98, 74, 60, 30, 10); g.fill();
-    // объектив
+    // lens
     g.fillStyle = '#16181c';
     g.beginPath(); g.arc(128, 142, 34, 0, Math.PI * 2); g.fill();
     g.strokeStyle = '#f2efe8'; g.lineWidth = 8;
     g.beginPath(); g.arc(128, 142, 20, 0, Math.PI * 2); g.stroke();
-    // вспышка
+    // flash
     g.fillStyle = '#16181c';
     g.beginPath(); g.arc(180, 112, 8, 0, Math.PI * 2); g.fill();
     const t = new THREE.CanvasTexture(c);
@@ -155,12 +155,12 @@ window.initApp = function () {
     }
     nearSpot = best;
     photoBtn.style.display = best ? 'block' : 'none';
-    if (best) photoBtn.textContent = '📷 Фото: ' + best.name;
+    if (best) photoBtn.textContent = '📷 Photo: ' + best.name;
   }
   function openPhoto(s) {
     const base = (APT.meta && APT.meta.photoBase) || 'photos/';
     document.getElementById('photoImg').src = base + s.file;
-    document.getElementById('photoCap').textContent = s.name + ' — реальное фото квартиры';
+    document.getElementById('photoCap').textContent = s.name + ' — real photo of the apartment';
     photoView.style.display = 'flex';
     if (document.pointerLockElement) document.exitPointerLock();
   }
@@ -168,7 +168,7 @@ window.initApp = function () {
   photoView.addEventListener('click', () => {
     photoView.style.display = 'none';
   });
-  // F — фото рядом (когда курсор захвачен и кнопку не нажать)
+  // F — nearby photo (when the cursor is busy and the button is hard to hit)
   document.addEventListener('keydown', (e) => {
     if (e.code === 'KeyF' && nearSpot && photoView.style.display !== 'flex') openPhoto(nearSpot);
     if (e.code === 'KeyM' && photoView.style.display !== 'flex') {
@@ -176,7 +176,7 @@ window.initApp = function () {
     }
   });
 
-  // ---------- Мини-карта ----------
+  // ---------- Minimap ----------
   const mapC = document.getElementById('minimap');
   const mg = mapC.getContext('2d');
   const MAP = { x1: -5.4, z1: -2.6, x2: 24.4, z2: 7.2 };
@@ -191,7 +191,7 @@ window.initApp = function () {
     mg.clearRect(0, 0, mapC.width, mapC.height);
     mg.fillStyle = 'rgba(20,22,26,0.78)';
     mg.fillRect(0, 0, mapC.width, mapC.height);
-    // полы
+    // floors
     const lists = upper
       ? [...APT.floors.upper, ...APT.floors.terrace]
       : APT.floors.main;
@@ -200,7 +200,7 @@ window.initApp = function () {
       const [a, b] = mapPt(f.x1, f.z1), [c, d] = mapPt(f.x2, f.z2);
       mg.fillRect(a, b, c - a, d - b);
     }
-    // стены
+    // walls
     mg.strokeStyle = '#e8e2d5';
     mg.lineWidth = 1.6;
     for (const w of APT.walls) {
@@ -209,7 +209,7 @@ window.initApp = function () {
       const [a, b] = mapPt(w.x1, w.z1), [c, d] = mapPt(w.x2, w.z2);
       mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
     }
-    // лестница
+    // stairs
     mg.strokeStyle = 'rgba(232,226,213,0.5)';
     const s = APT.stairs;
     for (let i = 0; i <= 8; i++) {
@@ -217,7 +217,7 @@ window.initApp = function () {
       const [a, b] = mapPt(x, s.z1), [c, d] = mapPt(x, s.z2);
       mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
     }
-    // игрок
+    // player
     const [px, py] = mapPt(controls.pos.x, controls.pos.z);
     mg.fillStyle = '#ffb454';
     mg.beginPath();
@@ -230,13 +230,13 @@ window.initApp = function () {
     mg.moveTo(px, py);
     mg.lineTo(px - Math.sin(a2) * 10, py - Math.cos(a2) * 10);
     mg.stroke();
-    // подпись этажа
+    // floor caption
     mg.fillStyle = '#fff';
     mg.font = '11px system-ui';
-    mg.fillText(upper ? '2 этаж · терраса' : '1 этаж', 8, mapC.height - 8);
+    mg.fillText(upper ? 'Upper floor · terrace' : 'Ground floor', 8, mapC.height - 8);
   }
 
-  // ---------- Подпись комнаты ----------
+  // ---------- Current-room label ----------
   const roomEl = document.getElementById('room');
   function roomName() {
     const g = controls.ground;
@@ -264,7 +264,7 @@ window.initApp = function () {
       drawMap();
       checkPhotoSpot();
       roomEl.textContent = doll.on
-        ? (doll.measure ? 'Рулетка · два клика по полу — расстояние' : 'Режим макета · клик по полу — войти')
+        ? (doll.measure ? 'Measure · click the floor twice for a distance' : 'Dollhouse · click the floor to walk there')
         : roomName();
     }
     requestAnimationFrame(loop);

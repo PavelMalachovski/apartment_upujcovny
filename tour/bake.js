@@ -1,14 +1,13 @@
 // ============================================================
-// Запекание света (лайтмаппер).
+// Light baking (the lightmapper).
 //
-// Считает освещённость по текселям для полов, потолков и скатов
-// мансарды: прямой свет ламп с проверкой видимости (мягкие тени),
-// окна как площадные источники холодного света, солнце на террасе,
-// постоянная составляющая переотражений. Результат — CanvasTexture,
-// подключается как lightMap (uv2) к MeshBasicMaterial, так что
-// запечённые поверхности не тратят GPU на динамический свет.
+// Computes per-texel lighting for floors, ceilings and attic slopes:
+// direct lamp light with visibility tests (soft shadows), windows as
+// cool-light area sources, sun on the terrace, and a constant bounce
+// term. The result is a CanvasTexture attached as a lightMap (uv2) to
+// MeshBasicMaterial, so baked surfaces spend no GPU on dynamic light.
 //
-// Вход: Builder.bakeData = { occluders, lights, windows, surfaces }
+// Input: Builder.bakeData = { occluders, lights, windows, surfaces }
 //   occluder: {x1,y1,z1, x2,y2,z2}
 //   light:    {x,y,z, int}
 //   window:   {x,y,z, nx,nz, area, lvl}
@@ -18,7 +17,7 @@
 const Baker = (() => {
   const T = THREE;
 
-  // Луч p→q против набора AABB (slab-тест), t в (0.02, 0.98)
+  // Ray p→q against the AABB set (slab test), t in (0.02, 0.98)
   function blocked(p, q, boxes) {
     const dx = q.x - p.x, dy = q.y - p.y, dz = q.z - p.z;
     for (let i = 0; i < boxes.length; i++) {
@@ -56,12 +55,12 @@ const Baker = (() => {
     return false;
   }
 
-  // Смещения для мягких теней (джиттер позиции источника)
+  // Offsets for soft shadows (light-position jitter)
   const JIT = [[0, 0], [0.14, -0.1], [-0.12, 0.13]];
-  const SUN = { x: -0.55, y: 0.72, z: 0.42 }; // нормированное направление НА солнце
-  const EXP = 1.7; // запас HDR: lightMapIntensity компенсирует
+  const SUN = { x: -0.55, y: 0.72, z: 0.42 }; // normalized direction TOWARD the sun
+  const EXP = 1.7; // HDR headroom: lightMapIntensity compensates
 
-  // Освещённость точки P с нормалью N (общая для лайтмапов и вершин стен)
+  // Lighting at point P with normal N (shared by lightmaps and wall vertices)
   const _Q = new T.Vector3();
   function lightAt(P, N, occ, data, outdoor) {
     let r, g, b;
@@ -128,10 +127,10 @@ const Baker = (() => {
     const px = img.data;
 
     const P = new T.Vector3(), N = new T.Vector3();
-    // нормаль поверхности в мире
+    // surface normal in world space
     N.set(0, 0, 1).transformDirection(mw);
 
-    // предфильтр окклюдеров: рядом с bbox поверхности (с запасом высоты света)
+    // occluder prefilter: near the surface bbox (with light-height margin)
     mesh.geometry.computeBoundingBox();
     const bb = mesh.geometry.boundingBox.clone().applyMatrix4(mw).expandByScalar(9);
     const occ = data.occluders.filter(b =>
@@ -140,7 +139,7 @@ const Baker = (() => {
       b.z2 > bb.min.z && b.z1 < bb.max.z);
 
     for (let j = 0; j < H; j++) {
-      // PlaneGeometry: v растёт вверх, канвас — вниз
+      // PlaneGeometry: v grows upward, canvas grows downward
       const v = 1 - (j + 0.5) / H;
       for (let i = 0; i < W; i++) {
         const u = (i + 0.5) / W;
@@ -155,7 +154,7 @@ const Baker = (() => {
       }
     }
     ctx.putImageData(img, 0, 0);
-    // лёгкое размытие убирает ступенчатость теней
+    // a light blur removes shadow banding
     ctx.globalAlpha = 0.5;
     ctx.drawImage(canvas, 0, 0);
     ctx.globalAlpha = 1;
@@ -169,11 +168,11 @@ const Baker = (() => {
     mesh.material.needsUpdate = true;
   }
 
-  // ---------- Стены: слитая геометрия с повершинным светом ----------
-  // Все куски стен собираются в ОДИН меш (1 draw call). Каждая грань
-  // сегментируется ~0.45м, в вершины пишется запечённая освещённость.
+  // ---------- Walls: merged geometry with per-vertex light ----------
+  // All wall pieces merge into ONE mesh (1 draw call). Every face is
+  // segmented at ~0.45 m and baked lighting is written into the vertices.
   function bakeWalls(scene, data) {
-    // два ведра: стены нижнего уровня и верхнего — для среза в режиме макета
+    // two buckets: lower- and upper-level walls — for the dollhouse cutaway
     const buckets = { low: { pos: [], nrm: [], col: [] }, high: { pos: [], nrm: [], col: [] } };
     let cur;
     const pos = { push: (...a) => cur.pos.push(...a) };
@@ -181,9 +180,9 @@ const Baker = (() => {
     const col = { push: (...a) => cur.col.push(...a) };
     const P = new T.Vector3(), N = new T.Vector3();
     const SEG = 0.45;
-    const WEXP = 1.25; // стены не пересвечиваются — меньший HDR-запас, чем у полов
+    const WEXP = 1.25; // walls don't overexpose — less HDR headroom than floors
 
-    // квадратная сетка: origin + u*uVec + v*vVec, нормаль n
+    // square grid: origin + u*uVec + v*vVec, normal n
     function grid(o, uVec, vVec, n, su, sv, occ, shade) {
       N.set(n[0], n[1], n[2]);
       const c = [];
@@ -226,16 +225,16 @@ const Baker = (() => {
       const su = Math.max(1, Math.round((p.alongX ? w : d) / SEG));
       const sv = Math.max(1, Math.round(h / SEG));
       if (p.alongX) {
-        grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, h, 0], [0, 0, 1], su, sv, occ, true);   // юг
-        grid([p.x2, p.y1, p.z1], [-w, 0, 0], [0, h, 0], [0, 0, -1], su, sv, occ, true); // север
-        // торцы (откосы) и верх/низ — по одному кваду
+        grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, h, 0], [0, 0, 1], su, sv, occ, true);   // south
+        grid([p.x2, p.y1, p.z1], [-w, 0, 0], [0, h, 0], [0, 0, -1], su, sv, occ, true); // north
+        // ends (reveals) and top/bottom — one quad each
         grid([p.x1, p.y1, p.z1], [0, 0, d], [0, h, 0], [-1, 0, 0], 1, 1, occ, true);
         grid([p.x2, p.y1, p.z2], [0, 0, -d], [0, h, 0], [1, 0, 0], 1, 1, occ, true);
         grid([p.x1, p.y2, p.z1], [w, 0, 0], [0, 0, d], [0, 1, 0], 1, 1, occ, false);
         grid([p.x1, p.y1, p.z2], [w, 0, 0], [0, 0, -d], [0, -1, 0], 1, 1, occ, true);
       } else {
-        grid([p.x2, p.y1, p.z1], [0, 0, d], [0, h, 0], [1, 0, 0], su, sv, occ, true);   // восток
-        grid([p.x1, p.y1, p.z2], [0, 0, -d], [0, h, 0], [-1, 0, 0], su, sv, occ, true); // запад
+        grid([p.x2, p.y1, p.z1], [0, 0, d], [0, h, 0], [1, 0, 0], su, sv, occ, true);   // east
+        grid([p.x1, p.y1, p.z2], [0, 0, -d], [0, h, 0], [-1, 0, 0], su, sv, occ, true); // west
         grid([p.x1, p.y1, p.z1], [w, 0, 0], [0, h, 0], [0, 0, -1], 1, 1, occ, true);
         grid([p.x2, p.y1, p.z2], [-w, 0, 0], [0, h, 0], [0, 0, 1], 1, 1, occ, true);
         grid([p.x1, p.y2, p.z1], [w, 0, 0], [0, 0, d], [0, 1, 0], 1, 1, occ, false);
@@ -255,11 +254,11 @@ const Baker = (() => {
     }
   }
 
-  // Асинхронный проход, чтобы страница успевала рисоваться
+  // Async pass so the page keeps painting
   function run(scene, data, onProgress) {
     return new Promise((resolve) => {
       const list = data.surfaces.slice();
-      const total = list.length + 3; // стены ~3 «шага» прогресса
+      const total = list.length + 3; // walls ≈ 3 progress steps
       let done = 0;
       const step = () => {
         const t0 = performance.now();
@@ -269,7 +268,7 @@ const Baker = (() => {
         }
         if (onProgress) onProgress(done / total);
         if (list.length) { setTimeout(step, 0); return; }
-        // финальный этап — стены единым мешем
+        // final stage — walls as a single mesh
         setTimeout(() => {
           bakeWalls(scene, data);
           if (onProgress) onProgress(1);

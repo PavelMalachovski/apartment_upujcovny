@@ -1,51 +1,54 @@
-# 3D-тур по апартаментам (AirBNB) — дизайн
+# Apartment 3D tour (AirBNB) — design
 
-Дата: 2026-08-08. Статус: одобрено пользователем («поехали»).
+Date: 2026-08-08. Status: approved by the user ("let's go").
+(Historical record; some decisions were later superseded — e.g. pointer
+lock was replaced by drag-look, and small decor was added after all.)
 
-## Цель
-Интерактивная браузерная «прогулка» от первого лица по двухуровневым апартаментам,
-восстановленным по 20 фотографиям (фото `1.jpeg` — поэтажный план обоих уровней).
-Ощущение — как ходить по квартире с риэлтором, но управление полностью свободное.
+## Goal
+An interactive first-person browser "walk" through a two-level apartment,
+reconstructed from 20 photographs (photo `1.jpeg` is the floor plan of
+both levels). The feel: touring the apartment with a realtor, but with
+fully free movement.
 
-## Решения (зафиксированы с пользователем)
-- **Формат:** интерактивный 3D-тур в браузере (Three.js), не видео.
-- **Режим:** только свободная ходьба (WASD + мышь, pointer lock). Без авто-экскурсии.
-- **Детализация:** «средняя+» — вся крупная мебель и встроенные шкафы по местам,
-  реальные цвета/материалы (дуб, выбеленный ясень, чёрный/белый мрамор, стёганые
-  изголовья), без мелкого декора (вазы, книги, посуда).
-- **Масштаб:** размерных линий на плане нет; калибровка по стандартной мебели
-  (кровать 180 см, глубина кухонной столешницы 60 см, ступень ~28 см).
-  Ожидаемая погрешность ±5–10%.
+## Decisions (locked with the user)
+- **Format:** interactive 3D tour in the browser (Three.js), not video.
+- **Mode:** free walking only (WASD + mouse). No auto-tour.
+- **Detail:** "medium+" — all large furniture and built-ins in place,
+  real colours/materials (oak, whitewashed ash, black/white marble,
+  quilted headboards), no small decor (vases, books, dishes).
+- **Scale:** the plan has no dimension lines; calibration against
+  standard furniture (180 cm bed, 60 cm kitchen counter depth, ~28 cm
+  stair tread). Expected error ±5–10%.
 
-## Архитектура
-- Папка `tour/`: `index.html` + `three.min.js` (локальная копия, UMD-сборка,
-  работает с file:// двойным кликом, без сборщиков и CDN).
-- Данные квартиры — декларативный JS-модуль (`apartment.js`): стены как отрезки
-  с высотами, проёмы (двери/окна), комнаты/полы, лестница, мебель как
-  параметрические примитивы с материалами. Код-«строитель» (`builder.js`)
-  превращает данные в Three.js-сцену.
-- Контролы от первого лица — свой мини-модуль (~50 строк), без examples-зависимостей.
+## Architecture
+- `tour/` folder: `index.html` + `three.min.js` (local copy, UMD build,
+  no bundlers or CDNs).
+- Apartment data is a declarative config: walls as segments with
+  heights, openings (doors/windows), rooms/floors, stairs, furniture as
+  parametric primitives with materials. A "builder" (`builder.js`)
+  turns the data into a Three.js scene.
+- First-person controls — a small custom module, no examples
+  dependencies.
 
-## Сцена
-- Уровень 1: вход, кухня с островом, столовая 8 мест, гостиная, 2 спальни,
-  2+ ванные, прачечная, коридор, лестница.
-- Уровень 2 (мансарда): гостиная с ТВ-перегородкой + спальня, ванная,
-  скошенные потолки, выход на террасу.
-- Терраса: настил, планчатое ограждение, плетёная мебель.
-- Освещение: hemisphere + ambient + точечные источники в комнатах; без теней
-  высокой стоимости (перфоманс важнее).
+## Scene
+- Level 1: entry, kitchen with island, dining for 8, living room,
+  bedrooms, bathrooms, laundry, hallway, stairs.
+- Level 2 (attic): living room with a TV partition + bedroom, bathroom,
+  sloped ceilings, terrace access.
+- Terrace: decking, slatted fence, wicker furniture.
+- Lighting: hemisphere + ambient + point lights per room; no expensive
+  shadows (performance first).
 
-## Управление и физика
-- WASD/стрелки + мышь (pointer lock), рост камеры 1.6 м.
-- Коллизии со стенами (2D-проверка по отрезкам стен).
-- Лестница — плавный подъём (клэмп высоты пола по позиции), выход на 2-й этаж
-  и на террасу.
-- Стартовый оверлей с подсказкой управления; клик — захват мыши.
+## Controls and physics
+- WASD/arrows + mouse, camera height 1.6 m.
+- Wall collisions (2D segment tests).
+- Stairs — smooth climb (floor-height clamp by position), exit to the
+  upper floor and the terrace.
+- Start overlay with control hints.
 
-## Проверка точности
-- Мини-карта (canvas) в углу с планом этажа и точкой игрока — для визуальной
-  сверки геометрии с оригинальным планом.
+## Accuracy check
+- A canvas minimap in the corner with the floor plan and player dot —
+  for visual comparison against the original plan.
 
-## Вне скоупа
-- Фотограмметрия/фотореализм, мобильный джойстик (добавим по запросу),
-  авто-экскурсия, экспорт .glb.
+## Out of scope
+- Photogrammetry/photorealism, auto-tour, .glb export.

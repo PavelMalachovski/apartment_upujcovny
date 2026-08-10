@@ -1,24 +1,24 @@
 // ============================================================
-// Строитель сцены: превращает данные APT в Three.js-объекты.
+// Scene builder: turns APT data into Three.js objects.
 //
-// Структура:
-//   1. Процедурные текстуры (canvas): паркет, мрамор, ткани, картины
-//   2. Материалы (M.*) — единая палитра проекта
-//   3. Стены с проёмами (двери/окна/проходы) + мансардные скосы
-//   4. Полы, потолки, лестница, терраса
-//   5. Мебель (F.*) — параметрические конструкторы + blob-тени
-//   6. Свет: hemisphere + солнце + точечные по комнатам
+// Structure:
+//   1. Procedural canvas textures: parquet, marble, fabrics, paintings
+//   2. Materials (M.*) — the project's single palette
+//   3. Walls with openings (doors/windows/passages) + attic slopes
+//   4. Floors, ceilings, stairs, terrace
+//   5. Furniture (F.*) — parametric constructors + blob shadows
+//   6. Light: hemisphere + sun + per-room points
 //
-// Каждый непроходимый объект добавляет коллайдер (segs — стены,
-// boxes — мебель) с уровнем 'main' | 'upper' | 'terrace' | 'both'.
+// Every impassable object adds a collider (segs — walls,
+// boxes — furniture) with a level: 'main' | 'upper' | 'terrace' | 'both'.
 // ============================================================
 
 const Builder = (() => {
   const T = THREE;
   const colliders = { segs: [], boxes: [] }; // segs: {x1,z1,x2,z2,lvl}; boxes: {x1,z1,x2,z2,lvl}
-  // Данные для запекания света (см. bake.js)
+  // Light-baking data (see bake.js)
   const bakeData = { occluders: [], lights: [], windows: [], surfaces: [], wallPieces: [] };
-  // Проёмы (двери/проходы) для автопроверки: см. validate.js
+  // Openings (doors/passages) for the layout check: see validate.js
   const doorways = [];
   function addOccluder(cx, cy, cz, sx, sy, sz) {
     bakeData.occluders.push({
@@ -27,7 +27,7 @@ const Builder = (() => {
     });
   }
 
-  // ---------- Процедурные текстуры ----------
+  // ---------- Procedural textures ----------
   function canvasTex(w, h, draw, repX = 1, repY = 1) {
     const c = document.createElement('canvas');
     c.width = w; c.height = h;
@@ -61,7 +61,7 @@ const Builder = (() => {
     });
   }
 
-  // Паркет: доски с индивидуальным тоном, швами и живым волокном
+  // Parquet: boards with individual tone, seams and lively grain
   function floorTex() {
     return canvasTex(1024, 1024, (g) => {
       const rowH = 128;
@@ -73,7 +73,7 @@ const Builder = (() => {
           const r = Math.min(255, 184 * tone), gr = Math.min(255, 149 * tone), b = Math.min(255, 95 * tone);
           g.fillStyle = `rgb(${r | 0},${gr | 0},${b | 0})`;
           g.fillRect(x, y, len, rowH);
-          // волокно
+          // grain
           for (let i = 0; i < 26; i++) {
             g.strokeStyle = `rgba(110,80,50,${0.04 + Math.random() * 0.08})`;
             g.lineWidth = 0.8 + Math.random() * 1.6;
@@ -83,7 +83,7 @@ const Builder = (() => {
             g.bezierCurveTo(x + len * 0.3, yy + (Math.random() - 0.5) * 10, x + len * 0.7, yy + (Math.random() - 0.5) * 10, x + len, yy);
             g.stroke();
           }
-          // редкие сучки
+          // occasional knots
           if (Math.random() < 0.3) {
             g.fillStyle = 'rgba(100,70,45,0.35)';
             g.beginPath();
@@ -91,12 +91,12 @@ const Builder = (() => {
               3 + Math.random() * 4, 2 + Math.random() * 2, Math.random() * Math.PI, 0, Math.PI * 2);
             g.fill();
           }
-          // торцевой шов
+          // end seam
           g.fillStyle = 'rgba(70,50,30,0.5)';
           g.fillRect(x + len - 2, y, 2, rowH);
           x += len;
         }
-        // продольный шов
+        // long seam
         g.fillStyle = 'rgba(70,50,30,0.55)';
         g.fillRect(0, y + rowH - 2, 1024, 2);
       }
@@ -106,7 +106,7 @@ const Builder = (() => {
   function marbleTex(bg, vein, n = 26) {
     return canvasTex(512, 512, (g) => {
       g.fillStyle = bg; g.fillRect(0, 0, 512, 512);
-      // крупные мягкие жилы с размытием
+      // large soft veins with blur
       for (let i = 0; i < Math.max(4, n / 4); i++) {
         g.save();
         g.shadowColor = vein.replace('A', '0.5');
@@ -122,7 +122,7 @@ const Builder = (() => {
         g.stroke();
         g.restore();
       }
-      // тонкие резкие прожилки
+      // thin sharp veinlets
       for (let i = 0; i < n; i++) {
         g.strokeStyle = vein.replace('A', (0.08 + Math.random() * 0.18).toFixed(2));
         g.lineWidth = 0.5 + Math.random() * 1.2;
@@ -134,13 +134,13 @@ const Builder = (() => {
         }
         g.stroke();
       }
-      // швы плитки
+      // tile seams
       g.strokeStyle = 'rgba(150,150,150,0.3)'; g.lineWidth = 1.5;
       g.strokeRect(0, 0, 256, 256); g.strokeRect(256, 256, 256, 256);
     });
   }
 
-  // Абстрактные картины в духе фото
+  // Abstract paintings in the spirit of the photos
   function artTex(style) {
     return canvasTex(256, 320, (g) => {
       if (style === 'warm') {
@@ -172,7 +172,7 @@ const Builder = (() => {
     });
   }
 
-  // Волнистая «ткань» для штор
+  // Wavy "fabric" for curtains
   function wavyPlane(w, h, mat, folds = 5) {
     const geo = new T.PlaneGeometry(w, h, 24, 1);
     const pos = geo.attributes.position;
@@ -250,7 +250,7 @@ const Builder = (() => {
     });
   }
 
-  // ---------- Материалы ----------
+  // ---------- Materials ----------
   const M = {};
   function initMaterials() {
     const wood = floorTex();
@@ -299,7 +299,7 @@ const Builder = (() => {
     M.doorWood = new T.MeshStandardMaterial({ map: woodTex('#d5c8b2', 'rgba(150,130,105,0)', false), roughness: 0.7 });
     M.lampShade = new T.MeshStandardMaterial({ color: 0xf5f2ea, emissive: 0xffe8c0, emissiveIntensity: 0.5, roughness: 0.9 });
     M.smoke = new T.MeshStandardMaterial({ color: 0x8f9298, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
-    // декор
+    // decor
     M.yellow = new T.MeshStandardMaterial({ color: 0xd0a23f, roughness: 0.9 });
     M.olive = new T.MeshStandardMaterial({ color: 0xa8a06b, roughness: 0.9 });
     M.lightBlue = new T.MeshStandardMaterial({ color: 0xaebfc7, roughness: 0.9 });
@@ -312,7 +312,7 @@ const Builder = (() => {
     M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
   }
 
-  // ---------- Хелперы ----------
+  // ---------- Helpers ----------
   function box(w, h, d, mat, x, y, z, group, rotY = 0) {
     const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
     m.position.set(x, y, z);
@@ -337,7 +337,7 @@ const Builder = (() => {
     }
   }
 
-  // Высота мансардного потолка (от пола 2 этажа) в точке z
+  // Attic ceiling height (above the upper floor) at point z
   function atticH(z) {
     const a = APT.attic;
     if (z <= a.ridgeZ) {
@@ -348,7 +348,7 @@ const Builder = (() => {
     return a.ridgeH - t * (a.ridgeH - a.southH);
   }
 
-  // ---------- Стены ----------
+  // ---------- Walls ----------
   const WALL_TH = 0.14;
   const DOOR_H = 2.05, PASS_H = 2.2, WIN_SILL = 0.85, WIN_HEAD = 2.45;
 
@@ -369,7 +369,7 @@ const Builder = (() => {
     const isUpper = w.lvl === 'upper';
     const openings = (w.openings || []).slice().sort((a, b) => a.at - b.at);
 
-    // Разбивка на сплошные куски
+    // Split into solid pieces
     let cursor = 0;
     const pieces = [];
     for (const o of openings) {
@@ -386,8 +386,8 @@ const Builder = (() => {
       const cx = w.x1 + ux * (from + len / 2);
       const cz = w.z1 + uz * (from + len / 2);
       const cy = baseY + (y0 + y1) / 2;
-      // стены осепараллельны: регистрируем AABB-кусок, меши строит и
-      // запекает Baker (слитая геометрия с повершинным светом)
+      // walls are axis-aligned: register an AABB piece; Baker builds
+      // and bakes the meshes (merged geometry with per-vertex light)
       const alongX = Math.abs(ux) > 0.5;
       const sx = alongX ? len : WALL_TH, sz = alongX ? WALL_TH : len;
       addOccluder(cx, cy, cz, sx, y1 - y0, sz);
@@ -398,11 +398,11 @@ const Builder = (() => {
       });
       return null;
     }
-    // Кусок стены с учётом мансардного скоса (для upper): режем полосами
-    // Верхняя часть стены (над проёмом) с учётом мансардного скоса
+    // Wall piece under the attic slope (upper level): cut into strips
+    // Upper part of a wall (above an opening) respecting the attic slope
     function placeTop(from, to, y0, flatTop, mat) {
       if (!isUpper) { place(from, to, y0, flatTop, mat); return; }
-      // крупный шаг: стена ступенчато перекрывает скат снаружи, изнутри видно только скат
+      // coarse step: the wall overlaps the slope outside; inside only the slope shows
       const step = 0.6;
       for (let s = from; s < to; s += step) {
         const e = Math.min(s + step, to);
@@ -413,11 +413,11 @@ const Builder = (() => {
     }
     function placeClamped(from, to, mat) {
       if (!isUpper) { place(from, to, 0, w.h, mat); return; }
-      // крупный шаг: стена ступенчато перекрывает скат снаружи, изнутри видно только скат
+      // coarse step: the wall overlaps the slope outside; inside only the slope shows
       const step = 0.6;
       for (let s = from; s < to; s += step) {
         const e = Math.min(s + step, to);
-        // берём максимум высоты на отрезке, чтобы стена перекрывала скат без щелей
+        // take the max height over the span so the wall covers the slope without gaps
         const hA = atticH(w.z1 + uz * s), hB = atticH(w.z1 + uz * e);
         const hh = Math.min(w.h, Math.max(0.0, Math.max(hA, hB) + 0.02));
         place(s, e, 0, hh, mat);
@@ -438,7 +438,7 @@ const Builder = (() => {
       const midZ = w.z1 + uz * ((p.from + p.to) / 2);
       const topH = isUpper ? Math.min(w.h, atticH(midZ) - 0.01) : w.h;
       if (o.type === 'win') {
-        // подоконник + перемычка + стекло + рама
+        // sill + lintel + glass + frame
         place(p.from, p.to, 0, WIN_SILL, segMat);
         placeTop(p.from, p.to, Math.min(WIN_HEAD, topH), topH, segMat);
         const winTop = Math.min(WIN_HEAD, topH - 0.05);
@@ -448,18 +448,18 @@ const Builder = (() => {
         g.position.set(cx, baseY + (WIN_SILL + winTop) / 2, cz);
         g.rotation.y = -ang;
         scene.add(g);
-        // рама
+        // frame
         const fr = new T.Mesh(new T.BoxGeometry(o.w, winTop - WIN_SILL, 0.06), M.white);
         fr.position.copy(g.position); fr.rotation.y = -ang;
         const inner = new T.Mesh(new T.BoxGeometry(o.w - 0.12, winTop - WIN_SILL - 0.12, 0.09), M.winGlass);
         inner.position.copy(g.position); inner.rotation.y = -ang;
         scene.add(fr); scene.add(inner);
-        // средник
+        // mullion
         const mull = new T.Mesh(new T.BoxGeometry(0.05, winTop - WIN_SILL - 0.1, 0.1), M.white);
         mull.position.copy(g.position); mull.rotation.y = -ang; scene.add(mull);
-        // окно — площадной источник дневного света для запекания
+        // a window is an area daylight source for baking
         {
-          // нормаль внутрь помещения: к центру этажа
+          // normal points into the room: toward the floor centre
           const roomC = w.lvl === 'main' ? { x: 12, z: 3.2 } : { x: 10, z: 2.5 };
           let nx = uz, nz = -ux;
           if ((roomC.x - cx) * nx + (roomC.z - cz) * nz < 0) { nx = -nx; nz = -nz; }
@@ -468,7 +468,7 @@ const Builder = (() => {
             nx, nz, area: o.w * (winTop - WIN_SILL), lvl: w.lvl
           });
         }
-        // шторы
+        // curtains
         const cc = w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null;
         if (cc) {
           for (const side of [-1, 1]) {
@@ -479,20 +479,20 @@ const Builder = (() => {
             cur.rotation.y = -ang;
             scene.add(cur);
           }
-          // карниз
+          // curtain rod
           const rod = new T.Mesh(new T.CylinderGeometry(0.012, 0.012, o.w + 1.5, 8), M.metalBlack);
           rod.rotation.z = Math.PI / 2;
           rod.rotation.y = -ang;
           rod.position.set(cx - Math.sin(ang) * 0.2, baseY + topH - 0.06, cz - Math.cos(ang) * 0.2);
           scene.add(rod);
         }
-        // окно непроходимо
+        // windows are impassable
         colliders.segs.push({
           x1: w.x1 + ux * p.from, z1: w.z1 + uz * p.from,
           x2: w.x1 + ux * p.to, z2: w.z1 + uz * p.to, lvl: colLvl
         });
       } else {
-        // дверь или проход: перемычка сверху
+        // door or passage: lintel above
         const hh = o.type === 'door' ? DOOR_H : PASS_H;
         placeTop(p.from, p.to, Math.min(hh, topH), topH, segMat);
         const cx = w.x1 + ux * ((p.from + p.to) / 2);
@@ -500,12 +500,12 @@ const Builder = (() => {
         if (!o.entrance) {
           doorways.push({
             x: cx, z: cz, w: o.w, type: o.type, lvl: w.lvl,
-            nx: uz, nz: -ux,                 // нормаль стены
-            ux, uz, baseY                    // направление вдоль стены и уровень пола
+            nx: uz, nz: -ux,                 // wall normal
+            ux, uz, baseY                    // direction along the wall and floor level
           });
         }
         if (o.type === 'door') {
-          // коробка
+          // door frame
           for (const side of [-1, 1]) {
             const jx = w.x1 + ux * (p.from + (side < 0 ? 0.02 : o.w - 0.02));
             const jz = w.z1 + uz * (p.from + (side < 0 ? 0.02 : o.w - 0.02));
@@ -515,7 +515,7 @@ const Builder = (() => {
             scene.add(jamb);
           }
           if (o.entrance) {
-            // входная дверь закрыта
+            // the entrance door stays closed
             const leaf = new T.Mesh(new T.BoxGeometry(o.w - 0.08, hh - 0.05, 0.06), M.doorWood);
             leaf.position.set(cx, baseY + hh / 2, cz);
             leaf.rotation.y = -ang;
@@ -525,10 +525,10 @@ const Builder = (() => {
               x2: w.x1 + ux * p.to, z2: w.z1 + uz * p.to, lvl: colLvl
             });
           }
-          // межкомнатные створки не рендерим: проёмы читаются открытыми
+          // interior door leaves are not rendered: openings read as open
         }
         if (o.slider) {
-          // раздвижная панель, полностью запаркованная сбоку от проёма
+          // sliding panel, fully parked beside the opening
           const park = p.from - o.w * 0.42;
           const sx = w.x1 + ux * park;
           const sz = w.z1 + uz * park;
@@ -542,10 +542,10 @@ const Builder = (() => {
     }
   }
 
-  // ---------- Полы, потолки (с запекаемыми накладками) ----------
+  // ---------- Floors, ceilings (with bakeable overlays) ----------
   const albedoCache = {};
   function bakedPlane(scene, cx, cy, cz, w, h, rotX, matKey, res, lvl, outdoor, tile) {
-    // накладка с uv2 и собственным albedo; lightMap назначит Baker
+    // overlay with uv2 and its own albedo; Baker assigns the lightMap
     let mat;
     if (matKey === 'white') {
       mat = new T.MeshBasicMaterial({ color: 0xf3f2ee });
@@ -565,7 +565,7 @@ const Builder = (() => {
     const mesh = new T.Mesh(geo, mat);
     mesh.rotation.x = rotX;
     mesh.position.set(cx, cy, cz);
-    mesh.userData.baked = 1; // не сливать: собственный lightMap
+    mesh.userData.baked = 1; // don't merge: it has its own lightMap
     scene.add(mesh);
     bakeData.surfaces.push({ mesh, w, h, res, lvl, outdoor });
     return mesh;
@@ -582,15 +582,15 @@ const Builder = (() => {
         const yy = f.over ? y + 0.012 : y;
         mesh.position.set((f.x1 + f.x2) / 2, yy - 0.05, (f.z1 + f.z2) / 2);
         scene.add(mesh);
-        // межэтажное перекрытие заслоняет свет
+        // the inter-floor slab blocks light
         addOccluder((f.x1 + f.x2) / 2, yy - 0.05, (f.z1 + f.z2) / 2, w, 0.1, d);
-        // запекаемая накладка сверху
+        // bakeable overlay on top
         bakedPlane(scene, (f.x1 + f.x2) / 2, yy + 0.004, (f.z1 + f.z2) / 2,
           w, d, -Math.PI / 2, f.mat, f.mat === 'wood' ? 9 : 7,
           lvlName, lvlName === 'terrace', tiles[f.mat]);
       }
     }
-    // Потолки 1 этажа
+    // Ground-floor ceilings
     const ceilRects = APT.mainCeil;
     for (const c of ceilRects) {
       const w = c.x2 - c.x1, d = c.z2 - c.z1;
@@ -598,12 +598,12 @@ const Builder = (() => {
       mesh.position.set((c.x1 + c.x2) / 2, APT.mainCeilH + 0.04, (c.z1 + c.z2) / 2);
       scene.add(mesh);
       addOccluder((c.x1 + c.x2) / 2, APT.mainCeilH + 0.04, (c.z1 + c.z2) / 2, w, 0.08, d);
-      // запекаемая накладка снизу
+      // bakeable overlay underneath
       bakedPlane(scene, (c.x1 + c.x2) / 2, APT.mainCeilH - 0.004, (c.z1 + c.z2) / 2,
         w, d, Math.PI / 2, 'white', 5, 'main', false, 1);
     }
 
-    // Мансардный потолок: два ската (запекаемые)
+    // Attic ceiling: two bakeable slopes
     const a = APT.attic, y0 = APT.upperFloorY;
     const x1 = 3.9, x2 = 17.2;
     function slope(zA, hA, zB, hB) {
@@ -615,7 +615,7 @@ const Builder = (() => {
       const zM = (zA + zB) / 2, hM = (hA + hB) / 2;
       mesh.position.set((x1 + x2) / 2, y0 + hM, zM);
       const pitch = Math.atan2(hB - hA, zB - zA);
-      // π/2 - pitch: нормаль плоскости смотрит вниз, в комнату (важно для запекания)
+      // π/2 - pitch: the plane normal faces down into the room (matters for baking)
       mesh.rotation.x = Math.PI / 2 - pitch;
       mesh.userData.baked = 1;
       scene.add(mesh);
@@ -625,9 +625,9 @@ const Builder = (() => {
     slope(a.ridgeZ, a.ridgeH, a.southZ, a.southH);
   }
 
-  // ---------- Лестница ----------
-  // lowX/highX задают направление подъёма (низ -> верх). Без них —
-  // старое поведение: низ на x2, подъём на запад.
+  // ---------- Stairs ----------
+  // lowX/highX set the climb direction (bottom -> top). Without them —
+  // legacy behaviour: bottom at x2, climbing west.
   function buildStairs(scene) {
     const s = APT.stairs;
     const lowX = (s.lowX !== undefined) ? s.lowX : s.x2;
@@ -642,13 +642,13 @@ const Builder = (() => {
       const y = riser * (i + 1);
       box(tread, riser, width, M.floorWood, x, y - riser / 2, zc, scene);
     }
-    // лестница как окклюдер: 4 ступенчатых блока
+    // the stairs as an occluder: 4 stepped blocks
     for (let k = 0; k < 4; k++) {
       const xa = lowX + dir * run * k / 4, xb = lowX + dir * run * (k + 1) / 4;
       addOccluder((xa + xb) / 2, s.rise * (k + 1) / 8, zc,
         Math.abs(xb - xa), s.rise * (k + 1) / 4, width);
     }
-    // перила вдоль южного края
+    // handrail along the south edge
     const railY = 0.95;
     for (let i = 0; i <= n; i += 2) {
       const x = lowX + dir * tread * i;
@@ -661,11 +661,11 @@ const Builder = (() => {
     scene.add(rail);
   }
 
-  // ---------- Ограждение террасы и окружение ----------
+  // ---------- Terrace fence and surroundings ----------
   function buildTerrace(scene) {
     const t = APT.floors.terrace[0];
     const y = APT.terraceY;
-    // планчатый забор
+    // slatted fence
     function fence(x1, z1, x2, z2) {
       const L = Math.hypot(x2 - x1, z2 - z1);
       const ang = Math.atan2(z2 - z1, x2 - x1);
@@ -683,13 +683,13 @@ const Builder = (() => {
       }
       colliders.segs.push({ x1, z1, x2, z2, lvl: 'terrace' });
     }
-    fence(t.x1, t.z1, t.x2 - 0.9, t.z1);       // север (до дома)
-    fence(t.x1, t.z1, t.x1, t.z2);             // запад
-    fence(t.x1, t.z2, t.x2, t.z2);             // юг
-    // ступенька у двери
+    fence(t.x1, t.z1, t.x2 - 0.9, t.z1);       // north (up to the house)
+    fence(t.x1, t.z1, t.x1, t.z2);             // west
+    fence(t.x1, t.z2, t.x2, t.z2);             // south
+    // step by the door
     const st = APT.terraceSteps;
     box(0.8, 0.12, st.z2 - st.z1, M.deck, st.doorX - 0.4, y + 0.06, (st.z1 + st.z2) / 2, scene);
-    // окружение: соседние крыши
+    // surroundings: neighbouring roofs
     const bldg = new T.MeshStandardMaterial({ color: 0xcbb9a4, roughness: 0.95 });
     const bldg2 = new T.MeshStandardMaterial({ color: 0xb5a08c, roughness: 0.95 });
     box(16, 7.0, 7, bldg, -5, y + 1.2, -7, scene);
@@ -699,15 +699,15 @@ const Builder = (() => {
     addOccluder(-5, y + 1.2, -7, 16, 7.0, 7);
     addOccluder(-9, y + 0.4, 10, 12, 5.5, 6);
     addOccluder(-11, y, 1, 9, 4.2, 14);
-    // дымоходы
+    // chimneys
     box(0.8, 1.8, 0.8, bldg2, -3.6, y + 5.6, -4.6, scene);
     box(0.6, 1.4, 0.6, bldg, -6.5, y + 3.9, 9.0, scene);
   }
 
-  // ---------- Мебель ----------
+  // ---------- Furniture ----------
   const F = {};
 
-  // ---------- Декор ----------
+  // ---------- Decor ----------
   const artCache = {};
   F.painting = (o, g) => {
     const w = o.w || 0.8, h = o.h || 1.0;
@@ -804,7 +804,7 @@ const Builder = (() => {
     const y = o.h || 0.9;
     box(0.16, 0.24, 0.3, M.black, 0, y + 0.12, 0, g);
     box(0.05, 0.06, 0.1, M.chrome, 0, y + 0.27, 0.06, g);
-    // чашки рядом
+    // cups beside it
     for (const s of [-1, 1]) {
       cyl(0.028, 0.022, 0.05, M.white, s * 0.15, y + 0.025, 0.05, g, 10);
     }
@@ -830,7 +830,7 @@ const Builder = (() => {
 
   F.towels = (o, g) => {
     const y = o.h || 0.9;
-    // стопка сложенных полотенец
+    // stack of folded towels
     for (let i = 0; i < (o.n || 3); i++) {
       box(0.3, 0.05, 0.22, M.bedding, 0, y + 0.03 + i * 0.055, 0, g);
     }
@@ -884,11 +884,11 @@ const Builder = (() => {
 
   F.wineSet = (o, g) => {
     const y = o.h || 0.44;
-    // ведёрко со льдом
+    // ice bucket
     cyl(0.07, 0.055, 0.14, M.chrome, -0.12, y + 0.07, 0, g, 12);
     const bottle = cyl(0.028, 0.028, 0.2, M.stemGreen, -0.12, y + 0.2, 0, g, 10);
     bottle.rotation.z = 0.35;
-    // бокалы
+    // glasses
     for (const s of [0, 1]) {
       cyl(0.004, 0.03, 0.07, M.clearGlass, 0.08 + s * 0.09, y + 0.1, 0.02, g, 8);
       cyl(0.032, 0.03, 0.055, M.clearGlass, 0.08 + s * 0.09, y + 0.16, 0.02, g, 8);
@@ -897,7 +897,7 @@ const Builder = (() => {
   };
 
   F.stringLights = (o, g) => {
-    // гирлянда с провисанием вдоль оси x группы
+    // string lights sagging along the group's x axis
     const L = o.w || 3.5, n = Math.round(L / 0.3);
     const glow = new T.MeshStandardMaterial({ color: 0xffe9c0, emissive: 0xffd98a, emissiveIntensity: 0.9, roughness: 0.5 });
     for (let i = 0; i <= n; i++) {
@@ -930,7 +930,7 @@ const Builder = (() => {
     if (throwMats[pat]) return throwMats[pat];
     const tex = canvasTex(256, 256, (g) => {
       if (pat === 'zigzag') {
-        // жёлто-чёрный зигзаг (фото 11)
+        // yellow-black zigzag (photo 11)
         g.fillStyle = '#e8e2d2'; g.fillRect(0, 0, 256, 256);
         const cols = ['#2b2b2b', '#d9b23c', '#9a9488', '#2b2b2b', '#cfc7b4'];
         for (let r = 0; r < 10; r++) {
@@ -943,7 +943,7 @@ const Builder = (() => {
           g.stroke();
         }
       } else {
-        // сине-серые квадратики (фото 12)
+        // blue-gray squares (photo 12)
         g.fillStyle = '#e9e6df'; g.fillRect(0, 0, 256, 256);
         const cols = ['#31456e', '#7b8794', '#4a6076', '#b9b2a4'];
         for (let yy = 8; yy < 256; yy += 24) {
@@ -960,15 +960,15 @@ const Builder = (() => {
 
   F.bed = (o, g) => {
     const L = o.len, W = o.w;
-    // изголовье
+    // headboard
     const quilt = o.head === 'navy' ? M.navyQuilt : M.beigeQuilt;
     box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
-    box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // база
-    box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // матрас+бельё
+    box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // base
+    box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // mattress + linen
     const bl = o.throwPat ? throwMat(o.throwPat) : M.blanket;
-    box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // покрывало
+    box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // throw
     if (o.throwPat) {
-      // свисающие края покрывала
+      // draping throw edges
       const drape = box(W - 0.04, 0.42, 0.05, bl, 0, 0.32, L * 0.445, g);
       drape.rotation.x = 0.06;
     }
@@ -1000,21 +1000,21 @@ const Builder = (() => {
 
   F.wardrobeTv = (o, g) => {
     box(o.w, 2.5, o.d, M.ashV, 0, 1.25, 0, g);
-    // ниша с ТВ
+    // TV niche
     box(o.w * 0.55, 0.75, 0.06, M.tv, 0, 1.45, o.d / 2 + 0.035, g);
     return { w: o.w, d: o.d };
   };
 
   F.sofaL = (o, g) => {
-    // основной блок вдоль x, шезлонг на западном конце вперёд (к северу)
+    // main block along x, chaise at the west end pointing forward (north)
     box(o.w, 0.4, o.d, M.cream, 0, 0.25, 0, g);
     box(o.w, 0.45, 0.22, M.cream, 0, 0.62, o.d / 2 - 0.11, g);
     for (const s of [-1, 1]) box(0.22, 0.55, o.d, M.cream, s * (o.w / 2 - 0.11), 0.5, 0, g);
-    // подушки
+    // cushions
     for (let i = 0; i < 4; i++) {
       box(o.w / 4 - 0.08, 0.13, o.d - 0.3, M.bedding, -o.w / 2 + (i + 0.5) * o.w / 4, 0.51, -0.05, g);
     }
-    // шезлонг
+    // chaise
     box(o.chaiseW, 0.4, o.chaiseD, M.cream, -o.w / 2 + o.chaiseW / 2, 0.25, -o.chaiseD / 2 - o.d / 2 + 0.2, g);
     box(o.chaiseW - 0.1, 0.12, o.chaiseD - 0.2, M.bedding, -o.w / 2 + o.chaiseW / 2, 0.47, -o.chaiseD / 2 - o.d / 2 + 0.2, g);
     return { custom: [
@@ -1065,7 +1065,7 @@ const Builder = (() => {
       const leg = cyl(0.03, 0.02, 0.72, M.doorWood, sx * (o.w / 2 - 0.25), 0.36, sz * (o.d / 2 - 0.18), g, 8);
       leg.rotation.z = sx * 0.12; leg.rotation.x = -sz * 0.1;
     }
-    // стулья: по 3 с длинных сторон + 2 торца
+    // chairs: 3 per long side + 2 ends
     const chairAt = (cx, cz, rot) => {
       const ch = new T.Group();
       box(0.42, 0.05, 0.4, M.white, 0, 0.45, 0, ch);
@@ -1084,7 +1084,7 @@ const Builder = (() => {
     }
     chairAt(o.w / 2 + 0.3, 0, -Math.PI / 2);
     chairAt(-o.w / 2 - 0.3, 0, Math.PI / 2);
-    // сервировка: тарелки, бокалы, салфетки
+    // table setting: plates, glasses, napkins
     const plateAt = (px, pz) => {
       cyl(0.115, 0.1, 0.012, M.white, px, 0.762, pz, g, 16);
       cyl(0.085, 0.085, 0.006, M.counter, px, 0.772, pz, g, 14);
@@ -1116,37 +1116,37 @@ const Builder = (() => {
   };
 
   F.kitchenRun = (o, g) => {
-    // нижние шкафы + столешница + фартук + верхние шкафы
+    // base cabinets + counter + splashback + wall cabinets
     box(o.w, 0.86, o.d, M.ash, 0, 0.43, 0, g);
     box(o.w, 0.04, o.d + 0.04, M.counter, 0, 0.9, 0.02, g);
-    box(o.w, 0.6, 0.02, M.ashV, 0, 1.3, -o.d / 2 + 0.01, g);         // фартук
-    box(o.w, 0.75, 0.35, M.ash, 0, 2.1, -o.d / 2 + 0.18, g);          // верх
-    // открытая полка с посудой (условно)
+    box(o.w, 0.6, 0.02, M.ashV, 0, 1.3, -o.d / 2 + 0.01, g);         // splashback
+    box(o.w, 0.75, 0.35, M.ash, 0, 2.1, -o.d / 2 + 0.18, g);          // uppers
+    // open shelf with dishes (schematic)
     box(o.w * 0.4, 0.02, 0.25, M.ashV, -o.w * 0.1, 1.62, -o.d / 2 + 0.14, g);
-    // мойка + смеситель
+    // sink + tap
     box(0.5, 0.02, 0.4, M.chrome, -o.w / 2 + 0.5, 0.915, 0, g);
     const tap = cyl(0.015, 0.015, 0.3, M.chrome, -o.w / 2 + 0.5, 1.05, -0.15, g, 8);
     tap.rotation.x = 0.0;
-    // варочная на острове — здесь духовка/микроволновка в колонне рядом
+    // the hob is on the island — this column holds the oven/microwave
     return { w: o.w, d: o.d };
   };
 
   F.tallUnits = (o, g) => {
     box(o.w, 2.5, o.d, M.ash, 0, 1.25, 0, g);
-    box(0.55, 0.45, 0.02, M.black, 0, 1.5, o.d / 2 + 0.01, g); // микроволновка/духовка фасад
+    box(0.55, 0.45, 0.02, M.black, 0, 1.5, o.d / 2 + 0.01, g); // oven/microwave front
     return { w: o.w, d: o.d };
   };
 
   F.island = (o, g) => {
     box(o.w, 0.88, o.d, M.ashV, 0, 0.44, 0, g);
     box(o.w + 0.15, 0.05, o.d + 0.15, M.counter, 0, 0.925, 0, g);
-    // варочная панель
+    // hob
     box(0.7, 0.01, 0.5, M.black, -o.w / 4, 0.955, 0, g);
     return { w: o.w + 0.2, d: o.d + 0.2 };
   };
 
   F.hood = (o, g) => {
-    // потолочный короб со встроенной вытяжкой (фото 6)
+    // ceiling box with built-in hood (photo 6)
     box(o.w + 0.3, 0.22, o.d + 0.35, M.wall, 0, 2.69, 0, g);
     box(o.w * 0.55, 0.02, o.d * 0.5, M.metalBlack, 0, 2.57, 0, g);
     return { noCollide: true };
@@ -1162,29 +1162,29 @@ const Builder = (() => {
   };
 
   F.tvPanel = (o, g) => {
-    // деревянная панель на стене + ТВ (face: сторона, куда смотрит; h: высота панели)
+    // wooden wall panel + TV (face: which way it looks; h: panel height)
     const sign = o.face === 'e' ? 1 : -1;
     const h = o.h || 2.3;
     box(0.06, h, o.w, M.ashV, 0, h / 2 + 0.02, 0, g);
     box(0.02, 0.75, 1.3, M.tv, sign * 0.045, Math.min(h * 0.62, h - 0.45), 0, g);
-    box(0.35, 0.35, o.w * 0.85, M.ash, sign * 0.22, 0.18, 0, g); // тумба
+    box(0.35, 0.35, o.w * 0.85, M.ash, sign * 0.22, 0.18, 0, g); // console
     return { w: 0.6, d: o.w };
   };
 
-  // ТВ-стена гостиной с боковыми нишами-стеллажами (фото 2)
+  // Living-room TV wall with shelving niches on the sides (photo 2)
   F.tvWallUnit = (o, g) => {
     const sign = o.face === 'e' ? 1 : -1;
     const W = o.w || 3.0;
     box(0.07, 2.35, W, M.ashV, 0, 1.35, 0, g);
     box(0.02, 0.78, 1.35, M.tv, sign * 0.05, 1.5, 0, g);
-    // ниши по бокам: тёмный фон + полки + декор
+    // side niches: dark backing + shelves + decor
     for (const side of [-1, 1]) {
       const zc = side * (W / 2 - 0.26);
       box(0.06, 1.7, 0.4, M.artFrame, sign * 0.012, 1.45, zc, g);
       for (let i = 0; i < 4; i++) {
         const y = 0.85 + i * 0.44;
         box(0.1, 0.025, 0.4, M.ashV, sign * 0.03, y, zc, g);
-        // мини-декор: книги или вазочка
+        // mini decor: books or a small vase
         if (i % 2 === 0) {
           for (let b = 0; b < 3; b++) {
             box(0.02, 0.16, 0.08, [M.navy, M.olive, M.pink][b], sign * 0.06, y + 0.1, zc - 0.1 + b * 0.05, g);
@@ -1194,12 +1194,12 @@ const Builder = (() => {
         }
       }
     }
-    // длинная низкая тумба
+    // long low console
     box(0.38, 0.32, W * 0.9, M.white, sign * 0.22, 0.17, 0, g);
     return { w: 0.65, d: W };
   };
 
-  // Узкий стеллаж-колонна с декором (спальня 1, фото 8)
+  // Narrow shelf column with decor (bedroom 1, photo 8)
   F.shelfTower = (o, g) => {
     box(0.36, 2.45, 0.5, M.ash, 0, 1.225, 0, g);
     for (let i = 0; i < 5; i++) {
@@ -1221,7 +1221,7 @@ const Builder = (() => {
     return { w: 0.4, d: 0.55 };
   };
 
-  // Чашки и стаканы на открытой полке кухни (фото 6)
+  // Cups and glasses on the open kitchen shelf (photo 6)
   F.cups = (o, g) => {
     const y = o.h || 1.63;
     for (let i = 0; i < 5; i++) {
@@ -1233,7 +1233,7 @@ const Builder = (() => {
     return { noCollide: true };
   };
 
-  // Подвесное кашпо со свисающей зеленью (терраса, фото 18)
+  // Hanging planter with trailing greenery (terrace, photo 18)
   F.hangingPlant = (o, g) => {
     const y = o.h || 1.45;
     cyl(0.07, 0.055, 0.1, M.pot, 0, y, 0, g, 10);
@@ -1258,7 +1258,7 @@ const Builder = (() => {
   };
 
   F.deskNook = (o, g) => {
-    // обои-джунгли + столешница + стул + полки
+    // jungle wallpaper + desktop + chair + shelves
     box(o.w, 2.5, 0.04, M.jungle, 0, 1.25, o.d / 2, g);
     box(o.w, 0.04, o.d, M.ash, 0, 0.74, 0, g);
     box(o.w * 0.7, 0.03, 0.2, M.white, 0, 1.35, o.d / 4, g);
@@ -1279,7 +1279,7 @@ const Builder = (() => {
   };
 
   F.shower = (o, g) => {
-    // стеклянная кабина: поддон, стойка, лейка, стекло по 2 сторонам
+    // glass cabin: tray, pole, head, glass on 2 sides
     box(o.w, 0.04, o.d, M.marbleW, 0, 0.02, 0, g);
     const gl1 = new T.Mesh(new T.PlaneGeometry(o.w, 2.0), M.glass);
     gl1.position.set(0, 1.04, o.d / 2); g.add(gl1);
@@ -1302,7 +1302,7 @@ const Builder = (() => {
       const b = new T.Mesh(new T.CylinderGeometry(0.19, 0.16, 0.14, 20), M.white);
       b.position.set(0, 0.97, 0); g.add(b);
     }
-    // зеркало с подсветкой
+    // backlit mirror
     const mir = new T.Mesh(new T.BoxGeometry(o.w * 0.55, 0.9, 0.02), M.smoke);
     mir.position.set(0, 1.75, -o.d / 2 - 0.0); g.add(mir);
     const halo = new T.Mesh(new T.BoxGeometry(o.w * 0.55 + 0.08, 0.98, 0.005), M.lampShade);
@@ -1338,7 +1338,7 @@ const Builder = (() => {
 
   F.plant = (o, g) => {
     const y = o.h || 0;
-    const scale = o.h ? 0.4 : 1; // на столешнице — маленький горшок с базиликом
+    const scale = o.h ? 0.4 : 1; // on a counter — a small basil pot
     const h = (o.big ? 1.3 : 0.8) * scale;
     cyl(0.14 * scale, 0.11 * scale, 0.3 * scale, M.pot, 0, y + 0.15 * scale, 0, g, 14);
     for (let i = 0; i < 7; i++) {
@@ -1368,7 +1368,7 @@ const Builder = (() => {
     for (const s of [-1, 1]) box(0.14, 0.35, 0.7, M.rattan, s * 0.28, 0.55, 0, g);
     box(0.55, 0.1, 0.5, M.cream, 0, 0.52, -0.03, g);
     box(0.5, 0.35, 0.08, M.cream, 0, 0.78, 0.24, g);
-    // подушка в горох (фото 18)
+    // polka-dot cushion (photo 18)
     if (!dotsMat) {
       dotsMat = new T.MeshStandardMaterial({
         map: canvasTex(128, 128, (gc) => {
@@ -1414,7 +1414,7 @@ const Builder = (() => {
     return { w: 0.35, d: 0.35 };
   };
 
-  // Высоты мебели для окклюзии света (тени запекаются в пол)
+  // Furniture heights for light occlusion (shadows bake into the floor)
   const OCC_H = {
     bed: 0.65, sofaL: 0.8, sofa: 0.8, armchair: 0.85, roundTable: 0.45,
     diningTable: 0.76, island: 0.95, kitchenRun: 2.45, tallUnits: 2.5,
@@ -1441,7 +1441,7 @@ const Builder = (() => {
       const occH = OCC_H[item.type] || 0.8;
       const canOcclude = !OCC_SKIP.includes(item.type);
       if (res.custom) {
-        // повёрнутые кастомные AABB не поддерживаем — используем как есть (rot=0 для sofaL)
+        // rotated custom AABBs unsupported — used as-is (rot=0 for sofaL)
         for (const b of res.custom) {
           colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
           if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
@@ -1458,7 +1458,7 @@ const Builder = (() => {
     }
   }
 
-  // ---------- Свет ----------
+  // ---------- Light ----------
   function buildLights(scene) {
     scene.add(new T.AmbientLight(0xfff2e2, 0.22));
     const hemi = new T.HemisphereLight(0xdfeaf5, 0x8a7a66, 0.38);
@@ -1471,24 +1471,24 @@ const Builder = (() => {
       if (l.lvl === 'main') y = APT.mainCeilH - 0.3;
       else if (l.lvl === 'stair') y = 4.6;
       else y = APT.upperFloorY + Math.min(2.3, atticH(l.z) - 0.3);
-      // динамическими остаются только помеченные dyn — остальные живут в запечённом свете
+      // only lights marked dyn stay dynamic — the rest live in the bake
       if (l.dyn) {
         const pt = new T.PointLight(0xffe4c0, 0.42, 7.0, 1.6);
         pt.position.set(l.x, y, l.z);
         scene.add(pt);
       }
       bakeData.lights.push({ x: l.x, y: y - 0.15, z: l.z, int: 1 });
-      // маленький плафон
+      // small ceiling cap
       const dot = new T.Mesh(new T.CylinderGeometry(0.06, 0.08, 0.05, 12), M.lampShade);
       dot.position.set(l.x, y + 0.22, l.z);
       scene.add(dot);
     }
   }
 
-  // ---------- Слияние статики: главный источник FPS ----------
-  // Все меши мебели, рам, штор, лестницы и забора сливаются по парам
-  // (материал, этаж) в несколько больших мешей. Пропускаются только меши с
-  // собственными лайтмапами (userData.baked) и слитые стены (userData.doll).
+  // ---------- Static merging: the main FPS win ----------
+  // All furniture, frame, curtain, stair and fence meshes merge per
+  // (material, floor) pair into a few big meshes. Only meshes with their
+  // own lightmaps (userData.baked) and merged walls (userData.doll) are skipped.
   function mergeStatic(scene) {
     const buckets = new Map();
     const toRemove = [];
@@ -1542,7 +1542,7 @@ const Builder = (() => {
     }
   }
 
-  // Точка входа: собирает всю сцену и возвращает коллайдеры для контроллера
+  // Entry point: builds the whole scene, returns colliders for the controls
   function build(scene) {
     initMaterials();
     buildFloors(scene);

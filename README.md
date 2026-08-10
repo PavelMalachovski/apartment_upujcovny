@@ -1,82 +1,85 @@
-# 🏠 Платформа 3D-туров по квартирам
+# 🏠 Apartment 3D Tour Platform
 
-Интерактивные туры по недвижимости прямо в браузере: прогулка от первого
-лица, режим макета «кукольный домик», реальные фотографии в точках съёмки,
-площади комнат и рулетка. Чистый Three.js без сборщика; новый объект — это
-JSON-конфиг плюс папка фотографий, без изменений кода.
+Interactive real-estate tours right in the browser: a first-person
+walkthrough, a dollhouse mode, real photographs at their shooting spots,
+room areas and a measuring tape. Pure Three.js with no bundler; a new
+property is a JSON config plus a photo folder — no code changes.
 
-**Каталог объектов:** `catalog.html` · **Тур:** `index.html?apt=<id>`
+**Property catalog:** `catalog.html` · **Tour:** `index.html?apt=<id>`
 
-## Возможности
+## Features
 
-- **Прогулка от первого лица** — WASD + осмотр мышью (drag), на телефоне
-  виртуальный джойстик + свайп, мультитач
-- **Режим макета (⌂ / клавиша M)** — орбитальный вид без крыши, срез
-  «1 этаж / весь дом», метки площадей комнат, клик по полу телепортирует
-  в эту точку
-- **📏 Рулетка** — два клика по полу, расстояние в метрах
-- **📷 Реальные фото** — маркеры в точках съёмки, кнопка/клавиша F
-  открывает фотографию поверх 3D-вида
-- **☰ Меню комнат** — мгновенный телепорт по 12 точкам
-- **Запечённый свет** — собственный CPU-лайтмаппер при загрузке (~2 с):
-  мягкие тени, дневной свет из окон, солнце на террасе
-- **Производительность** — слитая статика: ~50–130 draw calls, работает
-  на телефонах
+- **First-person walkthrough** — WASD + drag-look with the mouse; on
+  phones a virtual joystick + swipe, multitouch
+- **Dollhouse mode (⌂ / M key)** — orbit view without the roof, a
+  "Ground floor / Whole home" cutaway, room-area labels, clicking the
+  floor teleports you to that spot
+- **📏 Measuring tape** — two clicks on the floor, distance in metres
+- **📷 Real photos** — markers at the shooting spots; the button or the
+  F key opens the photograph on top of the 3D view
+- **☰ Rooms menu** — instant teleport to any of the rooms
+- **Baked lighting** — a custom CPU lightmapper at load (~2 s): soft
+  shadows, daylight from the windows, sun on the terrace
+- **Performance** — merged statics: ~50–130 draw calls, runs on phones
 
-## Быстрый старт
+## Quick start
 
 ```bash
 python -m http.server 8000 --directory tour
 ```
 
-Открой `http://localhost:8000/catalog.html` (каталог) или
-`http://localhost:8000/?apt=kings-court` (тур напрямую).
-Веб-сервер обязателен: конфиг грузится через fetch, file:// не работает.
+Open `http://localhost:8000/catalog.html` (catalog) or
+`http://localhost:8000/?apt=kings-court` (tour directly).
+A web server is required: the config is fetched, `file://` won't work.
 
-## Управление
+## Controls
 
-| Ввод | Действие |
+| Input | Action |
 |---|---|
-| **Мышь (зажать и вести)** | осмотр |
-| **WASD / стрелки** | ходьба (Shift — быстрее) |
-| **M** | режим макета |
-| **F** | фото рядом |
-| Телефон | джойстик слева — ходьба, свайп справа — осмотр |
+| **Mouse (hold & drag)** | look around |
+| **WASD / arrows** | walk (Shift — faster) |
+| **M** | dollhouse mode |
+| **F** | nearby photo |
+| Phone | joystick left — walk, swipe right — look |
 
-## Добавить новую квартиру
+## Add a new apartment
 
-1. Скопируй `tour/apartments/kings-court.json` → `tour/apartments/<id>.json`
-   и перепиши геометрию по поэтажному плану (метры; углы — в градусах)
-2. Фото → `tour/photos/<id>/*.webp` (≤1200px), пропиши `meta.photoBase`
-   и точки `photoSpots`
-3. Добавь карточку в `tour/apartments/index.json` — объект появится в каталоге
-4. Открой `?apt=<id>` и пройди чек-лист из `CLAUDE.md`
+1. Copy `tour/apartments/kings-court.json` → `tour/apartments/<id>.json`
+   and rewrite the geometry from the floor plan (metres; angles in
+   degrees)
+2. Photos → `tour/photos/<id>/*.webp` (≤1200px), set `meta.photoBase`
+   and the `photoSpots`
+3. Add a card to `tour/apartments/index.json` — the property appears in
+   the catalog
+4. Open `?apt=<id>` and run the checklist from `CLAUDE.md`
 
-## Деплой (Vercel)
+## Deploy (Vercel)
 
-Статика без сборки: `vercel.json` отдаёт папку `tour/` с корня. Импортируй
-репозиторий на [vercel.com/new](https://vercel.com/new) (preset **Other**,
-build пустой) — каждый пуш в `main` обновляет прод. Либо `npx vercel --prod`.
+Static, no build: `vercel.json` serves the `tour/` folder from the
+root. Import the repository at [vercel.com/new](https://vercel.com/new)
+(preset **Other**, empty build) — every push to `main` updates
+production. Or `npx vercel --prod`.
 
-## Структура
+## Structure
 
 ```
 tour/
-├── catalog.html          — каталог объектов
-├── index.html            — страница тура
+├── catalog.html          — property catalog
+├── index.html            — tour page
 ├── apartments/
-│   ├── index.json        — список для каталога
-│   └── kings-court.json  — конфиг квартиры (данные, не код)
-├── photos/kings-court/   — реальные фото (webp)
-├── main.js               — лоадер (?apt=, градусы→радианы)
-├── builder.js            — конфиг → сцена, слияние статики
-├── bake.js               — CPU-лайтмаппер (лайтмапы + вершинный свет стен)
-├── controls.js           — ходьба, тач, коллизии, этажность
-├── doll.js               — макет, срез, площади, рулетка
-├── app.js                — инициализация, мини-карта, меню, фото
-└── three.min.js          — Three.js r128 (локально)
+│   ├── index.json        — catalog list
+│   └── kings-court.json  — apartment config (data, not code)
+├── photos/kings-court/   — real photos (webp)
+├── main.js               — loader (?apt=, degrees→radians)
+├── builder.js            — config → scene, static merging
+├── bake.js               — CPU lightmapper (lightmaps + wall vertex light)
+├── controls.js           — walking, touch, collisions, floor levels
+├── doll.js               — dollhouse, cutaway, areas, measuring tape
+├── app.js                — init, minimap, menu, photos
+├── validate.js           — automatic layout check
+└── three.min.js          — Three.js r128 (local)
 ```
 
-Архитектурные правила и чек-листы для доработок — в [CLAUDE.md](CLAUDE.md).
-Исходные фотографии в корне репозитория игнорируются (`.gitignore`);
-публикуются только сжатые webp внутри `tour/photos/`.
+Architecture rules and checklists for changes live in
+[CLAUDE.md](CLAUDE.md). Original photos in the repository root are
+gitignored; only compressed webp inside `tour/photos/` are published.
