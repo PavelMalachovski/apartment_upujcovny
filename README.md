@@ -12,15 +12,18 @@ property is a JSON config plus a photo folder — no code changes.
 - **First-person walkthrough** — WASD + drag-look with the mouse; on
   phones a virtual joystick + swipe, multitouch
 - **Dollhouse mode (⌂ / M key)** — orbit view without the roof, a
-  "Ground floor / Whole home" cutaway, room-area labels, clicking the
-  floor teleports you to that spot
+  "Ground floor / Upper floor / Whole home" cutaway, room-area labels,
+  clicking the floor teleports you to that spot
 - **📏 Measuring tape** — two clicks on the floor, distance in metres
 - **📷 Real photos** — markers at the shooting spots; the button or the
-  F key opens the photograph on top of the 3D view
+  F key opens the photograph on top of the 3D view, and from there it
+  is a gallery of every room: arrows, ← →, or a swipe, with neighbours
+  preloaded
 - **☰ Rooms menu** — instant teleport to any of the rooms
 - **Baked lighting** — a custom CPU lightmapper at load (~2 s): soft
   shadows, daylight from the windows, sun on the terrace
-- **Performance** — merged statics: ~50–130 draw calls, runs on phones
+- **Performance** — merged statics and batched markers: ~85–145 draw
+  calls, runs on phones
 
 ## Quick start
 
@@ -40,6 +43,8 @@ A web server is required: the config is fetched, `file://` won't work.
 | **WASD / arrows** | walk (Shift — faster) |
 | **M** | dollhouse mode |
 | **F** | nearby photo |
+| **← →** | previous / next photo while the viewer is open |
+| **Esc** | close the photo viewer or the rooms panel |
 | Phone | joystick left — walk, swipe right — look |
 
 ## Add a new apartment

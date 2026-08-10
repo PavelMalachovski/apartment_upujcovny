@@ -10,7 +10,7 @@ class DollMode {
     this.controls = controls;
     this.dom = dom;
     this.on = false;
-    this.level = 'all';                       // '1' | 'all'
+    this.level = 'all';                       // '1' | '2' | 'all'
     this.orbit = { yaw: -Math.PI / 2, pitch: 0.95, dist: 17 };
     this.target = new THREE.Vector3(12.4, 1.2, 2.3);
     this.camPos = new THREE.Vector3();
@@ -58,6 +58,8 @@ class DollMode {
   }
 
   updateAreaLabels() {
+    // In 'all' the upper floor hides the ground one, so its labels are the
+    // only readable ones — same set as the upper-only view.
     for (const sp of this.areaSprites) {
       sp.visible = this.on &&
         (this.level === '1' ? sp.userData.areaLvl === 1 : sp.userData.areaLvl === 2);
@@ -146,7 +148,7 @@ class DollMode {
   classify() {
     const box = new THREE.Box3();
     this.scene.traverse((o) => {
-      if (!o.isMesh || o.parent !== this.scene) return;
+      if (!(o.isMesh || o.isPoints) || o.parent !== this.scene) return;
       if (o.userData.doll === 'walls1') { this.groups.walls1 = o; return; }
       if (o.userData.doll === 'walls2') { this.groups.walls2 = o; return; }
       if (o.userData.mergeLvl) {
@@ -174,12 +176,13 @@ class DollMode {
   }
 
   applyVisibility() {
-    const showUpper = !this.on || this.level === 'all';
+    const showUpper = !this.on || this.level !== '1';
+    const showLower = !this.on || this.level !== '2';
     for (const o of this.groups.g2) o.visible = showUpper;
     if (this.groups.walls2) this.groups.walls2.visible = showUpper;
+    for (const o of this.groups.g1) o.visible = showLower;
+    if (this.groups.walls1) this.groups.walls1.visible = showLower;
     for (const o of this.groups.roof) o.visible = !this.on;
-    for (const o of this.groups.g1) o.visible = true;
-    if (this.groups.walls1) this.groups.walls1.visible = true;
   }
 
   enter() {
@@ -219,6 +222,7 @@ class DollMode {
 
   syncButtons() {
     document.getElementById('dollLvl1').classList.toggle('act', this.level === '1');
+    document.getElementById('dollLvl2').classList.toggle('act', this.level === '2');
     document.getElementById('dollLvlAll').classList.toggle('act', this.level === 'all');
   }
 

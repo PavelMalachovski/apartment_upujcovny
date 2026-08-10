@@ -40,10 +40,11 @@ site root = the `tour/` folder). Workflow: branch → PR → merge
    to a local save endpoint.
 2. **The layout auto-check is the first thing to look at after an
    edit.** `validate.js` runs on load and reports to the console;
-   `?check=1` shows a badge. It catches three bug classes: a blocked
-   opening, an opening into the void (no floor behind it), and a room
+   `?check=1` shows a badge. It catches four bug classes: a blocked
+   opening, an opening into the void (no floor behind it), a room
    unreachable on foot from the start (0.25 m grid walk with player
-   collisions and floor levels). The report also lives in
+   collisions and floor levels), and a photo spot or teleport point
+   buried inside furniture. The report also lives in
    `window.__issues`. **Rule: the list must be empty before commit.**
 2a. **Walk simulation — for a specific route**: set the position, hold
    `controls.keys.KeyW = true`, run `controls.update(0.033)` in a loop,
@@ -78,7 +79,19 @@ site root = the `tour/` folder). Workflow: branch → PR → merge
 2g. **Fixtures moved? Move their dependents.** Photo spots, spawns and
    area markers are absolute too — after rearranging a bathroom the
    photo spot ended up inside the bathtub. Grep the JSON for
-   spawns/photoSpots/areas near any zone you touch.
+   spawns/photoSpots/areas near any zone you touch. The marker check in
+   `validate.js` now catches this class automatically.
+2h. **Furniture against a wall: measure the wall face, don't compute
+   from the centreline.** Wall coordinates in the config are
+   centrelines and the slab has thickness, so a bed placed by
+   arithmetic ends up *inside* the wall — both bedroom headboards were
+   fully swallowed and their quilting invisible, while nothing in the
+   validator complained (a hidden object still walks fine). Raycast
+   down the axis to find the real face, then add the item's own
+   half-depth:
+   `rc.set(new THREE.Vector3(x, 1.8, z0), new THREE.Vector3(0,0,-1))`.
+   Check with a second raycast that the item, not the wall, is hit
+   first.
 3. **Cache**: any JS/JSON change requires bumping `?v=N` in ALL
    `<script src>` tags in `index.html` — bump AFTER the last JS edit,
    or the new code gets cached under the old version. The apartment
@@ -86,9 +99,12 @@ site root = the `tour/` folder). Workflow: branch → PR → merge
    its own tag), so without a bump JSON edits never arrive — this bug
    has already cost an hour. Verify delivery: compare a field from APT
    in the console with the file.
-4. **Perf budget**: ≤160 draw calls anywhere (currently ~90–155; the
-   plan-true open corridor exposes more merged buckets from the entry
-   than the old walled layout did). New
+4. **Perf budget**: ≤150 draw calls anywhere (currently ~85–145).
+   Markers are `THREE.Points`, one object per level — sprites do not
+   batch, so the 14 photo spots used to cost 14 calls on their own.
+   Splitting the merged meshes into zones was tried and rejected: the
+   flat is one 28 m sightline, so at the entry every zone stays inside
+   the frustum and the split only adds calls. New
    furniture goes through `F.*` constructors in builder.js: it merges
    into the static meshes automatically and gets a shadow occluder. No
    new dynamic PointLights — light lives in the bake (`dyn: true` on 8

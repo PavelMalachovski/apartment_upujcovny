@@ -873,7 +873,10 @@ const Builder = (() => {
 
   F.cushions = (o, g) => {
     const y = o.h || 0.5;
-    const mats = { yellow: M.yellow, navy: M.navy, olive: M.olive, blue: M.lightBlue, dots: M.gray };
+    const mats = {
+      yellow: M.yellow, navy: M.navy, olive: M.olive, blue: M.lightBlue,
+      dots: M.gray, sage: M.sage, pink: M.pink
+    };
     (o.set || ['yellow', 'navy']).forEach((c, i) => {
       const p = box(0.4, 0.4, 0.12, mats[c] || M.gray, -0.25 + i * 0.42, y + 0.2, 0, g);
       p.rotation.x = -0.18;
@@ -941,6 +944,14 @@ const Builder = (() => {
             x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
           }
           g.stroke();
+        }
+      } else if (pat === 'stripes') {
+        // sage and terracotta bands — bedroom 3's accent
+        g.fillStyle = '#eae6dc'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#7f8c73', '#c98b62', '#eae6dc', '#9aa88d', '#eae6dc'];
+        for (let r = 0; r < 12; r++) {
+          g.fillStyle = cols[r % 5];
+          g.fillRect(0, r * 22, 256, r % 5 === 1 ? 7 : 14);
         }
       } else {
         // blue-gray squares (photo 12)

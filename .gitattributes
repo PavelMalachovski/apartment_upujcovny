@@ -1,0 +1,15 @@
+# Normalise line endings: LF in the repository and in the working tree.
+# Without this, checkouts on Windows produce CRLF and every commit warns
+# "LF will be replaced by CRLF".
+* text=auto eol=lf
+
+# Never touch binary assets.
+*.webp binary
+*.jpeg binary
+*.jpg  binary
+*.png  binary
+*.gif  binary
+*.ico  binary
+
+# Three.js is a vendored bundle: keep it out of diffs and language stats.
+tour/three.min.js -diff linguist-vendored
