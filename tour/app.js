@@ -48,6 +48,7 @@ window.initApp = function () {
     doll.exit(true);
   });
   document.getElementById('dollLvl1').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('1'); });
+  document.getElementById('dollLvl2').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('2'); });
   document.getElementById('dollLvlAll').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('all'); });
   document.getElementById('dollMeasure').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -97,6 +98,20 @@ window.initApp = function () {
     e.stopPropagation();
     roomsPanel.style.display = roomsPanel.style.display === 'block' ? 'none' : 'block';
   });
+
+  // First visit only: pulse the two controls people otherwise walk past.
+  // The animation stops itself after four beats, or on the first click.
+  const dollBtn = document.getElementById('dollBtn');
+  const hintSeen = (() => { try { return localStorage.getItem('tourHintSeen'); } catch (e) { return '1'; } })();
+  if (!hintSeen) {
+    document.getElementById('overlay').addEventListener('click', () => {
+      setTimeout(() => [roomsBtn, dollBtn].forEach(b => b.classList.add('attn')), 500);
+      try { localStorage.setItem('tourHintSeen', '1'); } catch (e) { /* private mode */ }
+    }, { once: true });
+    for (const b of [roomsBtn, dollBtn]) {
+      b.addEventListener('click', () => [roomsBtn, dollBtn].forEach(x => x.classList.remove('attn')), { once: true });
+    }
+  }
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Escape') roomsPanel.style.display = 'none';
   });
@@ -138,11 +153,24 @@ window.initApp = function () {
     t.anisotropy = 4;
     return t;
   })();
-  for (const s of APT.photoSpots) {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: camTex, depthTest: true }));
-    sp.position.set(s.x, s.g + 1.9, s.z);
-    sp.scale.set(0.34, 0.34, 1);
-    scene.add(sp);
+  // One Points object per level instead of one Sprite per spot: sprites
+  // do not batch, so 14 markers cost 14 draw calls. Splitting by level
+  // also lets the dollhouse cutaway hide the upper markers.
+  for (const lvl of [1, 2]) {
+    const list = APT.photoSpots.filter(s => (s.g < 1.5 ? 1 : 2) === lvl);
+    if (!list.length) continue;
+    const pos = new Float32Array(list.length * 3);
+    list.forEach((s, i) => {
+      pos[i * 3] = s.x; pos[i * 3 + 1] = s.g + 1.9; pos[i * 3 + 2] = s.z;
+    });
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+      map: camTex, size: 0.28, sizeAttenuation: true,
+      transparent: true, alphaTest: 0.4, depthTest: true
+    }));
+    pts.userData.mergeLvl = lvl;      // picked up by DollMode.classify
+    scene.add(pts);
   }
   let nearSpot = null;
   function checkPhotoSpot() {
@@ -157,29 +185,97 @@ window.initApp = function () {
     photoBtn.style.display = best ? 'block' : 'none';
     if (best) photoBtn.textContent = '📷 Photo: ' + best.name;
   }
-  function openPhoto(s) {
-    const base = (APT.meta && APT.meta.photoBase) || 'photos/';
-    document.getElementById('photoImg').src = base + s.file;
-    document.getElementById('photoCap').textContent = s.name + ' — real photo of the apartment';
-    photoView.style.display = 'flex';
-    if (document.pointerLockElement) document.exitPointerLock();
+  // ---------- Photo viewer: gallery over the 3D view ----------
+  // Once a photo is open it becomes a browsable gallery of every spot in
+  // the flat: arrows, ← →, or a swipe. Neighbours are preloaded so the
+  // next photo appears instantly instead of flashing white.
+  const photoBase = (APT.meta && APT.meta.photoBase) || 'photos/';
+  const photoOpen = () => photoView.style.display === 'flex';
+  const preloaded = new Set();
+  let photoIdx = -1;
+
+  function preloadAround(i) {
+    for (const d of [-1, 1]) {
+      const s = APT.photoSpots[(i + d + APT.photoSpots.length) % APT.photoSpots.length];
+      if (!s || preloaded.has(s.file)) continue;
+      preloaded.add(s.file);
+      new Image().src = photoBase + s.file;
+    }
   }
-  photoBtn.addEventListener('click', (e) => { e.stopPropagation(); if (nearSpot) openPhoto(nearSpot); });
-  photoView.addEventListener('click', () => {
+  function showPhoto(i) {
+    photoIdx = (i + APT.photoSpots.length) % APT.photoSpots.length;
+    const s = APT.photoSpots[photoIdx];
+    document.getElementById('photoImg').src = photoBase + s.file;
+    document.getElementById('photoCap').textContent =
+      s.name + ' — real photo · ' + (photoIdx + 1) + ' / ' + APT.photoSpots.length;
+    preloadAround(photoIdx);
+  }
+  function openPhoto(s) {
+    photoView.style.display = 'flex';
+    // freeze walking: arrow keys belong to the gallery while it is open
+    controls.enabled = false;
+    controls.keys = {};
+    showPhoto(APT.photoSpots.indexOf(s));
+  }
+  function closePhoto() {
     photoView.style.display = 'none';
+    if (!doll.on) controls.enabled = true;
+  }
+  const stepPhoto = (d) => showPhoto(photoIdx + d);
+
+  // swipe left/right on touch; the trailing click must not close the viewer
+  let swipeX = null, swiped = false;
+  photoView.addEventListener('touchstart', (e) => {
+    swipeX = e.changedTouches[0].clientX; swiped = false;
+  }, { passive: true });
+  photoView.addEventListener('touchend', (e) => {
+    if (swipeX === null) return;
+    const dx = e.changedTouches[0].clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) < 45) return;
+    swiped = true;
+    stepPhoto(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  photoBtn.addEventListener('click', (e) => { e.stopPropagation(); if (nearSpot) openPhoto(nearSpot); });
+  photoView.addEventListener('click', () => {               // backdrop closes
+    if (swiped) { swiped = false; return; }
+    closePhoto();
   });
+  document.getElementById('photoImg').addEventListener('click', (e) => e.stopPropagation());
+  document.getElementById('photoClose').addEventListener('click', (e) => { e.stopPropagation(); closePhoto(); });
+  document.getElementById('photoPrev').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(-1); });
+  document.getElementById('photoNext').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(1); });
+
   // F — nearby photo (when the cursor is busy and the button is hard to hit)
   document.addEventListener('keydown', (e) => {
-    if (e.code === 'KeyF' && nearSpot && photoView.style.display !== 'flex') openPhoto(nearSpot);
-    if (e.code === 'KeyM' && photoView.style.display !== 'flex') {
-      if (doll.on) doll.exit(false); else doll.enter();
+    if (photoOpen()) {
+      if (e.code === 'ArrowLeft') stepPhoto(-1);
+      else if (e.code === 'ArrowRight') stepPhoto(1);
+      else if (e.code === 'Escape') closePhoto();
+      return;
     }
+    if (e.code === 'KeyF' && nearSpot) openPhoto(nearSpot);
+    if (e.code === 'KeyM') { if (doll.on) doll.exit(false); else doll.enter(); }
   });
 
   // ---------- Minimap ----------
   const mapC = document.getElementById('minimap');
   const mg = mapC.getContext('2d');
   const MAP = { x1: -5.4, z1: -2.6, x2: 24.4, z2: 7.2 };
+  // The front door, taken from whichever opening is flagged as the entrance.
+  const entrance = (() => {
+    for (const w of APT.walls) {
+      for (const o of w.openings || []) {
+        if (!o.entrance) continue;
+        const dx = w.x2 - w.x1, dz = w.z2 - w.z1;
+        const len = Math.hypot(dx, dz) || 1;
+        const t = o.at + o.w / 2;
+        return { x: w.x1 + dx / len * t, z: w.z1 + dz / len * t };
+      }
+    }
+    return null;
+  })();
   function mapPt(x, z) {
     const sx = mapC.width / (MAP.x2 - MAP.x1);
     const sz = mapC.height / (MAP.z2 - MAP.z1);
@@ -217,6 +313,16 @@ window.initApp = function () {
       const [a, b] = mapPt(x, s.z1), [c, d] = mapPt(x, s.z2);
       mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
     }
+    // front door: the anchor everyone orients from on the ground floor
+    if (entrance && !upper) {
+      const [ex, ey] = mapPt(entrance.x, entrance.z);
+      mg.fillStyle = '#8fd0a0';
+      mg.beginPath(); mg.arc(ex, ey, 3.5, 0, Math.PI * 2); mg.fill();
+      mg.font = '9px system-ui';
+      mg.textAlign = 'right';
+      mg.fillText('entry', ex - 6, ey + 3);
+      mg.textAlign = 'left';
+    }
     // player
     const [px, py] = mapPt(controls.pos.x, controls.pos.z);
     mg.fillStyle = '#ffb454';
@@ -230,6 +336,19 @@ window.initApp = function () {
     mg.moveTo(px, py);
     mg.lineTo(px - Math.sin(a2) * 10, py - Math.cos(a2) * 10);
     mg.stroke();
+    // north arrow — the plan is drawn with north up
+    const nx = mapC.width - 17, ny = 17;
+    mg.fillStyle = 'rgba(20,22,26,0.72)';
+    mg.beginPath(); mg.arc(nx, ny, 13, 0, Math.PI * 2); mg.fill();
+    mg.fillStyle = '#e8e2d5';
+    mg.beginPath();
+    mg.moveTo(nx, ny - 9); mg.lineTo(nx - 4.5, ny + 3); mg.lineTo(nx, ny + 0.5); mg.lineTo(nx + 4.5, ny + 3);
+    mg.closePath(); mg.fill();
+    mg.font = '8px system-ui';
+    mg.textAlign = 'center';
+    mg.fillText('N', nx, ny + 10);
+    mg.textAlign = 'left';
+
     // floor caption
     mg.fillStyle = '#fff';
     mg.font = '11px system-ui';

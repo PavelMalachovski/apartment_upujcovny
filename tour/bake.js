@@ -98,8 +98,12 @@ const Baker = (() => {
         if (!blocked(P, _Q, occ)) vis++;
       }
       if (!vis) continue;
-      const e = Wn.area * 0.16 / (1 + d2 * 0.5) * cos * (vis / JIT.length);
-      r += e * 0.82; g += e * 0.90; b += e;
+      // Amplitude and falloff are tuned together: a flat window term makes
+      // every room read the same, so daylight is strong at the glass and
+      // drops away fast. Peak stays under the EXP headroom even where the
+      // south wall puts four windows within reach of one point.
+      const e = Wn.area * 0.26 / (1 + d2 * 0.56) * cos * (vis / JIT.length);
+      r += e * 0.80; g += e * 0.89; b += e;
     }
 
     if (outdoor) {

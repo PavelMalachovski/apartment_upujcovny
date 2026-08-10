@@ -3,7 +3,9 @@
 // reach users:
 //   1. furniture standing in a doorway (passage physically blocked);
 //   2. an opening leading into the void — no floor behind it;
-//   3. a room unreachable on foot from the start point.
+//   3. a room unreachable on foot from the start point;
+//   4. a photo spot or teleport point buried inside furniture
+//      (a bathroom rearrangement once left a photo spot in the tub).
 //
 // Runs on load, reports to the console. With ?check=1 it also
 // shows an issue list on top of the tour.
@@ -53,6 +55,56 @@ const Validate = (() => {
       if (ddx * ddx + ddz * ddz < RADIUS * RADIUS) return false;
     }
     return true;
+  }
+
+  // Is a point buried inside a solid? Unlike free() this ignores the
+  // player radius: standing 20 cm from a counter is fine, being inside
+  // the bathtub is not. Walls are lines, so they keep a half-thickness.
+  function insideSolid(x, z, y, colliders) {
+    const lv = lvlsFor(y);
+    for (const b of colliders.boxes) {
+      if (!lv.includes(b.lvl)) continue;
+      if (x > b.x1 && x < b.x2 && z > b.z1 && z < b.z2) return true;
+    }
+    const HALF = 0.12;
+    for (const s of colliders.segs) {
+      if (!lv.includes(s.lvl)) continue;
+      const dx = s.x2 - s.x1, dz = s.z2 - s.z1;
+      const len2 = dx * dx + dz * dz;
+      if (len2 < 1e-9) continue;
+      let t = ((x - s.x1) * dx + (z - s.z1) * dz) / len2;
+      t = Math.max(0, Math.min(1, t));
+      const ddx = x - (s.x1 + t * dx), ddz = z - (s.z1 + t * dz);
+      if (ddx * ddx + ddz * ddz < HALF * HALF) return true;
+    }
+    return false;
+  }
+
+  // ---------- 4. Markers: photo spots and teleport points ----------
+  function checkMarkers(colliders, issues) {
+    const scan = (list, kind) => {
+      for (const m of list || []) {
+        const g = m.g || 0;
+        const floor = groundAt(m.x, m.z, g);
+        if (floor === null) {
+          issues.push({
+            kind: kind + ' off floor',
+            where: m.name,
+            detail: `x ${m.x}, z ${m.z} has no floor at level ${g}`
+          });
+          continue;
+        }
+        if (insideSolid(m.x, m.z, floor, colliders)) {
+          issues.push({
+            kind: kind + ' inside furniture',
+            where: m.name,
+            detail: `x ${m.x}, z ${m.z} sits inside a solid object`
+          });
+        }
+      }
+    };
+    scan(APT.spawns, 'teleport point');
+    scan(APT.photoSpots, 'photo spot');
   }
 
   // ---------- 1-2. Opening checks ----------
@@ -157,6 +209,7 @@ const Validate = (() => {
   function run(colliders) {
     const issues = [];
     checkOpenings(colliders, issues);
+    checkMarkers(colliders, issues);
     const cells = checkReachability(colliders, issues);
     if (issues.length) {
       console.group('%cLayout check: ' + issues.length + ' issue(s)', 'color:#d85c3a;font-weight:bold');

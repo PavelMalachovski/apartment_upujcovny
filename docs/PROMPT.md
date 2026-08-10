@@ -79,11 +79,13 @@ have.
   collects the list of door openings; the check reports on load:
   (1) openings blocked by furniture; (2) openings with no floor behind
   them; (3) rooms unreachable on foot from the start — a ~0.25 m grid
-  walk with the same collisions as the player. The cell key must
-  include the floor level, or the two floors merge. Compute the
-  "blocked" threshold with the player radius in mind: a 0.85 m clear
-  door at radius 0.24 is fine, not a defect. The list must be empty
-  before commit
+  walk with the same collisions as the player; (4) photo spots and
+  teleport points that sit inside a solid. The cell key must include
+  the floor level, or the two floors merge. Compute the "blocked"
+  threshold with the player radius in mind: a 0.85 m clear door at
+  radius 0.24 is fine, not a defect. For markers use strict
+  containment instead — standing 20 cm from a counter is normal, being
+  inside the bathtub is not. The list must be empty before commit
 - Check a specific route's walkability by simulating the walk (hold W
   programmatically, run update, verify the end point). Remember: one
   run checks one line — a passage may exist yet be unreachable from the
@@ -101,6 +103,11 @@ have.
 - Rearranged fixtures: move their dependents — photo spots, spawn
   points and area labels are absolute coordinates too (a photo spot
   once ended up inside the bathtub)
+- Placing anything against a wall, measure the wall FACE with a
+  raycast; wall coordinates are centrelines and the slab has
+  thickness. Arithmetic alone buried both bedroom headboards inside
+  the wall, and no automated check complained because a hidden object
+  is still perfectly walkable — only a screenshot showed it
 - Work through branches and PRs with meaningful descriptions; verify
   prod after merge
 

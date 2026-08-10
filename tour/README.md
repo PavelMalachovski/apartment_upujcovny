@@ -37,21 +37,24 @@ way to show the apartment to a client.
 
 The **"⌂ Dollhouse"** button (or the **M** key) switches to dollhouse
 mode: the whole apartment under an orbit camera (mouse/finger — rotate,
-wheel/pinch — zoom), a "Ground floor / Whole home" cutaway with **room
-areas**, and **clicking the floor drops you into that exact spot**. The
-**"📏 Measure"** button takes two clicks on the floor and shows the
-distance. Esc or "✕ Walk" returns to walking.
+wheel/pinch — zoom), a "Ground floor / Upper floor / Whole home" cutaway
+with **room areas**, and **clicking the floor drops you into that exact
+spot**. The **"📏 Measure"** button takes two clicks on the floor and
+shows the distance. Esc or "✕ Walk" returns to walking.
 
 The **📷** markers in rooms are real photographs of the apartment: walk
-close and press the button at the bottom (or the **F** key). Photos live
+close and press the button at the bottom (or the **F** key). Once open
+it is a gallery of every photographed room — the ‹ › buttons, the **←
+→** keys, or a swipe move between them, and the neighbouring photos are
+preloaded so they appear instantly. Esc or the ✕ closes it. Photos live
 in `photos/*.webp`.
 
 The staircase is in the middle of the apartment: the hallway beside the
 bedrooms runs along it, the flight climbs west and exits into the upper
 hall. From the upper floor, the west door leads to the roof terrace.
 
-Top right — a minimap with the current floor plan and camera position;
-bottom left — the current room name.
+Top right — a minimap with the current floor plan, a north arrow, the
+front door and the camera position; bottom left — the current room name.
 
 ## Baked lighting
 

@@ -78,10 +78,31 @@
     box-shadow: 0 10px 50px rgba(0,0,0,0.6);
   }
   #photoCap { color: #e8e2d5; font-family: system-ui, sans-serif; font-size: 15px; }
+  .photoNav, #photoClose {
+    position: absolute; border: 0; cursor: pointer; z-index: 2;
+    background: rgba(20,22,26,0.72); color: #f2efe8;
+    display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif; border-radius: 50%;
+  }
+  .photoNav { top: 50%; transform: translateY(-50%); width: 54px; height: 54px; font-size: 30px; }
+  .photoNav:hover, #photoClose:hover { background: rgba(52,56,64,0.92); }
+  #photoPrev { left: 20px; }
+  #photoNext { right: 20px; }
+  #photoClose { top: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
+  @keyframes attnPulse {
+    0%, 100% { box-shadow: 0 4px 18px rgba(0,0,0,0.4); }
+    50%      { box-shadow: 0 4px 18px rgba(0,0,0,0.4), 0 0 0 9px rgba(232,226,213,0.20); }
+  }
+  .attn { animation: attnPulse 1.5s ease-in-out 4; }
   @media (max-width: 760px) {
     #roomsBtn, #dollBtn { font-size: 15px; padding: 11px 18px; }
     #dollBtn { left: 14px; top: 62px; }
-    #dollHud button { font-size: 13px; padding: 9px 13px; }
+    #dollHud { gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 96vw; }
+    #dollHud button { font-size: 13px; padding: 9px 12px; }
+    .photoNav { width: 44px; height: 44px; font-size: 25px; }
+    #photoPrev { left: 8px; }
+    #photoNext { right: 8px; }
+    #photoClose { top: 12px; right: 12px; }
   }
   #joyKnob {
     position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
@@ -130,12 +151,16 @@
 <div id="roomsPanel"></div>
 <div id="dollHud">
   <button id="dollLvl1">Ground floor</button>
+  <button id="dollLvl2">Upper floor</button>
   <button id="dollLvlAll" class="act">Whole home</button>
   <button id="dollMeasure">📏 Measure</button>
   <button id="dollExit">✕ Walk</button>
 </div>
 <div id="photoBtn">📷 Photo of this spot</div>
 <div id="photoView">
+  <button id="photoPrev" class="photoNav" aria-label="Previous photo">‹</button>
+  <button id="photoNext" class="photoNav" aria-label="Next photo">›</button>
+  <button id="photoClose" aria-label="Close photo">✕</button>
   <img id="photoImg" alt="">
   <div id="photoCap"></div>
 </div>
@@ -154,13 +179,13 @@
      style="color:rgba(242,239,232,0.55);font-size:13px;margin-top:6px;text-decoration:underline"
      onclick="event.stopPropagation()">← All properties</a>
 </div>
-<script src="three.min.js?v=36"></script>
-<script src="bake.js?v=36"></script>
-<script src="builder.js?v=36"></script>
-<script src="controls.js?v=36"></script>
-<script src="doll.js?v=36"></script>
-<script src="validate.js?v=36"></script>
-<script src="app.js?v=36"></script>
-<script src="main.js?v=36"></script>
+<script src="three.min.js?v=37"></script>
+<script src="bake.js?v=37"></script>
+<script src="builder.js?v=37"></script>
+<script src="controls.js?v=37"></script>
+<script src="doll.js?v=37"></script>
+<script src="validate.js?v=37"></script>
+<script src="app.js?v=37"></script>
+<script src="main.js?v=37"></script>
 </body>
 </html>
