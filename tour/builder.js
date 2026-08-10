@@ -18,6 +18,8 @@ const Builder = (() => {
   const colliders = { segs: [], boxes: [] }; // segs: {x1,z1,x2,z2,lvl}; boxes: {x1,z1,x2,z2,lvl}
   // Данные для запекания света (см. bake.js)
   const bakeData = { occluders: [], lights: [], windows: [], surfaces: [], wallPieces: [] };
+  // Проёмы (двери/проходы) для автопроверки: см. validate.js
+  const doorways = [];
   function addOccluder(cx, cy, cz, sx, sy, sz) {
     bakeData.occluders.push({
       x1: cx - sx / 2, y1: cy - sy / 2, z1: cz - sz / 2,
@@ -495,6 +497,13 @@ const Builder = (() => {
         placeTop(p.from, p.to, Math.min(hh, topH), topH, segMat);
         const cx = w.x1 + ux * ((p.from + p.to) / 2);
         const cz = w.z1 + uz * ((p.from + p.to) / 2);
+        if (!o.entrance) {
+          doorways.push({
+            x: cx, z: cz, w: o.w, type: o.type, lvl: w.lvl,
+            nx: uz, nz: -ux,                 // нормаль стены
+            ux, uz, baseY                    // направление вдоль стены и уровень пола
+          });
+        }
         if (o.type === 'door') {
           // коробка
           for (const side of [-1, 1]) {
@@ -1545,5 +1554,5 @@ const Builder = (() => {
     return colliders;
   }
 
-  return { build, colliders, atticH, bakeData, mergeStatic };
+  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways };
 })();

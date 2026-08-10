@@ -17,6 +17,7 @@ window.initApp = function () {
   const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 120);
 
   const colliders = Builder.build(scene);
+  window.__issues = Validate.run(colliders);   // автопроверка планировки
   Builder.mergeStatic(scene);
   const controls = new WalkControls(camera, canvas, colliders);
   // на тач-устройствах ограничиваем плотность пикселей ради FPS
