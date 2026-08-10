@@ -1,6 +1,6 @@
 // ============================================================
-// Режим «кукольный домик»: орбитальная камера над квартирой
-// без крыши, срез по этажам, клик по полу — телепорт в точку.
+// Dollhouse mode: orbit camera above the roofless apartment,
+// per-floor cutaway, click the floor to teleport there.
 // ============================================================
 
 class DollMode {
@@ -26,7 +26,7 @@ class DollMode {
     this.bindInput();
   }
 
-  // Метки площадей комнат (создаются лениво при первом входе)
+  // Room area labels (built lazily on first enter)
   buildAreaLabels() {
     if (this.areaSprites.length) return;
     for (const a of APT.areas) {
@@ -44,7 +44,7 @@ class DollMode {
       g.fillText(a.name, 128, 42);
       g.font = '26px system-ui';
       g.fillStyle = '#cbb994';
-      g.fillText(a.m2 + ' м²', 128, 76);
+      g.fillText(a.m2 + ' m²', 128, 76);
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
         map: new THREE.CanvasTexture(c), depthTest: false
       }));
@@ -64,7 +64,7 @@ class DollMode {
     }
   }
 
-  // ---------- Рулетка ----------
+  // ---------- Measuring tape ----------
   setMeasure(on) {
     this.measure = on;
     document.getElementById('dollMeasure').classList.toggle('act', on);
@@ -95,7 +95,7 @@ class DollMode {
       const [a, b] = this.measurePts;
       const len = a.distanceTo(b);
       const mid = a.clone().lerp(b, 0.5);
-      // линия-цилиндр
+      // cylinder line
       const cyl = new THREE.Mesh(
         new THREE.CylinderGeometry(0.025, 0.025, len, 8),
         new THREE.MeshBasicMaterial({ color: 0xd85c3a })
@@ -106,7 +106,7 @@ class DollMode {
         b.clone().sub(a).normalize()
       );
       this.measureGroup.add(cyl);
-      // подпись
+      // label
       const c = document.createElement('canvas');
       c.width = 192; c.height = 72;
       const g = c.getContext('2d');
@@ -115,7 +115,7 @@ class DollMode {
       g.fillStyle = '#fff';
       g.font = '600 34px system-ui';
       g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(len.toFixed(2) + ' м', 96, 38);
+      g.fillText(len.toFixed(2) + ' m', 96, 38);
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({
         map: new THREE.CanvasTexture(c), depthTest: false
       }));
@@ -125,7 +125,7 @@ class DollMode {
     }
   }
 
-  // Точка пола под кликом (для рулетки)
+  // Floor point under the click (for the tape)
   floorPoint(clientX, clientY) {
     const r = this.dom.getBoundingClientRect();
     const ndc = new THREE.Vector2(
@@ -142,7 +142,7 @@ class DollMode {
     return null;
   }
 
-  // Раскладываем меши по «этажам» (после запекания)
+  // Sort meshes into "floors" (after baking)
   classify() {
     const box = new THREE.Box3();
     this.scene.traverse((o) => {
@@ -160,7 +160,7 @@ class DollMode {
       else if (cy > 2.55) this.groups.g2.push(o);
       else this.groups.g1.push(o);
     });
-    // группы мебели лежат в scene как Group
+    // furniture groups live in the scene as Group
     this.scene.children.forEach((o) => {
       if (o.isGroup) {
         box.setFromObject(o);
@@ -222,7 +222,7 @@ class DollMode {
     document.getElementById('dollLvlAll').classList.toggle('act', this.level === 'all');
   }
 
-  // Клик/тап по полу — телепорт в точку
+  // Click/tap on the floor — teleport there
   teleport(clientX, clientY) {
     const r = this.dom.getBoundingClientRect();
     const ndc = new THREE.Vector2(
@@ -249,7 +249,7 @@ class DollMode {
 
   bindInput() {
     const d = this.dom;
-    // мышь: drag — орбита, короткий клик — телепорт, колесо — зум
+    // mouse: drag — orbit, short click — teleport, wheel — zoom
     d.addEventListener('mousedown', (e) => {
       if (!this.on) return;
       this.drag = { active: true, moved: 0, x: e.clientX, y: e.clientY };
@@ -278,7 +278,7 @@ class DollMode {
       e.preventDefault();
     }, { passive: false });
 
-    // тач: один палец — орбита, два — пинч-зум, тап — телепорт
+    // touch: one finger — orbit, two — pinch zoom, tap — teleport
     d.addEventListener('touchstart', (e) => {
       if (!this.on) return;
       if (e.touches.length === 1) {

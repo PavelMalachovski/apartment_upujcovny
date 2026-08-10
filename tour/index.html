@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>3D-тур · Апартаменты</title>
+<title>3D Tour · Apartment</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="description" content="Interactive first-person 3D tour of an apartment: walk through, dollhouse mode, real photos, room areas and a measuring tape — right in the browser.">
+<meta property="og:title" content="Apartment · 3D Tour">
+<meta property="og:description" content="Walk through the apartment in your browser: first-person tour, dollhouse mode, real photos.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0f12; overscroll-behavior: none; }
@@ -121,16 +125,16 @@
 </head>
 <body>
 <canvas id="view"></canvas>
-<div id="roomsBtn">☰ Комнаты</div>
-<div id="dollBtn">⌂ Макет</div>
+<div id="roomsBtn">☰ Rooms</div>
+<div id="dollBtn">⌂ Dollhouse</div>
 <div id="roomsPanel"></div>
 <div id="dollHud">
-  <button id="dollLvl1">1 этаж</button>
-  <button id="dollLvlAll" class="act">Весь дом</button>
-  <button id="dollMeasure">📏 Рулетка</button>
-  <button id="dollExit">✕ Прогулка</button>
+  <button id="dollLvl1">Ground floor</button>
+  <button id="dollLvlAll" class="act">Whole home</button>
+  <button id="dollMeasure">📏 Measure</button>
+  <button id="dollExit">✕ Walk</button>
 </div>
-<div id="photoBtn">📷 Фото этого места</div>
+<div id="photoBtn">📷 Photo of this spot</div>
 <div id="photoView">
   <img id="photoImg" alt="">
   <div id="photoCap"></div>
@@ -138,25 +142,25 @@
 <div id="joy"><div id="joyKnob"></div></div>
 <canvas id="minimap" width="300" height="118"></canvas>
 <div id="room"></div>
-<div id="hint">Мышь (зажать) — осмотр · WASD — ходьба · M — макет · F — фото</div>
+<div id="hint">Mouse (hold) — look · WASD — walk · M — dollhouse · F — photo</div>
 <div id="overlay">
-  <h1>Апартаменты · 3D-тур</h1>
-  <p id="overlayText">Двухуровневые апартаменты с террасой, восстановленные по фотографиям и поэтажному плану.<br>
-     WASD / стрелки — ходьба, зажми мышь и веди — осмотр.<br>
-     Кнопки сверху слева: <b>☰ Комнаты</b> — телепорт, <b>⌂ Макет</b> — вид сверху.<br>
-     Значки 📷 в комнатах показывают реальные фотографии.</p>
-  <div class="go" id="goBtn">Кликни, чтобы войти</div>
+  <h1>Apartment · 3D Tour</h1>
+  <p id="overlayText">A two-level apartment with a roof terrace, rebuilt from photos and the floor plan.<br>
+     WASD / arrows — walk, hold the mouse and drag — look around.<br>
+     Buttons top left: <b>☰ Rooms</b> — teleport, <b>⌂ Dollhouse</b> — top view.<br>
+     📷 markers in rooms show real photographs.</p>
+  <div class="go" id="goBtn">Click to enter</div>
   <a href="catalog.html" id="catLink"
      style="color:rgba(242,239,232,0.55);font-size:13px;margin-top:6px;text-decoration:underline"
-     onclick="event.stopPropagation()">← Все объекты</a>
+     onclick="event.stopPropagation()">← All properties</a>
 </div>
-<script src="three.min.js?v=35"></script>
-<script src="bake.js?v=35"></script>
-<script src="builder.js?v=35"></script>
-<script src="controls.js?v=35"></script>
-<script src="doll.js?v=35"></script>
-<script src="validate.js?v=35"></script>
-<script src="app.js?v=35"></script>
-<script src="main.js?v=35"></script>
+<script src="three.min.js?v=36"></script>
+<script src="bake.js?v=36"></script>
+<script src="builder.js?v=36"></script>
+<script src="controls.js?v=36"></script>
+<script src="doll.js?v=36"></script>
+<script src="validate.js?v=36"></script>
+<script src="app.js?v=36"></script>
+<script src="main.js?v=36"></script>
 </body>
 </html>

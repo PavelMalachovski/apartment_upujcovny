@@ -2,16 +2,16 @@
  "apartments": [
   {
    "id": "kings-court",
-   "title": "Апартаменты Kings Court",
-   "subtitle": "Двухуровневый пентхаус с террасой",
+   "title": "Kings Court Apartment",
+   "subtitle": "Two-level penthouse with a roof terrace",
    "cover": "photos/kings-court/2.webp",
    "specs": [
-    "195 м²",
-    "4 спальни",
-    "2 этажа",
-    "терраса"
+    "195 m²",
+    "4 bedrooms",
+    "2 levels",
+    "terrace"
    ],
-   "highlights": "Четыре спальни с собственными ванными, кухня с островом, столовая на 8 мест, мансардная студия и терраса на крыше"
+   "highlights": "Four bedrooms with private bathrooms, a kitchen with an island, a dining table for 8, an attic studio and a roof terrace"
   }
  ]
 }

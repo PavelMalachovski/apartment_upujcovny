@@ -1,24 +1,24 @@
 // ============================================================
-// Автопроверка планировки. Ловит классы багов, которые раньше
-// доезжали до пользователя:
-//   1. мебель стоит в дверном проёме (проход физически закрыт);
-//   2. проём ведёт в пустоту — за ним нет пола;
-//   3. комната недостижима пешком от стартовой точки.
+// Automatic layout check. Catches the bug classes that used to
+// reach users:
+//   1. furniture standing in a doorway (passage physically blocked);
+//   2. an opening leading into the void — no floor behind it;
+//   3. a room unreachable on foot from the start point.
 //
-// Запускается при загрузке, пишет отчёт в консоль. С ?check=1
-// показывает плашку со списком проблем поверх тура.
+// Runs on load, reports to the console. With ?check=1 it also
+// shows an issue list on top of the tour.
 // ============================================================
 
 const Validate = (() => {
-  const STEP = 0.25;        // шаг сетки проходимости
-  const RADIUS = 0.24;      // радиус игрока (как в controls)
-  const STEP_UP = 0.35;     // максимальный перепад между соседними ячейками
+  const STEP = 0.25;        // walkability grid step
+  const RADIUS = 0.24;      // player radius (same as controls)
+  const STEP_UP = 0.35;     // max height difference between neighbour cells
 
   function lvlsFor(y) {
     return y < 1.5 ? ['main', 'both'] : ['upper', 'terrace', 'both'];
   }
 
-  // Высота пола в точке; near — ожидаемая высота (как в controls.groundAt)
+  // Floor height at a point; near — expected height (same as controls.groundAt)
   function groundAt(x, z, near) {
     let best = null, bestDiff = Infinity;
     for (const zn of APT.groundZones) {
@@ -35,7 +35,7 @@ const Validate = (() => {
     return (best === null || bestDiff > 1.4) ? null : best;
   }
 
-  // Свободна ли точка от коллайдеров на своём уровне
+  // Is a point free of colliders on its level
   function free(x, z, y, colliders) {
     const lv = lvlsFor(y);
     for (const b of colliders.boxes) {
@@ -55,11 +55,11 @@ const Validate = (() => {
     return true;
   }
 
-  // ---------- 1-2. Проверка проёмов ----------
+  // ---------- 1-2. Opening checks ----------
   function checkOpenings(colliders, issues) {
     for (const o of Builder.openings) {
       const near = o.baseY;
-      // точки по обе стороны проёма
+      // points on both sides of the opening
       const sides = [1, -1].map(s => ({
         x: o.x + o.nx * 0.55 * s,
         z: o.z + o.nz * 0.55 * s
@@ -67,13 +67,13 @@ const Validate = (() => {
       const grounds = sides.map(p => groundAt(p.x, p.z, near));
       if (grounds.some(g => g === null)) {
         issues.push({
-          kind: 'проём в пустоту',
+          kind: 'opening into void',
           where: `x ${o.x.toFixed(1)}, z ${o.z.toFixed(1)} (${o.lvl})`,
-          detail: 'с одной из сторон нет пола'
+          detail: 'no floor on one side'
         });
         continue;
       }
-      // ширина непрерывного свободного участка внутри проёма
+      // width of the widest continuous free stretch inside the opening
       const N = 12;
       let best = 0, cur = 0;
       for (let k = 0; k <= N; k++) {
@@ -82,25 +82,25 @@ const Validate = (() => {
         cur = free(px, pz, grounds[0], colliders) ? cur + 1 : 0;
         best = Math.max(best, cur);
       }
-      // free() уже учитывает радиус игрока: любой свободный тексель = проходимо
+      // free() already includes the player radius: any free texel = passable
       const clear = best / N * o.w;
       if (clear < 0.08) {
         issues.push({
-          kind: 'проём заблокирован',
+          kind: 'opening blocked',
           where: `x ${o.x.toFixed(1)}, z ${o.z.toFixed(1)} (${o.lvl})`,
-          detail: `свободного места нет (проём ${o.w.toFixed(2)} м)`
+          detail: `no free space (opening ${o.w.toFixed(2)} m)`
         });
       } else if (clear < 0.25) {
         issues.push({
-          kind: 'проём сужен',
+          kind: 'opening narrowed',
           where: `x ${o.x.toFixed(1)}, z ${o.z.toFixed(1)} (${o.lvl})`,
-          detail: `свободно ${clear.toFixed(2)} м из ${o.w.toFixed(2)} м`
+          detail: `${clear.toFixed(2)} m free of ${o.w.toFixed(2)} m`
         });
       }
     }
   }
 
-  // ---------- 3. Достижимость комнат ----------
+  // ---------- 3. Room reachability ----------
   function checkReachability(colliders, issues) {
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
     for (const z of APT.groundZones) {
@@ -108,8 +108,8 @@ const Validate = (() => {
       minZ = Math.min(minZ, z.z1); maxZ = Math.max(maxZ, z.z2);
     }
     const W = Math.ceil((maxX - minX) / STEP), H = Math.ceil((maxZ - minZ) / STEP);
-    const seen = new Map();                      // key -> высота
-    // этаж входит в ключ: одна и та же клетка плана существует на двух уровнях
+    const seen = new Map();                      // key -> height
+    // the floor level is part of the key: the same plan cell exists on two levels
     const key = (i, j, y) => (i * (H + 2) + j) * 2 + (y < 1.5 ? 0 : 1);
     const start = APT.start;
     const sy = groundAt(start.x, start.z, 0) || 0;
@@ -131,11 +131,11 @@ const Validate = (() => {
         queue.push([ni, nj, g]);
       }
     }
-    // проверяем, что каждая точка меню комнат достижима
+    // every rooms-menu point must be reachable
     for (const sp of APT.spawns) {
       const i = Math.round((sp.x - minX) / STEP), j = Math.round((sp.z - minZ) / STEP);
-      // ищем достижимую клетку в радиусе метра: сама точка может стоять
-      // вплотную к мебели, важно, что до комнаты можно дойти
+      // look for a reachable cell within a metre: the point itself may sit
+      // right next to furniture — what matters is that the room can be reached
       let ok = false, R = 4;
       for (let di = -R; di <= R && !ok; di++) {
         for (let dj = -R; dj <= R && !ok; dj++) {
@@ -145,9 +145,9 @@ const Validate = (() => {
       }
       if (!ok) {
         issues.push({
-          kind: 'комната недостижима',
+          kind: 'room unreachable',
           where: sp.name,
-          detail: `от старта пешком не дойти до x ${sp.x}, z ${sp.z}`
+          detail: `no walkable path from start to x ${sp.x}, z ${sp.z}`
         });
       }
     }
@@ -159,24 +159,24 @@ const Validate = (() => {
     checkOpenings(colliders, issues);
     const cells = checkReachability(colliders, issues);
     if (issues.length) {
-      console.group('%cПроверка планировки: ' + issues.length + ' проблем(ы)', 'color:#d85c3a;font-weight:bold');
+      console.group('%cLayout check: ' + issues.length + ' issue(s)', 'color:#d85c3a;font-weight:bold');
       console.table(issues);
       console.groupEnd();
     } else {
-      console.log('%cПроверка планировки: всё чисто (' + Builder.openings.length +
-        ' проёмов, ' + cells + ' проходимых ячеек)', 'color:#3a8f52;font-weight:bold');
+      console.log('%cLayout check: all clear (' + Builder.openings.length +
+        ' openings, ' + cells + ' walkable cells)', 'color:#3a8f52;font-weight:bold');
     }
-    // плашка только по запросу — клиенту она не нужна
+    // badge only on request — clients don't need it
     if (new URLSearchParams(location.search).get('check') === '1') {
       const box = document.createElement('div');
       box.style.cssText = 'position:fixed;left:14px;bottom:52px;z-index:30;max-width:420px;' +
         'background:rgba(20,22,26,0.92);color:#f2efe8;padding:12px 14px;border-radius:10px;' +
         'font:13px/1.5 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,0.5)';
       box.innerHTML = issues.length
-        ? '<b style="color:#e8a05c">Проблемы планировки (' + issues.length + ')</b><br>' +
+        ? '<b style="color:#e8a05c">Layout issues (' + issues.length + ')</b><br>' +
           issues.map(i => '• ' + i.kind + ' — ' + i.where).join('<br>')
-        : '<b style="color:#8fd0a0">Планировка чистая</b><br>' +
-          Builder.openings.length + ' проёмов, ' + cells + ' проходимых ячеек';
+        : '<b style="color:#8fd0a0">Layout clean</b><br>' +
+          Builder.openings.length + ' openings, ' + cells + ' walkable cells';
       document.body.appendChild(box);
     }
     return issues;

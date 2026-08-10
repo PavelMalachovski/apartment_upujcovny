@@ -1,15 +1,15 @@
 // ============================================================
-// Точка входа конвейера: грузит JSON-конфиг квартиры и стартует тур.
+// Pipeline entry point: loads the apartment JSON config, starts the tour.
 //
-// Какую квартиру открыть, решает URL: ?apt=<id> (по умолчанию
-// kings-court). Конфиг лежит в apartments/<id>.json, фотографии —
-// в папке из meta.photoBase. Все углы в конфиге — в ГРАДУСАХ
-// (удобно править руками), здесь переводятся в радианы.
+// The URL picks the apartment: ?apt=<id> (default kings-court).
+// The config lives in apartments/<id>.json, photos in the folder
+// from meta.photoBase. All angles in the config are in DEGREES
+// (easy to edit by hand) and are converted to radians here.
 // ============================================================
 
-// Версия берётся из ?v= собственного тега <script> — тем же значением
-// версионируется и конфиг, иначе браузер отдаёт старый JSON из кеша,
-// и правки геометрии не доезжают до телефонов.
+// The version comes from ?v= on this file's own <script> tag — the same
+// value versions the config URL, otherwise the browser serves stale JSON
+// from cache and geometry edits never reach phones.
 const BUILD_V = (function () {
   try { return new URL(document.currentScript.src).searchParams.get('v') || ''; }
   catch (e) { return ''; }
@@ -27,15 +27,15 @@ const BUILD_V = (function () {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     cfg = await resp.json();
   } catch (err) {
-    goBtn.textContent = 'Не удалось загрузить квартиру «' + id + '»';
+    goBtn.textContent = 'Could not load apartment "' + id + '"';
     document.getElementById('overlayText').innerHTML =
-      'Проверь, что файл <b>apartments/' + id + '.json</b> существует.<br>' +
-      'При локальном запуске нужен веб-сервер: <code>python -m http.server</code><br>' +
-      '(fetch не работает с file://).';
+      'Check that <b>apartments/' + id + '.json</b> exists.<br>' +
+      'Local runs need a web server: <code>python -m http.server</code><br>' +
+      '(fetch does not work over file://).';
     return;
   }
 
-  // градусы -> радианы
+  // degrees -> radians
   const rad = (d) => d * Math.PI / 180;
   cfg.start.yaw = rad(cfg.start.yaw);
   for (const f of cfg.furniture) if (f.rot !== undefined) f.rot = rad(f.rot);
@@ -46,7 +46,7 @@ const BUILD_V = (function () {
 
   if (cfg.meta) {
     if (cfg.meta.title) {
-      document.title = cfg.meta.title + ' · 3D-тур';
+      document.title = cfg.meta.title + ' · 3D Tour';
       document.querySelector('#overlay h1').textContent = cfg.meta.title;
     }
   }

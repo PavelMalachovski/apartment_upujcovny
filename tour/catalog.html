@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Каталог объектов · 3D-туры</title>
+<title>Property Catalog · 3D Tours</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Catalog of interactive apartment 3D tours: first-person walkthrough, dollhouse mode, real photographs — in the browser, no install.">
+<meta property="og:title" content="Property Catalog · 3D Tours">
+<meta property="og:description" content="Interactive apartment 3D tours in the browser.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 <style>
   * { box-sizing: border-box; }
@@ -58,15 +62,15 @@
 </head>
 <body>
 <header>
-  <h1>🏠 Каталог объектов</h1>
-  <p>Интерактивные 3D-туры: прогулка от первого лица, режим макета,<br>
-     реальные фотографии, площади комнат и рулетка — в браузере, без установки.</p>
+  <h1>🏠 Property Catalog</h1>
+  <p>Interactive 3D tours: first-person walkthrough, dollhouse mode,<br>
+     real photographs, room areas and a measuring tape — in the browser, no install.</p>
 </header>
 <div class="grid" id="grid"></div>
-<div id="empty" style="display:none">Каталог пуст — добавь квартиру в <b>apartments/index.json</b></div>
+<div id="empty" style="display:none">The catalog is empty — add an apartment to <b>apartments/index.json</b></div>
 <footer>
-  Новый объект = JSON-конфиг + папка фотографий.<br>
-  Управление в туре: мышь/палец — осмотр, WASD/джойстик — ходьба, ⌂ — макет.
+  A new property = a JSON config + a photo folder.<br>
+  Tour controls: mouse/finger — look, WASD/joystick — walk, ⌂ — dollhouse.
 </footer>
 <script>
 (async function () {
@@ -82,14 +86,14 @@
       card.innerHTML =
         '<div class="coverWrap">' +
           '<img src="' + a.cover + '" alt="' + a.title + '" loading="lazy">' +
-          '<div class="badge">3D-тур</div>' +
+          '<div class="badge">3D tour</div>' +
         '</div>' +
         '<div class="body">' +
           '<h2>' + a.title + '</h2>' +
           '<p class="subtitle">' + (a.subtitle || '') + '</p>' +
           '<div class="specs">' + (a.specs || []).map(s => '<span>' + s + '</span>').join('') + '</div>' +
           '<p class="highlights">' + (a.highlights || '') + '</p>' +
-          '<a class="open" href="index.html?apt=' + a.id + '">Открыть 3D-тур →</a>' +
+          '<a class="open" href="index.html?apt=' + a.id + '">Open 3D tour →</a>' +
         '</div>';
       grid.appendChild(card);
     }

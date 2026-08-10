@@ -1,97 +1,101 @@
-# 3D-тур по апартаментам
+# Apartment 3D Tour
 
-Интерактивная прогулка от первого лица по двухуровневым апартаментам,
-восстановленным по 20 фотографиям и поэтажному плану (`../1.jpeg`).
+An interactive first-person walkthrough of a two-level apartment,
+reconstructed from 20 photographs and the floor plan (`../1.jpeg`).
 
-## Как открыть
+## How to open
 
-Двойной клик по `index.html` — работает без сервера и без интернета.
-
-Если браузер блокирует локальные файлы, запусти мини-сервер из этой папки:
+Run a tiny web server from this folder (the config is fetched, so
+`file://` does not work):
 
 ```bash
 python -m http.server 8000
 ```
 
-и открой `http://localhost:8000/`.
+then open `http://localhost:8000/` (tour) or
+`http://localhost:8000/catalog.html` (property catalog).
 
-## Управление
+## Controls
 
-Компьютер:
+Desktop:
 
-- **WASD** или стрелки — ходьба
-- **мышь** — осмотр (клик по экрану захватывает курсор)
-- **Shift** — быстрый шаг
-- **Esc** — вернуть курсор
+- **WASD** or arrow keys — walk
+- **mouse (hold and drag)** — look around (the cursor stays visible,
+  buttons stay clickable — no pointer lock)
+- **Shift** — walk faster
+- **Esc** — close panels
 
-Телефон / планшет:
+Phone / tablet:
 
-- **джойстик в левом нижнем углу** — ходьба (палец можно ставить в любом месте
-  левой половины экрана, джойстик подъедет под палец)
-- **правая половина экрана** — осмотр свайпом
-- работают оба пальца одновременно
+- **joystick, bottom left** — walk (put your finger anywhere on the left
+  half of the screen and the joystick docks under it)
+- **right half of the screen** — swipe to look
+- both fingers work at the same time
 
-Кнопка **«☰ Комнаты»** в левом верхнем углу телепортирует в любую комнату —
-самый быстрый способ показать квартиру клиенту.
+The **"☰ Rooms"** button (top left) teleports to any room — the fastest
+way to show the apartment to a client.
 
-Кнопка **«⌂ Макет»** (или клавиша **M**) включает режим кукольного домика:
-квартира целиком с орбитальной камерой (мышь/палец — вращение, колесо/пинч —
-зум), переключатель «1 этаж / Весь дом» с **площадями комнат**, **клик по
-полу опускает прямо в эту точку квартиры**. Кнопка **«📏 Рулетка»** — два
-клика по полу измеряют расстояние. Esc или «✕ Прогулка» — обратно к ходьбе.
+The **"⌂ Dollhouse"** button (or the **M** key) switches to dollhouse
+mode: the whole apartment under an orbit camera (mouse/finger — rotate,
+wheel/pinch — zoom), a "Ground floor / Whole home" cutaway with **room
+areas**, and **clicking the floor drops you into that exact spot**. The
+**"📏 Measure"** button takes two clicks on the floor and shows the
+distance. Esc or "✕ Walk" returns to walking.
 
-Значки **📷** в комнатах — реальные фотографии квартиры: подойди ближе и
-нажми кнопку внизу (или клавишу **F**). Фото лежат в `photos/*.webp`.
+The **📷** markers in rooms are real photographs of the apartment: walk
+close and press the button at the bottom (or the **F** key). Photos live
+in `photos/*.webp`.
 
-Лестница на второй этаж — в середине квартиры: из коридора между спальнями
-проход на север, затем марш вверх на восток и выход в холл второго этажа.
-С верхнего этажа через западную дверь можно выйти на террасу.
+The staircase is in the middle of the apartment: the hallway beside the
+bedrooms runs along it, the flight climbs west and exits into the upper
+hall. From the upper floor, the west door leads to the roof terrace.
 
-В правом верхнем углу — мини-карта с планом текущего этажа и позицией камеры,
-в левом нижнем — название комнаты.
+Top right — a minimap with the current floor plan and camera position;
+bottom left — the current room name.
 
-## Запечённый свет
+## Baked lighting
 
-При загрузке (~1–2 секунды, прогресс на стартовом экране) встроенный
-лайтмаппер трассирует освещение и запекает его в текстуры для полов,
-потолков и скатов мансарды: мягкие тени под мебелью, световые пятна от
-ламп, холодный дневной свет от окон, солнце и тени зданий на террасе.
-Запечённые поверхности рендерятся без динамического света (MeshBasic +
-lightMap), что разгружает GPU.
+On load (~1–2 seconds, progress on the start screen) the built-in
+lightmapper traces lighting and bakes it into textures for floors,
+ceilings and attic slopes: soft shadows under furniture, lamp pools,
+cool daylight from the windows, sun and building shadows on the terrace.
+Baked surfaces render without dynamic light (MeshBasic + lightMap),
+which unloads the GPU.
 
-## Конвейер: добавить новую квартиру
+## Pipeline: add a new apartment
 
-Данные квартиры — это JSON-конфиг, код один на все объекты:
+Apartment data is a JSON config; the code is shared by all properties:
 
-1. Скопируй `apartments/kings-court.json` → `apartments/my-flat.json`
-2. Отредактируй геометрию: стены/проёмы, полы, мебель, свет, точки
-   телепорта. Все координаты в метрах, все углы (`rot`, `yaw`) — в градусах
-3. Положи фото в `photos/my-flat/` и пропиши в `meta.photoBase` и `photoSpots`
-4. Открой `?apt=my-flat` — и это отдельный тур на том же коде
+1. Copy `apartments/kings-court.json` → `apartments/my-flat.json`
+2. Edit the geometry: walls/openings, floors, furniture, lights,
+   teleport points. All coordinates in metres, all angles (`rot`,
+   `yaw`) in degrees
+3. Put photos in `photos/my-flat/` and set `meta.photoBase` and
+   `photoSpots`
+4. Open `?apt=my-flat` — a separate tour on the same code
 
-Локально нужен веб-сервер (`python -m http.server` из папки `tour/`):
-fetch-загрузка конфига не работает с file://.
+## Structure
 
-## Структура
-
-| Файл | Что внутри |
+| File | Contents |
 |---|---|
-| `apartments/*.json` | Конфиги квартир: стены, проёмы, полы, мебель, свет, споты (углы в градусах) |
-| `main.js` | Лоадер: выбирает квартиру по `?apt=`, переводит градусы в радианы, стартует |
-| `builder.js` | Строитель сцены: процедурные текстуры, материалы, геометрия, мебель |
-| `bake.js` | Лайтмаппер: трассировка видимости по AABB, запекание в CanvasTexture |
-| `doll.js` | Режим макета: орбитальная камера, срез этажей, клик-телепорт |
-| `controls.js` | Управление от первого лица: коллизии, переходы между уровнями |
-| `app.js` | Инициализация, цикл рендера, мини-карта, подписи комнат |
-| `three.min.js` | Three.js r128 (локальная копия) |
+| `apartments/*.json` | Apartment configs: walls, openings, floors, furniture, lights, spots (angles in degrees) |
+| `main.js` | Loader: picks the apartment via `?apt=`, converts degrees to radians, starts |
+| `builder.js` | Scene builder: procedural textures, materials, geometry, furniture |
+| `bake.js` | Lightmapper: AABB visibility tracing, baking into CanvasTexture |
+| `doll.js` | Dollhouse mode: orbit camera, floor cutaway, click-teleport |
+| `controls.js` | First-person controls: collisions, level transitions |
+| `app.js` | Init, render loop, minimap, room labels |
+| `validate.js` | Automatic layout check: blocked/void openings, room reachability |
+| `three.min.js` | Three.js r128 (local copy) |
 
-## Точность
+## Accuracy
 
-Геометрия снята с поэтажного плана. Размерных линий на плане нет, поэтому
-масштаб откалиброван по стандартной мебели (кровать 180 см, глубина кухонной
-столешницы 60 см, ступень ~20 см). Ожидаемая погрешность ±5–10% — для
-визуализации незаметна, но для замеров модель использовать нельзя.
+The geometry was measured off the floor plan. The plan has no dimension
+lines, so the scale was calibrated against standard furniture (180 cm
+bed, 60 cm kitchen counter depth, ~20 cm stair riser). Expected error is
+±5–10% — invisible for visualisation, but the model must not be used
+for measured surveys.
 
-Детализация — уровень «средняя+»: вся крупная мебель и встроенные шкафы стоят
-на своих местах с реальными цветами и материалами, мелкий декор (вазы, книги,
-посуда) опущен намеренно.
+Detail level is "medium+": all large furniture and built-ins sit in
+their real places with real colours and materials; small decor is
+stylised rather than exact.
