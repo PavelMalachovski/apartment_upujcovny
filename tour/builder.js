@@ -250,6 +250,52 @@ const Builder = (() => {
     });
   }
 
+  // Fired-clay terrace tiles ("červená pálená" per the Horky One standards)
+  function terracottaTex() {
+    return canvasTex(512, 512, (g) => {
+      const T2 = 128;
+      for (let y = 0; y < 512; y += T2) {
+        for (let x = 0; x < 512; x += T2) {
+          const tone = 0.86 + Math.random() * 0.28;
+          g.fillStyle = `rgb(${Math.min(255, 178 * tone) | 0},${(96 * tone) | 0},${(66 * tone) | 0})`;
+          g.fillRect(x, y, T2, T2);
+          for (let i = 0; i < 14; i++) {
+            g.fillStyle = `rgba(120,55,35,${0.05 + Math.random() * 0.1})`;
+            g.beginPath();
+            g.ellipse(x + Math.random() * T2, y + Math.random() * T2,
+              4 + Math.random() * 14, 2 + Math.random() * 6, Math.random() * Math.PI, 0, Math.PI * 2);
+            g.fill();
+          }
+          g.strokeStyle = 'rgba(90,45,30,0.75)'; g.lineWidth = 3;
+          g.strokeRect(x + 1, y + 1, T2 - 2, T2 - 2);
+        }
+      }
+    });
+  }
+
+  // Matte concrete-look 600×600 tiles (Macroni Factor, bathroom)
+  function tileGrayTex() {
+    return canvasTex(512, 512, (g) => {
+      const T2 = 256;
+      for (let y = 0; y < 512; y += T2) {
+        for (let x = 0; x < 512; x += T2) {
+          const tone = 0.92 + Math.random() * 0.14;
+          g.fillStyle = `rgb(${(158 * tone) | 0},${(158 * tone) | 0},${(160 * tone) | 0})`;
+          g.fillRect(x, y, T2, T2);
+          for (let i = 0; i < 60; i++) {
+            g.fillStyle = `rgba(${110 + Math.random() * 90 | 0},${110 + Math.random() * 90 | 0},${115 + Math.random() * 90 | 0},0.07)`;
+            g.beginPath();
+            g.ellipse(x + Math.random() * T2, y + Math.random() * T2,
+              8 + Math.random() * 40, 5 + Math.random() * 22, Math.random() * Math.PI, 0, Math.PI * 2);
+            g.fill();
+          }
+          g.strokeStyle = 'rgba(105,105,108,0.6)'; g.lineWidth = 2;
+          g.strokeRect(x + 1, y + 1, T2 - 2, T2 - 2);
+        }
+      }
+    });
+  }
+
   // ---------- Materials ----------
   const M = {};
   function initMaterials() {
@@ -267,6 +313,8 @@ const Builder = (() => {
     M.marbleW = new T.MeshStandardMaterial({ map: marbleTex('#e9e9eb', 'rgba(120,125,135,A)'), roughness: 0.35 });
     M.marbleB = new T.MeshStandardMaterial({ map: marbleTex('#1a1a1e', 'rgba(220,220,225,A)', 16), roughness: 0.4 });
     M.deck = new T.MeshStandardMaterial({ map: deckTex(), roughness: 0.85 });
+    M.terracotta = new T.MeshStandardMaterial({ map: terracottaTex(), roughness: 0.8 });
+    M.tileGray = new T.MeshStandardMaterial({ map: tileGrayTex(), roughness: 0.4 });
     M.white = new T.MeshStandardMaterial({ color: 0xf5f4f0, roughness: 0.6 });
     M.counter = new T.MeshStandardMaterial({ map: marbleTex('#eceded', 'rgba(140,140,145,A)', 14), roughness: 0.3 });
     M.black = new T.MeshStandardMaterial({ color: 0x17171a, roughness: 0.5 });
@@ -337,7 +385,11 @@ const Builder = (() => {
     }
   }
 
-  // Attic ceiling height (above the upper floor) at point z
+  // Which level the attic sits on ('upper' for kings-court) and its base Y
+  function atticLvl() { return APT.attic ? (APT.attic.lvl || 'upper') : null; }
+  function atticBaseY() { return atticLvl() === 'main' ? APT.mainFloorY : APT.upperFloorY; }
+
+  // Attic ceiling height (above the attic level's floor) at point z
   function atticH(z) {
     const a = APT.attic;
     if (z <= a.ridgeZ) {
@@ -366,7 +418,8 @@ const Builder = (() => {
     const ang = Math.atan2(dz, dx);
     const ux = dx / L, uz = dz / L;
     const baseY = w.lvl === 'main' ? APT.mainFloorY : APT.upperFloorY;
-    const isUpper = w.lvl === 'upper';
+    // walls on the attic's level are clamped to the roof slope
+    const isUpper = !!APT.attic && w.lvl === atticLvl();
     const openings = (w.openings || []).slice().sort((a, b) => a.at - b.at);
 
     // Split into solid pieces
@@ -403,7 +456,7 @@ const Builder = (() => {
     function placeTop(from, to, y0, flatTop, mat) {
       if (!isUpper) { place(from, to, y0, flatTop, mat); return; }
       // coarse step: the wall overlaps the slope outside; inside only the slope shows
-      const step = 0.6;
+      const step = atticLvl() === 'main' ? 0.3 : 0.6;
       for (let s = from; s < to; s += step) {
         const e = Math.min(s + step, to);
         const hA = atticH(w.z1 + uz * s), hB = atticH(w.z1 + uz * e);
@@ -414,7 +467,7 @@ const Builder = (() => {
     function placeClamped(from, to, mat) {
       if (!isUpper) { place(from, to, 0, w.h, mat); return; }
       // coarse step: the wall overlaps the slope outside; inside only the slope shows
-      const step = 0.6;
+      const step = atticLvl() === 'main' ? 0.3 : 0.6;
       for (let s = from; s < to; s += step) {
         const e = Math.min(s + step, to);
         // take the max height over the span so the wall covers the slope without gaps
@@ -460,7 +513,8 @@ const Builder = (() => {
         // a window is an area daylight source for baking
         {
           // normal points into the room: toward the floor centre
-          const roomC = w.lvl === 'main' ? { x: 12, z: 3.2 } : { x: 10, z: 2.5 };
+          const roomC = (APT.roomCenter && APT.roomCenter[w.lvl]) ||
+            (w.lvl === 'main' ? { x: 12, z: 3.2 } : { x: 10, z: 2.5 });
           let nx = uz, nz = -ux;
           if ((roomC.x - cx) * nx + (roomC.z - cz) * nz < 0) { nx = -nx; nz = -nz; }
           bakeData.windows.push({
@@ -468,8 +522,10 @@ const Builder = (() => {
             nx, nz, area: o.w * (winTop - WIN_SILL), lvl: w.lvl
           });
         }
-        // curtains
-        const cc = w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null;
+        // curtains: per-opening override, else the kings-court heuristic
+        const curMap = { beige: M.curtainBeige, green: M.curtainGreen, gray: M.curtainGray };
+        const cc = o.curtain ? curMap[o.curtain]
+          : (w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null);
         if (cc) {
           for (const side of [-1, 1]) {
             const px = cx + ux * side * (o.w / 2 + 0.14);
@@ -516,7 +572,7 @@ const Builder = (() => {
           }
           if (o.entrance) {
             // the entrance door stays closed
-            const leaf = new T.Mesh(new T.BoxGeometry(o.w - 0.08, hh - 0.05, 0.06), M.doorWood);
+            const leaf = new T.Mesh(new T.BoxGeometry(o.w - 0.08, hh - 0.05, 0.06), o.white ? M.white : M.doorWood);
             leaf.position.set(cx, baseY + hh / 2, cz);
             leaf.rotation.y = -ang;
             scene.add(leaf);
@@ -552,7 +608,7 @@ const Builder = (() => {
     } else {
       const key = matKey + '|' + Math.round(w / tile * 4) + '|' + Math.round(h / tile * 4);
       if (!albedoCache[key]) {
-        const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck }[matKey];
+        const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray }[matKey];
         const map = src.map.clone();
         map.needsUpdate = true;
         map.repeat.set(w / tile, h / tile);
@@ -572,8 +628,8 @@ const Builder = (() => {
   }
 
   function buildFloors(scene) {
-    const matOf = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck };
-    const tiles = { wood: 4.2, marbleW: 2.2, deck: 3.2 };
+    const matOf = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray };
+    const tiles = { wood: 4.2, marbleW: 2.2, deck: 3.2, terracotta: 2.0, tileGray: 2.4 };
     for (const [lvlName, list] of Object.entries(APT.floors)) {
       const y = lvlName === 'main' ? APT.mainFloorY : lvlName === 'upper' ? APT.upperFloorY : APT.terraceY;
       for (const f of list) {
@@ -603,9 +659,11 @@ const Builder = (() => {
         w, d, Math.PI / 2, 'white', 5, 'main', false, 1);
     }
 
-    // Attic ceiling: two bakeable slopes
-    const a = APT.attic, y0 = APT.upperFloorY;
-    const x1 = 3.9, x2 = 17.2;
+    // Attic ceiling: two bakeable slopes (+ optional skylights)
+    if (!APT.attic) return;
+    const a = APT.attic, y0 = atticBaseY();
+    const x1 = (a.x1 !== undefined) ? a.x1 : 3.9;
+    const x2 = (a.x2 !== undefined) ? a.x2 : 17.2;
     function slope(zA, hA, zB, hB) {
       const len = Math.hypot(zB - zA, hB - hA) + 0.3;
       const geo = new T.PlaneGeometry(x2 - x1, len);
@@ -618,11 +676,38 @@ const Builder = (() => {
       // π/2 - pitch: the plane normal faces down into the room (matters for baking)
       mesh.rotation.x = Math.PI / 2 - pitch;
       mesh.userData.baked = 1;
+      mesh.userData.dollRoof = 1;
       scene.add(mesh);
-      bakeData.surfaces.push({ mesh, w: x2 - x1, h: len, res: 5, lvl: 'upper', outdoor: false });
+      bakeData.surfaces.push({ mesh, w: x2 - x1, h: len, res: 5, lvl: atticLvl(), outdoor: false });
     }
     slope(a.northZ, a.northH, a.ridgeZ, a.ridgeH);
     slope(a.ridgeZ, a.ridgeH, a.southZ, a.southH);
+
+    // Roof windows sitting flush in the slope: glass + frame + a daylight
+    // source for the bake whose normal points down into the room
+    for (const sk of a.skylights || []) {
+      const yA = y0 + atticH(sk.zA), yB = y0 + atticH(sk.zB);
+      const len = Math.hypot(sk.zB - sk.zA, yB - yA);
+      const pitch = Math.atan2(yB - yA, sk.zB - sk.zA);
+      const cx = sk.x, cz = (sk.zA + sk.zB) / 2, cy = (yA + yB) / 2;
+      const rotX = Math.PI / 2 - pitch;
+      // plane normal after rotX: (0, -cos(pitch), sin(pitch)) — down into the room
+      const ny = -Math.cos(pitch), nz = Math.sin(pitch);
+      const fr = new T.Mesh(new T.BoxGeometry(sk.w + 0.12, len + 0.12, 0.08), M.white);
+      fr.position.set(cx + 0, cy + ny * 0.01, cz + nz * 0.01);
+      fr.rotation.x = rotX;
+      fr.userData.dollRoof = 1;
+      scene.add(fr);
+      const gl = new T.Mesh(new T.PlaneGeometry(sk.w, len), M.winGlass);
+      gl.position.set(cx, cy + ny * 0.055, cz + nz * 0.055);
+      gl.rotation.x = rotX;
+      gl.userData.dollRoof = 1;
+      scene.add(gl);
+      bakeData.windows.push({
+        x: cx, y: cy + ny * 0.1, z: cz + nz * 0.1,
+        nx: 0, ny, nz, area: sk.w * len, lvl: atticLvl()
+      });
+    }
   }
 
   // ---------- Stairs ----------
@@ -702,6 +787,48 @@ const Builder = (() => {
     // chimneys
     box(0.8, 1.8, 0.8, bldg2, -3.6, y + 5.6, -4.6, scene);
     box(0.6, 1.4, 0.6, bldg, -6.5, y + 3.9, 9.0, scene);
+  }
+
+  // ---------- Generic railings (metal, per the standards) ----------
+  function buildRails(scene) {
+    for (const r of APT.rails || []) {
+      const y = (r.y !== undefined) ? r.y : APT.terraceY;
+      const L = Math.hypot(r.x2 - r.x1, r.z2 - r.z1);
+      if (L < 0.05) continue;
+      const ang = Math.atan2(r.z2 - r.z1, r.x2 - r.x1);
+      const cx = (r.x1 + r.x2) / 2, cz = (r.z1 + r.z2) / 2;
+      for (const [hh, th] of [[0.35, 0.02], [0.65, 0.02], [1.02, 0.05]]) {
+        const bar = new T.Mesh(new T.BoxGeometry(L, th, th === 0.05 ? 0.05 : 0.02), M.metalBlack);
+        bar.position.set(cx, y + hh, cz);
+        bar.rotation.y = -ang;
+        scene.add(bar);
+      }
+      const nPosts = Math.max(2, Math.round(L / 1.1) + 1);
+      for (let i = 0; i < nPosts; i++) {
+        const f = i / (nPosts - 1);
+        cyl(0.018, 0.018, 1.02, M.metalBlack,
+          r.x1 + (r.x2 - r.x1) * f, y + 0.51, r.z1 + (r.z2 - r.z1) * f, scene, 8);
+      }
+      colliders.segs.push({ x1: r.x1, z1: r.z1, x2: r.x2, z2: r.z2, lvl: y < 1.5 ? 'main' : 'terrace' });
+    }
+  }
+
+  // ---------- Neighbouring building masses (config-driven) ----------
+  function buildSurroundings(scene) {
+    if (!APT.surroundings) return;
+    const mats = {
+      bldg: new T.MeshStandardMaterial({ color: 0xcbb9a4, roughness: 0.95 }),
+      bldg2: new T.MeshStandardMaterial({ color: 0xb5a08c, roughness: 0.95 }),
+      roofRed: new T.MeshStandardMaterial({ color: 0x9c5038, roughness: 0.9 })
+    };
+    for (const s of APT.surroundings) {
+      box(s.w, s.h, s.d, mats[s.mat] || mats.bldg, s.x, (s.y || 0) + s.h / 2, s.z, scene);
+      if (s.occ) addOccluder(s.x, (s.y || 0) + s.h / 2, s.z, s.w, s.h, s.d);
+      if (s.solid) colliders.boxes.push({
+        x1: s.x - s.w / 2, z1: s.z - s.d / 2, x2: s.x + s.w / 2, z2: s.z + s.d / 2,
+        lvl: (s.y || 0) < 1.5 ? 'main' : 'terrace'
+      });
+    }
   }
 
   // ---------- Furniture ----------
@@ -914,7 +1041,7 @@ const Builder = (() => {
   };
 
   F.wallPanel = (o, g) => {
-    const mat = o.mat === 'black' ? M.marbleB : M.marbleW;
+    const mat = o.mat === 'black' ? M.marbleB : o.mat === 'tile' ? M.tileGray : M.marbleW;
     const h = o.h || 2.6;
     box(o.w, h, 0.04, mat, 0, h / 2, 0, g);
     return { noCollide: true };
@@ -1088,13 +1215,17 @@ const Builder = (() => {
       ch.position.set(cx, 0, cz); ch.rotation.y = rot;
       g.add(ch);
     };
-    for (let i = 0; i < 3; i++) {
-      const x = -o.w / 2 + (i + 0.5) * o.w / 3;
+    // chair count scales with the table; small tables skip the end chairs
+    const nSide = Math.max(1, Math.round(o.w / 0.75));
+    for (let i = 0; i < nSide; i++) {
+      const x = -o.w / 2 + (i + 0.5) * o.w / nSide;
       chairAt(x, o.d / 2 + 0.25, Math.PI);
       chairAt(x, -o.d / 2 - 0.25, 0);
     }
-    chairAt(o.w / 2 + 0.3, 0, -Math.PI / 2);
-    chairAt(-o.w / 2 - 0.3, 0, Math.PI / 2);
+    if (o.ends !== false) {
+      chairAt(o.w / 2 + 0.3, 0, -Math.PI / 2);
+      chairAt(-o.w / 2 - 0.3, 0, Math.PI / 2);
+    }
     // table setting: plates, glasses, napkins
     const plateAt = (px, pz) => {
       cyl(0.115, 0.1, 0.012, M.white, px, 0.762, pz, g, 16);
@@ -1103,12 +1234,12 @@ const Builder = (() => {
       cyl(0.004, 0.028, 0.08, M.clearGlass, px + 0.16, 0.8, pz, g, 8);
       cyl(0.03, 0.028, 0.06, M.clearGlass, px + 0.16, 0.87, pz, g, 8);
     };
-    for (let i = 0; i < 3; i++) {
-      const x = -o.w / 2 + (i + 0.5) * o.w / 3;
+    for (let i = 0; i < nSide; i++) {
+      const x = -o.w / 2 + (i + 0.5) * o.w / nSide;
       plateAt(x, o.d / 2 - 0.22);
       plateAt(x, -o.d / 2 + 0.22);
     }
-    return { w: o.w + 1.1, d: o.d + 1.1 };
+    return { w: o.w + (o.ends !== false ? 1.1 : 0.2), d: o.d + 1.1 };
   };
 
   F.pendants = (o, g) => {
@@ -1128,17 +1259,28 @@ const Builder = (() => {
 
   F.kitchenRun = (o, g) => {
     // base cabinets + counter + splashback + wall cabinets
-    box(o.w, 0.86, o.d, M.ash, 0, 0.43, 0, g);
-    box(o.w, 0.04, o.d + 0.04, M.counter, 0, 0.9, 0.02, g);
-    box(o.w, 0.6, 0.02, M.ashV, 0, 1.3, -o.d / 2 + 0.01, g);         // splashback
-    box(o.w, 0.75, 0.35, M.ash, 0, 2.1, -o.d / 2 + 0.18, g);          // uppers
+    // colour options (Horky One: white lowers, anthracite uppers, wood top)
+    const cab = o.cab === 'white' ? M.white : M.ash;
+    const top = o.top === 'wood' ? M.doorWood : M.counter;
+    const upper = o.upper === 'black' ? M.black : M.ash;
+    const splash = o.top === 'wood' ? M.doorWood : M.ashV;
+    box(o.w, 0.86, o.d, cab, 0, 0.43, 0, g);
+    box(o.w, 0.04, o.d + 0.04, top, 0, 0.9, 0.02, g);
+    box(o.w, 0.6, 0.02, splash, 0, 1.3, -o.d / 2 + 0.01, g);         // splashback
+    box(o.w, 0.75, 0.35, upper, 0, 2.1, -o.d / 2 + 0.18, g);          // uppers
     // open shelf with dishes (schematic)
-    box(o.w * 0.4, 0.02, 0.25, M.ashV, -o.w * 0.1, 1.62, -o.d / 2 + 0.14, g);
-    // sink + tap
-    box(0.5, 0.02, 0.4, M.chrome, -o.w / 2 + 0.5, 0.915, 0, g);
-    const tap = cyl(0.015, 0.015, 0.3, M.chrome, -o.w / 2 + 0.5, 1.05, -0.15, g, 8);
-    tap.rotation.x = 0.0;
-    // the hob is on the island — this column holds the oven/microwave
+    if (!o.noShelf) box(o.w * 0.4, 0.02, 0.25, M.ashV, -o.w * 0.1, 1.62, -o.d / 2 + 0.14, g);
+    // sink + tap (o.sink: offset from the centre along the run)
+    const sx = (o.sink !== undefined) ? o.sink : -o.w / 2 + 0.5;
+    box(0.5, 0.02, 0.4, M.chrome, sx, 0.915, 0, g);
+    cyl(0.015, 0.015, 0.3, M.chrome, sx, 1.05, -0.15, g, 8);
+    // optional hob in the counter (otherwise it lives on the island)
+    if (o.hob !== undefined) {
+      box(0.6, 0.012, 0.5, M.black, o.hob, 0.925, 0, g);
+      for (const [bx, bz] of [[-0.14, -0.12], [0.14, -0.12], [-0.14, 0.12], [0.14, 0.12]]) {
+        cyl(0.07, 0.07, 0.006, M.metalBlack, o.hob + bx, 0.935, bz, g, 12);
+      }
+    }
     return { w: o.w, d: o.d };
   };
 
@@ -1448,7 +1590,8 @@ const Builder = (() => {
       g.rotation.y = item.rot || 0;
       const res = fn(item, g) || {};
       scene.add(g);
-      const clvl = item.lvl;
+      // a street-level terrace shares the walking level with 'main'
+      const clvl = (item.lvl === 'terrace' && APT.terraceY < 1.5) ? 'main' : item.lvl;
       const occH = OCC_H[item.type] || 0.8;
       const canOcclude = !OCC_SKIP.includes(item.type);
       if (res.custom) {
@@ -1479,8 +1622,13 @@ const Builder = (() => {
     scene.add(sun);
     for (const l of APT.lights) {
       let y;
-      if (l.lvl === 'main') y = APT.mainCeilH - 0.3;
+      if (l.lvl === 'main') {
+        y = APT.mainCeilH - 0.3;
+        // with the attic on the main level, lamps hang from the slope
+        if (APT.attic && atticLvl() === 'main') y = APT.mainFloorY + Math.max(1.9, atticH(l.z) - 0.35);
+      }
       else if (l.lvl === 'stair') y = 4.6;
+      else if (l.lvl === 'terrace') y = APT.terraceY + 2.1;
       else y = APT.upperFloorY + Math.min(2.3, atticH(l.z) - 0.3);
       // only lights marked dyn stay dynamic — the rest live in the bake
       if (l.dyn) {
@@ -1506,7 +1654,7 @@ const Builder = (() => {
     const box = new T.Box3();
 
     function collect(mesh) {
-      if (!mesh.isMesh || mesh.userData.doll || mesh.userData.baked) return;
+      if (!mesh.isMesh || mesh.userData.doll || mesh.userData.baked || mesh.userData.dollRoof) return;
       mesh.updateWorldMatrix(true, false);
       const geo = (mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone());
       geo.applyMatrix4(mesh.matrixWorld);
@@ -1522,7 +1670,7 @@ const Builder = (() => {
       if (child.isGroup && furnGroups.includes(child)) {
         child.traverse((m) => collect(m));
         toRemove.push(child);
-      } else if (child.isMesh && !child.userData.doll && !child.userData.baked) {
+      } else if (child.isMesh && !child.userData.doll && !child.userData.baked && !child.userData.dollRoof) {
         collect(child);
         toRemove.push(child);
       }
@@ -1558,8 +1706,10 @@ const Builder = (() => {
     initMaterials();
     buildFloors(scene);
     for (const w of APT.walls) buildWall(scene, w);
-    buildStairs(scene);
-    buildTerrace(scene);
+    if (APT.stairs) buildStairs(scene);
+    if (APT.terraceSteps) buildTerrace(scene);   // kings-court style wooden terrace
+    buildRails(scene);
+    buildSurroundings(scene);
     buildFurniture(scene);
     buildLights(scene);
     return colliders;

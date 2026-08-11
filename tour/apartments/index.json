@@ -1,6 +1,19 @@
 {
  "apartments": [
   {
+   "id": "horkyone-10",
+   "title": "Horky One — Apartment 10",
+   "subtitle": "2kk attic flat with a corner terrace",
+   "cover": "photos/horkyone-10/3.webp",
+   "specs": [
+    "51.4 m²",
+    "2kk",
+    "6. NP",
+    "terrace"
+   ],
+   "highlights": "An attic 2kk with a glazed living-room wall onto a corner roof terrace, skylights over the lounge, a walk-in shower and oak floors throughout"
+  },
+  {
    "id": "kings-court",
    "title": "Kings Court Apartment",
    "subtitle": "Two-level penthouse with a roof terrace",

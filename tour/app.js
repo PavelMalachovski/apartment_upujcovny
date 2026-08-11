@@ -50,6 +50,13 @@ window.initApp = function () {
   document.getElementById('dollLvl1').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('1'); });
   document.getElementById('dollLvl2').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('2'); });
   document.getElementById('dollLvlAll').addEventListener('click', (e) => { e.stopPropagation(); doll.setLevel('all'); });
+  // single-level flats have nothing to cut away — hide the level switch
+  const singleLevel = !(APT.floors.upper && APT.floors.upper.length);
+  if (singleLevel) {
+    document.getElementById('dollLvl1').style.display = 'none';
+    document.getElementById('dollLvl2').style.display = 'none';
+    document.getElementById('dollLvlAll').style.display = 'none';
+  }
   document.getElementById('dollMeasure').addEventListener('click', (e) => {
     e.stopPropagation();
     doll.setMeasure(!doll.measure);
@@ -73,9 +80,10 @@ window.initApp = function () {
   const roomsBtn = document.getElementById('roomsBtn');
   const roomsPanel = document.getElementById('roomsPanel');
   let lastLvl = null;
+  const oneLvlMenu = APT.spawns.every(s => s.g === APT.spawns[0].g);
   for (const s of APT.spawns) {
     const lvl = s.g === 0 ? 'Ground floor' : 'Upper floor & terrace';
-    if (lvl !== lastLvl) {
+    if (!oneLvlMenu && lvl !== lastLvl) {
       const hdr = document.createElement('div');
       hdr.className = 'lvl';
       hdr.textContent = lvl;
@@ -115,13 +123,22 @@ window.initApp = function () {
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Escape') roomsPanel.style.display = 'none';
   });
+  const aptIntro = (APT.meta && APT.meta.description)
+    ? APT.meta.description
+    : 'A two-level apartment with a roof terrace, rebuilt from photos and the floor plan';
   if (controls.isTouch) {
     document.getElementById('overlayText').innerHTML =
-      'A two-level apartment with a roof terrace, rebuilt from photos and the floor plan.<br>' +
+      aptIntro + '.<br>' +
       'Left half of the screen — walk joystick, right half — look around.<br>' +
       'Buttons top left: <b>☰ Rooms</b> — teleport, <b>⌂ Dollhouse</b> — top view.<br>' +
-      '📷 markers in rooms show real photographs.';
+      '📷 markers in rooms show the photographs.';
     document.getElementById('goBtn').textContent = 'Tap to enter';
+  } else {
+    document.getElementById('overlayText').innerHTML =
+      aptIntro + '.<br>' +
+      'WASD / arrows — walk, hold the mouse and drag — look around.<br>' +
+      'Buttons top left: <b>☰ Rooms</b> — teleport, <b>⌂ Dollhouse</b> — top view.<br>' +
+      '📷 markers in rooms show the photographs.';
   }
 
   // ---------- Photo spots: markers + viewer ----------
@@ -207,7 +224,7 @@ window.initApp = function () {
     const s = APT.photoSpots[photoIdx];
     document.getElementById('photoImg').src = photoBase + s.file;
     document.getElementById('photoCap').textContent =
-      s.name + ' — real photo · ' + (photoIdx + 1) + ' / ' + APT.photoSpots.length;
+      s.name + ' — ' + (s.vis ? 'visualization' : 'real photo') + ' · ' + (photoIdx + 1) + ' / ' + APT.photoSpots.length;
     preloadAround(photoIdx);
   }
   function openPhoto(s) {
@@ -262,7 +279,8 @@ window.initApp = function () {
   // ---------- Minimap ----------
   const mapC = document.getElementById('minimap');
   const mg = mapC.getContext('2d');
-  const MAP = { x1: -5.4, z1: -2.6, x2: 24.4, z2: 7.2 };
+  // bounds: meta.map override, else the kings-court numbers (legacy default)
+  const MAP = (APT.meta && APT.meta.map) || { x1: -5.4, z1: -2.6, x2: 24.4, z2: 7.2 };
   // The front door, taken from whichever opening is flagged as the entrance.
   const entrance = (() => {
     for (const w of APT.walls) {
@@ -287,10 +305,11 @@ window.initApp = function () {
     mg.clearRect(0, 0, mapC.width, mapC.height);
     mg.fillStyle = 'rgba(20,22,26,0.78)';
     mg.fillRect(0, 0, mapC.width, mapC.height);
-    // floors
+    // floors: a street-level terrace belongs to the main view
+    const lowTerrace = (APT.terraceY !== undefined && APT.terraceY < 1.5);
     const lists = upper
-      ? [...APT.floors.upper, ...APT.floors.terrace]
-      : APT.floors.main;
+      ? [...(APT.floors.upper || []), ...(lowTerrace ? [] : APT.floors.terrace || [])]
+      : [...APT.floors.main, ...(lowTerrace ? APT.floors.terrace || [] : [])];
     mg.fillStyle = upper ? 'rgba(190,175,150,0.25)' : 'rgba(190,175,150,0.25)';
     for (const f of lists) {
       const [a, b] = mapPt(f.x1, f.z1), [c, d] = mapPt(f.x2, f.z2);
@@ -306,12 +325,14 @@ window.initApp = function () {
       mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
     }
     // stairs
-    mg.strokeStyle = 'rgba(232,226,213,0.5)';
-    const s = APT.stairs;
-    for (let i = 0; i <= 8; i++) {
-      const x = s.x1 + (s.x2 - s.x1) * i / 8;
-      const [a, b] = mapPt(x, s.z1), [c, d] = mapPt(x, s.z2);
-      mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
+    if (APT.stairs) {
+      mg.strokeStyle = 'rgba(232,226,213,0.5)';
+      const s = APT.stairs;
+      for (let i = 0; i <= 8; i++) {
+        const x = s.x1 + (s.x2 - s.x1) * i / 8;
+        const [a, b] = mapPt(x, s.z1), [c, d] = mapPt(x, s.z2);
+        mg.beginPath(); mg.moveTo(a, b); mg.lineTo(c, d); mg.stroke();
+      }
     }
     // front door: the anchor everyone orients from on the ground floor
     if (entrance && !upper) {
@@ -352,7 +373,10 @@ window.initApp = function () {
     // floor caption
     mg.fillStyle = '#fff';
     mg.font = '11px system-ui';
-    mg.fillText(upper ? 'Upper floor · terrace' : 'Ground floor', 8, mapC.height - 8);
+    const capt = singleLevel
+      ? ((APT.meta && APT.meta.levelLabel) || 'Floor plan')
+      : (upper ? 'Upper floor · terrace' : 'Ground floor');
+    mg.fillText(capt, 8, mapC.height - 8);
   }
 
   // ---------- Current-room label ----------

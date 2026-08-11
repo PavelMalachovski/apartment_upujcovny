@@ -91,7 +91,8 @@ const Baker = (() => {
       const d = Math.sqrt(d2);
       const cos = (ddx * N.x + ddy * N.y + ddz * N.z) / d;
       if (cos <= 0) continue;
-      if ((P.x - Wn.x) * Wn.nx + (P.z - Wn.z) * Wn.nz < 0) continue;
+      // skip points behind the window plane (ny: skylights face downward)
+      if ((P.x - Wn.x) * Wn.nx + (P.y - Wn.y) * (Wn.ny || 0) + (P.z - Wn.z) * Wn.nz < 0) continue;
       let vis = 0;
       for (const [jx, jz] of JIT) {
         _Q.set(Wn.x + jx * 0.5, Wn.y + jz, Wn.z + jx * 0.5 * Math.abs(Wn.nx));
