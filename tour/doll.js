@@ -11,8 +11,13 @@ class DollMode {
     this.dom = dom;
     this.on = false;
     this.level = 'all';                       // '1' | '2' | 'all'
-    this.orbit = { yaw: -Math.PI / 2, pitch: 0.95, dist: 17 };
-    this.target = new THREE.Vector3(12.4, 1.2, 2.3);
+    // orbit target/distance: meta.doll override, kings-court defaults otherwise
+    const md = (APT.meta && APT.meta.doll) || {};
+    this.orbit = { yaw: -Math.PI / 2, pitch: 0.95, dist: md.dist || 17 };
+    this.target = new THREE.Vector3(
+      md.x !== undefined ? md.x : 12.4,
+      md.y !== undefined ? md.y : 1.2,
+      md.z !== undefined ? md.z : 2.3);
     this.camPos = new THREE.Vector3();
     this.groups = { g1: [], g2: [], roof: [], walls1: null, walls2: null };
     this.ray = new THREE.Raycaster();
@@ -151,6 +156,7 @@ class DollMode {
       if (!(o.isMesh || o.isPoints) || o.parent !== this.scene) return;
       if (o.userData.doll === 'walls1') { this.groups.walls1 = o; return; }
       if (o.userData.doll === 'walls2') { this.groups.walls2 = o; return; }
+      if (o.userData.dollRoof) { this.groups.roof.push(o); return; }
       if (o.userData.mergeLvl) {
         (o.userData.mergeLvl === 1 ? this.groups.g1 : this.groups.g2).push(o);
         return;

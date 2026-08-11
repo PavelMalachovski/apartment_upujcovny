@@ -1,0 +1,211 @@
+{
+ "mainFloorY": 0,
+ "mainCeilH": 2.62,
+ "terraceY": -0.04,
+
+ "attic": {
+  "lvl": "main",
+  "x1": -0.45, "x2": 10.25,
+  "northZ": -0.4, "northH": 2.62,
+  "ridgeZ": 4.15, "ridgeH": 3.7,
+  "southZ": 6.75, "southH": 2.4,
+  "skylights": [
+   { "x": 6.2, "w": 0.9, "zA": 2.0, "zB": 3.1 },
+   { "x": 8.1, "w": 0.9, "zA": 2.0, "zB": 3.1 }
+  ]
+ },
+
+ "roomCenter": { "main": { "x": 6.5, "z": 2.2 } },
+
+ "walls": [
+  { "lvl": "main", "x1": -0.14, "z1": -0.07, "x2": 9.81, "z2": -0.07, "h": 3.8, "ext": true },
+
+  { "lvl": "main", "x1": -0.07, "z1": -0.14, "x2": -0.07, "z2": 3.28, "h": 3.8, "ext": true,
+    "openings": [ { "at": 1.0, "w": 1.38, "type": "win" } ] },
+
+  { "lvl": "main", "x1": -0.14, "z1": 3.21, "x2": 4.93, "z2": 3.21, "h": 3.8, "ext": true },
+
+  { "lvl": "main", "x1": 4.86, "z1": -0.07, "x2": 4.86, "z2": 6.41, "h": 3.8,
+    "openings": [ { "at": 1.89, "w": 0.82, "type": "door" } ] },
+
+  { "lvl": "main", "x1": 4.62, "z1": -0.07, "x2": 4.62, "z2": 1.41, "h": 3.8 },
+  { "lvl": "main", "x1": 4.62, "z1": 1.41, "x2": 4.86, "z2": 1.41, "h": 3.8 },
+
+  { "lvl": "main", "x1": 4.86, "z1": 4.18, "x2": 9.81, "z2": 4.18, "h": 3.8,
+    "openings": [ { "at": 2.5, "w": 0.82, "type": "door" } ] },
+
+  { "lvl": "main", "x1": 5.01, "z1": 4.18, "x2": 5.01, "z2": 6.41, "h": 3.8 },
+
+  { "lvl": "main", "x1": 7.14, "z1": 4.18, "x2": 7.14, "z2": 6.41, "h": 3.8,
+    "openings": [ { "at": 1.45, "w": 0.78, "type": "door" } ] },
+
+  { "lvl": "main", "x1": 4.86, "z1": 6.41, "x2": 9.15, "z2": 6.41, "h": 3.8, "ext": true,
+    "openings": [ { "at": 2.49, "w": 0.83, "type": "door", "entrance": true, "white": true } ] },
+
+  { "lvl": "main", "x1": 8.33, "z1": 4.18, "x2": 8.33, "z2": 5.47, "h": 3.8 },
+  { "lvl": "main", "x1": 8.33, "z1": 5.47, "x2": 9.15, "z2": 5.47, "h": 3.8 },
+  { "lvl": "main", "x1": 9.08, "z1": 5.47, "x2": 9.08, "z2": 6.41, "h": 3.8 },
+  { "lvl": "main", "x1": 9.81, "z1": 4.18, "x2": 9.81, "z2": 5.47, "h": 3.8, "ext": true },
+
+  { "lvl": "main", "x1": 9.81, "z1": -0.07, "x2": 9.81, "z2": 4.18, "h": 3.8, "ext": true,
+    "openings": [
+     { "at": 0.57, "w": 0.97, "type": "door", "terrace": true },
+     { "at": 1.54, "w": 1.0, "type": "win", "curtain": "gray" },
+     { "at": 3.07, "w": 1.02, "type": "win", "curtain": "gray" }
+    ] }
+ ],
+
+ "floors": {
+  "main": [
+   { "x1": -0.07, "z1": -0.07, "x2": 4.86, "z2": 3.21, "mat": "wood" },
+   { "x1": 4.86, "z1": -0.07, "x2": 9.81, "z2": 4.18, "mat": "wood" },
+   { "x1": 4.93, "z1": 4.18, "x2": 7.14, "z2": 6.41, "mat": "tileGray" },
+   { "x1": 7.14, "z1": 4.18, "x2": 8.33, "z2": 6.41, "mat": "wood" },
+   { "x1": 8.33, "z1": 5.4, "x2": 9.15, "z2": 6.41, "mat": "wood" }
+  ],
+  "terrace": [
+   { "x1": 9.88, "z1": -0.03, "x2": 10.51, "z2": 4.87, "mat": "terracotta" },
+   { "x1": 10.51, "z1": -0.03, "x2": 11.14, "z2": 4.51, "mat": "terracotta" },
+   { "x1": 11.14, "z1": -0.03, "x2": 11.77, "z2": 4.16, "mat": "terracotta" },
+   { "x1": 11.77, "z1": -0.03, "x2": 12.4, "z2": 3.82, "mat": "terracotta" }
+  ]
+ },
+ "mainCeil": [
+  { "x1": 8.33, "z1": 4.18, "x2": 9.81, "z2": 5.47 }
+ ],
+
+ "rails": [
+  { "x1": 9.88, "z1": 0.0, "x2": 12.85, "z2": 0.0 },
+  { "x1": 12.4, "z1": 0.0, "x2": 12.4, "z2": 3.82 },
+  { "x1": 11.77, "z1": 3.82, "x2": 12.4, "z2": 3.82 },
+  { "x1": 11.77, "z1": 3.82, "x2": 11.77, "z2": 4.16 },
+  { "x1": 11.14, "z1": 4.16, "x2": 11.77, "z2": 4.16 },
+  { "x1": 11.14, "z1": 4.16, "x2": 11.14, "z2": 4.51 },
+  { "x1": 10.51, "z1": 4.51, "x2": 11.14, "z2": 4.51 },
+  { "x1": 10.51, "z1": 4.51, "x2": 10.51, "z2": 4.87 },
+  { "x1": 9.88, "z1": 4.87, "x2": 10.51, "z2": 4.87 }
+ ],
+
+ "surroundings": [
+  { "x": 12.1, "z": 5.6, "w": 3.4, "d": 1.6, "h": 2.4, "mat": "bldg2", "occ": true },
+  { "x": 13.9, "z": 4.4, "w": 2.6, "d": 1.4, "h": 2.8, "mat": "bldg2", "occ": true },
+  { "x": 4.0, "z": 8.6, "w": 14.0, "d": 3.6, "h": 3.4, "mat": "bldg", "occ": true },
+  { "x": -2.6, "z": 5.0, "w": 3.0, "d": 6.0, "h": 1.0, "y": -0.8, "mat": "roofRed" },
+  { "x": 14.6, "z": 1.6, "w": 3.0, "d": 6.5, "h": 0.5, "y": -1.0, "mat": "roofRed" },
+  { "x": 5.0, "z": -9.5, "w": 26.0, "d": 5.0, "h": 4.5, "y": -3.0, "mat": "bldg2" }
+ ],
+
+ "furniture": [
+  { "type": "bed", "x": 1.73, "z": 1.12, "lvl": "main", "w": 1.6, "len": 2.0, "throwPat": "stripes" },
+  { "type": "cushions", "x": 1.73, "z": 0.45, "lvl": "main", "h": 0.6, "set": ["sage", "pink"] },
+  { "type": "sideTable", "x": 0.62, "z": 0.28, "lvl": "main" },
+  { "type": "sideTable", "x": 2.84, "z": 0.28, "lvl": "main" },
+  { "type": "wardrobe", "x": 4.25, "z": 1.1, "lvl": "main", "w": 0.6, "d": 1.6, "rot": 180 },
+  { "type": "sideboard", "x": 1.25, "z": 2.95, "lvl": "main", "w": 1.7, "d": 0.35 },
+  { "type": "vaseFlowers", "x": 1.0, "z": 2.95, "lvl": "main", "h": 0.46, "kind": "pampas" },
+  { "type": "plant", "x": 0.45, "z": 2.7, "lvl": "main", "big": true },
+
+  { "type": "sofa", "x": 8.2, "z": 0.55, "lvl": "main", "w": 1.8, "d": 0.95, "col": "cream", "rot": 180 },
+  { "type": "cushions", "x": 8.2, "z": 0.72, "lvl": "main", "h": 0.48, "set": ["olive", "gray"] },
+  { "type": "rug", "x": 6.95, "z": 1.3, "lvl": "main", "w": 1.7, "d": 1.9, "pat": "light" },
+  { "type": "roundTable", "x": 7.05, "z": 1.1, "lvl": "main", "r": 0.35, "glass": true },
+  { "type": "armchair", "x": 6.55, "z": 1.5, "lvl": "main", "col": "graybrown", "rot": 315 },
+  { "type": "tvOnWall", "x": 4.72, "z": 0.78, "lvl": "main", "w": 1.2, "rot": 90 },
+  { "type": "sideboard", "x": 5.11, "z": 0.78, "lvl": "main", "w": 0.35, "d": 1.3 },
+  { "type": "diningTable", "x": 8.92, "z": 3.28, "lvl": "main", "w": 1.2, "d": 0.8, "rot": 0, "ends": false },
+  { "type": "kitchenRun", "x": 6.34, "z": 3.81, "lvl": "main", "w": 1.64, "d": 0.6, "rot": 180,
+    "cab": "white", "upper": "black", "top": "wood", "noShelf": true, "sink": 0.55, "hob": -0.35 },
+  { "type": "tallUnits", "x": 5.23, "z": 3.78, "lvl": "main", "w": 0.58, "d": 0.65, "rot": 180 },
+  { "type": "wardrobe", "x": 5.22, "z": 3.13, "lvl": "main", "w": 0.6, "d": 0.5, "rot": 180 },
+  { "type": "coffeeMachine", "x": 6.95, "z": 3.95, "lvl": "main", "h": 0.92 },
+  { "type": "fruitBowl", "x": 6.3, "z": 3.9, "lvl": "main", "h": 0.92 },
+  { "type": "plant", "x": 9.45, "z": 0.35, "lvl": "main" },
+
+  { "type": "wallPanel", "x": 6.03, "z": 4.25, "lvl": "main", "w": 2.1, "h": 2.3, "mat": "tile" },
+  { "type": "wallPanel", "x": 5.1, "z": 5.32, "lvl": "main", "w": 2.1, "h": 2.3, "mat": "tile", "rot": 90 },
+  { "type": "wallPanel", "x": 6.03, "z": 6.32, "lvl": "main", "w": 2.1, "h": 2.3, "mat": "tile" },
+  { "type": "wallPanel", "x": 7.04, "z": 5.32, "lvl": "main", "w": 2.1, "h": 2.3, "mat": "tile", "rot": 90 },
+  { "type": "shower", "x": 5.55, "z": 5.8, "lvl": "main", "w": 1.1, "d": 0.9, "rot": 90 },
+  { "type": "wc", "x": 5.36, "z": 4.8, "lvl": "main", "w": 0.42, "d": 0.55, "rot": 90 },
+  { "type": "vanity", "x": 6.55, "z": 4.53, "lvl": "main", "w": 0.85, "d": 0.5 },
+  { "type": "toiletries", "x": 6.35, "z": 4.5, "lvl": "main", "h": 0.94 },
+  { "type": "towels", "x": 6.85, "z": 4.5, "lvl": "main", "h": 0.94, "n": 2 },
+  { "type": "bathMat", "x": 5.6, "z": 5.05, "lvl": "main" },
+
+  { "type": "bench", "x": 8.7, "z": 6.1, "lvl": "main", "w": 0.75, "d": 0.32 },
+  { "type": "runner", "x": 7.75, "z": 5.3, "lvl": "main", "w": 0.7, "d": 1.6 },
+  { "type": "painting", "x": 7.23, "z": 5.2, "lvl": "main", "style": "leaf", "rot": 90 },
+
+  { "type": "terraceChair", "x": 11.55, "z": 1.0, "lvl": "terrace", "rot": 210 },
+  { "type": "terraceChair", "x": 11.95, "z": 2.35, "lvl": "terrace", "rot": 255 },
+  { "type": "terraceTable", "x": 11.05, "z": 1.7, "lvl": "terrace", "w": 0.65, "d": 0.65 },
+  { "type": "planter", "x": 10.35, "z": 0.4, "lvl": "terrace" },
+  { "type": "planter", "x": 12.25, "z": 0.45, "lvl": "terrace" },
+  { "type": "lantern", "x": 12.0, "z": 3.35, "lvl": "terrace" },
+  { "type": "stringLights", "x": 11.35, "z": 0.12, "lvl": "terrace", "w": 2.8, "h": 1.9 }
+ ],
+
+ "lights": [
+  { "x": 1.73, "z": 1.6, "lvl": "main", "dyn": true },
+  { "x": 3.9, "z": 2.4, "lvl": "main" },
+  { "x": 6.4, "z": 1.3, "lvl": "main", "dyn": true },
+  { "x": 8.85, "z": 3.2, "lvl": "main" },
+  { "x": 6.4, "z": 3.6, "lvl": "main" },
+  { "x": 6.0, "z": 5.3, "lvl": "main", "dyn": true },
+  { "x": 7.75, "z": 5.5, "lvl": "main" },
+  { "x": 11.3, "z": 1.7, "lvl": "terrace" }
+ ],
+
+ "groundZones": [
+  { "x1": -0.07, "z1": -0.07, "x2": 4.86, "z2": 3.21, "y": 0 },
+  { "x1": 4.86, "z1": -0.07, "x2": 9.81, "z2": 4.18, "y": 0 },
+  { "x1": 4.93, "z1": 4.18, "x2": 7.14, "z2": 6.41, "y": 0 },
+  { "x1": 7.14, "z1": 4.18, "x2": 8.33, "z2": 6.41, "y": 0 },
+  { "x1": 8.33, "z1": 5.4, "x2": 9.15, "z2": 6.41, "y": 0 },
+  { "x1": 9.81, "z1": -0.03, "x2": 10.51, "z2": 4.87, "y": -0.04 },
+  { "x1": 10.51, "z1": -0.03, "x2": 11.14, "z2": 4.51, "y": -0.04 },
+  { "x1": 11.14, "z1": -0.03, "x2": 11.77, "z2": 4.16, "y": -0.04 },
+  { "x1": 11.77, "z1": -0.03, "x2": 12.4, "z2": 3.82, "y": -0.04 }
+ ],
+
+ "roomLabels": [
+  { "x1": -0.07, "z1": -0.07, "x2": 4.86, "z2": 3.21, "y": 0, "name": "Bedroom" },
+  { "x1": 4.86, "z1": -0.07, "x2": 9.81, "z2": 4.18, "y": 0, "name": "Living room + kitchen" },
+  { "x1": 4.93, "z1": 4.18, "x2": 7.14, "z2": 6.41, "y": 0, "name": "Bathroom" },
+  { "x1": 7.14, "z1": 4.18, "x2": 9.15, "z2": 6.41, "y": 0, "name": "Hall" },
+  { "x1": 9.81, "z1": -0.07, "x2": 12.4, "z2": 4.87, "y": 0, "name": "Terrace" }
+ ],
+
+ "areas": [
+  { "name": "Bedroom", "m2": 14.1, "x": 2.2, "z": 1.6, "g": 0 },
+  { "name": "Living room + kk", "m2": 19.9, "x": 7.2, "z": 2.0, "g": 0 },
+  { "name": "Bathroom", "m2": 3.9, "x": 6.0, "z": 5.3, "g": 0 },
+  { "name": "Hall", "m2": 3.1, "x": 7.75, "z": 5.3, "g": 0 },
+  { "name": "Terrace", "m2": 10.4, "x": 11.2, "z": 1.9, "g": 0 }
+ ],
+
+ "spawns": [
+  { "name": "Living room", "x": 7.4, "z": 2.4, "yaw": 270, "g": 0 },
+  { "name": "Bedroom", "x": 2.6, "z": 2.6, "yaw": 350, "g": 0 },
+  { "name": "Bathroom", "x": 6.4, "z": 5.1, "yaw": 210, "g": 0 },
+  { "name": "Hall", "x": 7.75, "z": 5.9, "yaw": 0, "g": 0 },
+  { "name": "Terrace", "x": 11.2, "z": 2.6, "yaw": 315, "g": 0 }
+ ],
+
+ "photoSpots": [
+  { "file": "2.webp", "name": "Living room", "x": 7.9, "z": 1.35, "g": 0, "yaw": 90, "vis": true },
+  { "file": "3.webp", "name": "Kitchen", "x": 5.65, "z": 2.9, "g": 0, "yaw": 255, "vis": true }
+ ],
+
+ "start": { "x": 7.75, "z": 5.85, "yaw": 0 },
+
+ "meta": {
+  "id": "horkyone-10",
+  "title": "Horky One — Apartment 10",
+  "description": "2kk attic flat with a corner terrace on the 6th floor of Horky One, rebuilt from the floor plan",
+  "photoBase": "photos/horkyone-10/",
+  "map": { "x1": -1.2, "z1": -1.3, "x2": 13.6, "z2": 7.6 },
+  "doll": { "x": 6.2, "y": 0.8, "z": 2.6, "dist": 13 },
+  "levelLabel": "6. NP · 2kk · 51.4 m²"
+ }
+}

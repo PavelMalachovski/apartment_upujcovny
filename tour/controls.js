@@ -213,8 +213,17 @@ class WalkControls {
     }
     let eyeY = this.ground + this.eye;
     // in the attic, clamp the camera under the roof slope
-    if (this.ground > 2.9 && this.pos.x > 4.2 && this.pos.x < 15.6 && window.Builder) {
-      eyeY = Math.min(eyeY, 3.1 + Builder.atticH(this.pos.z) - 0.12);
+    // (top-level `const Builder` is not a window property — reference it directly)
+    if (typeof Builder !== 'undefined' && APT.attic) {
+      const a = APT.attic;
+      const onMain = (a.lvl || 'upper') === 'main';
+      const base = onMain ? APT.mainFloorY : APT.upperFloorY;
+      const onLvl = onMain ? this.ground < 1.5 : this.ground > 2.9;
+      const ax1 = (a.x1 !== undefined) ? a.x1 + 0.3 : 4.2;
+      const ax2 = (a.x2 !== undefined) ? a.x2 - 0.3 : 15.6;
+      if (onLvl && this.pos.x > ax1 && this.pos.x < ax2) {
+        eyeY = Math.min(eyeY, base + Builder.atticH(this.pos.z) - 0.12);
+      }
     }
     this.camera.position.set(this.pos.x, eyeY, this.pos.z);
     this.camera.rotation.order = 'YXZ';
