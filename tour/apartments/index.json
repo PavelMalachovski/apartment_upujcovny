@@ -1,6 +1,19 @@
 {
  "apartments": [
   {
+   "id": "serenity",
+   "title": "Serenity Pool Access",
+   "subtitle": "One-bedroom apartment with direct pool access",
+   "cover": "photos/serenity/10.webp",
+   "specs": [
+    "45 m²",
+    "1 bedroom",
+    "pool access",
+    "terrace"
+   ],
+   "highlights": "A ground-floor one-bedroom suite whose private terrace steps straight into the resort pool — open-plan lounge and kitchenette, a bedroom with a cushioned bench window, and a walk-in rain shower"
+  },
+  {
    "id": "horkyone-10",
    "title": "Horky One — Apartment 10",
    "subtitle": "2kk attic flat with a corner terrace",

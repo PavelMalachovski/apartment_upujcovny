@@ -528,15 +528,20 @@ const Builder = (() => {
           : (w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null);
         if (cc) {
           for (const side of [-1, 1]) {
-            const px = cx + ux * side * (o.w / 2 + 0.14);
-            const pz = cz + uz * side * (o.w / 2 + 0.14);
+            // park position clamped inside the wall run
+            let s = (p.from + p.to) / 2 + side * (o.w / 2 + 0.14);
+            s = Math.max(0.33, Math.min(L - 0.33, s));
+            const px = w.x1 + ux * s;
+            const pz = w.z1 + uz * s;
             const cur = wavyPlane(0.55, topH - 0.18, cc, 5);
             cur.position.set(px - Math.sin(ang) * 0.2, baseY + (topH - 0.18) / 2 + 0.06, pz - Math.cos(ang) * 0.2);
             cur.rotation.y = -ang;
             scene.add(cur);
           }
-          // curtain rod
-          const rod = new T.Mesh(new T.CylinderGeometry(0.012, 0.012, o.w + 1.5, 8), M.metalBlack);
+          // curtain rod, clamped so it never pokes past the wall ends
+          const rodMid = (p.from + p.to) / 2;
+          const rodLen = 2 * Math.min((o.w + 1.5) / 2, rodMid - 0.05, L - rodMid - 0.05);
+          const rod = new T.Mesh(new T.CylinderGeometry(0.012, 0.012, Math.max(rodLen, o.w + 0.2), 8), M.metalBlack);
           rod.rotation.z = Math.PI / 2;
           rod.rotation.y = -ang;
           rod.position.set(cx - Math.sin(ang) * 0.2, baseY + topH - 0.06, cz - Math.cos(ang) * 0.2);
@@ -582,6 +587,17 @@ const Builder = (() => {
             });
           }
           // interior door leaves are not rendered: openings read as open
+        }
+        if (o.daylight) {
+          // glazed outdoor doorway acts as an area daylight source for baking
+          const roomC = (APT.roomCenter && APT.roomCenter[w.lvl]) ||
+            (w.lvl === 'main' ? { x: 12, z: 3.2 } : { x: 10, z: 2.5 });
+          let nx = uz, nz = -ux;
+          if ((roomC.x - cx) * nx + (roomC.z - cz) * nz < 0) { nx = -nx; nz = -nz; }
+          bakeData.windows.push({
+            x: cx + nx * 0.1, y: baseY + hh / 2, z: cz + nz * 0.1,
+            nx, nz, area: o.w * (hh - 0.15), lvl: w.lvl
+          });
         }
         if (o.slider) {
           // sliding panel, fully parked beside the opening
@@ -819,7 +835,10 @@ const Builder = (() => {
     const mats = {
       bldg: new T.MeshStandardMaterial({ color: 0xcbb9a4, roughness: 0.95 }),
       bldg2: new T.MeshStandardMaterial({ color: 0xb5a08c, roughness: 0.95 }),
-      roofRed: new T.MeshStandardMaterial({ color: 0x9c5038, roughness: 0.9 })
+      roofRed: new T.MeshStandardMaterial({ color: 0x9c5038, roughness: 0.9 }),
+      water: new T.MeshStandardMaterial({ color: 0x4ecfdf, roughness: 0.12, metalness: 0.15 }),
+      stone: new T.MeshStandardMaterial({ color: 0xd8d4cc, roughness: 0.9 }),
+      hedge: new T.MeshStandardMaterial({ color: 0x4f6f45, roughness: 0.95 })
     };
     for (const s of APT.surroundings) {
       box(s.w, s.h, s.d, mats[s.mat] || mats.bldg, s.x, (s.y || 0) + s.h / 2, s.z, scene);
