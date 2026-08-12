@@ -53,13 +53,17 @@ const BUILD_V = (function () {
 
   window.initApp();
 
-  // Resemblance capture harness, off by default and never downloaded
-  // by normal visitors. BUILD_V (captured synchronously above, before any
-  // await) versions this the same way the config fetch is versioned —
-  // document.currentScript is null by this point inside an async IIFE.
-  if (new URLSearchParams(location.search).has('measure')) {
-    const s = document.createElement('script');
-    s.src = 'measure.js' + (BUILD_V ? '?v=' + BUILD_V : '');
-    document.head.appendChild(s);
+  // Debug capture harnesses (measure = resemblance to the real photos,
+  // refshots = fixed-camera regression frames), off by default and never
+  // downloaded by normal visitors. BUILD_V (captured synchronously above,
+  // before any await) versions this the same way the config fetch is
+  // versioned — document.currentScript is null by this point inside an
+  // async IIFE.
+  for (const flag of ['measure', 'refshots']) {
+    if (new URLSearchParams(location.search).has(flag)) {
+      const s = document.createElement('script');
+      s.src = flag + '.js' + (BUILD_V ? '?v=' + BUILD_V : '');
+      document.head.appendChild(s);
+    }
   }
 })();

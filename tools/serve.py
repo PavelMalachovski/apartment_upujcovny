@@ -23,12 +23,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return
-        name = os.path.basename(self.path)
+        rel = self.path[len('/save/'):]
+        parts = [p for p in rel.split('/') if p not in ('', '.', '..')]
+        if not parts:
+            self.send_response(400)
+            self.end_headers()
+            return
+        dest = os.path.join(SHOTS, *parts)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         n = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(n).decode()
         if ',' in body:
             body = body.split(',', 1)[1]
-        with open(os.path.join(SHOTS, name), 'wb') as f:
+        with open(dest, 'wb') as f:
             f.write(base64.b64decode(body))
         self.send_response(200)
         self.end_headers()
