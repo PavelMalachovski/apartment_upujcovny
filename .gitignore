@@ -21,3 +21,6 @@ node_modules/
 
 # Offscreen renders captured by tour/measure.js — build output, not source
 tools/shots/
+
+# Python bytecode from the measurement tools
+tools/__pycache__/
