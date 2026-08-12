@@ -982,23 +982,46 @@ python tools/delta_e.py --apt serenity --phase b1-migration
 python tools/delta_e.py --apt kings-court --phase b1-migration
 ```
 
-Expected: **serenity within ±0.3 of 16.58, kings-court within ±0.3 of 22.44.**
+**Superseded — read the redefined gate above.** The original expectation was
+±0.3 on both. Task 6 established that cannot hold: every bake constant was
+fitted against r128's pipeline. Record the numbers instead of gating on them,
+and confirm they match what task 6 measured:
+
+- serenity **16.58 → ~17.23** — worse, and expected to be. Its `exposure`
+  0.33 and the bake constants were converged against r128 over several
+  iterations, so a corrected pipeline breaks that fit by construction.
+- kings-court **22.44 → ~21.21** — *better*. It was only ever baselined,
+  never fitted, so it had no fit to break and the corrections show through
+  as a genuine improvement.
+
+That split is the evidence that the serenity regression is a mis-fitted
+constant and not a rendering defect. If a re-run contradicts it — if
+kings-court has also regressed — that is a real finding and stops the gate.
+
 These are measured with the harness's existing, unfixed field of view — on
 purpose. The FOV error is systematic and cancels in a before/after
 comparison; fixing it here would move the engine and the ruler at once. Plan 2
 fixes it and re-baselines.
 
 `horkyone-10` has no `compare`-flagged spots, so `delta_e.py` exits with an
+error for it. Expected, and it is observation A1 — plan 2 decides whether to
+flag its spots or accept it on a luminance criterion.
+
+`horkyone-10` has no `compare`-flagged spots, so `delta_e.py` exits with an
 error for it. That is expected and is not a failure of this step — it is
 observation A1, and plan 2 decides what to do about it.
 
-- [ ] **Step 6: Reference frames**
+- [ ] **Step 6: Reference frames — diagnostic, not a gate**
 
 ```bash
 python tools/compare_shots.py --a r128 --b r185
 ```
 
-Expected: exit code 0.
+It will exit non-zero, and that is no longer a failure. Use it for what it is
+now good for: **open the worst three frames and look at them.** The numbers
+cannot tell a legitimate BRDF change from a broken material; your eyes can.
+Record which frames are worst and whether anything in them looks *wrong* as
+opposed to merely different.
 
 - [ ] **Step 7: Bump the version, last**
 
