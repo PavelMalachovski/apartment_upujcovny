@@ -1,0 +1,63 @@
+{
+  "apartment": "serenity",
+  "phase": "a3-ao-fix1",
+  "mean": 24.51,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "deltaE": 31.39
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "deltaE": 23.97
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "deltaE": 26.4
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "deltaE": 26.86
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "deltaE": 19.93
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "deltaE": 21.44
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "deltaE": 20.22
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "deltaE": 24.93
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "deltaE": 27.92
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "deltaE": 27.99
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "deltaE": 18.6
+    }
+  ],
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

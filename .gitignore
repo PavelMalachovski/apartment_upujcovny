@@ -14,3 +14,10 @@
 Thumbs.db
 node_modules/
 .playwright-mcp/
+
+# Isolated worktrees and agent scratch space
+.claude/worktrees/
+.superpowers/
+
+# Offscreen renders captured by tour/measure.js — build output, not source
+tools/shots/

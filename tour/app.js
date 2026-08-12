@@ -2,13 +2,85 @@
 // Scene init, render loop, minimap, current-room label
 // ============================================================
 
+// Capture a cube panorama of the apartment itself and turn it into a
+// PMREM environment. Reflections then show this flat's real window
+// instead of a stock studio, which is what resemblance needs.
+//
+// Two ordering constraints, both load-bearing:
+//   - run AFTER the light bake, or the panorama records unlit surfaces;
+//   - run while scene.environment is still null, or reflections feed
+//     back on themselves.
+function captureEnvironment(renderer, scene, point) {
+  // Tone mapping is applied per-fragment for every toneMapped material
+  // (the default), including during these six CubeCamera face renders.
+  // Left enabled, the captured environment would store display-referred,
+  // ACES-compressed values that then get tone-mapped a SECOND time when
+  // the scene is actually drawn — losing highlight energy relative to the
+  // real room, and worse, making the capture itself move every time the
+  // exposure changes: fitting exposure against a moving target. Suspended
+  // for the duration of the capture only, restored in `finally` so it
+  // survives the exception path below.
+  const prevToneMapping = renderer.toneMapping;
+  renderer.toneMapping = THREE.NoToneMapping;
+  try {
+    const target = new THREE.WebGLCubeRenderTarget(256, {
+      format: THREE.RGBAFormat,
+      generateMipmaps: true,
+      minFilter: THREE.LinearMipmapLinearFilter
+    });
+    const cam = new THREE.CubeCamera(0.1, 60, target);
+    cam.position.set(point.x, point.y, point.z);
+    scene.environment = null;
+    cam.update(renderer, scene);
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileCubemapShader();
+    const env = pmrem.fromCubemap(target.texture).texture;
+    pmrem.dispose();
+    target.dispose();
+
+    scene.environment = env;
+    return env;
+  } catch (e) {
+    console.warn('[env] capture failed, materials stay unreflective:', e);
+    // CubeCamera.update() and PMREMGenerator only restore the renderer's
+    // previous render target on the normal exit path in r128 — an
+    // exception partway through the six cube-face renders (context loss, a
+    // WebGL error) can leave the renderer bound to an offscreen cube face,
+    // so every frame after this one would render into it instead of the
+    // canvas: a black screen, exactly what this handler exists to prevent.
+    // Restore defensively, in its own try/catch, so a failure in the
+    // restore itself can never mask the warning above or re-throw past it.
+    try { renderer.setRenderTarget(null); } catch (e2) { /* nothing more we can do */ }
+    return null;
+  } finally {
+    renderer.toneMapping = prevToneMapping;
+  }
+}
+
 window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  // Fitted per-apartment against its own photographs (task 7); apartments
+  // with no photographs flagged for comparison keep this same 1.05 they
+  // always had, via the default. A plain `!== undefined` guard would let
+  // `null`, `0` or a stringified `"0.33"` straight through to
+  // toneMappingExposure and produce a black or near-black render with no
+  // warning -- exactly the failure mode this project's config-degrades-
+  // with-a-warning rule exists to prevent (see Materials.color()'s hex
+  // validation in materials.js for the same shape of guard). Require a
+  // finite positive number or fall back, same as every other config key.
+  const rawExposure = APT.exposure;
+  let exposure = 1.05;
+  if (typeof rawExposure === 'number' && isFinite(rawExposure) && rawExposure > 0) {
+    exposure = rawExposure;
+  } else if (rawExposure !== undefined) {
+    console.warn('[app] APT.exposure must be a positive number, got', JSON.stringify(rawExposure), '-- falling back to 1.05');
+  }
+  renderer.toneMappingExposure = exposure;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xbcd5e8);
@@ -22,6 +94,10 @@ window.initApp = function () {
   const controls = new WalkControls(camera, canvas, colliders);
   // cap pixel density on touch devices for FPS
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, controls.isTouch ? 1.6 : 2));
+  // Built before the first resize() call below: resize() closes over `post`
+  // and runs immediately, so declaring it any later would read a
+  // temporal-dead-zone `const` and throw.
+  const post = Post.create(renderer, scene, camera);
   resize();
 
   // Light baking: async, with progress on the overlay
@@ -30,9 +106,46 @@ window.initApp = function () {
   goBtn.textContent = 'Baking light… 0%';
   goBtn.style.opacity = '0.6';
   const doll = new DollMode(scene, camera, controls, canvas);
-  window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
+  // Bake timing, always on: window.__bakeMs is set the moment Baker.run's
+  // own promise settles, independent of whatever else this .then() chain
+  // goes on to do (env capture, etc.) below. Living inside this function
+  // rather than an external debug recipe means it survives this function
+  // being restructured, and it can be read by anyone verifying a bake-time
+  // claim without editing source first.
+  const __bakeT0 = performance.now();
+  const __bakerRun = Baker.run(scene, Builder.bakeData, (p) => {
     goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
-  }).then(() => {
+  });
+  __bakerRun.then(() => { window.__bakeMs = performance.now() - __bakeT0; });
+  window.__bakeReady = __bakerRun.then(() => {
+    // Capture point precedence: APT.env.capture (per axis) > APT.roomCenter.main
+    // > APT.start. kings-court has no roomCenter, so without the start
+    // fallback its capture point would default to the world origin — outside
+    // the flat and most likely inside a wall. APT.start is by definition a
+    // valid standing position inside every apartment, so it is the safer
+    // fallback than a literal { x: 0, z: 0 }.
+    const fallback = (APT.roomCenter && APT.roomCenter.main) || APT.start || { x: 0, z: 0 };
+    const ec = (APT.env && APT.env.capture) || {};
+    // buildLights (builder.js) always adds AmbientLight + HemisphereLight
+    // tagged `envFallback` — the fill scene.environment is meant to
+    // replace. Detach them BEFORE capturing, not after: captureEnvironment
+    // renders the scene through a CubeCamera, so any light still in the
+    // scene graph during those six faces gets baked permanently into the
+    // resulting PMREM texture. Removing them only on success (the previous
+    // ordering) still lit every surface in the panorama itself, silently
+    // brightening the one environment the whole session then reflects
+    // from. Re-attach them only if the capture actually failed, so
+    // materials stay fully lit (just unreflective) on that path, per spec.
+    const fallbackLights = scene.children.filter((c) => c.userData.envFallback);
+    for (const light of fallbackLights) scene.remove(light);
+    const env = captureEnvironment(renderer, scene, {
+      x: ec.x !== undefined ? ec.x : fallback.x,
+      y: ec.y !== undefined ? ec.y : 1.6,
+      z: ec.z !== undefined ? ec.z : fallback.z
+    });
+    if (!env) {
+      for (const light of fallbackLights) scene.add(light);
+    }
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';
     doll.classify();
@@ -70,6 +183,7 @@ window.initApp = function () {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    if (post) post.setSize(w, h);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -393,7 +507,8 @@ window.initApp = function () {
     return '';
   }
 
-  window.__app = { scene, camera, renderer, controls, doll, drawMap, roomName };
+  window.__app = { scene, camera, renderer, controls, doll, drawMap, roomName,
+                   composer: post ? post.composer : null, post };
 
   let last = performance.now();
   let frame = 0;
@@ -402,7 +517,8 @@ window.initApp = function () {
     last = now;
     controls.update(dt);
     doll.update();
-    renderer.render(scene, camera);
+    if (post && post.enabled) post.render(now * 0.001);
+    else renderer.render(scene, camera);
     if ((frame++ & 3) === 0) {
       drawMap();
       checkPhotoSpot();

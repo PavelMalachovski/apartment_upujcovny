@@ -1,13 +1,12 @@
 // ============================================================
 // Scene builder: turns APT data into Three.js objects.
 //
-// Structure:
-//   1. Procedural canvas textures: parquet, marble, fabrics, paintings
-//   2. Materials (M.*) — the project's single palette
-//   3. Walls with openings (doors/windows/passages) + attic slopes
-//   4. Floors, ceilings, stairs, terrace
-//   5. Furniture (F.*) — parametric constructors + blob shadows
-//   6. Light: hemisphere + sun + per-room points
+// Materials (M.*) and their procedural canvas textures now live in
+// materials.js — see that file for the palette. Structure here:
+//   1. Walls with openings (doors/windows/passages) + attic slopes
+//   2. Floors, ceilings, stairs, terrace
+//   3. Furniture (F.*) — parametric constructors + blob shadows
+//   4. Light: hemisphere + sun + per-room points
 //
 // Every impassable object adds a collider (segs — walls,
 // boxes — furniture) with a level: 'main' | 'upper' | 'terrace' | 'both'.
@@ -27,150 +26,11 @@ const Builder = (() => {
     });
   }
 
-  // ---------- Procedural textures ----------
-  function canvasTex(w, h, draw, repX = 1, repY = 1) {
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    draw(c.getContext('2d'), w, h);
-    const t = new T.CanvasTexture(c);
-    t.wrapS = t.wrapT = T.RepeatWrapping;
-    t.repeat.set(repX, repY);
-    t.anisotropy = 4;
-    return t;
-  }
-
-  function woodTex(base, dark, plank = true) {
-    return canvasTex(512, 512, (g) => {
-      g.fillStyle = base; g.fillRect(0, 0, 512, 512);
-      for (let i = 0; i < 260; i++) {
-        g.strokeStyle = `rgba(120,90,60,${0.03 + Math.random() * 0.05})`;
-        g.lineWidth = 1 + Math.random() * 2;
-        const y = Math.random() * 512;
-        g.beginPath(); g.moveTo(0, y);
-        g.bezierCurveTo(170, y + Math.random() * 8 - 4, 340, y + Math.random() * 8 - 4, 512, y);
-        g.stroke();
-      }
-      if (plank) {
-        g.strokeStyle = dark; g.lineWidth = 2;
-        for (let y = 0; y < 512; y += 64) { g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke(); }
-        for (let y = 32; y < 512; y += 64) {
-          const x = (Math.random() * 512) | 0;
-          g.beginPath(); g.moveTo(x, y - 32); g.lineTo(x, y + 32); g.stroke();
-        }
-      }
-    });
-  }
-
-  // Parquet: boards with individual tone, seams and lively grain
-  function floorTex() {
-    return canvasTex(1024, 1024, (g) => {
-      const rowH = 128;
-      for (let y = 0; y < 1024; y += rowH) {
-        let x = (y / rowH) % 2 === 0 ? 0 : -180;
-        while (x < 1024) {
-          const len = 260 + Math.random() * 300;
-          const tone = 0.82 + Math.random() * 0.36;
-          const r = Math.min(255, 184 * tone), gr = Math.min(255, 149 * tone), b = Math.min(255, 95 * tone);
-          g.fillStyle = `rgb(${r | 0},${gr | 0},${b | 0})`;
-          g.fillRect(x, y, len, rowH);
-          // grain
-          for (let i = 0; i < 26; i++) {
-            g.strokeStyle = `rgba(110,80,50,${0.04 + Math.random() * 0.08})`;
-            g.lineWidth = 0.8 + Math.random() * 1.6;
-            const yy = y + Math.random() * rowH;
-            g.beginPath();
-            g.moveTo(x, yy);
-            g.bezierCurveTo(x + len * 0.3, yy + (Math.random() - 0.5) * 10, x + len * 0.7, yy + (Math.random() - 0.5) * 10, x + len, yy);
-            g.stroke();
-          }
-          // occasional knots
-          if (Math.random() < 0.3) {
-            g.fillStyle = 'rgba(100,70,45,0.35)';
-            g.beginPath();
-            g.ellipse(x + len * (0.2 + Math.random() * 0.6), y + rowH * (0.3 + Math.random() * 0.4),
-              3 + Math.random() * 4, 2 + Math.random() * 2, Math.random() * Math.PI, 0, Math.PI * 2);
-            g.fill();
-          }
-          // end seam
-          g.fillStyle = 'rgba(70,50,30,0.5)';
-          g.fillRect(x + len - 2, y, 2, rowH);
-          x += len;
-        }
-        // long seam
-        g.fillStyle = 'rgba(70,50,30,0.55)';
-        g.fillRect(0, y + rowH - 2, 1024, 2);
-      }
-    });
-  }
-
-  function marbleTex(bg, vein, n = 26) {
-    return canvasTex(512, 512, (g) => {
-      g.fillStyle = bg; g.fillRect(0, 0, 512, 512);
-      // large soft veins with blur
-      for (let i = 0; i < Math.max(4, n / 4); i++) {
-        g.save();
-        g.shadowColor = vein.replace('A', '0.5');
-        g.shadowBlur = 10 + Math.random() * 14;
-        g.strokeStyle = vein.replace('A', (0.25 + Math.random() * 0.3).toFixed(2));
-        g.lineWidth = 2 + Math.random() * 3.5;
-        let x = Math.random() * 512, y = -20;
-        g.beginPath(); g.moveTo(x, y);
-        while (y < 540) {
-          x += (Math.random() - 0.5) * 130; y += 60 + Math.random() * 80;
-          g.lineTo(x, y);
-        }
-        g.stroke();
-        g.restore();
-      }
-      // thin sharp veinlets
-      for (let i = 0; i < n; i++) {
-        g.strokeStyle = vein.replace('A', (0.08 + Math.random() * 0.18).toFixed(2));
-        g.lineWidth = 0.5 + Math.random() * 1.2;
-        let x = Math.random() * 512, y = Math.random() * 512;
-        g.beginPath(); g.moveTo(x, y);
-        for (let s = 0; s < 6; s++) {
-          x += (Math.random() - 0.5) * 200; y += (Math.random() - 0.5) * 200;
-          g.lineTo(x, y);
-        }
-        g.stroke();
-      }
-      // tile seams
-      g.strokeStyle = 'rgba(150,150,150,0.3)'; g.lineWidth = 1.5;
-      g.strokeRect(0, 0, 256, 256); g.strokeRect(256, 256, 256, 256);
-    });
-  }
-
-  // Abstract paintings in the spirit of the photos
-  function artTex(style) {
-    return canvasTex(256, 320, (g) => {
-      if (style === 'warm') {
-        g.fillStyle = '#ded7c9'; g.fillRect(0, 0, 256, 320);
-        g.fillStyle = '#c07a33'; g.fillRect(140, 40, 90, 120);
-        g.fillStyle = '#2b2b2b'; g.fillRect(60, 70, 110, 150);
-        g.fillStyle = 'rgba(192,122,51,0.8)'; g.fillRect(100, 190, 100, 80);
-        g.fillStyle = 'rgba(43,43,43,0.6)'; g.fillRect(170, 150, 60, 110);
-      } else if (style === 'leaf') {
-        g.fillStyle = '#f4f2ee'; g.fillRect(0, 0, 256, 320);
-        g.strokeStyle = '#5a6b52'; g.lineWidth = 3;
-        for (let i = 0; i < 7; i++) {
-          const x = 50 + i * 26, len = 80 + Math.random() * 90;
-          g.beginPath(); g.moveTo(x, 280);
-          g.quadraticCurveTo(x + 20, 280 - len / 2, x - 10, 280 - len);
-          g.stroke();
-          for (let j = 0; j < 5; j++) {
-            g.beginPath();
-            g.ellipse(x + 4 - j * 3, 260 - j * len / 5, 8, 3, -0.6, 0, Math.PI * 2);
-            g.stroke();
-          }
-        }
-      } else { // mono
-        g.fillStyle = '#e8e6e1'; g.fillRect(0, 0, 256, 320);
-        g.fillStyle = '#b9bdc2'; g.beginPath(); g.ellipse(120, 130, 75, 95, 0.3, 0, Math.PI * 2); g.fill();
-        g.fillStyle = '#2e2e30'; g.beginPath(); g.ellipse(150, 180, 45, 60, -0.2, 0, Math.PI * 2); g.fill();
-        g.fillStyle = 'rgba(255,255,255,0.65)'; g.beginPath(); g.ellipse(110, 110, 40, 50, 0.5, 0, Math.PI * 2); g.fill();
-      }
-    });
-  }
+  // Materials and procedural textures live in materials.js; both modules
+  // share the same M object and canvasTex helper through this alias.
+  const M = Materials.M;
+  const canvasTex = Materials.canvasTex;
+  const artTex = Materials.artTex;
 
   // Wavy "fabric" for curtains
   function wavyPlane(w, h, mat, folds = 5) {
@@ -185,184 +45,105 @@ const Builder = (() => {
     return m;
   }
 
-  function quiltTex(base, line) {
-    return canvasTex(256, 256, (g) => {
-      g.fillStyle = base; g.fillRect(0, 0, 256, 256);
-      g.strokeStyle = line; g.lineWidth = 3;
-      for (let i = 0; i <= 256; i += 64) {
-        g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 256); g.stroke();
-        g.beginPath(); g.moveTo(0, i); g.lineTo(256, i); g.stroke();
-      }
-      const grd = g.createRadialGradient(128, 128, 10, 128, 128, 180);
-      grd.addColorStop(0, 'rgba(255,255,255,0.10)'); grd.addColorStop(1, 'rgba(0,0,0,0.10)');
-      g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
-    }, 2, 2);
-  }
-
-  function rugTex(kind) {
-    return canvasTex(256, 256, (g) => {
-      if (kind === 'grayblue') {
-        g.fillStyle = '#b9c0c4'; g.fillRect(0, 0, 256, 256);
-        for (let i = 0; i < 900; i++) {
-          g.fillStyle = ['#8fa3ad', '#a9b4ba', '#7d95a3', '#c7cdd1'][i % 4];
-          g.globalAlpha = 0.25;
-          g.fillRect(Math.random() * 256, Math.random() * 256, 20, 3);
-        }
-      } else {
-        g.fillStyle = '#d8d4cc'; g.fillRect(0, 0, 256, 256);
-        for (let i = 0; i < 700; i++) {
-          g.fillStyle = ['#c9c4ba', '#e2ded6', '#bfbab0'][i % 3];
-          g.globalAlpha = 0.3;
-          g.fillRect(Math.random() * 256, Math.random() * 256, 16, 3);
-        }
-      }
-      g.globalAlpha = 1;
-    });
-  }
-
-  function jungleTex() {
-    return canvasTex(256, 256, (g) => {
-      g.fillStyle = '#22301f'; g.fillRect(0, 0, 256, 256);
-      for (let i = 0; i < 60; i++) {
-        const x = Math.random() * 256, y = Math.random() * 256;
-        g.fillStyle = ['#3c5232', '#54683b', '#8a7442', '#b08d4f', '#2e4429'][i % 5];
-        g.globalAlpha = 0.8;
-        g.beginPath();
-        g.ellipse(x, y, 4 + Math.random() * 10, 12 + Math.random() * 18, Math.random() * Math.PI, 0, Math.PI * 2);
-        g.fill();
-      }
-      g.globalAlpha = 1;
-    }, 2, 2);
-  }
-
-  function deckTex() {
-    return canvasTex(512, 512, (g) => {
-      g.fillStyle = '#8a6844'; g.fillRect(0, 0, 512, 512);
-      for (let y = 0; y < 512; y += 42) {
-        g.fillStyle = `rgba(70,50,30,${0.15 + Math.random() * 0.1})`;
-        g.fillRect(0, y, 512, 4);
-        for (let i = 0; i < 40; i++) {
-          g.strokeStyle = `rgba(60,40,25,${0.05 + Math.random() * 0.1})`;
-          const yy = y + 6 + Math.random() * 30;
-          g.beginPath(); g.moveTo(0, yy); g.lineTo(512, yy); g.stroke();
-        }
-      }
-    });
-  }
-
-  // Fired-clay terrace tiles ("červená pálená" per the Horky One standards)
-  function terracottaTex() {
-    return canvasTex(512, 512, (g) => {
-      const T2 = 128;
-      for (let y = 0; y < 512; y += T2) {
-        for (let x = 0; x < 512; x += T2) {
-          const tone = 0.86 + Math.random() * 0.28;
-          g.fillStyle = `rgb(${Math.min(255, 178 * tone) | 0},${(96 * tone) | 0},${(66 * tone) | 0})`;
-          g.fillRect(x, y, T2, T2);
-          for (let i = 0; i < 14; i++) {
-            g.fillStyle = `rgba(120,55,35,${0.05 + Math.random() * 0.1})`;
-            g.beginPath();
-            g.ellipse(x + Math.random() * T2, y + Math.random() * T2,
-              4 + Math.random() * 14, 2 + Math.random() * 6, Math.random() * Math.PI, 0, Math.PI * 2);
-            g.fill();
-          }
-          g.strokeStyle = 'rgba(90,45,30,0.75)'; g.lineWidth = 3;
-          g.strokeRect(x + 1, y + 1, T2 - 2, T2 - 2);
-        }
-      }
-    });
-  }
-
-  // Matte concrete-look 600×600 tiles (Macroni Factor, bathroom)
-  function tileGrayTex() {
-    return canvasTex(512, 512, (g) => {
-      const T2 = 256;
-      for (let y = 0; y < 512; y += T2) {
-        for (let x = 0; x < 512; x += T2) {
-          const tone = 0.92 + Math.random() * 0.14;
-          g.fillStyle = `rgb(${(158 * tone) | 0},${(158 * tone) | 0},${(160 * tone) | 0})`;
-          g.fillRect(x, y, T2, T2);
-          for (let i = 0; i < 60; i++) {
-            g.fillStyle = `rgba(${110 + Math.random() * 90 | 0},${110 + Math.random() * 90 | 0},${115 + Math.random() * 90 | 0},0.07)`;
-            g.beginPath();
-            g.ellipse(x + Math.random() * T2, y + Math.random() * T2,
-              8 + Math.random() * 40, 5 + Math.random() * 22, Math.random() * Math.PI, 0, Math.PI * 2);
-            g.fill();
-          }
-          g.strokeStyle = 'rgba(105,105,108,0.6)'; g.lineWidth = 2;
-          g.strokeRect(x + 1, y + 1, T2 - 2, T2 - 2);
-        }
-      }
-    });
-  }
-
-  // ---------- Materials ----------
-  const M = {};
-  function initMaterials() {
-    const wood = floorTex();
-    wood.repeat.set(3, 3);
-    M.floorWood = new T.MeshStandardMaterial({ map: wood, roughness: 0.55, metalness: 0.04 });
-    const ash = woodTex('#cdbc9f', 'rgba(150,130,105,0)', false);
-    ash.repeat.set(1.2, 1.2);
-    M.ash = new T.MeshStandardMaterial({ map: ash, roughness: 0.75 });
-    const ashV = woodTex('#c6b394', 'rgba(150,130,105,0)', false);
-    ashV.repeat.set(1.2, 1.2); ashV.rotation = Math.PI / 2;
-    M.ashV = new T.MeshStandardMaterial({ map: ashV, roughness: 0.75 });
-    M.wall = new T.MeshStandardMaterial({ color: 0xe8e4db, roughness: 0.95 });
-    M.ceil = new T.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.95 });
-    M.marbleW = new T.MeshStandardMaterial({ map: marbleTex('#e9e9eb', 'rgba(120,125,135,A)'), roughness: 0.35 });
-    M.marbleB = new T.MeshStandardMaterial({ map: marbleTex('#1a1a1e', 'rgba(220,220,225,A)', 16), roughness: 0.4 });
-    M.deck = new T.MeshStandardMaterial({ map: deckTex(), roughness: 0.85 });
-    M.terracotta = new T.MeshStandardMaterial({ map: terracottaTex(), roughness: 0.8 });
-    M.tileGray = new T.MeshStandardMaterial({ map: tileGrayTex(), roughness: 0.4 });
-    M.white = new T.MeshStandardMaterial({ color: 0xf5f4f0, roughness: 0.6 });
-    M.counter = new T.MeshStandardMaterial({ map: marbleTex('#eceded', 'rgba(140,140,145,A)', 14), roughness: 0.3 });
-    M.black = new T.MeshStandardMaterial({ color: 0x17171a, roughness: 0.5 });
-    M.tv = new T.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.25, metalness: 0.4 });
-    M.chrome = new T.MeshStandardMaterial({ color: 0xd8dadf, roughness: 0.25, metalness: 0.9 });
-    M.glass = new T.MeshStandardMaterial({ color: 0xcfe4ea, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.22, side: T.DoubleSide });
-    M.winGlass = new T.MeshStandardMaterial({ color: 0xcfe2ee, emissive: 0x9fc4dd, emissiveIntensity: 0.4, roughness: 0.2, transparent: true, opacity: 0.9, side: T.DoubleSide });
-    M.cream = new T.MeshStandardMaterial({ color: 0xe6e0d4, roughness: 0.9 });
-    M.navy = new T.MeshStandardMaterial({ color: 0x233054, roughness: 0.85 });
-    M.navyQuilt = new T.MeshStandardMaterial({ map: quiltTex('#26334f', 'rgba(10,16,30,0.8)'), roughness: 0.85 });
-    M.beigeQuilt = new T.MeshStandardMaterial({ map: quiltTex('#cec0ab', 'rgba(150,135,110,0.8)'), roughness: 0.9 });
-    M.sage = new T.MeshStandardMaterial({ color: 0x8d968a, roughness: 0.9 });
-    M.taupe = new T.MeshStandardMaterial({ color: 0x9b8d7c, roughness: 0.9 });
-    M.graybrown = new T.MeshStandardMaterial({ color: 0x7a7168, roughness: 0.9 });
-    M.blueFab = new T.MeshStandardMaterial({ color: 0x51617a, roughness: 0.9 });
-    M.gray = new T.MeshStandardMaterial({ color: 0x9aa0a3, roughness: 0.9 });
-    M.bedding = new T.MeshStandardMaterial({ color: 0xfbfaf7, roughness: 0.95 });
-    M.blanket = new T.MeshStandardMaterial({ color: 0xcfc4b0, roughness: 0.95 });
-    M.rugGB = new T.MeshStandardMaterial({ map: rugTex('grayblue'), roughness: 1 });
-    M.rugL = new T.MeshStandardMaterial({ map: rugTex('light'), roughness: 1 });
-    M.jungle = new T.MeshStandardMaterial({ map: jungleTex(), roughness: 0.95 });
-    M.metalBlack = new T.MeshStandardMaterial({ color: 0x222226, roughness: 0.4, metalness: 0.7 });
-    M.rattan = new T.MeshStandardMaterial({ map: woodTex('#5a452e', 'rgba(30,20,10,0.6)', false), roughness: 0.95 });
-    M.fenceWood = new T.MeshStandardMaterial({ map: woodTex('#a58757', 'rgba(60,45,25,0.4)', false), roughness: 0.95 });
-    M.plantGreen = new T.MeshStandardMaterial({ color: 0x4f7042, roughness: 0.95, side: T.DoubleSide });
-    M.pot = new T.MeshStandardMaterial({ color: 0xefefec, roughness: 0.8 });
-    M.curtainBeige = new T.MeshStandardMaterial({ color: 0xc4b49e, roughness: 1, side: T.DoubleSide });
-    M.curtainGreen = new T.MeshStandardMaterial({ color: 0x2f5044, roughness: 1, side: T.DoubleSide });
-    M.curtainGray = new T.MeshStandardMaterial({ color: 0x9a9da0, roughness: 1, side: T.DoubleSide });
-    M.doorWood = new T.MeshStandardMaterial({ map: woodTex('#d5c8b2', 'rgba(150,130,105,0)', false), roughness: 0.7 });
-    M.lampShade = new T.MeshStandardMaterial({ color: 0xf5f2ea, emissive: 0xffe8c0, emissiveIntensity: 0.5, roughness: 0.9 });
-    M.smoke = new T.MeshStandardMaterial({ color: 0x8f9298, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
-    // decor
-    M.yellow = new T.MeshStandardMaterial({ color: 0xd0a23f, roughness: 0.9 });
-    M.olive = new T.MeshStandardMaterial({ color: 0xa8a06b, roughness: 0.9 });
-    M.lightBlue = new T.MeshStandardMaterial({ color: 0xaebfc7, roughness: 0.9 });
-    M.pink = new T.MeshStandardMaterial({ color: 0xd8a0a8, roughness: 0.9 });
-    M.knit = new T.MeshStandardMaterial({ color: 0x8e9499, roughness: 1 });
-    M.pampas = new T.MeshStandardMaterial({ color: 0xcbb493, roughness: 1, side: T.DoubleSide });
-    M.stemGreen = new T.MeshStandardMaterial({ color: 0x476b3f, roughness: 0.9 });
-    M.amberGlass = new T.MeshStandardMaterial({ color: 0x9a6a2f, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.75 });
-    M.artFrame = new T.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.6 });
-    M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
-  }
-
   // ---------- Helpers ----------
+  // A chamfered box: the 6 inset faces, 12 edge bevels and 8 corner
+  // triangles. 44 triangles instead of 12, which is irrelevant here
+  // because mergeStatic collapses everything anyway.
+  //
+  // A `uv` attribute is mandatory, not optional: mergeStatic takes its
+  // attribute template from the first chunk in a bucket, so a geometry
+  // missing `uv` beside geometries that have it merges to zeroed UVs and
+  // silently destroys the texture mapping.
+  function chamferBoxGeometry(w, h, d, c) {
+    const H = [w / 2, h / 2, d / 2];
+    c = Math.min(c, H[0] * 0.4, H[1] * 0.4, H[2] * 0.4);
+    if (c <= 0.0005) return new T.BoxGeometry(w, h, d);
+
+    const pos = [], nrm = [], uvs = [];
+
+    // point with axis `ax` on its outer face, the two other axes inset by c
+    function pt(ax, s, u, su, v, sv) {
+      const p = [0, 0, 0];
+      p[ax] = s * H[ax];
+      p[u] = su * (H[u] - c);
+      p[v] = sv * (H[v] - c);
+      return p;
+    }
+    function norm(v) {
+      const L = Math.hypot(v[0], v[1], v[2]) || 1;
+      return [v[0] / L, v[1] / L, v[2] / L];
+    }
+    function emit(p, n) {
+      pos.push(p[0], p[1], p[2]);
+      nrm.push(n[0], n[1], n[2]);
+      // planar projection along the dominant axis of the normal, which is
+      // exact on the flat faces and adequate on the bevels
+      const ax = (Math.abs(n[0]) >= Math.abs(n[1]) && Math.abs(n[0]) >= Math.abs(n[2])) ? 0
+        : (Math.abs(n[1]) >= Math.abs(n[2]) ? 1 : 2);
+      const u = (ax + 1) % 3, v = (ax + 2) % 3;
+      uvs.push(p[u] / (2 * H[u]) + 0.5, p[v] / (2 * H[v]) + 0.5);
+    }
+    // Winding is derived, never reasoned about: if the geometric normal
+    // opposes the intended one, swap two vertices.
+    function tri(a, b, cc, n) {
+      const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const e2 = [cc[0] - a[0], cc[1] - a[1], cc[2] - a[2]];
+      const g = [e1[1] * e2[2] - e1[2] * e2[1],
+                 e1[2] * e2[0] - e1[0] * e2[2],
+                 e1[0] * e2[1] - e1[1] * e2[0]];
+      if (g[0] * n[0] + g[1] * n[1] + g[2] * n[2] < 0) { const t = b; b = cc; cc = t; }
+      emit(a, n); emit(b, n); emit(cc, n);
+    }
+    function quad(a, b, cc, dd, n) { tri(a, b, cc, n); tri(a, cc, dd, n); }
+
+    for (let ax = 0; ax < 3; ax++) {
+      const u = (ax + 1) % 3, v = (ax + 2) % 3;
+      for (const s of [-1, 1]) {
+        const n = [0, 0, 0]; n[ax] = s;
+        quad(pt(ax, s, u, -1, v, -1), pt(ax, s, u, 1, v, -1),
+             pt(ax, s, u, 1, v, 1), pt(ax, s, u, -1, v, 1), n);
+      }
+    }
+    // 12 edge bevels: axes a and b outer, running along axis e
+    for (let a1 = 0; a1 < 3; a1++) {
+      for (let b1 = a1 + 1; b1 < 3; b1++) {
+        const e = 3 - a1 - b1;
+        for (const sa of [-1, 1]) {
+          for (const sb of [-1, 1]) {
+            const n = [0, 0, 0]; n[a1] = sa; n[b1] = sb;
+            const nn = norm(n);
+            quad(pt(a1, sa, b1, sb, e, -1), pt(a1, sa, b1, sb, e, 1),
+                 pt(b1, sb, a1, sa, e, 1), pt(b1, sb, a1, sa, e, -1), nn);
+          }
+        }
+      }
+    }
+    // 8 corners
+    for (const sx of [-1, 1]) {
+      for (const sy of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          const s = [sx, sy, sz];
+          tri(pt(0, sx, 1, sy, 2, sz), pt(1, sy, 0, sx, 2, sz), pt(2, sz, 0, sx, 1, sy),
+              norm(s));
+        }
+      }
+    }
+
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new T.Float32BufferAttribute(nrm, 3));
+    geo.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
+    return geo;
+  }
+
+  let CHAMFER = 0;   // metres; 0 disables. Only furniture switches it on.
+
   function box(w, h, d, mat, x, y, z, group, rotY = 0) {
-    const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+    const small = Math.min(w, h, d) < 0.15;
+    const geo = (CHAMFER > 0 && !small)
+      ? chamferBoxGeometry(w, h, d, CHAMFER)
+      : new T.BoxGeometry(w, h, d);
+    const m = new T.Mesh(geo, mat);
     m.position.set(x, y, z);
     if (rotY) m.rotation.y = rotY;
     group.add(m);
@@ -620,17 +401,31 @@ const Builder = (() => {
     // overlay with uv2 and its own albedo; Baker assigns the lightMap
     let mat;
     if (matKey === 'white') {
-      mat = new T.MeshBasicMaterial({ color: 0xf3f2ee });
+      // Ceiling overlay. Wired to a 'ceiling' palette key (fallback stays
+      // this file's own long-standing constant) so the capability exists,
+      // but no apartment samples a value for it yet -- the photographs
+      // this task works from barely show ceiling, and a value guessed off
+      // a sliver of frame would be worse than none (Task 8 fix round 2).
+      mat = new T.MeshBasicMaterial({ color: Materials.color('ceiling', 0xf3f2ee) });
     } else {
+      const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray }[matKey];
       const key = matKey + '|' + Math.round(w / tile * 4) + '|' + Math.round(h / tile * 4);
       if (!albedoCache[key]) {
-        const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray }[matKey];
         const map = src.map.clone();
         map.needsUpdate = true;
         map.repeat.set(w / tile, h / tile);
         albedoCache[key] = map;
       }
-      mat = new T.MeshBasicMaterial({ map: albedoCache[key] });
+      // Carry the source material's colour tint through to this overlay --
+      // it used to be dropped here, so palette.floorWood/tileGray (etc.)
+      // never reached the actual visible floor mesh (Task 8 fix round 2).
+      // Safe by construction: every material reachable through `src` above
+      // defaults to white (0xffffff) when its palette key is absent --
+      // M.floorWood and M.tileGray explicitly via col(key, 0xffffff),
+      // M.marbleW/M.deck/M.terracotta implicitly via THREE's own
+      // MeshStandardMaterial default -- and multiplying a map by white is
+      // the identity, so apartments with no palette block are unaffected.
+      mat = new T.MeshBasicMaterial({ map: albedoCache[key], color: src.color });
     }
     const geo = new T.PlaneGeometry(w, h);
     geo.setAttribute('uv2', new T.BufferAttribute(geo.attributes.uv.array.slice(), 2));
@@ -1074,47 +869,6 @@ const Builder = (() => {
   };
   F.runner = (o, g) => F.rug(Object.assign({ pat: 'light' }, o), g);
 
-  const throwMats = {};
-  function throwMat(pat) {
-    if (throwMats[pat]) return throwMats[pat];
-    const tex = canvasTex(256, 256, (g) => {
-      if (pat === 'zigzag') {
-        // yellow-black zigzag (photo 11)
-        g.fillStyle = '#e8e2d2'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#2b2b2b', '#d9b23c', '#9a9488', '#2b2b2b', '#cfc7b4'];
-        for (let r = 0; r < 10; r++) {
-          g.strokeStyle = cols[r % 5]; g.lineWidth = 7;
-          g.beginPath();
-          for (let x = 0; x <= 256; x += 16) {
-            const y = r * 26 + ((x / 16) % 2 ? 8 : -8);
-            x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
-          }
-          g.stroke();
-        }
-      } else if (pat === 'stripes') {
-        // sage and terracotta bands — bedroom 3's accent
-        g.fillStyle = '#eae6dc'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#7f8c73', '#c98b62', '#eae6dc', '#9aa88d', '#eae6dc'];
-        for (let r = 0; r < 12; r++) {
-          g.fillStyle = cols[r % 5];
-          g.fillRect(0, r * 22, 256, r % 5 === 1 ? 7 : 14);
-        }
-      } else {
-        // blue-gray squares (photo 12)
-        g.fillStyle = '#e9e6df'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#31456e', '#7b8794', '#4a6076', '#b9b2a4'];
-        for (let yy = 8; yy < 256; yy += 24) {
-          for (let xx = 8; xx < 256; xx += 24) {
-            g.fillStyle = cols[(xx * 7 + yy * 13) % 4 | 0];
-            g.fillRect(xx, yy, 11, 11);
-          }
-        }
-      }
-    }, 2, 2);
-    throwMats[pat] = new T.MeshStandardMaterial({ map: tex, roughness: 0.95 });
-    return throwMats[pat];
-  }
-
   F.bed = (o, g) => {
     const L = o.len, W = o.w;
     // headboard
@@ -1122,7 +876,7 @@ const Builder = (() => {
     box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
     box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // base
     box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // mattress + linen
-    const bl = o.throwPat ? throwMat(o.throwPat) : M.blanket;
+    const bl = o.throwPat ? Materials.throwMat(o.throwPat) : M.blanket;
     box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // throw
     if (o.throwPat) {
       // draping throw edges
@@ -1533,7 +1287,6 @@ const Builder = (() => {
     return { w: 0.4, d: 0.4 };
   };
 
-  let dotsMat = null;
   F.terraceChair = (o, g) => {
     box(0.7, 0.45, 0.7, M.rattan, 0, 0.25, 0, g);
     box(0.7, 0.5, 0.14, M.rattan, 0, 0.65, 0.28, g);
@@ -1541,21 +1294,7 @@ const Builder = (() => {
     box(0.55, 0.1, 0.5, M.cream, 0, 0.52, -0.03, g);
     box(0.5, 0.35, 0.08, M.cream, 0, 0.78, 0.24, g);
     // polka-dot cushion (photo 18)
-    if (!dotsMat) {
-      dotsMat = new T.MeshStandardMaterial({
-        map: canvasTex(128, 128, (gc) => {
-          gc.fillStyle = '#ece5d8'; gc.fillRect(0, 0, 128, 128);
-          const cols = ['#2b2b2b', '#c07a33', '#8a8f4a', '#d9c26a'];
-          for (let i = 0; i < 14; i++) {
-            gc.fillStyle = cols[i % 4];
-            gc.beginPath();
-            gc.arc(Math.random() * 128, Math.random() * 128, 9 + Math.random() * 5, 0, Math.PI * 2);
-            gc.fill();
-          }
-        }), roughness: 0.95
-      });
-    }
-    const pil = box(0.4, 0.38, 0.1, dotsMat, 0, 0.72, 0.18, g);
+    const pil = box(0.4, 0.38, 0.1, Materials.dotsMat(), 0, 0.72, 0.18, g);
     pil.rotation.x = -0.25;
     return { w: 0.75, d: 0.75 };
   };
@@ -1599,42 +1338,77 @@ const Builder = (() => {
 
   const furnGroups = [];
   function buildFurniture(scene) {
-    for (const item of APT.furniture) {
-      const fn = F[item.type];
-      if (!fn) continue;
-      const g = new T.Group();
-      furnGroups.push(g);
-      const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
-      g.position.set(item.x, baseY, item.z);
-      g.rotation.y = item.rot || 0;
-      const res = fn(item, g) || {};
-      scene.add(g);
-      // a street-level terrace shares the walking level with 'main'
-      const clvl = (item.lvl === 'terrace' && APT.terraceY < 1.5) ? 'main' : item.lvl;
-      const occH = OCC_H[item.type] || 0.8;
-      const canOcclude = !OCC_SKIP.includes(item.type);
-      if (res.custom) {
-        // rotated custom AABBs unsupported — used as-is (rot=0 for sofaL)
-        for (const b of res.custom) {
-          colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
-          if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
-            b.x2 - b.x1, occH, b.z2 - b.z1);
-        }
-      } else if (!res.noCollide) {
-        addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
-        if (canOcclude) {
-          const bb = colliders.boxes[colliders.boxes.length - 1];
-          addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
-            bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
+    CHAMFER = 0.005;
+    try {
+      for (const item of APT.furniture) {
+        const fn = F[item.type];
+        if (!fn) continue;
+        const g = new T.Group();
+        furnGroups.push(g);
+        const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
+        g.position.set(item.x, baseY, item.z);
+        g.rotation.y = item.rot || 0;
+        const res = fn(item, g) || {};
+        scene.add(g);
+        // a street-level terrace shares the walking level with 'main'
+        const clvl = (item.lvl === 'terrace' && APT.terraceY < 1.5) ? 'main' : item.lvl;
+        const occH = OCC_H[item.type] || 0.8;
+        const canOcclude = !OCC_SKIP.includes(item.type);
+        if (res.custom) {
+          // rotated custom AABBs unsupported — used as-is (rot=0 for sofaL)
+          for (const b of res.custom) {
+            colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
+            if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
+              b.x2 - b.x1, occH, b.z2 - b.z1);
+          }
+        } else if (!res.noCollide) {
+          addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
+          if (canOcclude) {
+            const bb = colliders.boxes[colliders.boxes.length - 1];
+            addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
+              bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
+          }
         }
       }
+    } finally {
+      CHAMFER = 0;
     }
   }
 
   // ---------- Light ----------
+  // AmbientLight and HemisphereLight are flat, direction-agnostic stand-ins
+  // for "ambient bounce light off the room." app.js's captureEnvironment()
+  // feeds scene.environment a real panorama of this room's own baked walls,
+  // floors and furniture, which gives every MeshStandardMaterial a second,
+  // spatially-accurate diffuse IBL term for the exact same physical
+  // quantity these two lights approximate — stacking both double-counts
+  // scene radiance and drifts every render brighter than the photographs
+  // (measured: every one of 11 delta_e spots rose, matte bedrooms and the
+  // kitchen more than the reflective bathroom, the ambient-double-count
+  // signature, not a specular one).
+  //
+  // So they're built here, tagged `envFallback`, as the default — added
+  // unconditionally on every load. app.js detaches them right before it
+  // calls captureEnvironment() (a light still in the scene graph during
+  // the capture's six CubeCamera faces would get baked into the resulting
+  // panorama itself, permanently brightening the one environment the whole
+  // session reflects from) and re-attaches them only if that capture
+  // returns null. That ordering makes the fallback the true default:
+  // whatever way captureEnvironment can fail — a thrown exception, a
+  // context loss, an old device that chokes on PMREMGenerator — the two
+  // lights land back in the scene and materials keep exactly the fill they
+  // would have had with no environment at all — reflectionless but still
+  // lit, per spec, by construction rather than by a comment someone has to
+  // trust. The sun is unconditional either way: a 256px cube capture is
+  // too low-resolution to reproduce its crisp direction-specific
+  // highlight/shadow, so it is not part of this fallback pair and is never
+  // detached.
   function buildLights(scene) {
-    scene.add(new T.AmbientLight(0xfff2e2, 0.22));
+    const amb = new T.AmbientLight(0xfff2e2, 0.22);
+    amb.userData.envFallback = true;
+    scene.add(amb);
     const hemi = new T.HemisphereLight(0xdfeaf5, 0x8a7a66, 0.38);
+    hemi.userData.envFallback = true;
     scene.add(hemi);
     const sun = new T.DirectionalLight(0xfff0d8, 0.55);
     sun.position.set(-30, 40, 20);
@@ -1722,7 +1496,7 @@ const Builder = (() => {
 
   // Entry point: builds the whole scene, returns colliders for the controls
   function build(scene) {
-    initMaterials();
+    Materials.init(APT.palette);
     buildFloors(scene);
     for (const w of APT.walls) buildWall(scene, w);
     if (APT.stairs) buildStairs(scene);
@@ -1734,5 +1508,6 @@ const Builder = (() => {
     return colliders;
   }
 
-  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways };
+  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways,
+           M, chamferBoxGeometry };
 })();
