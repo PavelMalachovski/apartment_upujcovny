@@ -152,3 +152,63 @@ null-composer fallback for weak-GPU/missing-vendor-file sessions where
 Both fixes live entirely in `tour/refshots.js` (new in this task, gated
 behind `?refshots=1`, never loaded for a real visitor) — no production file
 was changed to reach these results.
+
+## Task 6: r128 vs r185 comparison
+
+`--max-mad 2.0` (unchanged from above). Full method, tables and self-review
+in `.superpowers/sdd/2026-08-12-phase-b1-migration/task-6-report.md`.
+
+**PointLight.decay: no change.** The one `new THREE.PointLight(...)` call
+(`builder.js`, `buildLights`) already passes an explicit 4th argument,
+`1.6` — not the r128 default of `1` the brief expected to find missing.
+`git blame` dates that literal to commit `8a5d34d` (2026-08-09), a full
+migration cycle before the r128 reference set was frozen (`64add93`), so the
+r128 captures already reflect `decay=1.6`. Setting it to `1` as the brief's
+Step 2 literally reads would have been a real behaviour change away from
+parity, not toward it — the trap the whole exercise exists to catch, just
+one step earlier than expected. Left untouched.
+
+**Sequence and result, one variable at a time (worst MAD across all 30
+frames each time):**
+
+| Capture | Change | Worst MAD | Mechanism |
+|---|---|---:|---|
+| `r185-baseline` | none (decay already correct) | 64.61 | — |
+| `r185-a-colormgmt` | `THREE.ColorManagement.enabled = false` | 49.86 | r155+ auto-decodes hex `Color`s as sRGB; r128 never did. Not in any prior task's scope (task 4 covered only texture `.colorSpace`, never this separate, renderer-global switch). |
+| `r185-b-bloom` | bloom threshold `0.92` → `1.294` | 49.97 | Domain conversion (see below); helped exactly the two frames task 5 flagged (serenity bathroom 34→13, bedroom 43→21), roughly neutral elsewhere as expected. |
+| `r185-c-lightmap` | lightmap `lightMapIntensity` `1.7` → `1.7*PI` | 46.42 | r185's `MeshBasicMaterial` lightmap chunk gained a `* RECIPROCAL_PI` r128 never had (three.module.js `fragment$a`) — every baked floor/ceiling/attic surface (not walls, which use vertex colours) rendered at roughly a third of r128's brightness. Biggest single mechanism found; cut every non-dollhouse frame's MAD by roughly half to two-thirds. |
+| `r185-d-sky` (rejected) | background/fog compensated for exposure 1.05 only | 62.65 | Helped kings-court/horkyone-10 dollhouse frames a lot, but made serenity's *worse* (46→63) because its exposure is 0.33, not 1.05. Reverted for the exposure-aware version below — recorded here because a rejected fix with a number is still information. |
+| `r185` (final) | background/fog compensated using each apartment's own `toneMappingExposure` | **41.33** | Same domain conversion as bloom, generalized to read the real per-apartment exposure instead of a hardcoded one. |
+
+**Final: 30 frames, worst MAD 41.33, threshold 2.00, 30 failing.** Down from
+64.61 before any change (36% reduction in worst-case error), but the gate
+does not pass — recorded honestly, not silently.
+
+**Residual, with best explanation:**
+- **Dollhouse frames stay the worst category** (8.7–41.3 MAD) even after the
+  sky fix, because they're dominated by open-sky pixel area where any
+  remaining background/environment mismatch shows most. serenity's two
+  dollhouse frames (41.3, 40.9) are the global worst — its 0.33 exposure
+  sits furthest from the bloom threshold's 1.05 calibration, so whatever
+  residual the bloom conversion carries lands hardest there too.
+- **The sky fix made three serenity walk-frames worse** (entrance 20.1→21.3,
+  living-room 22.7→32.3, pool-terrace 26.3→38.2) even though it improved
+  serenity's own dollhouse frames (46.4→41.3) and the worst-of-30 headline
+  number. Best explanation: serenity's compensated linear sky is much
+  brighter than the naive hex (exposure 0.33 needs a bigger push; blue
+  channel ends up at 3.8, vs 1.2 at exposure 1.05) and outdoor/window-facing
+  frames now plausibly cross the (also-approximate, 1.05-calibrated) bloom
+  threshold where they didn't before — two approximate fixes interacting.
+  Not chased further: isolating it needs re-deriving bloom's threshold
+  per-apartment-exposure too (the same generalization already applied to
+  the sky), which is a real next step but a new variable, not this one.
+- **Every interior frame still sits 8–20 MAD above threshold** after all four
+  mechanisms. Visual comparison (kings-court kitchen, before/after in the
+  task report) shows the two frames are now close on ordinary inspection —
+  wall, ceiling, floor and curtain tones all read as matching — with the
+  most visible remaining difference a faint blue tint on r128's window glass
+  panels that r185 doesn't reproduce. No single further mechanism was found;
+  most likely a combination of JPEG/compression noise, antialiasing at
+  material edges, and smaller uninvestigated shader-chunk deltas of the same
+  general shape as the lightmap one, each individually below the threshold
+  where hand-forensics on a single frame can separate it from the others.

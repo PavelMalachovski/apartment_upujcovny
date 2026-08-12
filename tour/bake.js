@@ -231,7 +231,24 @@ const Baker = (() => {
     tex.minFilter = T.LinearFilter;
     tex.magFilter = T.LinearFilter;
     mesh.material.lightMap = tex;
-    mesh.material.lightMapIntensity = 1.7;
+    // r128's MeshBasicMaterial lightmap chunk was a plain multiply:
+    // indirectDiffuse += lightMapTexel.rgb * lightMapIntensity. r185's
+    // (tour/lib/three-0.185.0/build/three.module.js, fragment$a, the
+    // meshbasic_frag USE_LIGHTMAP branch) inserted a further
+    // * RECIPROCAL_PI (0.3183098861837907, i.e. 1/PI) -- the same
+    // physically-correct-units move as PointLight's decay default,
+    // just for baked lightmaps instead of dynamic point lights, and one
+    // this task's brief didn't anticipate because it's a shader-chunk
+    // change, invisible from application code. Left uncompensated this
+    // dims every baked floor/ceiling/attic-slope surface (walls are
+    // vertexColors, a different chunk, unaffected -- confirmed visually:
+    // ceilings shifted cool/grey against r128, walls did not) to roughly
+    // a third of its r128 brightness. Multiplying by PI here exactly
+    // cancels the new factor (1.7 * PI * RECIPROCAL_PI === 1.7),
+    // reproducing r128's lightmap contribution unchanged. EXP above is a
+    // separate, bake-time-only concern (how far the written texture is
+    // compressed into the 0-255 byte range) and is untouched.
+    mesh.material.lightMapIntensity = 1.7 * Math.PI;
     mesh.material.needsUpdate = true;
   }
 

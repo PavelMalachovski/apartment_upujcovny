@@ -86,11 +86,38 @@ const Post = (() => {
       const composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
 
-      // strength, radius, threshold. The threshold is re-derived in step 3 of
-      // this task: on r185 the chain runs in linear light and OutputPass does
-      // tone mapping at the end, so the value that acted on encoded pixels in
-      // r128 does not mean the same thing here.
-      const bloom = new UnrealBloomPass(size, 0.22, 0.5, 0.92);
+      // strength, radius, threshold. r128 ran its composer with the render
+      // targets patched to sRGBEncoding (see git history of this file before
+      // task 5), so RenderPass there emitted fully tonemapped+sRGB-encoded
+      // pixels and UnrealBloomPass's LuminosityHighPassShader thresholded a
+      // display-referred 0.92. On r185 RenderPass writes a *linear*,
+      // untonemapped target -- OutputPass alone owns tonemap+encode, once,
+      // at the end -- so the same literal 0.92 now compares against raw
+      // scene radiance instead, and ~17-21% of the frame crosses it where
+      // r128 was near-inert (measured task 5).
+      //
+      // Converted threshold, derived from the actual vendored ACES/sRGB
+      // formulas (tour/lib/three-0.185.0's tonemapping_pars_fragment /
+      // colorspace_pars_fragment), not tuned by eye:
+      //   1. Undo sRGB OETF: encoded 0.92 -> y = ((0.92+0.055)/1.055)^2.4
+      //                                       = 0.82757 (ACES-output space;
+      //      matches this file's own pre-task-5 comment, "roughly 0.83 in
+      //      linear light", independently derived at the time).
+      //   2. Undo RRTAndODTFit (ACESFilmicToneMapping's rational fit) for a
+      //      neutral/grey input -- exact for grey because both ACES 3x3
+      //      matrices have row sums of 1.0, so they're a no-op on r=g=b:
+      //      solve y = (x^2+0.0245786x-0.000090537)/(0.983729x^2+0.432951x+0.238081)
+      //      for x, positive root: x = 2.263646.
+      //   3. Undo the exposure/0.6 pre-scale: L = x * 0.6 / exposure.
+      //      Calibrated at exposure 1.05 -- the app.js fallback default,
+      //      and what kings-court and horkyone-10 actually run at (only
+      //      serenity overrides exposure, to 0.33, which this single global
+      //      constant can't also match; see task-6-report.md for the
+      //      residual that leaves).
+      //      L = 2.263646 * 0.6 / 1.05 = 1.293512.
+      // Round-trip-verified: full_forward(1.293512, exposure=1.05) = 0.92
+      // exactly (script in task-6-report.md).
+      const bloom = new UnrealBloomPass(size, 0.22, 0.5, 1.294);
       composer.addPass(bloom);
 
       const grain = new ShaderPass(GrainVignetteShader);

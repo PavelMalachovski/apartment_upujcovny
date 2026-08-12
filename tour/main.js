@@ -22,6 +22,19 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 const BUILD_V = new URL(import.meta.url).searchParams.get('v') || '';
 
 window.THREE = THREE;
+// r128 had no colour-management system at all: a hex like 0xffe4c0 passed
+// straight through as the linear RGB triplet, unconverted, for every
+// material and light Color in the app. r155+ defaults
+// ColorManagement.enabled = true, which makes Color's hex/style
+// constructors assume sRGB and auto-decode to linear before use -- a
+// conversion that never ran under r128. Must be set before any classic
+// script (materials.js, builder.js) constructs a single Color. Textures are
+// a separate mechanism and are unaffected (they default to NoColorSpace
+// regardless -- see materials.js's canvasTex()); this is scoped to Color
+// only. Measured, not assumed: this was the single largest contributor to
+// the r128<->r185 gap of everything task 6 found -- see
+// docs/superpowers/metrics/r128-reference.md.
+THREE.ColorManagement.enabled = false;
 Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass });
 
 // The classic scripts only declare classes and touch THREE inside functions,
