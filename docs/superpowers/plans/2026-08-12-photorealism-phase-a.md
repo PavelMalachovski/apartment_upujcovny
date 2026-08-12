@@ -810,11 +810,22 @@ Paste this in the console **before** wiring the generator into `box()`. It must 
     if (Math.abs(L - 1) > 1e-3) { fail.push('normal ' + i + ' length ' + L); break; }
   }
 
-  // a box too small to chamfer must degrade, not produce a degenerate mesh
-  const tiny = Builder.chamferBoxGeometry(0.01, 0.01, 0.01, 0.005);
+  // A box too small to chamfer must degrade, not produce a degenerate mesh.
+  // Pick the dimension from the clamp, not by eye: c is first clamped to
+  // 0.4 * half-extent, so the 0.0005 early-out is only reached when the
+  // half-extent is at or below 0.00125 — a 2 mm cube, not a 10 mm one.
+  const tiny = Builder.chamferBoxGeometry(0.002, 0.002, 0.002, 0.005);
   if (tiny.attributes.position.count !== 24) {
     fail.push('tiny box did not fall back to BoxGeometry (got ' +
               tiny.attributes.position.count + ' positions, expected 24)');
+  }
+
+  // The smallest box the production path will ever chamfer is 0.15 m, and it
+  // must NOT fall back — otherwise the guard is swallowing real furniture.
+  const smallest = Builder.chamferBoxGeometry(0.15, 0.15, 0.15, 0.005);
+  if (smallest.attributes.position.count !== 132) {
+    fail.push('smallest chamfered box fell back unexpectedly (got ' +
+              smallest.attributes.position.count + ' positions, expected 132)');
   }
 
   console.log(fail.length ? 'FAIL:\n' + fail.join('\n') : 'PASS: all chamfer assertions hold');
@@ -824,7 +835,9 @@ Paste this in the console **before** wiring the generator into `box()`. It must 
 
 Expected on the first run, before the generator exists: `Builder.chamferBoxGeometry is not a function`. After Step 1 and this step's export: `PASS`.
 
-A bounding box smaller than requested means the inset was applied to the outer faces instead of the neighbouring axes — a sign error in `pt()`. A tiny box returning 132 positions means the early-out threshold is wrong; `BoxGeometry` yields 24 positions for a non-indexed read of 12 triangles, which is what the fallback must produce.
+A bounding box smaller than requested means the inset was applied to the outer faces instead of the neighbouring axes — a sign error in `pt()`. `BoxGeometry` yields a `position.count` of 24, which is what the fallback must produce.
+
+The two size cases are deliberately chosen from opposite sides of the guard, because a guard that never fires and a guard that fires too eagerly are both defects and a single case cannot tell them apart. The production path never reaches the fallback at all — `box()` refuses to chamfer anything whose smallest dimension is under 0.15 m — so this guard is purely defensive, which is exactly why it needs a test: `chamferBoxGeometry` is exported on `Builder` and nothing stops a later caller passing other values.
 
 - [ ] **Step 4: Wire it into `box()` behind a flag**
 
