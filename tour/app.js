@@ -43,14 +43,21 @@ function captureEnvironment(renderer, scene, point) {
     return env;
   } catch (e) {
     console.warn('[env] capture failed, materials stay unreflective:', e);
-    // CubeCamera.update() and PMREMGenerator only restore the renderer's
-    // previous render target on the normal exit path in r128 — an
-    // exception partway through the six cube-face renders (context loss, a
-    // WebGL error) can leave the renderer bound to an offscreen cube face,
-    // so every frame after this one would render into it instead of the
-    // canvas: a black screen, exactly what this handler exists to prevent.
-    // Restore defensively, in its own try/catch, so a failure in the
-    // restore itself can never mask the warning above or re-throw past it.
+    // CubeCamera.update() and PMREMGenerator still restore the renderer's
+    // previous render target only on the normal exit path — re-verified in
+    // the vendored r185 copy, not carried over from the r128 comment this
+    // replaces. `CubeCamera.update()` (three.core.js) reads
+    // `renderer.getRenderTarget()` into a local, renders the six faces, and
+    // restores at the very end with no try/finally around any of it;
+    // `PMREMGenerator._fromTexture()` (three.module.js) does the same,
+    // stashing `_oldTarget` and only putting it back in `_cleanup()`, which
+    // is the last statement of the normal path. So an exception partway
+    // through (context loss, a WebGL error) still leaves the renderer bound
+    // to an offscreen cube face, and every frame after this one would
+    // render into it instead of the canvas: a black screen, exactly what
+    // this handler exists to prevent. Restore defensively, in its own
+    // try/catch, so a failure in the restore itself can never mask the
+    // warning above or re-throw past it.
     try { renderer.setRenderTarget(null); } catch (e2) { /* nothing more we can do */ }
     return null;
   } finally {
