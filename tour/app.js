@@ -2,6 +2,40 @@
 // Scene init, render loop, minimap, current-room label
 // ============================================================
 
+// Capture a cube panorama of the apartment itself and turn it into a
+// PMREM environment. Reflections then show this flat's real window
+// instead of a stock studio, which is what resemblance needs.
+//
+// Two ordering constraints, both load-bearing:
+//   - run AFTER the light bake, or the panorama records unlit surfaces;
+//   - run while scene.environment is still null, or reflections feed
+//     back on themselves.
+function captureEnvironment(renderer, scene, point) {
+  try {
+    const target = new THREE.WebGLCubeRenderTarget(256, {
+      format: THREE.RGBAFormat,
+      generateMipmaps: true,
+      minFilter: THREE.LinearMipmapLinearFilter
+    });
+    const cam = new THREE.CubeCamera(0.1, 60, target);
+    cam.position.set(point.x, point.y, point.z);
+    scene.environment = null;
+    cam.update(renderer, scene);
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileCubemapShader();
+    const env = pmrem.fromCubemap(target.texture).texture;
+    pmrem.dispose();
+    target.dispose();
+
+    scene.environment = env;
+    return env;
+  } catch (e) {
+    console.warn('[env] capture failed, materials stay unreflective:', e);
+    return null;
+  }
+}
+
 window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -33,6 +67,19 @@ window.initApp = function () {
   window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
     goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
   }).then(() => {
+    // Capture point precedence: APT.env.capture (per axis) > APT.roomCenter.main
+    // > APT.start. kings-court has no roomCenter, so without the start
+    // fallback its capture point would default to the world origin — outside
+    // the flat and most likely inside a wall. APT.start is by definition a
+    // valid standing position inside every apartment, so it is the safer
+    // fallback than a literal { x: 0, z: 0 }.
+    const fallback = (APT.roomCenter && APT.roomCenter.main) || APT.start || { x: 0, z: 0 };
+    const ec = (APT.env && APT.env.capture) || {};
+    captureEnvironment(renderer, scene, {
+      x: ec.x !== undefined ? ec.x : fallback.x,
+      y: ec.y !== undefined ? ec.y : 1.6,
+      z: ec.z !== undefined ? ec.z : fallback.z
+    });
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';
     doll.classify();
