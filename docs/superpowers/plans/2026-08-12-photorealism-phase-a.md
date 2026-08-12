@@ -861,17 +861,22 @@ Walls, floors and ceilings must **not** be chamfered — a bevel at every wall-s
 
 The 0.15 m floor keeps drawer pulls, book spines and cutlery from receiving furniture-scale bevels.
 
-In `buildFurniture`, bracket the loop:
+In `buildFurniture`, bracket the loop. The reset goes in a `finally`, so a throwing furniture constructor cannot leave the flag stuck on for the rest of the module's life:
 
 ```js
   function buildFurniture(scene) {
     CHAMFER = 0.005;
-    for (const item of APT.furniture) {
-      /* unchanged body */
+    try {
+      for (const item of APT.furniture) {
+        /* unchanged body */
+      }
+    } finally {
+      CHAMFER = 0;
     }
-    CHAMFER = 0;
   }
 ```
+
+Module-level mutable state that is only correct on the happy path is the kind of thing that stays inert for months and then surfaces as a mystery once someone adds a retry or a re-init path. One line removes the class of problem.
 
 - [ ] **Step 5: Verify geometry, textures and the layout gate**
 
