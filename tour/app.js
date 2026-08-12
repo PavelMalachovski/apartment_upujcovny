@@ -93,9 +93,18 @@ window.initApp = function () {
   goBtn.textContent = 'Baking light… 0%';
   goBtn.style.opacity = '0.6';
   const doll = new DollMode(scene, camera, controls, canvas);
-  window.__bakeReady = Baker.run(scene, Builder.bakeData, (p) => {
+  // Bake timing, always on: window.__bakeMs is set the moment Baker.run's
+  // own promise settles, independent of whatever else this .then() chain
+  // goes on to do (env capture, etc.) below. Living inside this function
+  // rather than an external debug recipe means it survives this function
+  // being restructured, and it can be read by anyone verifying a bake-time
+  // claim without editing source first.
+  const __bakeT0 = performance.now();
+  const __bakerRun = Baker.run(scene, Builder.bakeData, (p) => {
     goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
-  }).then(() => {
+  });
+  __bakerRun.then(() => { window.__bakeMs = performance.now() - __bakeT0; });
+  window.__bakeReady = __bakerRun.then(() => {
     // Capture point precedence: APT.env.capture (per axis) > APT.roomCenter.main
     // > APT.start. kings-court has no roomCenter, so without the start
     // fallback its capture point would default to the world origin — outside

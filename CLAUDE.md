@@ -87,11 +87,14 @@ now carries:
 ## Hard rules
 
 **1. Every visual change is verified with a screenshot.** Debug API:
-`window.__app = {scene, camera, renderer, controls, doll, composer, post}`
-and `window.__bakeReady` (Promise). `composer`/`post` are `null` when the
-post-processing chain didn't build (missing example files, weak GPU) —
-always guard with `if (a.post && a.post.enabled)` rather than assuming
-either exists. Recipes are below.
+`window.__app = {scene, camera, renderer, controls, doll, composer, post}`,
+`window.__bakeReady` (Promise), `window.__issues` (array, filled once
+`__bakeReady` resolves), and `window.__bakeMs` (number, set the instant
+`Baker.run`'s own promise settles — read it after awaiting
+`__bakeReady`). `composer`/`post` are `null` when the post-processing
+chain didn't build (missing example files, weak GPU) — always guard with
+`if (a.post && a.post.enabled)` rather than assuming either exists.
+Recipes are below.
 
 **2. The layout self-check is the first thing you look at after an
 edit.** `validate.js` runs on load, prints to the console, fills
@@ -188,27 +191,20 @@ deferred to the engine migration in phase B. The progress readout on the
 start overlay exists specifically so a slow bake reads as "loading," not
 "broken," in the meantime.
 
-To reproduce a bake-time measurement (the console has no built-in timer —
-this is the same one-off instrumentation used to produce the numbers
-above, meant to be reverted afterward, not left in):
+To reproduce a bake-time measurement, no source edit required —
+`window.__bakeMs` is a permanent part of the debug API (set inside
+`app.js`, the instant `Baker.run`'s own promise settles, regardless of
+how quickly anything outside gets around to checking):
 
 ```js
-// paste into app.js right before `const doll = new DollMode(...)`,
-// bump app.js's own ?v= in index.html to force a fresh fetch, then
-// reload a few times and read the console — revert both before commit
-const __bt0 = performance.now();
-const __bakerRun = Baker.run(scene, Builder.bakeData, (p) => {
-  goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
-});
-__bakerRun.then(() => console.log('[BAKE_MS]', performance.now() - __bt0));
-window.__bakeReady = __bakerRun.then(() => {
+window.__bakeReady.then(() => console.log(window.__bakeMs));
 ```
 
-A plain post-navigation `performance.now()` marker races the bake and
-undercounts it for the fast apartments (serenity's bake can finish before
-a second tool round-trip lands) — the instrumentation has to live inside
-`app.js` itself so the timestamp is taken regardless of how quickly an
-outside observer gets around to checking.
+A plain post-navigation `performance.now()` marker taken from *outside*
+the page would race the bake and undercount it for the fast apartments
+(serenity's bake can finish before a second tool round-trip lands) — that
+is why the timestamp is taken inside `app.js` itself rather than
+described by an external recipe.
 
 **5. Geometry.** Do not render interior door leaves — openings must read
 as open. Walls with `h > 4` collide on `'both'` levels. The terrace
