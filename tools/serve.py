@@ -66,11 +66,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(400)
             self.end_headers()
             return
-        os.makedirs(os.path.dirname(dest), exist_ok=True)
-        n = int(self.headers.get('Content-Length', 0))
-        body = self.rfile.read(n).decode()
+        # A missing or zero Content-Length used to fall straight through:
+        # read(0) -> '' -> b64decode('') -> b'' -> a 0-byte file written and
+        # HTTP 200 'ok' returned. Every capture harness in this repo
+        # (measure.js, refshots.js) treats 200 as "the frame is on disk", so
+        # a capture that produced nothing reported success and the empty
+        # files were only noticed downstream, if at all -- the exact
+        # silent-degradation shape app.js's exposure guard exists to
+        # prevent. Reject it here instead: no file created, no directory
+        # created, and a status the caller can actually act on. Checked
+        # before makedirs for the same reason the traversal check above is.
+        n = int(self.headers.get('Content-Length', 0) or 0)
+        body = self.rfile.read(n).decode() if n > 0 else ''
         if ',' in body:
             body = body.split(',', 1)[1]
+        if not body:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'empty body: nothing captured, no file written')
+            return
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, 'wb') as f:
             f.write(base64.b64decode(body))
         self.send_response(200)
