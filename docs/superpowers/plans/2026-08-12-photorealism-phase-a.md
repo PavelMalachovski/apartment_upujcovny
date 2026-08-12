@@ -18,7 +18,11 @@ Copied verbatim from `docs/superpowers/specs/2026-08-12-photorealism-design.md`.
 - `validate.js` must report an empty issue list before every commit.
 - Metres and degrees; the yaw convention is unchanged.
 - **≤400 draw calls on desktop, ≤250 on mobile**, re-measured after every geometry addition, at the entrance and in two rooms.
-- **Phase A bake stays under ~3 s**, because it is still synchronous.
+- **No task may add more than ~1 s to any apartment's bake**, because the bake is still synchronous and blocks the start overlay. The AO ray count is the knob if a task exceeds this.
+
+  This replaces an earlier blanket "bake stays under ~3 s", which was written from `CLAUDE.md`'s claim of "~2 s" without measuring every apartment. Task 5 measured all three, medians of three runs: serenity 267 ms, horkyone-10 1323 ms, **kings-court 8674 ms before any of this work**. The 3 s figure was never achievable for kings-court and no phase A task caused it — the cost is the per-texel `lightAt` loop over that flat's far larger surface, occluder and light counts, and it predates this branch.
+
+  Recorded as a phase B item rather than fixed here: the spec already plans to move the bake into a Worker, which fixes the frozen-overlay symptom, and reducing the base cost means touching lightmap resolution and `lightAt` — a change with its own visual consequences that does not belong in a task about ambient occlusion. At the product level it sits at the top of the 5–10 s load the brief accepted, and the overlay shows live progress throughout, so it is a known cost rather than an unexplained freeze.
 - Total transferred weight per apartment ≤50 MB including shared assets.
 - Everything in the project is in English: UI strings, JSON room names, docs, code comments.
 - Any JS or JSON change requires bumping `?v=N` on **all** `<script src>` tags in `index.html`, and the bump happens **after** the last code edit. **Every task in this plan bumps**, as its final edit before committing — not only the first and last. A task that changes JS or JSON without bumping serves the old file from cache, which is the failure `CLAUDE.md` records as having cost an hour.
