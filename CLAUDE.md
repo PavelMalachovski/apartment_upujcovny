@@ -161,7 +161,8 @@ save endpoint instead:
 const a = window.__app;
 a.renderer.setSize(1280, 820, false);
 a.camera.aspect = 1280 / 820; a.camera.updateProjectionMatrix();
-a.renderer.render(a.scene, a.camera);
+if (a.post) { a.post.setSize(1280, 820); a.post.render(0); }
+else a.renderer.render(a.scene, a.camera);
 const c = document.createElement('canvas');
 c.width = 1280; c.height = 820;
 c.getContext('2d').drawImage(a.renderer.domElement, 0, 0);

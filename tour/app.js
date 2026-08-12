@@ -65,6 +65,10 @@ window.initApp = function () {
   const controls = new WalkControls(camera, canvas, colliders);
   // cap pixel density on touch devices for FPS
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, controls.isTouch ? 1.6 : 2));
+  // Built before the first resize() call below: resize() closes over `post`
+  // and runs immediately, so declaring it any later would read a
+  // temporal-dead-zone `const` and throw.
+  const post = Post.create(renderer, scene, camera);
   resize();
 
   // Light baking: async, with progress on the overlay
@@ -141,6 +145,7 @@ window.initApp = function () {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    if (post) post.setSize(w, h);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -464,7 +469,8 @@ window.initApp = function () {
     return '';
   }
 
-  window.__app = { scene, camera, renderer, controls, doll, drawMap, roomName };
+  window.__app = { scene, camera, renderer, controls, doll, drawMap, roomName,
+                   composer: post ? post.composer : null, post };
 
   let last = performance.now();
   let frame = 0;
@@ -473,7 +479,8 @@ window.initApp = function () {
     last = now;
     controls.update(dt);
     doll.update();
-    renderer.render(scene, camera);
+    if (post && post.enabled) post.render(now * 0.001);
+    else renderer.render(scene, camera);
     if ((frame++ & 3) === 0) {
       drawMap();
       checkPhotoSpot();
