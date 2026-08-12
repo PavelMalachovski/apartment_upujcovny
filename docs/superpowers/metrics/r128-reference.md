@@ -514,6 +514,15 @@ value would be taste, not mechanism, and bloom tuning belongs to plan 2
 alongside the exposure re-fit that changes what these radiances are.
 Documented in `post.js` beside the constant.
 
+**Constraint for plan 2, not a suggestion: fit bloom and exposure together.**
+They are coupled through the same buffer — exposure scales the radiances that
+bloom's threshold and strength then act on — so fitting exposure alone drives
+its value to absorb bloom's domain error, and the resulting number describes
+neither. That is the phase-A failure repeating in a new place: a constant
+tuned against conditions a later change moves, with nothing re-checking it.
+Fit them jointly, or fit exposure with the bloom pass disabled and enable it
+only once its own constants are set.
+
 ### Resemblance after difference 6 — and what it does to the load-bearing split
 
 Captured with the unchanged harness (same unfixed FOV, per plan 1's scope) at
