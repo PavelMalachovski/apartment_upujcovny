@@ -68,51 +68,84 @@ const Post = (() => {
       console.warn('[post] weak GPU detected, rendering without the chain');
       return null;
     }
-    const size = new T.Vector2();
-    renderer.getSize(size);
+    // The two-name check above only covers the two files whose absence
+    // leaves THREE.UnrealBloomPass/EffectComposer undefined before any
+    // constructor runs. RenderPass.js, ShaderPass.js, CopyShader.js and
+    // LuminosityHighPassShader.js each fail differently and only once
+    // something below tries to use them (new T.RenderPass(...) throwing
+    // TypeError, EffectComposer's internal `new THREE.ShaderPass(CopyShader)`
+    // throwing, UnrealBloomPass's constructor calling
+    // UniformsUtils.clone(undefined.uniforms), etc.) — those exceptions
+    // would otherwise escape past Post.create into initApp and abort
+    // everything after it: no bake, no window.__app, no render loop, a
+    // permanently stuck "Click to enter" screen. Wrapping the whole body
+    // catches all six failure shapes the same way, not just the two the
+    // name guard happens to catch before construction even starts.
+    try {
+      const size = new T.Vector2();
+      renderer.getSize(size);
 
-    const composer = new T.EffectComposer(renderer);
+      const composer = new T.EffectComposer(renderer);
 
-    // EffectComposer's auto-created render targets default to
-    // LinearEncoding regardless of renderer.outputEncoding. None of the
-    // full-screen-quad shaders in this chain (UnrealBloomPass's internal
-    // passes, our own grain/vignette pass) re-apply sRGB encoding — they
-    // are hand-written GLSL with no <encodings_fragment> chunk, so nothing
-    // downstream ever compensates. RenderPass draws the scene into that
-    // linear-encoded target, so the scene's sRGB-encoded output gets
-    // stored as if it were already linear (i.e. treated as if a gamma
-    // decode had happened that never did), and every later pass just
-    // relays those too-low values straight to the screen. Measured
-    // directly: the same surface reads ~148 out of 255 rendered straight
-    // to the screen but ~76 through an unpatched composer target — almost
-    // exactly what sRGB-decoding that pixel's own encoded value would
-    // produce, i.e. one full unwanted gamma decode with no matching
-    // encode anywhere in the chain. Match the render targets' encoding to
-    // the renderer's so RenderPass's output actually is what every later
-    // pass assumes it already is.
-    composer.renderTarget1.texture.encoding = renderer.outputEncoding;
-    composer.renderTarget2.texture.encoding = renderer.outputEncoding;
+      // EffectComposer's auto-created render targets default to
+      // LinearEncoding regardless of renderer.outputEncoding. None of the
+      // full-screen-quad shaders in this chain (UnrealBloomPass's internal
+      // passes, our own grain/vignette pass) apply sRGB encoding themselves
+      // — they are hand-written GLSL with no <encodings_fragment> chunk, so
+      // nothing in the chain ever encodes. Three.js derives the *scene*
+      // shader's output encoding from the currently bound render target's
+      // texture.encoding, not from renderer.outputEncoding directly — so
+      // with an unpatched (Linear) target, RenderPass's scene materials
+      // compile with an identity linearToOutputTexel and the sRGB encode
+      // that should happen there simply never runs, rather than a decode
+      // running that shouldn't. Numerically the same missing step either
+      // way, but worth being precise about: there is no stray decode
+      // anywhere in this chain to go hunting for. Measured directly: the
+      // same surface reads ~148 out of 255 rendered straight to the screen
+      // but ~76 through an unpatched composer target — matches leaving that
+      // one encode out. Match the render targets' encoding to the
+      // renderer's so RenderPass actually performs it.
+      //
+      // Consequence worth knowing if these tuning numbers ever need
+      // revisiting: bloom and the grain/vignette pass now read and write
+      // gamma-encoded (not linear) values, since nothing downstream decodes
+      // before operating on them and nothing re-encodes after. The 0.92
+      // bloom threshold therefore acts on encoded values — roughly 0.83 in
+      // linear light. The corner vignette factor (~0.789, see
+      // GrainVignetteShader) is correspondingly closer to 0.57x in linear
+      // terms than its face-value 0.79 suggests.
+      composer.renderTarget1.texture.encoding = renderer.outputEncoding;
+      composer.renderTarget2.texture.encoding = renderer.outputEncoding;
 
-    composer.addPass(new T.RenderPass(scene, camera));
+      composer.addPass(new T.RenderPass(scene, camera));
 
-    // strength, radius, threshold — threshold high so only real daylight blooms
-    const bloom = new T.UnrealBloomPass(size, 0.22, 0.5, 0.92);
-    composer.addPass(bloom);
+      // strength, radius, threshold — threshold high so only real daylight blooms
+      const bloom = new T.UnrealBloomPass(size, 0.22, 0.5, 0.92);
+      composer.addPass(bloom);
 
-    const grain = new T.ShaderPass(GrainVignetteShader);
-    grain.renderToScreen = true;
-    composer.addPass(grain);
+      const grain = new T.ShaderPass(GrainVignetteShader);
+      grain.renderToScreen = true;
+      composer.addPass(grain);
 
-    return {
-      composer: composer,
-      enabled: true,
-      setSize: function (w, h) {
-        composer.setSize(w, h);
-        bloom.setSize(w, h);
-      },
-      update: function (t) { grain.uniforms.time.value = t; },
-      render: function (t) { grain.uniforms.time.value = t; composer.render(); }
-    };
+      return {
+        composer: composer,
+        enabled: true,
+        setSize: function (w, h) {
+          // composer.setSize already resizes every pass (bloom included) at
+          // width*pixelRatio — an extra bloom.setSize(w, h) here would
+          // re-size just the bloom mip chain from CSS pixels, running it at
+          // half resolution on a DPR-2 display while measure.js (which only
+          // calls composer.setSize) scores a correctly-sized bloom. Do not
+          // add that call back.
+          composer.setSize(w, h);
+        },
+        update: function (t) { grain.uniforms.time.value = t; },
+        render: function (t) { grain.uniforms.time.value = t; composer.render(); }
+      };
+    } catch (e) {
+      console.warn('[post] failed to build the post-processing chain, rendering without it:', e);
+      return null;
+    }
   }
 
   return { create };

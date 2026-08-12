@@ -11,7 +11,7 @@
     {
       "file": "2.webp",
       "name": "Pool Terrace",
-      "deltaE": 22.21
+      "deltaE": 22.22
     },
     {
       "file": "3.webp",
@@ -26,17 +26,17 @@
     {
       "file": "5.webp",
       "name": "Kitchen & Hall",
-      "deltaE": 18.28
+      "deltaE": 18.27
     },
     {
       "file": "6.webp",
       "name": "Bedroom",
-      "deltaE": 19.64
+      "deltaE": 19.65
     },
     {
       "file": "7.webp",
       "name": "Bedroom",
-      "deltaE": 19.53
+      "deltaE": 19.52
     },
     {
       "file": "8.webp",
@@ -46,12 +46,12 @@
     {
       "file": "9.webp",
       "name": "Living Room",
-      "deltaE": 27.22
+      "deltaE": 27.21
     },
     {
       "file": "10.webp",
       "name": "Pool Terrace",
-      "deltaE": 26.55
+      "deltaE": 26.56
     },
     {
       "file": "11.webp",
