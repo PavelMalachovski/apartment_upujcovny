@@ -144,16 +144,38 @@ on all tags" **stops working silently** under a prefix mapping, because
 `"three/addons/": "./lib/jsm/"` cannot carry a version — those files arrive
 from cache with no `?v` at all.
 
-Therefore the importmap **enumerates every addon explicitly, each with
-`?v=N`**. There are roughly a dozen; they fit in one block, and the whole
-dependency surface becomes visible in one place. `main.js` keeps reading the
-version off its own tag, as today.
+**Corrected while writing plan 1.** This document originally answered that by
+enumerating every addon in the importmap with its own `?v=N`. That does not
+work. Addons import each other by **relative path** —
+`EffectComposer.js` does `import { CopyShader } from '../shaders/CopyShader.js'`
+— and a relative specifier resolves against the importing module's URL
+**without inheriting its query string**. Enumeration versions only the files
+named in the map and leaves every transitively-imported file cacheable
+forever, which is the same bug wearing a longer config block.
+
+The fix is to put the version **in the path**: vendored library files live
+under `tour/lib/three-<version>/`, so the URL itself changes when the library
+does and every relative import inside the subtree inherits it. Third-party
+files at a version-stamped path need no `?v` at all.
+
+Our own files keep `?v=N`, and it collapses to **one tag**: `index.html`
+carries a single `<script type="module" src="main.js?v=N">`, `main.js` reads
+the version from `import.meta.url` (`document.currentScript` is null in a
+module), and loads the remaining classic scripts itself with that same
+version. Fifteen tags to bump becomes one — a chore that has already cost this
+project an hour, removed rather than re-documented.
 
 ### Minimal migration, deliberately
 
 `main.js` becomes the single ES module: it imports three and the addons,
-publishes `window.THREE` and the addon classes, then calls into the existing
-classic scripts.
+publishes `window.THREE` and the addon classes, and then **loads the classic
+scripts itself**, in their existing order.
+
+It has to load them rather than let `index.html` do it, and the reason is a
+trap worth recording: classic `<script src>` tags execute *before* deferred
+module scripts, and `post.js:12` evaluates `const T = THREE;` at load time.
+Leaving the classic tags in the HTML would throw `ReferenceError: THREE is not
+defined` before `main.js` ever ran.
 
 `builder.js` (62 KB), `bake.js`, `controls.js`, `doll.js`, `validate.js` and
 `app.js` are **not converted to ESM**. They only declare classes and touch
