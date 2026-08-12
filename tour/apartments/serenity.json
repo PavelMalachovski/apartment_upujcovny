@@ -3,6 +3,13 @@
   "mainCeilH": 2.6,
   "terraceY": -0.05,
   "exposure": 0.33,
+  "palette": {
+    "floorWood": "#f7ffff",
+    "wall": "#f9fbe0",
+    "sofa": "#132743",
+    "tileGray": "#fde4cb",
+    "counter": "#fcfff6"
+  },
   "roomCenter": {
     "main": {
       "x": 2.9,

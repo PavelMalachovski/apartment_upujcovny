@@ -334,34 +334,48 @@ const Materials = (() => {
   }
 
   // ---------- Materials ----------
-  // `palette` is accepted and ignored until Task 7 introduces it, so the
-  // signature does not churn.
+  // `palette` is APT.palette from the apartment config: material key -> hex
+  // string, sampled from the real photographs by tools/sample_palette.py
+  // (Task 8). Every key is optional; an absent or invalid value falls back
+  // to the hardcoded constant it always had, so an apartment with no
+  // palette block renders exactly as before.
   function init(palette) {
+    const P = palette || {};
+    const col = (key, fallback) => {
+      const v = P[key];
+      if (typeof v !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(v)) return fallback;
+      return parseInt(v.slice(1), 16);
+    };
+
     const wood = floorTex();
     wood.repeat.set(3, 3);
-    M.floorWood = new T.MeshStandardMaterial({ map: wood, roughness: 0.55, metalness: 0.04 });
+    M.floorWood = new T.MeshStandardMaterial({ map: wood, color: col('floorWood', 0xffffff), roughness: 0.55, metalness: 0.04 });
     const ash = woodTex('#cdbc9f', 'rgba(150,130,105,0)', false);
     ash.repeat.set(1.2, 1.2);
-    M.ash = new T.MeshStandardMaterial({ map: ash, roughness: 0.75 });
+    M.ash = new T.MeshStandardMaterial({ map: ash, color: col('ash', 0xffffff), roughness: 0.75 });
     const ashV = woodTex('#c6b394', 'rgba(150,130,105,0)', false);
     ashV.repeat.set(1.2, 1.2); ashV.rotation = Math.PI / 2;
-    M.ashV = new T.MeshStandardMaterial({ map: ashV, roughness: 0.75 });
-    M.wall = new T.MeshStandardMaterial({ color: 0xe8e4db, roughness: 0.95 });
+    M.ashV = new T.MeshStandardMaterial({ map: ashV, color: col('ash', 0xffffff), roughness: 0.75 });
+    M.wall = new T.MeshStandardMaterial({ color: col('wall', 0xe8e4db), roughness: 0.95 });
     M.ceil = new T.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.95 });
     M.marbleW = new T.MeshStandardMaterial({ map: marbleTex('#e9e9eb', 'rgba(120,125,135,A)'), roughness: 0.35 });
     M.marbleB = new T.MeshStandardMaterial({ map: marbleTex('#1a1a1e', 'rgba(220,220,225,A)', 16), roughness: 0.4 });
     M.deck = new T.MeshStandardMaterial({ map: deckTex(), roughness: 0.85 });
     M.terracotta = new T.MeshStandardMaterial({ map: terracottaTex(), roughness: 0.8 });
-    M.tileGray = new T.MeshStandardMaterial({ map: tileGrayTex(), roughness: 0.4 });
+    M.tileGray = new T.MeshStandardMaterial({ map: tileGrayTex(), color: col('tileGray', 0xffffff), roughness: 0.4 });
     M.white = new T.MeshStandardMaterial({ color: 0xf5f4f0, roughness: 0.6 });
-    M.counter = new T.MeshStandardMaterial({ map: marbleTex('#eceded', 'rgba(140,140,145,A)', 14), roughness: 0.3 });
+    M.counter = new T.MeshStandardMaterial({ map: marbleTex('#eceded', 'rgba(140,140,145,A)', 14), color: col('counter', 0xffffff), roughness: 0.3 });
     M.black = new T.MeshStandardMaterial({ color: 0x17171a, roughness: 0.5 });
     M.tv = new T.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.25, metalness: 0.4 });
     M.chrome = new T.MeshStandardMaterial({ color: 0xd8dadf, roughness: 0.25, metalness: 0.9 });
     M.glass = new T.MeshStandardMaterial({ color: 0xcfe4ea, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.22, side: T.DoubleSide });
     M.winGlass = new T.MeshStandardMaterial({ color: 0xcfe2ee, emissive: 0x9fc4dd, emissiveIntensity: 0.4, roughness: 0.2, transparent: true, opacity: 0.9, side: T.DoubleSide });
     M.cream = new T.MeshStandardMaterial({ color: 0xe6e0d4, roughness: 0.9 });
-    M.navy = new T.MeshStandardMaterial({ color: 0x233054, roughness: 0.85 });
+    // M.navy is also the serenity sofa's fabric colour (F.sofa in
+    // builder.js, o.col === 'navy'), so it doubles as the 'sofa' palette
+    // key; it is reused for a handful of navy decor accents too, which is
+    // fine since they read as the same fabric hue.
+    M.navy = new T.MeshStandardMaterial({ color: col('sofa', 0x233054), roughness: 0.85 });
     M.navyQuilt = new T.MeshStandardMaterial({ map: quiltTex('#26334f', 'rgba(10,16,30,0.8)'), roughness: 0.85 });
     M.beigeQuilt = new T.MeshStandardMaterial({ map: quiltTex('#cec0ab', 'rgba(150,135,110,0.8)'), roughness: 0.9 });
     M.sage = new T.MeshStandardMaterial({ color: 0x8d968a, roughness: 0.9 });
