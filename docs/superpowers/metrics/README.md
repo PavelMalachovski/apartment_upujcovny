@@ -40,6 +40,41 @@ it. Both are cheap to keep and this is the only task in the table that
 raised the score; every one after it (AO, post, exposure) brought it
 back down and past baseline.
 
+## Every file in this directory
+
+The trend table above cites one canonical file per stage. This directory
+also holds every intermediate and exploratory run behind the post-
+processing and palette stages — kept deliberately, not clutter, because
+several of them are the actual evidence for findings stated elsewhere in
+this document. Canonical files (the ones the trend table's numbers come
+from) are marked **canonical**; everything else is a waypoint, a control,
+or a ruled-out alternative, in chronological order.
+
+**Ambient occlusion (stage: "Baked ambient occlusion," trend-table value 24.54)**
+
+| File | mean | What it is |
+|---|---:|---|
+| `serenity-a3-ao.json` | 24.54 | **Canonical.** The baked-AO stage's trend-table result. |
+| `serenity-a3-ao-fix1.json` | 24.51 | Rerun after AO review round 1 (occluder plane-culling, floor-relative height, dropping a biased ray override). Near-identical to the canonical run — the fixes were correctness fixes to the AO sampler, not attempts to move this metric. |
+
+**Post-processing (stage: "Post-processing chain," trend-table value 23.15)**
+
+| File | mean | What it is |
+|---|---:|---|
+| `serenity-a4-post.json` | 23.15 | **Canonical.** The post-processing chain's trend-table result. |
+| `serenity-a4-post-fix.json` | 23.15 | Rerun after the post-processing correctness fixes (sRGB encoding on the composer's render targets, dropping a DPR-mismatched bloom resize). Same score as the canonical run — expected, since those fixes corrected *how* the chain rendered, not anything this metric measures; recorded to confirm the fixes hadn't regressed resemblance, not to move it. |
+
+**Palette (stage: "Palette sampled from the photographs," trend-table value 16.58)**
+
+| File | mean | What it is |
+|---|---:|---|
+| `serenity-a5-nopalette-check.json` | 16.57 | **Control.** Score with no palette applied at all — matches the exposure-only baseline exactly, and is the number every palette variant below is measured against. This is the file that makes the null result checkable rather than asserted. |
+| `serenity-a5-palette-direct-test.json` | 16.79 | **Ruled out.** An early approach: sample photograph colours and apply them directly. This is *worse* than doing nothing (16.79 vs. the 16.57 control) — the measured evidence that direct sampling actively hurts resemblance, which is what justified building the closed-loop approach below instead of shipping this one. |
+| `serenity-a5-palette-closedloop-test.json` | 16.59 | The closed-loop sampling approach that replaced direct sampling. Roughly flat against the 16.57 control — the approach that was actually adopted and committed. |
+| `serenity-a5-palette.json` | 16.62 | First committed wiring of the adopted approach: palette values reached only the live (non-baked) materials via `Materials.init()`. Baked floors, ceilings and walls still ignored `APT.palette` entirely at this point, which is why this number is *worse* than the 16.57 control rather than better. |
+| `serenity-a5-palette-fix1.json` | 16.60 | After wiring `bake.js`'s merged wall tint to the palette (fix round 1). Still worse than the control — the floor/ceiling lightmap tint was still unwired. |
+| `serenity-a5-palette-fix2.json` | 16.58 | **Canonical.** After wiring `builder.js`'s floor/ceiling overlay tint too (fix round 2) — palette now reaches every surface. This is the trend-table's "Palette sampled from the photographs" result, and it is where the null result becomes trustworthy: with every surface genuinely wired, the score (16.58) still lands within noise of the no-palette control (16.57). |
+
 ## Two results worth stating plainly, not smoothing over
 
 **The exposure task did almost all of the work.** A reviewer decomposed

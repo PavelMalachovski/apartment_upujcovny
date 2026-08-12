@@ -43,8 +43,8 @@ accepted description style.
 | `main.js` | Loader: reads `?apt=<id>`, fetches the config with the same `?v=` as its own tag, degrees→radians, calls `initApp()` |
 | `materials.js` | Material palette `M.*` and procedural canvas textures, split out of `builder.js`; `Materials.color(key, fallback)` resolves an `APT.palette` hex or falls back, shared with `bake.js`'s wall tint |
 | `builder.js` | Config → scene: walls with openings, attic slopes, floors/ceilings, stairs, terrace, furniture constructors `F.*` (chamfered edges via `chamferBoxGeometry`), occluders and light sources for the bake, `mergeStatic` |
-| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic) including baked ambient occlusion (`aoAt`); walls → one merged mesh per level with per-vertex baked light and AO |
-| `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — AO lives in the bake |
+| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic) including baked ambient occlusion (`aoAt`), also called on furniture vertices (`bakeFurnitureAO`); walls → one merged mesh per level with per-vertex baked light only, **no AO** — `bakeWalls()` calls `lightAt()` alone, so a floor-to-wall corner darkens on the floor side only. Known limitation, recorded during the AO task, not yet closed |
+| `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — AO lives in the bake, for floors and furniture (not walls, see `bake.js` above) |
 | `lib/` | Vendored r128-compatible Three.js example files the post chain needs: `EffectComposer`, `RenderPass`, `ShaderPass`, `UnrealBloomPass`, `CopyShader`, `LuminosityHighPassShader` — none of these ship in `three.min.js` itself |
 | `measure.js` | Resemblance capture, loaded only under `?measure=1`: renders every `compare`-flagged photo spot from its own camera/aspect and POSTs the frame to `tools/serve.py`'s save endpoint for offline `tools/delta_e.py` scoring |
 | `validate.js` | Layout self-check: blocked openings, openings into the void, unreachable rooms, markers inside solids |
@@ -167,16 +167,48 @@ is a single 28 m sightline, so at the entrance every zone stays inside
 the frustum and the split only adds calls. Do not retry it.
 
 **4a. Baking has no fixed time budget — it is whatever the geometry
-costs, and one apartment is already slow.** Measured medians of three
-runs: serenity 267 ms, horkyone-10 1323 ms, **kings-court 8674 ms —
-before any work in this phase**. Nothing here made it slower; kings-court
-was already the largest, most detailed apartment and the CPU lightmapper
-was always going to cost more for it. Do not chase this number down
-inside `bake.js` — the fix is architectural (move the bake into a Worker
-so it stops blocking the main thread) and is deferred to the engine
-migration in phase B. The progress readout on the start overlay exists
-specifically so a slow bake reads as "loading," not "broken," in the
-meantime.
+costs, and one apartment is already slow.** Reference medians of three
+runs, recorded before this phase: serenity 267 ms, horkyone-10 1323 ms,
+**kings-court 8674 ms**. That base cost predates the phase — kings-court
+was already the largest, most detailed apartment, and the CPU lightmapper
+was always going to cost more for it; this phase did not create that
+slowness. Remeasured this session on different hardware: serenity 323 ms,
+horkyone-10 1647 ms, kings-court 9942 ms — **15-24% higher, consistently,
+across all three.** That consistent proportional rise is equally
+explained by the hardware difference or by this phase's own AO baking
+(`aoAt()` now runs for every lightmap texel and every furniture vertex)
+costing something everywhere; the two measurements were not taken on the
+same machine, so this cannot be isolated further with what's on hand.
+Don't read more into it than that — say what the data supports (a
+same-direction, similar-sized rise on all three apartments) and no more.
+Do not chase kings-court's underlying slowness down inside `bake.js`
+regardless of which explanation is right — the fix is architectural
+(move the bake into a Worker so it stops blocking the main thread) and is
+deferred to the engine migration in phase B. The progress readout on the
+start overlay exists specifically so a slow bake reads as "loading," not
+"broken," in the meantime.
+
+To reproduce a bake-time measurement (the console has no built-in timer —
+this is the same one-off instrumentation used to produce the numbers
+above, meant to be reverted afterward, not left in):
+
+```js
+// paste into app.js right before `const doll = new DollMode(...)`,
+// bump app.js's own ?v= in index.html to force a fresh fetch, then
+// reload a few times and read the console — revert both before commit
+const __bt0 = performance.now();
+const __bakerRun = Baker.run(scene, Builder.bakeData, (p) => {
+  goBtn.textContent = 'Baking light… ' + Math.round(p * 100) + '%';
+});
+__bakerRun.then(() => console.log('[BAKE_MS]', performance.now() - __bt0));
+window.__bakeReady = __bakerRun.then(() => {
+```
+
+A plain post-navigation `performance.now()` marker races the bake and
+undercounts it for the fast apartments (serenity's bake can finish before
+a second tool round-trip lands) — the instrumentation has to live inside
+`app.js` itself so the timestamp is taken regardless of how quickly an
+outside observer gets around to checking.
 
 **5. Geometry.** Do not render interior door leaves — openings must read
 as open. Walls with `h > 4` collide on `'both'` levels. The terrace
