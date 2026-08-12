@@ -7,13 +7,38 @@
 // (easy to edit by hand) and are converted to radians here.
 // ============================================================
 
-// The version comes from ?v= on this file's own <script> tag — the same
-// value versions the config URL, otherwise the browser serves stale JSON
-// from cache and geometry edits never reach phones.
-const BUILD_V = (function () {
-  try { return new URL(document.currentScript.src).searchParams.get('v') || ''; }
-  catch (e) { return ''; }
-})();
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+// The version comes from ?v= on this module's own URL — the same value
+// versions the config fetch and every classic script loaded below, otherwise
+// the browser serves stale JSON and stale code from cache and edits never
+// reach phones. document.currentScript is null in a module; import.meta.url
+// carries the query string, so it is the equivalent.
+const BUILD_V = new URL(import.meta.url).searchParams.get('v') || '';
+
+window.THREE = THREE;
+Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass });
+
+// The classic scripts only declare classes and touch THREE inside functions,
+// so publishing the globals first is enough — but they must load in this
+// order, and they must load before initApp is called.
+const CLASSIC = ['post.js', 'bake.js', 'materials.js', 'builder.js',
+                 'controls.js', 'doll.js', 'validate.js', 'app.js'];
+
+function loadClassic(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src + (BUILD_V ? '?v=' + BUILD_V : '');
+    s.onload = res;
+    s.onerror = () => rej(new Error('failed to load ' + src));
+    document.head.appendChild(s);
+  });
+}
 
 (async function () {
   const goBtn = document.getElementById('goBtn');
@@ -49,6 +74,14 @@ const BUILD_V = (function () {
       document.title = cfg.meta.title + ' · 3D Tour';
       document.querySelector('#overlay h1').textContent = cfg.meta.title;
     }
+  }
+
+  try {
+    for (const f of CLASSIC) await loadClassic(f);
+  } catch (err) {
+    goBtn.textContent = 'Could not load the tour';
+    document.getElementById('overlayText').textContent = String(err.message);
+    return;
   }
 
   window.initApp();
