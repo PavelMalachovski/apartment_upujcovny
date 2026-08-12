@@ -21,7 +21,7 @@ Copied verbatim from `docs/superpowers/specs/2026-08-12-photorealism-design.md`.
 - **Phase A bake stays under ~3 s**, because it is still synchronous.
 - Total transferred weight per apartment ≤50 MB including shared assets.
 - Everything in the project is in English: UI strings, JSON room names, docs, code comments.
-- Any JS or JSON change requires bumping `?v=N` on **all** `<script src>` tags in `index.html`, and the bump happens **after** the last code edit.
+- Any JS or JSON change requires bumping `?v=N` on **all** `<script src>` tags in `index.html`, and the bump happens **after** the last code edit. **Every task in this plan bumps**, as its final edit before committing — not only the first and last. A task that changes JS or JSON without bumping serves the old file from cache, which is the failure `CLAUDE.md` records as having cost an hour.
 - A missing asset degrades to the procedural path with a console warning, and never produces a black screen.
 
 ## Documented deviation from the spec
@@ -397,16 +397,36 @@ A pure move with **no visual change whatsoever**. Doing it first means the four 
 - Produces: global `Materials = { M, init(palette), canvasTex(w, h, draw, repX, repY) }` where `M` is the same object `builder.js` uses today and `init()` replaces the current `initMaterials()`.
 - Consumes: nothing. `palette` is unused until Task 7 and must be accepted and ignored now so the signature does not churn later.
 
-- [ ] **Step 1: Capture the pre-move reference screenshots**
+- [ ] **Step 1: Capture a deterministic pre-move snapshot of the palette**
 
-This refactor's test is that the picture does not change. Capture the evidence first — run the server, then in the console:
+This refactor's test is that the materials do not change. **Do not byte-compare rendered frames:** `builder.js` calls `Math.random()` 41 times in its texture and furniture generation, so two consecutive reloads of identical code produce different images. A byte comparison would fail on correct work.
+
+Snapshot the palette instead — it is deterministic and it is exactly what a move can break. First make it reachable by adding `M` to Builder's returned object, a one-line change that also serves the project's existing debug-API convention:
+
+```js
+  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways, M };
+```
+
+Then in the console, with the server running:
 
 ```js
 await window.__bakeReady;
-await window.__measure();
+window.__paletteSnapshot = () => Object.keys(Builder.M).sort().map((k) => {
+  const m = Builder.M[k];
+  return [k, m.type,
+    m.color ? m.color.getHexString() : '-',
+    m.roughness !== undefined ? m.roughness.toFixed(3) : '-',
+    m.metalness !== undefined ? m.metalness.toFixed(3) : '-',
+    m.map ? 'map' : '-',
+    m.transparent ? 'T' : '-',
+    m.opacity !== undefined ? m.opacity.toFixed(2) : '-',
+    m.side !== undefined ? m.side : '-'
+  ].join(' ');
+}).join('\n');
+copy(window.__paletteSnapshot());   // or console.log and save by hand
 ```
 
-Copy `tools/shots/` to `tools/shots-before-task2/`.
+Save the output to `tools/palette-before.txt`.
 
 - [ ] **Step 2: Move the code**
 
@@ -461,7 +481,9 @@ In `tour/index.html`, insert `materials.js` **before** `builder.js`:
 
 - [ ] **Step 4: Verify nothing changed**
 
-Reload and check the layout gate plus the picture:
+`builder.js` now reads `M` from `Materials`, so `Builder.M` and `Materials.M` are the same object and the snapshot is taken through the same accessor as before the move — an apples-to-apples comparison.
+
+Reload and check the layout gate:
 
 ```js
 await window.__bakeReady; window.__issues
@@ -469,14 +491,22 @@ await window.__bakeReady; window.__issues
 
 Expected: `[]`.
 
-Then re-run `window.__measure()` and compare byte sizes against `tools/shots-before-task2/`. JPEG output for an unchanged scene is deterministic, so the files should be identical or within a few bytes. Any visible difference means something was dropped in the move — find it rather than accepting it.
+Then take the snapshot again with the identical function from Step 1 and diff it against `tools/palette-before.txt`:
+
+```bash
+python -c "import sys; a=open('tools/palette-before.txt',encoding='utf-8').read().splitlines(); b=open('tools/palette-after.txt',encoding='utf-8').read().splitlines(); d=[(x,y) for x,y in zip(a,b) if x!=y]; print('lines before/after:', len(a), len(b)); print('differences:', d if d else 'none')"
+```
+
+Expected: identical line counts and **no differences**. Any difference means a material was dropped or altered in the move — find it rather than accepting it. A shorter "after" list means a material was lost entirely, which is the most likely mistake and the one a screenshot would miss.
 
 Also confirm the other two apartments still build: load `?apt=kings-court&check=1` and `?apt=horkyone-10&check=1`, both must report `[]`.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Bump the cache version and commit**
+
+Bump `?v=43` → `?v=44` on all `<script src>` tags in `tour/index.html`, including the new `materials.js`, as the last edit.
 
 ```bash
-rm -rf tools/shots-before-task2
+rm -f tools/palette-before.txt tools/palette-after.txt
 git add tour/materials.js tour/builder.js tour/index.html
 git commit -m "Extract the material palette into materials.js, no visual change"
 ```
@@ -600,7 +630,7 @@ python tools/delta_e.py --apt serenity --phase a1-env
 
 Expected: mean ΔE2000 at or below the baseline. Record the number in the commit message. If it rose, the capture point is probably inside a solid — check it against the `roomCenter` and the walls before proceeding.
 
-- [ ] **Step 6: Check the draw-call budget and commit**
+- [ ] **Step 6: Check the draw-call budget, bump the version, commit**
 
 ```js
 const c2 = a.controls;
@@ -609,10 +639,12 @@ a.renderer.render(a.scene, a.camera);
 console.log('calls at entrance:', a.renderer.info.render.calls);
 ```
 
-Expected: unchanged at ~54, well under 400.
+Expected: unchanged at ~55, well under 400.
+
+Bump `?v=` on all `<script src>` tags in `tour/index.html` as the last edit.
 
 ```bash
-git add tour/app.js docs/superpowers/metrics/serenity-a1-env.json
+git add tour/app.js tour/index.html docs/superpowers/metrics/serenity-a1-env.json
 git commit -m "Capture the environment map from the apartment itself"
 ```
 
@@ -725,22 +757,76 @@ In `tour/builder.js`, above `function box(`:
   }
 ```
 
-- [ ] **Step 2: Verify the generator in isolation before wiring it up**
+- [ ] **Step 2: Export the generator so it can be tested**
 
-In the console:
+The generator lives inside the `builder.js` IIFE and is unreachable from the console, so add it to the returned object beside `M` from Task 2. It is a pure geometry helper; exporting it costs nothing and matches the project's existing debug-API convention:
 
 ```js
-const g = new THREE.BufferGeometry();  // sanity: the real check is below
-// Access the generator through a temporary export if needed, or test via
-// a furniture item after Step 3. Minimum acceptance:
-//   - position count === 44 * 3 === 132
-//   - every uv in [0, 1]
-//   - the bounding box equals the requested w/h/d
+  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways,
+           M, chamferBoxGeometry };
 ```
 
-Acceptance for a `chamferBoxGeometry(1, 1, 1, 0.005)`: 132 positions, bounding box exactly `(-0.5,-0.5,-0.5)`–`(0.5,0.5,0.5)`, all UVs within `[0, 1]`. A bounding box smaller than requested means the inset was applied to the outer faces — a sign error.
+- [ ] **Step 3: Write and run the failing assertions**
 
-- [ ] **Step 3: Wire it into `box()` behind a flag**
+Paste this in the console **before** wiring the generator into `box()`. It must fail first — a check that cannot fail proves nothing:
+
+```js
+(() => {
+  const fail = [];
+  const g = Builder.chamferBoxGeometry(1, 1, 1, 0.005);
+
+  // 6 faces x 2 + 12 edge bevels x 2 + 8 corners x 1 = 44 triangles
+  const n = g.attributes.position.count;
+  if (n !== 132) fail.push('position count ' + n + ', expected 132');
+
+  // the chamfer is an inset: the outer dimensions must be untouched
+  g.computeBoundingBox();
+  const bb = g.boundingBox;
+  for (const [axis, lo, hi] of [['x', bb.min.x, bb.max.x],
+                                ['y', bb.min.y, bb.max.y],
+                                ['z', bb.min.z, bb.max.z]]) {
+    if (Math.abs(lo + 0.5) > 1e-6 || Math.abs(hi - 0.5) > 1e-6) {
+      fail.push('bbox ' + axis + ' = [' + lo + ', ' + hi + '], expected [-0.5, 0.5]');
+    }
+  }
+
+  // a uv attribute is mandatory or mergeStatic silently zeroes the mapping
+  const uv = g.attributes.uv;
+  if (!uv) fail.push('no uv attribute');
+  else {
+    if (uv.count !== n) fail.push('uv count ' + uv.count + ' != position count ' + n);
+    for (let i = 0; i < uv.array.length; i++) {
+      if (uv.array[i] < -1e-6 || uv.array[i] > 1 + 1e-6) {
+        fail.push('uv out of [0,1] at ' + i + ': ' + uv.array[i]);
+        break;
+      }
+    }
+  }
+
+  // every normal must be unit length, or lighting goes wrong after merging
+  const nm = g.attributes.normal;
+  for (let i = 0; i < nm.count; i++) {
+    const L = Math.hypot(nm.getX(i), nm.getY(i), nm.getZ(i));
+    if (Math.abs(L - 1) > 1e-3) { fail.push('normal ' + i + ' length ' + L); break; }
+  }
+
+  // a box too small to chamfer must degrade, not produce a degenerate mesh
+  const tiny = Builder.chamferBoxGeometry(0.01, 0.01, 0.01, 0.005);
+  if (tiny.attributes.position.count !== 24) {
+    fail.push('tiny box did not fall back to BoxGeometry (got ' +
+              tiny.attributes.position.count + ' positions, expected 24)');
+  }
+
+  console.log(fail.length ? 'FAIL:\n' + fail.join('\n') : 'PASS: all chamfer assertions hold');
+  return fail.length === 0;
+})();
+```
+
+Expected on the first run, before the generator exists: `Builder.chamferBoxGeometry is not a function`. After Step 1 and this step's export: `PASS`.
+
+A bounding box smaller than requested means the inset was applied to the outer faces instead of the neighbouring axes — a sign error in `pt()`. A tiny box returning 132 positions means the early-out threshold is wrong; `BoxGeometry` yields 24 positions for a non-indexed read of 12 triangles, which is what the fallback must produce.
+
+- [ ] **Step 4: Wire it into `box()` behind a flag**
 
 Walls, floors and ceilings must **not** be chamfered — a bevel at every wall-segment join would open a visible groove along the whole flat. So the chamfer is scoped to furniture construction only:
 
@@ -774,7 +860,7 @@ In `buildFurniture`, bracket the loop:
   }
 ```
 
-- [ ] **Step 4: Verify geometry, textures and the layout gate**
+- [ ] **Step 5: Verify geometry, textures and the layout gate**
 
 ```js
 await window.__bakeReady;
@@ -797,7 +883,7 @@ c.update(0.001); a.renderer.render(a.scene, a.camera);
 
 Expected: wood and marble still show their grain. Flat untextured colour means the UV attribute did not survive `mergeStatic` — go back to Step 1 rather than continuing.
 
-- [ ] **Step 5: Re-measure, check budget, commit**
+- [ ] **Step 6: Re-measure, bump the version, commit**
 
 ```js
 await window.__measure();
@@ -809,8 +895,10 @@ python tools/delta_e.py --apt serenity --phase a2-chamfer
 
 Check draw calls at the entrance again (expected: unchanged, since merging is by material). Confirm `?apt=kings-court&check=1` and `?apt=horkyone-10&check=1` still report `[]`.
 
+Bump `?v=` on all `<script src>` tags in `tour/index.html` as the last edit.
+
 ```bash
-git add tour/builder.js docs/superpowers/metrics/serenity-a2-chamfer.json
+git add tour/builder.js tour/index.html docs/superpowers/metrics/serenity-a2-chamfer.json
 git commit -m "Chamfer furniture edges so they catch the environment highlight"
 ```
 
@@ -978,7 +1066,7 @@ Expected: `merged === withColor` — a mismatch is the exact condition that rend
 
 Screenshot the living room and the bedroom. Expected: furniture darkens gently where it meets the floor and in its own crevices. **Uniformly dark furniture means the self-occlusion skip in `aoAt` is not firing** — check the `inside` test before continuing.
 
-- [ ] **Step 7: Re-measure, check budget, commit**
+- [ ] **Step 7: Re-measure, bump the version, commit**
 
 ```js
 await window.__measure();
@@ -990,8 +1078,10 @@ python tools/delta_e.py --apt serenity --phase a3-ao
 
 Confirm bake time still under 3 s, draw calls unchanged, and both other apartments report `[]`.
 
+Bump `?v=` on all `<script src>` tags in `tour/index.html` as the last edit.
+
 ```bash
-git add tour/bake.js docs/superpowers/metrics/serenity-a3-ao.json
+git add tour/bake.js tour/index.html docs/superpowers/metrics/serenity-a3-ao.json
 git commit -m "Bake ambient occlusion into floor lightmaps and furniture vertices"
 ```
 
@@ -1196,7 +1286,7 @@ if (a.post) { a.post.setSize(1280, 820); a.post.render(0); }
 else a.renderer.render(a.scene, a.camera);
 ```
 
-- [ ] **Step 6: Re-measure, check budget, commit**
+- [ ] **Step 6: Re-measure, bump the version, commit**
 
 ```js
 await window.__measure();
@@ -1209,6 +1299,8 @@ python tools/delta_e.py --apt serenity --phase a4-post
 The bloom threshold and grain amount are the tuning knobs — if ΔE rose, lower `amount` toward 0.02 and raise the bloom threshold toward 0.95, then re-measure. Tune against the metric, not against taste.
 
 Check draw calls; the chain adds passes, so expect a rise. Confirm it stays under 400.
+
+Bump `?v=` on all `<script src>` tags in `tour/index.html` — including the six new `lib/` files and `post.js` — as the last edit.
 
 ```bash
 git add tour/lib tour/post.js tour/app.js tour/index.html CLAUDE.md \
@@ -1351,7 +1443,7 @@ Then verify the fallback is real: temporarily set `"wall": "not-a-colour"` in th
 
 Confirm the other two apartments, which have no `palette` block at all, still render unchanged: `?apt=kings-court&check=1` and `?apt=horkyone-10&check=1` must report `[]` and look as before.
 
-- [ ] **Step 5: Re-measure, commit**
+- [ ] **Step 5: Re-measure, bump the version, commit**
 
 ```js
 await window.__measure();
@@ -1363,9 +1455,15 @@ python tools/delta_e.py --apt serenity --phase a5-palette
 
 This is the task most likely to move the metric, because it targets colour directly and the metric measures colour. Expect the largest single drop here.
 
+The version bump matters more here than anywhere else in the plan: this task changes `serenity.json`, and `main.js` fetches the config with the version read off its own script tag. Without the bump the browser serves the **old config** and the new palette silently never arrives. Bump `?v=` on all `<script src>` tags as the last edit, then confirm the config actually changed by comparing a field in the console against the file:
+
+```js
+console.log(APT.palette);   // must match the block you pasted into the JSON
+```
+
 ```bash
 git add tools/sample_palette.py tour/materials.js tour/apartments/serenity.json \
-        docs/superpowers/metrics/serenity-a5-palette.json
+        tour/index.html docs/superpowers/metrics/serenity-a5-palette.json
 git commit -m "Sample the material palette from the real photographs"
 ```
 
