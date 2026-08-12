@@ -851,7 +851,62 @@ git commit -m "Set PointLight decay explicitly for r155+ physically correct ligh
 
 ---
 
-### Task 7: The migration gate
+### The gate, redefined after task 6 — read this before task 7
+
+Task 6 established that **pixel parity with r128 is not achievable, and
+chasing it is actively harmful.** Recording the reasoning here because it
+changes what this plan's central claim means.
+
+Five real r128→r185 behavioural differences were found, each with a
+mechanism, and each converted back:
+
+| # | Difference | Conversion |
+|---|---|---|
+| 1 | `ColorManagement.enabled` defaults true from r155; r128 had no colour management, so hex `Color`s passed through as linear | Disabled. Largest single contributor |
+| 2 | The bloom threshold moved from the encoded domain to the linear one | 0.92 → 1.294, exact ACES/sRGB inversion |
+| 3 | r185 adds `RECIPROCAL_PI` to lightmap-lit surfaces | `lightMapIntensity` × π |
+| 4 | The grain/vignette pass also moved into the linear domain — a multiply and an **additive** ±0.035 that on r128 acted on encoded values | Pass reordered past `OutputPass` rather than its constants converted: it was always designed to act on display-referred values |
+| 5 | r128 never tone-mapped `scene.background` or fog; r185's single final resolve does | **Reverted, see below** |
+
+The plan's assumption that `PointLight.decay` defaulted to 1 was also wrong —
+it was already pinned to 1.6 — so that step was a no-op.
+
+After all five, `compare_shots.py` still reports a worst MAD of ~35 with 27 of
+30 frames over the 2.0 threshold. **The residual is unrecoverable by
+construction.** Fifty-seven releases changed the standard-material BRDF, the
+IBL path and `PMREMGenerator`. Reproducing r128's pixels would mean shipping
+r128's shaders, which is the opposite of migrating.
+
+Difference 5 is the cautionary one. Preserving it took 76 lines in `app.js`
+numerically inverting the ACES chain to reconstruct a background colour that
+r185 would then tone-map back — an apparatus coupled to
+`toneMappingExposure`, which plan 2 re-fits from scratch. Measured against
+the metric that actually matters, it is worth **−0.04 ΔE2000** (17.26 with,
+17.22 without): nothing, and slightly negative. It was removed. Let it stand
+as the example of what optimising toward a pixel-parity gate produces.
+
+**The gate this plan is judged by, therefore:**
+
+1. **Structural — hard pass/fail.** Validator clean on all three apartments,
+   walk simulations, sky-leak raycasts, draw calls in budget, every apartment
+   loading with no console errors. This is the real safety net and it is
+   fully achievable.
+2. **Resemblance — bounded and explained, not zero.** ΔE2000 moved 16.58 →
+   17.26 on serenity. Every constant the bake owns (`EXP`, `WEXP`, the
+   ambient base, and serenity's fitted `exposure` 0.33) was tuned against
+   r128's pipeline, so under a corrected pipeline they are mis-fitted **by
+   construction**. Re-fitting them is plan 2's step 4, not this plan's.
+3. **`compare_shots.py` is demoted to a diagnostic.** It points at frames
+   worth looking at. It no longer passes or fails anything.
+4. **Human review** of the reference frames, side by side, for anything the
+   numbers cannot see.
+
+**This branch must not merge to `main` until plan 2's exposure re-fit brings
+ΔE2000 back to at least the r128 baseline.** Merging plan 1 alone would
+deploy a measurably worse-looking product to production. The phase merges as
+a phase.
+
+## Task 7: The migration gate
 
 Everything in one place, all three apartments, before this is called done.
 
