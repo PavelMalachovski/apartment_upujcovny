@@ -521,7 +521,12 @@ Captured with the unchanged harness (same unfixed FOV, per plan 1's scope) at
 
 **Noise floor first**, because the conclusion depends on the deltas being
 real: a same-code repeat (fresh page load, procedural textures reshuffled)
-scored serenity 17.12 → 17.13 and kings-court 22.09 → 22.06. **±0.03.**
+scored serenity 17.12 → 17.13 and kings-court 22.09 → 22.06. **±0.03** on the
+rounded means; recomputed at full precision from the spot arrays the repeat
+noise is **±0.039**, so the 0.89 kings-court move is ~23× the noise floor, not
+the ~30× a rounded-means division suggests. Both multiples are overwhelming
+and no conclusion here depends on which is used — but the smaller one is the
+honest figure.
 
 | Apartment | phase-A baseline | before this wave | after difference 6 | vs baseline |
 |---|---:|---:|---:|---:|
@@ -544,7 +549,7 @@ asymmetry that made it persuasive is gone, and one new data point cuts
 directly against the story it was telling:
 
 1. **72% of kings-court's "improvement" was the missing π, not the absence
-   of a fit.** Its margin over baseline fell from 1.23 to 0.35. The
+   of a fit.** Its margin over baseline fell from 1.24 to 0.35. The
    reviewer's competing explanation — that a globally missing light factor is
    also diffuse and of the same magnitude — was correct, and it accounted for
    most of one half of the split.
@@ -556,7 +561,7 @@ directly against the story it was telling:
    **global** constants shared by all three apartments and were equally
    authored under r128 — so kings-court always had a fit to break too, just
    not a per-apartment one.
-3. **Serenity barely moved**: 0.65 → 0.54, only 17% of its regression
+3. **Serenity barely moved**: 0.64 → 0.54, only ~16% of its regression
    recovered, against 72% of kings-court's improvement erased. The same
    correction landing that unevenly is better explained by where each
    apartment sits relative to its own photographs (serenity renders too dark
@@ -566,7 +571,7 @@ directly against the story it was telling:
 **What survives:** serenity is +0.54 above its baseline and still needs plan
 2's exposure re-fit; the do-not-merge condition is unchanged and, if
 anything, better supported now that kings-court's cushion is 0.35 rather than
-1.23. **What does not survive:** using the serenity/kings-court split as
+1.24. **What does not survive:** using the serenity/kings-court split as
 proof that the regression is a mis-fitted constant rather than a rendering
 defect. It is a 0.89-wide difference between two apartments after a
 correction that moved them in opposite directions, which is an observation,
