@@ -60,42 +60,46 @@ const Post = (() => {
   }
 
   function create(renderer, scene, camera) {
-    if (!T.EffectComposer || !T.UnrealBloomPass) {
-      console.warn('[post] example files missing, rendering without the chain');
-      return null;
+    const need = { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass };
+    for (const k in need) {
+      if (!need[k]) {
+        console.warn('[post] ' + k + ' missing, rendering without the chain');
+        return null;
+      }
     }
     if (!capable(renderer)) {
       console.warn('[post] weak GPU detected, rendering without the chain');
       return null;
     }
-    // The two-name check above only covers the two files whose absence
-    // leaves THREE.UnrealBloomPass/EffectComposer undefined before any
-    // constructor runs. RenderPass.js, ShaderPass.js, CopyShader.js and
-    // LuminosityHighPassShader.js each fail differently and only once
-    // something below tries to use them (new T.RenderPass(...) throwing
-    // TypeError, EffectComposer's internal `new THREE.ShaderPass(CopyShader)`
-    // throwing, UnrealBloomPass's constructor calling
-    // UniformsUtils.clone(undefined.uniforms), etc.) — those exceptions
-    // would otherwise escape past Post.create into initApp and abort
-    // everything after it: no bake, no window.__app, no render loop, a
-    // permanently stuck "Click to enter" screen. Wrapping the whole body
-    // catches all six failure shapes the same way, not just the two the
-    // name guard happens to catch before construction even starts.
+    // The five-key guard above only rules out the classes this file
+    // constructs being undefined; it cannot rule out the constructors
+    // themselves throwing (WebGL resource limits, shader compilation
+    // failures, driver quirks). An uncaught exception here would escape
+    // Post.create into initApp and abort everything after it — no bake,
+    // no window.__app, no render loop, a permanently stuck "Click to
+    // enter" screen. Wrap the whole body so any construction failure
+    // degrades to "no post chain" instead.
     try {
       const size = new T.Vector2();
       renderer.getSize(size);
 
-      const composer = new T.EffectComposer(renderer);
+      const composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
 
-      composer.addPass(new T.RenderPass(scene, camera));
-
-      // strength, radius, threshold — threshold high so only real daylight blooms
-      const bloom = new T.UnrealBloomPass(size, 0.22, 0.5, 0.92);
+      // strength, radius, threshold. The threshold is re-derived in step 3 of
+      // this task: on r185 the chain runs in linear light and OutputPass does
+      // tone mapping at the end, so the value that acted on encoded pixels in
+      // r128 does not mean the same thing here.
+      const bloom = new UnrealBloomPass(size, 0.22, 0.5, 0.92);
       composer.addPass(bloom);
 
-      const grain = new T.ShaderPass(GrainVignetteShader);
-      grain.renderToScreen = true;
+      const grain = new ShaderPass(GrainVignetteShader);
       composer.addPass(grain);
+
+      // Tone mapping and the sRGB conversion happen here, once, at the end.
+      // This is what replaces r128's per-material encoding and the render
+      // target patch deleted in task 4.
+      composer.addPass(new OutputPass());
 
       return {
         composer: composer,
