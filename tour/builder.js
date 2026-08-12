@@ -759,47 +759,6 @@ const Builder = (() => {
   };
   F.runner = (o, g) => F.rug(Object.assign({ pat: 'light' }, o), g);
 
-  const throwMats = {};
-  function throwMat(pat) {
-    if (throwMats[pat]) return throwMats[pat];
-    const tex = canvasTex(256, 256, (g) => {
-      if (pat === 'zigzag') {
-        // yellow-black zigzag (photo 11)
-        g.fillStyle = '#e8e2d2'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#2b2b2b', '#d9b23c', '#9a9488', '#2b2b2b', '#cfc7b4'];
-        for (let r = 0; r < 10; r++) {
-          g.strokeStyle = cols[r % 5]; g.lineWidth = 7;
-          g.beginPath();
-          for (let x = 0; x <= 256; x += 16) {
-            const y = r * 26 + ((x / 16) % 2 ? 8 : -8);
-            x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
-          }
-          g.stroke();
-        }
-      } else if (pat === 'stripes') {
-        // sage and terracotta bands — bedroom 3's accent
-        g.fillStyle = '#eae6dc'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#7f8c73', '#c98b62', '#eae6dc', '#9aa88d', '#eae6dc'];
-        for (let r = 0; r < 12; r++) {
-          g.fillStyle = cols[r % 5];
-          g.fillRect(0, r * 22, 256, r % 5 === 1 ? 7 : 14);
-        }
-      } else {
-        // blue-gray squares (photo 12)
-        g.fillStyle = '#e9e6df'; g.fillRect(0, 0, 256, 256);
-        const cols = ['#31456e', '#7b8794', '#4a6076', '#b9b2a4'];
-        for (let yy = 8; yy < 256; yy += 24) {
-          for (let xx = 8; xx < 256; xx += 24) {
-            g.fillStyle = cols[(xx * 7 + yy * 13) % 4 | 0];
-            g.fillRect(xx, yy, 11, 11);
-          }
-        }
-      }
-    }, 2, 2);
-    throwMats[pat] = new T.MeshStandardMaterial({ map: tex, roughness: 0.95 });
-    return throwMats[pat];
-  }
-
   F.bed = (o, g) => {
     const L = o.len, W = o.w;
     // headboard
@@ -807,7 +766,7 @@ const Builder = (() => {
     box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
     box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // base
     box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // mattress + linen
-    const bl = o.throwPat ? throwMat(o.throwPat) : M.blanket;
+    const bl = o.throwPat ? Materials.throwMat(o.throwPat) : M.blanket;
     box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // throw
     if (o.throwPat) {
       // draping throw edges
@@ -1218,7 +1177,6 @@ const Builder = (() => {
     return { w: 0.4, d: 0.4 };
   };
 
-  let dotsMat = null;
   F.terraceChair = (o, g) => {
     box(0.7, 0.45, 0.7, M.rattan, 0, 0.25, 0, g);
     box(0.7, 0.5, 0.14, M.rattan, 0, 0.65, 0.28, g);
@@ -1226,21 +1184,7 @@ const Builder = (() => {
     box(0.55, 0.1, 0.5, M.cream, 0, 0.52, -0.03, g);
     box(0.5, 0.35, 0.08, M.cream, 0, 0.78, 0.24, g);
     // polka-dot cushion (photo 18)
-    if (!dotsMat) {
-      dotsMat = new T.MeshStandardMaterial({
-        map: canvasTex(128, 128, (gc) => {
-          gc.fillStyle = '#ece5d8'; gc.fillRect(0, 0, 128, 128);
-          const cols = ['#2b2b2b', '#c07a33', '#8a8f4a', '#d9c26a'];
-          for (let i = 0; i < 14; i++) {
-            gc.fillStyle = cols[i % 4];
-            gc.beginPath();
-            gc.arc(Math.random() * 128, Math.random() * 128, 9 + Math.random() * 5, 0, Math.PI * 2);
-            gc.fill();
-          }
-        }), roughness: 0.95
-      });
-    }
-    const pil = box(0.4, 0.38, 0.1, dotsMat, 0, 0.72, 0.18, g);
+    const pil = box(0.4, 0.38, 0.1, Materials.dotsMat(), 0, 0.72, 0.18, g);
     pil.rotation.x = -0.25;
     return { w: 0.75, d: 0.75 };
   };

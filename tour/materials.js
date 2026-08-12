@@ -267,6 +267,72 @@ const Materials = (() => {
     });
   }
 
+  // Bed throw-blanket patterns, cached per pattern name. Furniture-facing
+  // (only F.bed in builder.js calls this), but it is a canvasTex-based
+  // texture generator like the others above, so it lives here too.
+  const throwMats = {};
+  function throwMat(pat) {
+    if (throwMats[pat]) return throwMats[pat];
+    const tex = canvasTex(256, 256, (g) => {
+      if (pat === 'zigzag') {
+        // yellow-black zigzag (photo 11)
+        g.fillStyle = '#e8e2d2'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#2b2b2b', '#d9b23c', '#9a9488', '#2b2b2b', '#cfc7b4'];
+        for (let r = 0; r < 10; r++) {
+          g.strokeStyle = cols[r % 5]; g.lineWidth = 7;
+          g.beginPath();
+          for (let x = 0; x <= 256; x += 16) {
+            const y = r * 26 + ((x / 16) % 2 ? 8 : -8);
+            x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+          }
+          g.stroke();
+        }
+      } else if (pat === 'stripes') {
+        // sage and terracotta bands — bedroom 3's accent
+        g.fillStyle = '#eae6dc'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#7f8c73', '#c98b62', '#eae6dc', '#9aa88d', '#eae6dc'];
+        for (let r = 0; r < 12; r++) {
+          g.fillStyle = cols[r % 5];
+          g.fillRect(0, r * 22, 256, r % 5 === 1 ? 7 : 14);
+        }
+      } else {
+        // blue-gray squares (photo 12)
+        g.fillStyle = '#e9e6df'; g.fillRect(0, 0, 256, 256);
+        const cols = ['#31456e', '#7b8794', '#4a6076', '#b9b2a4'];
+        for (let yy = 8; yy < 256; yy += 24) {
+          for (let xx = 8; xx < 256; xx += 24) {
+            g.fillStyle = cols[(xx * 7 + yy * 13) % 4 | 0];
+            g.fillRect(xx, yy, 11, 11);
+          }
+        }
+      }
+    }, 2, 2);
+    throwMats[pat] = new T.MeshStandardMaterial({ map: tex, roughness: 0.95 });
+    return throwMats[pat];
+  }
+
+  // Terrace-chair polka-dot cushion (photo 18). Lazily built on first use —
+  // not every apartment has a terrace chair — and cached after that, exactly
+  // as the inline version in builder.js behaved.
+  let dotsMatCache = null;
+  function dotsMat() {
+    if (!dotsMatCache) {
+      dotsMatCache = new T.MeshStandardMaterial({
+        map: canvasTex(128, 128, (gc) => {
+          gc.fillStyle = '#ece5d8'; gc.fillRect(0, 0, 128, 128);
+          const cols = ['#2b2b2b', '#c07a33', '#8a8f4a', '#d9c26a'];
+          for (let i = 0; i < 14; i++) {
+            gc.fillStyle = cols[i % 4];
+            gc.beginPath();
+            gc.arc(Math.random() * 128, Math.random() * 128, 9 + Math.random() * 5, 0, Math.PI * 2);
+            gc.fill();
+          }
+        }), roughness: 0.95
+      });
+    }
+    return dotsMatCache;
+  }
+
   // ---------- Materials ----------
   // `palette` is accepted and ignored until Task 7 introduces it, so the
   // signature does not churn.
@@ -332,5 +398,5 @@ const Materials = (() => {
     M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
   }
 
-  return { M, init, canvasTex, artTex };
+  return { M, init, canvasTex, artTex, throwMat, dotsMat };
 })();
