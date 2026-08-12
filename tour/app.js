@@ -11,6 +11,17 @@
 //   - run while scene.environment is still null, or reflections feed
 //     back on themselves.
 function captureEnvironment(renderer, scene, point) {
+  // Tone mapping is applied per-fragment for every toneMapped material
+  // (the default), including during these six CubeCamera face renders.
+  // Left enabled, the captured environment would store display-referred,
+  // ACES-compressed values that then get tone-mapped a SECOND time when
+  // the scene is actually drawn — losing highlight energy relative to the
+  // real room, and worse, making the capture itself move every time the
+  // exposure changes: fitting exposure against a moving target. Suspended
+  // for the duration of the capture only, restored in `finally` so it
+  // survives the exception path below.
+  const prevToneMapping = renderer.toneMapping;
+  renderer.toneMapping = THREE.NoToneMapping;
   try {
     const target = new THREE.WebGLCubeRenderTarget(256, {
       format: THREE.RGBAFormat,
@@ -42,6 +53,8 @@ function captureEnvironment(renderer, scene, point) {
     // restore itself can never mask the warning above or re-throw past it.
     try { renderer.setRenderTarget(null); } catch (e2) { /* nothing more we can do */ }
     return null;
+  } finally {
+    renderer.toneMapping = prevToneMapping;
   }
 }
 
@@ -51,7 +64,10 @@ window.initApp = function () {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  // Fitted per-apartment against its own photographs (task 7); apartments
+  // with no photographs flagged for comparison keep this same 1.05 they
+  // always had, via the default.
+  renderer.toneMappingExposure = (APT.exposure !== undefined) ? APT.exposure : 1.05;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xbcd5e8);
