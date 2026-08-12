@@ -268,3 +268,147 @@ simultaneously, silently (no `window.__issues` entry). It already takes
 `exposure` as a parameter rather than a baked-in constant so re-running it
 is cheap, but that has to actually happen alongside the refit, not be
 assumed.
+
+**Correction, next round: `invertR128Sky`/`applyR128SkyParity` removed
+entirely**, not left in place. Measured directly against the metric that
+actually matters (ΔE2000, not MAD): 17.26 with the apparatus, 17.22 without
+— worth **−0.04**, nothing, slightly the wrong way, for 76 lines coupled to
+a value (`toneMappingExposure`) the next plan re-fits from scratch. Superseded
+by the final summary below.
+
+---
+
+## Final summary — task 6 complete, gate redefined (commit `1b95f39` of the plan)
+
+**Pixel parity with r128 is not the gate any more.** Fifty-seven Three.js
+releases (r128→r185) changed the standard-material BRDF, the IBL path and
+`PMREMGenerator`; reproducing r128's pixels exactly would mean shipping
+r128's shaders, which defeats the purpose of migrating. `compare_shots.py`
+is a **diagnostic** from here on, not pass/fail. The real gates are (1)
+structural correctness — hard pass/fail, fully met — and (2) resemblance to
+the real photographs (`delta_e.py`) — bounded and explained, not required to
+be zero, because every constant the light bake owns was fitted against
+r128's pipeline and is mis-fitted under a corrected one **by construction**.
+Re-fitting those constants (`EXP`, `WEXP`, the ambient base, serenity's
+`exposure: 0.33`) is explicitly plan 2's job, not task 6's.
+
+### The five real behavioural differences found, each with its mechanism and conversion
+
+| # | Difference | Mechanism | Conversion | Status |
+|---|---|---|---|---|
+| 1 | `ColorManagement.enabled` | Defaults `true` from r155; r128 had no colour-management system, hex `Color`s passed straight through as linear | Disabled globally in `main.js`, before any classic script constructs a `Color` | Kept — largest single contributor to closing the gap |
+| 2 | Bloom threshold | r128's patched composer fed `UnrealBloomPass` fully tonemapped+sRGB-encoded pixels; r185's `RenderPass` writes raw linear radiance | `0.92` → `1.294`, exact ACES/sRGB inversion for a neutral input (both ACES matrices have row-sum 1, exact not approximate), calibrated at exposure 1.05 | Kept |
+| 3 | Lightmap intensity | r185's `MeshBasicMaterial` `USE_LIGHTMAP` shader branch (`three.module.js`, `fragment$a`) gained `* RECIPROCAL_PI` that r128 never had; every baked floor/ceiling/attic surface rendered ~⅓ as bright (walls use vertex colours, a different chunk, unaffected) | `lightMapIntensity` `1.7` → `1.7 * Math.PI` — exact cancellation, a pure pre-nonlinearity multiply | Kept — biggest single mechanism by frame-count affected |
+| 4 | Grain/vignette domain | Same domain move as #2, for a whole shader instead of one constant: `GrainVignetteShader` ran before `OutputPass`, reading/writing linear HDR instead of encoded values | **Not a constant conversion** — proven not to have an exact one (additive grain's needed offset is brightness-dependent; provable from the shader). Pass reordered to run after `OutputPass`, restoring the exact domain its constants were always written for, with the constants themselves untouched | Kept — second-biggest mechanism, moved 3 frames under the old 2.0 diagnostic threshold outright |
+| 5 | Background/fog tone-mapping | r128 never tone-mapped or sRGB-encoded a plain `Color` background/fog clear; r185's single-final-resolve `OutputPass` processes the whole buffer uniformly, background included | Built (76 lines, exact per-apartment-exposure ACES inversion), measured, **removed** | **Reverted** — see below |
+
+**The plan's `PointLight.decay` assumption was wrong.** The brief expected a
+bare `new THREE.PointLight(color, intensity, distance)` silently defaulting
+from r128's `1` to r155+'s `2`. The one dynamic `PointLight` in the codebase
+(`builder.js`) already passed an explicit 4th argument, `1.6`, since commit
+`8a5d34d` — a full migration cycle before the r128 reference set was even
+frozen. The r128 captures already reflect `decay=1.6`; setting it to the
+brief's assumed default of `1` would have moved r185 *away* from parity, not
+toward it. No code change. This was the first sign the plan's model of where
+the gap would be was incomplete — differences 1, 3, 4 and 5 were all found
+by investigating why the measured gap was far larger than the plan's
+original two flagged causes (decay, bloom) could explain.
+
+### Why difference 5 was reverted — the cautionary result
+
+Preserving the background/fog behaviour cost 76 lines in `app.js`: a
+from-scratch numeric inversion of the full ACES 3×3 matrices plus the
+`RRTAndODTFit` rational fit plus the sRGB transfer function, parameterized
+by each apartment's `toneMappingExposure` so it wouldn't repeat the mistake
+of a single hardcoded exposure (a first attempt at that, calibrated only at
+1.05, was tested and rejected — it helped kings-court/horkyone-10 but made
+serenity worse, worst MAD 46.4→62.6). The generalized version was exact by
+construction and passed its own round-trip check.
+
+None of that mattered to the metric that actually matters. Measured
+directly, A/B, no file edit (reset `scene.background`/`scene.fog.color` to
+the plain hex at runtime, re-ran `__measure()` + `delta_e.py`):
+
+| | mean ΔE2000 (serenity) |
+|---|---:|
+| With `invertR128Sky`/`applyR128SkyParity` | 17.26 |
+| Without (plain `0xbcd5e8`) | 17.22 |
+
+**−0.04.** Nothing, and slightly the wrong direction, for an apparatus that
+also left a background linear value of `(1.053, 2.103, 3.815)` — a blue
+channel at 3.8× nominal — coupled to a `toneMappingExposure` the next plan
+re-fits from scratch. This is what optimising toward `compare_shots.py`'s
+pixel-diff number, instead of the resemblance metric the product is
+actually judged by, produces: real engineering effort spent making pixels
+match a reference that was never the thing that mattered. **Removed.**
+`scene.background`/`scene.fog` are back to the plain `new
+THREE.Color(0xbcd5e8)` / `new THREE.Fog(0xbcd5e8, 40, 90)` they always were,
+with a comment recording the difference as a **known, accepted** one — not
+something the code compensates for.
+
+### Final numbers (differences 1–4 kept, difference 5 reverted)
+
+**`compare_shots.py` — diagnostic, not a gate:**
+
+```
+30 frames, worst MAD 50.15, threshold 2.00 (informational), 30 "failing" (informational)
+```
+
+Worse than the last round's 34.97/27-failing on the dollhouse and outdoor
+frames specifically (serenity `doll-1`/`doll-all` 30.72/30.30 → 50.12/50.15;
+kings-court and horkyone-10's dollhouse frames, which had passed outright
+with difference 5 in place, no longer do). **Expected, and not a
+regression** — those frames only "passed" because a 76-line apparatus was
+bending pixels toward a reference that the resemblance metric says wasn't
+worth bending toward. This number is now read for which frames are worth a
+human look, not compared to 2.0.
+
+**`delta_e.py` — the gate that matters, both apartments with committed
+baselines:**
+
+| Apartment | Baseline (phase A, committed) | Final (this task, all 4 kept mechanisms) | Change |
+|---|---:|---:|---:|
+| serenity | 16.58 (`serenity-a6-palette-fix2.json`) | **17.23** (`serenity-b1-final.json`) | +0.65 (worse) |
+| kings-court | 22.44 (`kings-court-baseline.json`) | **21.21** (`kings-court-b1-final.json`) | **−1.23 (better)** |
+
+**Not a uniform regression.** kings-court's resemblance to its own
+photographs *improved* after the full r128→r185 migration plus all four
+kept fixes — it was never scored between the migration and this task, so
+this is the first measurement of it. serenity regressed, by less than the
+gap between its two intermediate ΔE readings this task produced (17.79 with
+the domain bugs present → 17.26 after the grain/vignette fix → 17.23 after
+also dropping the sky apparatus), i.e. most of serenity's regression was
+already clawed back by differences 1–4; a further 0.65 remains open, on one
+of two scored apartments.
+
+### The residual, stated as unrecoverable by construction
+
+**Not an open defect. Not something task 6 or a further mechanism hunt
+should chase.** Two independent, sufficient reasons:
+
+1. **The rendering math changed underneath, permanently.** Fifty-seven
+   Three.js releases separate r128 from r185. The standard-material BRDF,
+   the image-based-lighting path and `PMREMGenerator` (the environment
+   reflection this app's `captureEnvironment()` depends on) all changed in
+   ways with no single flag or constant to undo — unlike the five
+   differences above, which were each one specific, identifiable, reversible
+   mechanism. Reproducing r128's pixels exactly, at this point, would mean
+   vendoring r128's shaders — the opposite of a migration.
+2. **Every constant the light bake owns was fitted against the old
+   pipeline, and is now mis-fitted by construction.** `bake.js`'s `EXP`
+   (1.7) and `WEXP` (1.25) headroom constants, the hardcoded indoor/outdoor
+   ambient base in `lightAt()`, and serenity's own hand-fitted
+   `exposure: 0.33` were all tuned, by eye or by phase A's own iterative
+   `delta_e.py` process, against how r128 rendered. r185 renders the exact
+   same scene data differently (correctly, per reason 1) — so a constant
+   tuned to compensate for r128's specific rendering behaviour necessarily
+   over- or under-compensates now. This is **not a bug task 6 introduced or
+   could fix**; it is what "the pipeline under these constants changed"
+   means, arithmetically. Re-fitting them against r185's actual output is
+   plan 2's step 4, explicitly, per the plan document's own gate
+   redefinition (commit `1b95f39`).
+
+**This branch does not merge to `main` until plan 2's exposure re-fit
+restores ΔE2000 to at least the r128 baseline on both scored apartments.**
+Recorded here so the next task starts from the right number, not from 16.58
+or 22.44 as if this task hadn't moved them.

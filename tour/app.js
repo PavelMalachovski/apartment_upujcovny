@@ -58,81 +58,6 @@ function captureEnvironment(renderer, scene, point) {
   }
 }
 
-// A THREE.Color background clear was never tone-mapped or sRGB-encoded on
-// r128 (confirmed both by direct measurement -- rendering straight to the
-// canvas with no post chain reproduces the naive hex/255 triplet exactly,
-// independent of renderer.toneMapping -- and by that value round-tripping
-// through the shared GrainVignetteShader's vignette to land almost exactly
-// on the r128 reference's own corner pixel: measured (151,170,185),
-// predicted 188,213,232 x that frame's ~0.796 vignette factor = ~150,170,185).
-// r185's OutputPass processes the whole composited buffer uniformly,
-// background included, so the same 0xbcd5e8 now gets the full
-// ACESFilmicToneMapping + sRGB treatment it never got before -- a structural
-// side effect of task 5's single-final-resolve-pass chain, not a value that
-// moved.
-//
-// A hardcoded compensation (one exposure baked in) was tried first and
-// rejected: calibrated at exposure 1.05 it helped kings-court and
-// horkyone-10's dollhouse frames (MAD roughly halved) but made serenity's
-// *worse* (exposure 0.33 needs a different compensation; worst-of-30 MAD
-// went 46.4 -> 62.6 -- see task-6-report.md). This version inverts the same
-// ACESFilmicToneMapping + sRGB OETF chain (exact 3x3 matrix inverses of the
-// fixed ACESInputMat/ACESOutputMat constants in
-// tour/lib/three-0.185.0/build/three.module.js's tonemapping_pars_fragment,
-// computed once offline -- derivation script in task-6-report.md) using
-// *this apartment's actual* toneMappingExposure, so it's correct for all
-// three instead of tuned to one.
-function invertR128Sky(hex, exposure) {
-  const r = ((hex >> 16) & 255) / 255, g = ((hex >> 8) & 255) / 255, b = (hex & 255) / 255;
-  const srgbEotf = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-  const y = [srgbEotf(r), srgbEotf(g), srgbEotf(b)];
-  // exact inverses of ACESOutputMat / ACESInputMat (see three.module.js)
-  const OUT_INV = [
-    [0.6430382486, 0.3111867518, 0.0457754574],
-    [0.0592686904, 0.9314364869, 0.0092949157],
-    [0.0059619013, 0.0639290157, 0.9301183842]
-  ];
-  const IN_INV = [
-    [1.764740972, -0.6757776782, -0.0889632938],
-    [-0.147027852, 1.1602515117, -0.0132236597],
-    [-0.0363368301, -0.1624364369, 1.198773267]
-  ];
-  const mul = (M, v) => [
-    M[0][0] * v[0] + M[0][1] * v[1] + M[0][2] * v[2],
-    M[1][0] * v[0] + M[1][1] * v[1] + M[1][2] * v[2],
-    M[2][0] * v[0] + M[2][1] * v[1] + M[2][2] * v[2]
-  ];
-  const z = mul(OUT_INV, y);
-  // invert RRTAndODTFit per channel: y = (x^2+0.0245786x-0.000090537) /
-  // (0.983729x^2+0.432951x+0.238081); positive root of the cross-multiplied
-  // quadratic (0.983729y-1)x^2 + (0.432951y-0.0245786)x + (0.238081y+0.000090537) = 0
-  const rrtInverse = (yv) => {
-    const A = 0.983729 * yv - 1, B = 0.432951 * yv - 0.0245786, C = 0.238081 * yv + 0.000090537;
-    const disc = Math.max(B * B - 4 * A * C, 0);
-    const sq = Math.sqrt(disc);
-    const x1 = (-B + sq) / (2 * A), x2 = (-B - sq) / (2 * A);
-    return x1 >= 0 ? x1 : x2;
-  };
-  const x = z.map(rrtInverse);
-  const w = mul(IN_INV, x);
-  return w.map((v) => v * 0.6 / exposure);
-}
-
-// Patches scene.background and scene.fog's colour in place so they still
-// read as 0xbcd5e8 once rendered, at this apartment's own exposure. Applied
-// after both are constructed with the plain hex (kept in the source as
-// 0xbcd5e8, not replaced by the computed triple, so the value being
-// preserved stays legible). setRGB with no explicit colorSpace argument is
-// assumed already-linear and stores its arguments unconverted regardless of
-// ColorManagement.enabled, so this is exact, not naive hex passthrough --
-// and unlike a hex literal it can hold the blue channel's >1.0 result, a
-// legitimate HDR value no hex triplet can express.
-function applyR128SkyParity(scene, exposure) {
-  const [r, g, b] = invertR128Sky(0xbcd5e8, exposure);
-  scene.background.setRGB(r, g, b);
-  if (scene.fog) scene.fog.color.setRGB(r, g, b);
-}
-
 window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -158,9 +83,21 @@ window.initApp = function () {
   renderer.toneMappingExposure = exposure;
 
   const scene = new THREE.Scene();
+  // Known accepted r128->r185 difference, not compensated for: r128 never
+  // tone-mapped or sRGB-encoded a plain Color background/fog clear (the
+  // per-material path skipped it for a bare clear colour); r185's single
+  // final-resolve OutputPass processes the whole composited buffer
+  // uniformly, background included, so the same 0xbcd5e8 now reads
+  // differently once rendered. A numeric compensation (inverting the ACES
+  // chain per-apartment exposure) was built and measured in task 6 -- it
+  // cost 76 lines, coupled the result to toneMappingExposure (which plan 2
+  // re-fits from scratch), and was worth -0.04 dE2000 against the
+  // resemblance metric that actually matters (17.26 with it, 17.22
+  // without) -- nothing, slightly the wrong way. Removed. Left as a
+  // recorded, accepted difference; see docs/superpowers/metrics/
+  // r128-reference.md for the measurement.
   scene.background = new THREE.Color(0xbcd5e8);
   scene.fog = new THREE.Fog(0xbcd5e8, 40, 90);
-  applyR128SkyParity(scene, exposure);
 
   const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 120);
 
