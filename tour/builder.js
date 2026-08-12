@@ -46,8 +46,104 @@ const Builder = (() => {
   }
 
   // ---------- Helpers ----------
+  // A chamfered box: the 6 inset faces, 12 edge bevels and 8 corner
+  // triangles. 44 triangles instead of 12, which is irrelevant here
+  // because mergeStatic collapses everything anyway.
+  //
+  // A `uv` attribute is mandatory, not optional: mergeStatic takes its
+  // attribute template from the first chunk in a bucket, so a geometry
+  // missing `uv` beside geometries that have it merges to zeroed UVs and
+  // silently destroys the texture mapping.
+  function chamferBoxGeometry(w, h, d, c) {
+    const H = [w / 2, h / 2, d / 2];
+    c = Math.min(c, H[0] * 0.4, H[1] * 0.4, H[2] * 0.4);
+    if (c <= 0.0005) return new T.BoxGeometry(w, h, d);
+
+    const pos = [], nrm = [], uvs = [];
+
+    // point with axis `ax` on its outer face, the two other axes inset by c
+    function pt(ax, s, u, su, v, sv) {
+      const p = [0, 0, 0];
+      p[ax] = s * H[ax];
+      p[u] = su * (H[u] - c);
+      p[v] = sv * (H[v] - c);
+      return p;
+    }
+    function norm(v) {
+      const L = Math.hypot(v[0], v[1], v[2]) || 1;
+      return [v[0] / L, v[1] / L, v[2] / L];
+    }
+    function emit(p, n) {
+      pos.push(p[0], p[1], p[2]);
+      nrm.push(n[0], n[1], n[2]);
+      // planar projection along the dominant axis of the normal, which is
+      // exact on the flat faces and adequate on the bevels
+      const ax = (Math.abs(n[0]) >= Math.abs(n[1]) && Math.abs(n[0]) >= Math.abs(n[2])) ? 0
+        : (Math.abs(n[1]) >= Math.abs(n[2]) ? 1 : 2);
+      const u = (ax + 1) % 3, v = (ax + 2) % 3;
+      uvs.push(p[u] / (2 * H[u]) + 0.5, p[v] / (2 * H[v]) + 0.5);
+    }
+    // Winding is derived, never reasoned about: if the geometric normal
+    // opposes the intended one, swap two vertices.
+    function tri(a, b, cc, n) {
+      const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const e2 = [cc[0] - a[0], cc[1] - a[1], cc[2] - a[2]];
+      const g = [e1[1] * e2[2] - e1[2] * e2[1],
+                 e1[2] * e2[0] - e1[0] * e2[2],
+                 e1[0] * e2[1] - e1[1] * e2[0]];
+      if (g[0] * n[0] + g[1] * n[1] + g[2] * n[2] < 0) { const t = b; b = cc; cc = t; }
+      emit(a, n); emit(b, n); emit(cc, n);
+    }
+    function quad(a, b, cc, dd, n) { tri(a, b, cc, n); tri(a, cc, dd, n); }
+
+    for (let ax = 0; ax < 3; ax++) {
+      const u = (ax + 1) % 3, v = (ax + 2) % 3;
+      for (const s of [-1, 1]) {
+        const n = [0, 0, 0]; n[ax] = s;
+        quad(pt(ax, s, u, -1, v, -1), pt(ax, s, u, 1, v, -1),
+             pt(ax, s, u, 1, v, 1), pt(ax, s, u, -1, v, 1), n);
+      }
+    }
+    // 12 edge bevels: axes a and b outer, running along axis e
+    for (let a1 = 0; a1 < 3; a1++) {
+      for (let b1 = a1 + 1; b1 < 3; b1++) {
+        const e = 3 - a1 - b1;
+        for (const sa of [-1, 1]) {
+          for (const sb of [-1, 1]) {
+            const n = [0, 0, 0]; n[a1] = sa; n[b1] = sb;
+            const nn = norm(n);
+            quad(pt(a1, sa, b1, sb, e, -1), pt(a1, sa, b1, sb, e, 1),
+                 pt(b1, sb, a1, sa, e, 1), pt(b1, sb, a1, sa, e, -1), nn);
+          }
+        }
+      }
+    }
+    // 8 corners
+    for (const sx of [-1, 1]) {
+      for (const sy of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          const s = [sx, sy, sz];
+          tri(pt(0, sx, 1, sy, 2, sz), pt(1, sy, 0, sx, 2, sz), pt(2, sz, 0, sx, 1, sy),
+              norm(s));
+        }
+      }
+    }
+
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new T.Float32BufferAttribute(nrm, 3));
+    geo.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
+    return geo;
+  }
+
+  let CHAMFER = 0;   // metres; 0 disables. Only furniture switches it on.
+
   function box(w, h, d, mat, x, y, z, group, rotY = 0) {
-    const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+    const small = Math.min(w, h, d) < 0.15;
+    const geo = (CHAMFER > 0 && !small)
+      ? chamferBoxGeometry(w, h, d, CHAMFER)
+      : new T.BoxGeometry(w, h, d);
+    const m = new T.Mesh(geo, mat);
     m.position.set(x, y, z);
     if (rotY) m.rotation.y = rotY;
     group.add(m);
@@ -1228,6 +1324,7 @@ const Builder = (() => {
 
   const furnGroups = [];
   function buildFurniture(scene) {
+    CHAMFER = 0.005;
     for (const item of APT.furniture) {
       const fn = F[item.type];
       if (!fn) continue;
@@ -1258,6 +1355,7 @@ const Builder = (() => {
         }
       }
     }
+    CHAMFER = 0;
   }
 
   // ---------- Light ----------
@@ -1393,5 +1491,6 @@ const Builder = (() => {
     return colliders;
   }
 
-  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways, M };
+  return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways,
+           M, chamferBoxGeometry };
 })();
