@@ -60,6 +60,54 @@ const Baker = (() => {
   const SUN = { x: -0.55, y: 0.72, z: 0.42 }; // normalized direction TOWARD the sun
   const EXP = 1.7; // HDR headroom: lightMapIntensity compensates
 
+  // Hemisphere directions in tangent space, cosine-ish spread.
+  const AO_DIRS = [
+    [0, 1, 0], [0.6, 0.8, 0], [-0.6, 0.8, 0], [0, 0.8, 0.6], [0, 0.8, -0.6],
+    [0.45, 0.77, 0.45], [-0.45, 0.77, 0.45], [0.45, 0.77, -0.45]
+  ];
+  const AO_DIST = 0.6;   // metres; contact shadows only, not global darkening
+
+  // Ambient occlusion at P with normal N. 1 = open, 0 = fully enclosed.
+  const _A = new T.Vector3(), _B = new T.Vector3();
+  function aoAt(P, N, occ, rays) {
+    // Occluders containing P are this object's own box: counting them
+    // would darken every surface uniformly and look like a bad exposure.
+    const near = [];
+    for (let i = 0; i < occ.length; i++) {
+      const b = occ[i];
+      const inside = P.x > b.x1 - 0.02 && P.x < b.x2 + 0.02 &&
+                     P.y > b.y1 - 0.02 && P.y < b.y2 + 0.02 &&
+                     P.z > b.z1 - 0.02 && P.z < b.z2 + 0.02;
+      if (inside) continue;
+      // cheap reject: box further than AO_DIST cannot occlude
+      const dx = Math.max(b.x1 - P.x, 0, P.x - b.x2);
+      const dy = Math.max(b.y1 - P.y, 0, P.y - b.y2);
+      const dz = Math.max(b.z1 - P.z, 0, P.z - b.z2);
+      if (dx * dx + dy * dy + dz * dz > AO_DIST * AO_DIST) continue;
+      near.push(b);
+    }
+    if (!near.length) return 1;   // the common case, and it costs one loop
+
+    // tangent basis around N
+    const up = Math.abs(N.y) > 0.9 ? _A.set(1, 0, 0) : _A.set(0, 1, 0);
+    const t1 = new T.Vector3().crossVectors(up, N).normalize();
+    const t2 = new T.Vector3().crossVectors(N, t1);
+
+    const n = Math.min(rays, AO_DIRS.length);
+    let open = 0;
+    for (let i = 0; i < n; i++) {
+      const d = AO_DIRS[i];
+      _B.set(
+        P.x + (t1.x * d[0] + N.x * d[1] + t2.x * d[2]) * AO_DIST,
+        P.y + (t1.y * d[0] + N.y * d[1] + t2.y * d[2]) * AO_DIST,
+        P.z + (t1.z * d[0] + N.z * d[1] + t2.z * d[2]) * AO_DIST
+      );
+      if (!blocked(P, _B, near)) open++;
+    }
+    // never crush to black: contact shadows, not holes
+    return 0.35 + 0.65 * (open / n);
+  }
+
   // Lighting at point P with normal N (shared by lightmaps and wall vertices)
   const _Q = new T.Vector3();
   function lightAt(P, N, occ, data, outdoor) {
@@ -151,10 +199,11 @@ const Baker = (() => {
         P.set((u - 0.5) * w, (v - 0.5) * h, 0).applyMatrix4(mw);
         P.x += N.x * 0.03; P.y += N.y * 0.03; P.z += N.z * 0.03;
         const [r, g, b] = lightAt(P, N, occ, data, outdoor);
+        const ao = aoAt(P, N, occ, (APT.quality && APT.quality.aoRays) || 8);
         const o = (j * W + i) * 4;
-        px[o] = Math.min(255, r / EXP * 255);
-        px[o + 1] = Math.min(255, g / EXP * 255);
-        px[o + 2] = Math.min(255, b / EXP * 255);
+        px[o] = Math.min(255, r * ao / EXP * 255);
+        px[o + 1] = Math.min(255, g * ao / EXP * 255);
+        px[o + 2] = Math.min(255, b * ao / EXP * 255);
         px[o + 3] = 255;
       }
     }
@@ -259,6 +308,46 @@ const Baker = (() => {
     }
   }
 
+  // ---------- Furniture: per-vertex AO on the merged meshes ----------
+  // Merged furniture carries no lightmap: it is lit dynamically while the
+  // floor is baked, so it sits in a different light environment from the
+  // room and reads as pasted on. Per-vertex AO puts it back in the room.
+  function bakeFurnitureAO(scene, data) {
+    const rays = (APT.quality && APT.quality.aoRays) || 8;
+    const P = new T.Vector3(), N = new T.Vector3();
+    scene.traverse((mesh) => {
+      if (!mesh.isMesh || mesh.userData.mergeLvl === undefined) return;
+      const g = mesh.geometry;
+      const p = g.attributes.position, nAttr = g.attributes.normal;
+      if (!p || !nAttr) return;
+
+      g.computeBoundingBox();
+      const bb = g.boundingBox.clone().expandByScalar(1.0);
+      const occ = data.occluders.filter(b =>
+        b.x2 > bb.min.x && b.x1 < bb.max.x &&
+        b.y2 > bb.min.y && b.y1 < bb.max.y &&
+        b.z2 > bb.min.z && b.z1 < bb.max.z);
+
+      const col = new Float32Array(p.count * 3);
+      for (let i = 0; i < p.count; i++) {
+        P.set(p.getX(i), p.getY(i), p.getZ(i));
+        let ao = 1;
+        // contact shadows live low; skip the expensive test up high
+        if (P.y < 1.2 && occ.length) {
+          N.set(nAttr.getX(i), nAttr.getY(i), nAttr.getZ(i));
+          ao = aoAt(P, N, occ, rays);
+        }
+        col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = ao;
+      }
+      g.setAttribute('color', new T.BufferAttribute(col, 3));
+      // Clone before enabling vertexColors: the material is shared across
+      // the bucket, and a mesh with vertexColors but no colour attribute
+      // renders undefined. One clone per merged mesh costs no draw calls.
+      mesh.material = mesh.material.clone();
+      mesh.material.vertexColors = true;
+    });
+  }
+
   // Async pass so the page keeps painting
   function run(scene, data, onProgress) {
     return new Promise((resolve) => {
@@ -276,6 +365,7 @@ const Baker = (() => {
         // final stage — walls as a single mesh
         setTimeout(() => {
           bakeWalls(scene, data);
+          bakeFurnitureAO(scene, data);
           if (onProgress) onProgress(1);
           resolve();
         }, 0);
