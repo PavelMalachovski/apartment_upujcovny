@@ -339,13 +339,26 @@ the chosen number in the commit message.
 await window.__bakeReady; await window.__refshots('r128');
 ```
 
-Then commit the frames — they are the artifact the rest of the plan is judged
-against.
+**The frames themselves are not committed.** `.gitignore:23` excludes
+`tools/shots/` as "build output, not source", and `*.jpg` is excluded too.
+Respect that: the frames stay local for the life of this plan, and what gets
+committed is the *result* of comparing them.
+
+Write `docs/superpowers/metrics/r128-reference.md` recording, for each
+apartment: the frame names captured, the `--max-mad` threshold chosen, and the
+two proof runs from steps 5 and 6 — the perturbed run's exit code 1 with its
+worst MAD, and the repeat run's exit code 0 with its worst MAD. Those two
+numbers are the evidence that the net works; the pixels are not.
 
 ```bash
-git add tour/refshots.js tools/compare_shots.py tools/serve.py tour/main.js tour/index.html tools/shots/r128
+git add tour/refshots.js tools/compare_shots.py tools/serve.py tour/main.js \
+        tour/index.html docs/superpowers/metrics/r128-reference.md
 git commit -m "Freeze the r128 render as a reference set before migrating"
 ```
+
+Do not `git add -f` the frames. If a later session needs them, it re-captures
+them from the r128 tag — that is what the version-controlled capture script is
+for.
 
 ---
 
@@ -818,8 +831,12 @@ improved for a reason nobody checked is a bug, not a result.
 
 - [ ] **Step 5: Commit**
 
+Append the r128-vs-r185 comparison result to
+`docs/superpowers/metrics/r128-reference.md` — worst MAD, threshold, and the
+mechanism found in step 4. The frames stay local and gitignored, as in task 1.
+
 ```bash
-git add tour/builder.js tools/shots/r185
+git add tour/builder.js docs/superpowers/metrics/r128-reference.md
 git commit -m "Set PointLight decay explicitly for r155+ physically correct lighting"
 ```
 
