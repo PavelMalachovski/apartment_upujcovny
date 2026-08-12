@@ -11,7 +11,7 @@
     {
       "file": "2.webp",
       "name": "Pool Terrace",
-      "deltaE": 24.07
+      "deltaE": 24.12
     },
     {
       "file": "3.webp",
@@ -21,7 +21,7 @@
     {
       "file": "4.webp",
       "name": "Living Room",
-      "deltaE": 27.08
+      "deltaE": 27.09
     },
     {
       "file": "5.webp",
@@ -31,7 +31,7 @@
     {
       "file": "6.webp",
       "name": "Bedroom",
-      "deltaE": 21.95
+      "deltaE": 21.91
     },
     {
       "file": "7.webp",
@@ -41,12 +41,12 @@
     {
       "file": "8.webp",
       "name": "Bedroom",
-      "deltaE": 25.18
+      "deltaE": 25.2
     },
     {
       "file": "9.webp",
       "name": "Living Room",
-      "deltaE": 28.07
+      "deltaE": 28.08
     },
     {
       "file": "10.webp",
@@ -56,7 +56,7 @@
     {
       "file": "11.webp",
       "name": "Bedroom",
-      "deltaE": 19.12
+      "deltaE": 19.13
     }
   ],
   "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."

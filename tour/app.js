@@ -84,18 +84,25 @@ window.initApp = function () {
     // fallback than a literal { x: 0, z: 0 }.
     const fallback = (APT.roomCenter && APT.roomCenter.main) || APT.start || { x: 0, z: 0 };
     const ec = (APT.env && APT.env.capture) || {};
+    // buildLights (builder.js) always adds AmbientLight + HemisphereLight
+    // tagged `envFallback` — the fill scene.environment is meant to
+    // replace. Detach them BEFORE capturing, not after: captureEnvironment
+    // renders the scene through a CubeCamera, so any light still in the
+    // scene graph during those six faces gets baked permanently into the
+    // resulting PMREM texture. Removing them only on success (the previous
+    // ordering) still lit every surface in the panorama itself, silently
+    // brightening the one environment the whole session then reflects
+    // from. Re-attach them only if the capture actually failed, so
+    // materials stay fully lit (just unreflective) on that path, per spec.
+    const fallbackLights = scene.children.filter((c) => c.userData.envFallback);
+    for (const light of fallbackLights) scene.remove(light);
     const env = captureEnvironment(renderer, scene, {
       x: ec.x !== undefined ? ec.x : fallback.x,
       y: ec.y !== undefined ? ec.y : 1.6,
       z: ec.z !== undefined ? ec.z : fallback.z
     });
-    // buildLights (builder.js) always adds AmbientLight + HemisphereLight
-    // tagged `envFallback` — the fill scene.environment is meant to
-    // replace. Remove them only now that capture has actually succeeded,
-    // so a failed capture (env === null) leaves them in place and
-    // materials stay fully lit, just unreflective, per spec.
-    if (env) {
-      for (const light of scene.children.filter((c) => c.userData.envFallback)) scene.remove(light);
+    if (!env) {
+      for (const light of fallbackLights) scene.add(light);
     }
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';

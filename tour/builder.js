@@ -1272,17 +1272,22 @@ const Builder = (() => {
   // kitchen more than the reflective bathroom, the ambient-double-count
   // signature, not a specular one).
   //
-  // So they're built here, tagged `envFallback`, and app.js removes them
-  // the moment a capture actually succeeds — never before. That makes the
-  // fallback the *default*: if captureEnvironment ever returns null (a
-  // thrown exception, a context loss, an old device that chokes on
-  // PMREMGenerator), scene.environment stays null and these two lights are
-  // simply never removed, so materials keep exactly the fill they would
-  // have had with no environment at all — reflectionless but still lit, per
-  // spec, by construction rather than by a comment someone has to trust.
-  // The sun is unconditional either way: a 256px cube capture is too
-  // low-resolution to reproduce its crisp direction-specific
-  // highlight/shadow, so it is not part of this fallback pair.
+  // So they're built here, tagged `envFallback`, as the default — added
+  // unconditionally on every load. app.js detaches them right before it
+  // calls captureEnvironment() (a light still in the scene graph during
+  // the capture's six CubeCamera faces would get baked into the resulting
+  // panorama itself, permanently brightening the one environment the whole
+  // session reflects from) and re-attaches them only if that capture
+  // returns null. That ordering makes the fallback the true default:
+  // whatever way captureEnvironment can fail — a thrown exception, a
+  // context loss, an old device that chokes on PMREMGenerator — the two
+  // lights land back in the scene and materials keep exactly the fill they
+  // would have had with no environment at all — reflectionless but still
+  // lit, per spec, by construction rather than by a comment someone has to
+  // trust. The sun is unconditional either way: a 256px cube capture is
+  // too low-resolution to reproduce its crisp direction-specific
+  // highlight/shadow, so it is not part of this fallback pair and is never
+  // detached.
   function buildLights(scene) {
     const amb = new T.AmbientLight(0xfff2e2, 0.22);
     amb.userData.envFallback = true;
