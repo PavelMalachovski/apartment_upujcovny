@@ -610,8 +610,9 @@ now-stale comment block at `:90-116` along with the two lines.
 
 - [ ] **Step 3: Do NOT set `colorSpace` on the procedural textures**
 
-`builder.js` creates `CanvasTexture`s and never sets `encoding`, so on r128
-they are treated as linear data. r185's default (`NoColorSpace`) preserves
+`materials.js` creates the procedural `CanvasTexture`s — in `canvasTex()`,
+split out of `builder.js` — and never sets `encoding`, so on r128 they are
+treated as linear data. r185's default (`NoColorSpace`) preserves
 that behaviour exactly. Setting `texture.colorSpace = THREE.SRGBColorSpace`
 would be the physically correct thing and **would change every colour in the
 scene**, breaking this plan's no-regression gate for a reason that looks like
