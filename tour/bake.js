@@ -69,6 +69,7 @@ const Baker = (() => {
 
   // Ambient occlusion at P with normal N. 1 = open, 0 = fully enclosed.
   const _A = new T.Vector3(), _B = new T.Vector3();
+  const _T1 = new T.Vector3(), _T2 = new T.Vector3();
   function aoAt(P, N, occ, rays) {
     // Occluders containing P are this object's own box: counting them
     // would darken every surface uniformly and look like a bad exposure.
@@ -79,6 +80,17 @@ const Baker = (() => {
                      P.y > b.y1 - 0.02 && P.y < b.y2 + 0.02 &&
                      P.z > b.z1 - 0.02 && P.z < b.z2 + 0.02;
       if (inside) continue;
+      // Cull boxes lying entirely behind the sample plane (P, N): every
+      // hemisphere ray leaves along +N, so a box that doesn't reach past
+      // that plane can never occlude one. This is exact (uses the box's
+      // furthest corner along N, not its centre) and output-neutral -- it
+      // just stops e.g. a floor slab, which sits immediately behind every
+      // floor texel, from being carried into `near` on every single texel.
+      const fx = N.x >= 0 ? b.x2 : b.x1;
+      const fy = N.y >= 0 ? b.y2 : b.y1;
+      const fz = N.z >= 0 ? b.z2 : b.z1;
+      const maxDot = N.x * (fx - P.x) + N.y * (fy - P.y) + N.z * (fz - P.z);
+      if (maxDot <= 0) continue;
       // cheap reject: box further than AO_DIST cannot occlude
       const dx = Math.max(b.x1 - P.x, 0, P.x - b.x2);
       const dy = Math.max(b.y1 - P.y, 0, P.y - b.y2);
@@ -90,8 +102,8 @@ const Baker = (() => {
 
     // tangent basis around N
     const up = Math.abs(N.y) > 0.9 ? _A.set(1, 0, 0) : _A.set(0, 1, 0);
-    const t1 = new T.Vector3().crossVectors(up, N).normalize();
-    const t2 = new T.Vector3().crossVectors(N, t1);
+    const t1 = _T1.crossVectors(up, N).normalize();
+    const t2 = _T2.crossVectors(N, t1);
 
     const n = Math.min(rays, AO_DIRS.length);
     let open = 0;
@@ -190,6 +202,7 @@ const Baker = (() => {
       b.x2 > bb.min.x && b.x1 < bb.max.x &&
       b.y2 > bb.min.y - 4 && b.y1 < bb.max.y + 4 &&
       b.z2 > bb.min.z && b.z1 < bb.max.z);
+    const aoRays = (APT.quality && APT.quality.aoRays) || 8;
 
     for (let j = 0; j < H; j++) {
       // PlaneGeometry: v grows upward, canvas grows downward
@@ -199,7 +212,7 @@ const Baker = (() => {
         P.set((u - 0.5) * w, (v - 0.5) * h, 0).applyMatrix4(mw);
         P.x += N.x * 0.03; P.y += N.y * 0.03; P.z += N.z * 0.03;
         const [r, g, b] = lightAt(P, N, occ, data, outdoor);
-        const ao = aoAt(P, N, occ, (APT.quality && APT.quality.aoRays) || 8);
+        const ao = aoAt(P, N, occ, aoRays);
         const o = (j * W + i) * 4;
         px[o] = Math.min(255, r * ao / EXP * 255);
         px[o + 1] = Math.min(255, g * ao / EXP * 255);
@@ -322,6 +335,7 @@ const Baker = (() => {
       if (!p || !nAttr) return;
 
       g.computeBoundingBox();
+      const floorY = g.boundingBox.min.y; // this level's floor -- world y, NOT 0 on the upper storey
       const bb = g.boundingBox.clone().expandByScalar(1.0);
       const occ = data.occluders.filter(b =>
         b.x2 > bb.min.x && b.x1 < bb.max.x &&
@@ -332,8 +346,11 @@ const Baker = (() => {
       for (let i = 0; i < p.count; i++) {
         P.set(p.getX(i), p.getY(i), p.getZ(i));
         let ao = 1;
-        // contact shadows live low; skip the expensive test up high
-        if (P.y < 1.2 && occ.length) {
+        // contact shadows live low; skip the expensive test up high. Height
+        // is measured from this merged mesh's own floor, not world y=0 --
+        // world y is the upper storey's floor plane on level 2, so an
+        // absolute cutoff silently skipped every upper-level vertex.
+        if (P.y - floorY < 1.2 && occ.length) {
           N.set(nAttr.getX(i), nAttr.getY(i), nAttr.getZ(i));
           ao = aoAt(P, N, occ, rays);
         }
