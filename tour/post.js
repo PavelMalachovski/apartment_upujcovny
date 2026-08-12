@@ -117,6 +117,42 @@ const Post = (() => {
       //      L = 2.263646 * 0.6 / 1.05 = 1.293512.
       // Round-trip-verified: full_forward(1.293512, exposure=1.05) = 0.92
       // exactly (script in task-6-report.md).
+      //
+      // KNOWN UNCONVERTED RESIDUAL -- the `strength` 0.22 below.
+      // The threshold conversion above fixes *which* pixels bloom. It does
+      // not fix *how much* they add, and that moved domain too. The chain:
+      //   LuminosityHighPassShader:  gl_FragColor = mix(black, texel, alpha)
+      //       -- above threshold the whole texel passes through unscaled, at
+      //          whatever magnitude the buffer holds;
+      //   UnrealBloomPass composite: bloom = 3.0 * bloomStrength * sum(mips),
+      //       blended with AdditiveBlending over the base.
+      // So the pass adds `strength x (radiance of the bright pixels)` in the
+      // domain it sits in. On r128 that domain was display-referred and
+      // capped near 1.0, so 0.22 could add at most ~0.22. On r185 the same
+      // pass sits in raw linear radiance, which this branch measured at up
+      // to **15.32** max luminance / 17.01 max single channel at serenity's
+      // bathroom spot, and 2.20 / 2.68 at its entrance (task-5-report.md,
+      // determinism-checked across three renders and a reload). At 15.32
+      // the additive term is ~3.4 where r128's was <=0.22 -- roughly 15x,
+      // and higher again now that the direct lights carry their legacy PI
+      // factor (builder.js).
+      //
+      // This is structurally the same additive-in-the-wrong-domain bug that
+      // was found and fixed for GrainVignetteShader below, and it has the
+      // same non-solution: no single `strength` reproduces r128's behaviour
+      // for every pixel, because the needed factor depends on how bright
+      // each bloomed pixel is. Grain was fixed by reordering it past
+      // OutputPass. **Bloom cannot be reordered** -- it must read the HDR
+      // buffer to have anything above 1.0 to bloom at all, and putting it
+      // after OutputPass would defeat the whole pass.
+      //
+      // Deliberately NOT retuned here. Any "corrected" number would be
+      // taste, not mechanism, and this plan's discipline is mechanism only.
+      // Bloom tuning is plan 2's, alongside the exposure re-fit that changes
+      // what these radiances even are. Recorded as an accepted, documented
+      // r185 residual in docs/superpowers/metrics/r128-reference.md, the
+      // same category as the point-light attenuation change and the BRDF/IBL
+      // changes.
       const bloom = new UnrealBloomPass(size, 0.22, 0.5, 1.294);
       composer.addPass(bloom);
 
