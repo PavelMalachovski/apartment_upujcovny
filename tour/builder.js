@@ -1261,22 +1261,35 @@ const Builder = (() => {
   }
 
   // ---------- Light ----------
-  // AmbientLight and HemisphereLight used to be the only diffuse fill this
-  // scene had: flat, direction-agnostic stand-ins for "ambient bounce light
-  // off the room." Since captureEnvironment() (app.js) now feeds
-  // scene.environment a real panorama of this room's own baked walls,
-  // floors and furniture, every MeshStandardMaterial gets a second,
+  // AmbientLight and HemisphereLight are flat, direction-agnostic stand-ins
+  // for "ambient bounce light off the room." app.js's captureEnvironment()
+  // feeds scene.environment a real panorama of this room's own baked walls,
+  // floors and furniture, which gives every MeshStandardMaterial a second,
   // spatially-accurate diffuse IBL term for the exact same physical
-  // quantity these two lights were approximating — stacking both
-  // double-counts scene radiance and drifts every render brighter than the
-  // photographs (measured: every one of 11 delta_e spots rose, matte
-  // bedrooms and the kitchen more than the reflective bathroom, which is
-  // the ambient-double-count signature, not a specular one). Removed both;
-  // the environment now supplies that fill on its own. The sun stays: a
-  // 256px cube capture is too low-resolution to reproduce its crisp
-  // direction-specific highlight/shadow, so it remains a distinct,
-  // non-redundant term.
+  // quantity these two lights approximate — stacking both double-counts
+  // scene radiance and drifts every render brighter than the photographs
+  // (measured: every one of 11 delta_e spots rose, matte bedrooms and the
+  // kitchen more than the reflective bathroom, the ambient-double-count
+  // signature, not a specular one).
+  //
+  // So they're built here, tagged `envFallback`, and app.js removes them
+  // the moment a capture actually succeeds — never before. That makes the
+  // fallback the *default*: if captureEnvironment ever returns null (a
+  // thrown exception, a context loss, an old device that chokes on
+  // PMREMGenerator), scene.environment stays null and these two lights are
+  // simply never removed, so materials keep exactly the fill they would
+  // have had with no environment at all — reflectionless but still lit, per
+  // spec, by construction rather than by a comment someone has to trust.
+  // The sun is unconditional either way: a 256px cube capture is too
+  // low-resolution to reproduce its crisp direction-specific
+  // highlight/shadow, so it is not part of this fallback pair.
   function buildLights(scene) {
+    const amb = new T.AmbientLight(0xfff2e2, 0.22);
+    amb.userData.envFallback = true;
+    scene.add(amb);
+    const hemi = new T.HemisphereLight(0xdfeaf5, 0x8a7a66, 0.38);
+    hemi.userData.envFallback = true;
+    scene.add(hemi);
     const sun = new T.DirectionalLight(0xfff0d8, 0.55);
     sun.position.set(-30, 40, 20);
     scene.add(sun);

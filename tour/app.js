@@ -32,6 +32,15 @@ function captureEnvironment(renderer, scene, point) {
     return env;
   } catch (e) {
     console.warn('[env] capture failed, materials stay unreflective:', e);
+    // CubeCamera.update() and PMREMGenerator only restore the renderer's
+    // previous render target on the normal exit path in r128 — an
+    // exception partway through the six cube-face renders (context loss, a
+    // WebGL error) can leave the renderer bound to an offscreen cube face,
+    // so every frame after this one would render into it instead of the
+    // canvas: a black screen, exactly what this handler exists to prevent.
+    // Restore defensively, in its own try/catch, so a failure in the
+    // restore itself can never mask the warning above or re-throw past it.
+    try { renderer.setRenderTarget(null); } catch (e2) { /* nothing more we can do */ }
     return null;
   }
 }
@@ -75,11 +84,19 @@ window.initApp = function () {
     // fallback than a literal { x: 0, z: 0 }.
     const fallback = (APT.roomCenter && APT.roomCenter.main) || APT.start || { x: 0, z: 0 };
     const ec = (APT.env && APT.env.capture) || {};
-    captureEnvironment(renderer, scene, {
+    const env = captureEnvironment(renderer, scene, {
       x: ec.x !== undefined ? ec.x : fallback.x,
       y: ec.y !== undefined ? ec.y : 1.6,
       z: ec.z !== undefined ? ec.z : fallback.z
     });
+    // buildLights (builder.js) always adds AmbientLight + HemisphereLight
+    // tagged `envFallback` — the fill scene.environment is meant to
+    // replace. Remove them only now that capture has actually succeeded,
+    // so a failed capture (env === null) leaves them in place and
+    // materials stay fully lit, just unreflective, per spec.
+    if (env) {
+      for (const light of scene.children.filter((c) => c.userData.envFallback)) scene.remove(light);
+    }
     goBtn.textContent = goText;
     goBtn.style.opacity = '1';
     doll.classify();
