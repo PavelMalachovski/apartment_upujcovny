@@ -212,3 +212,59 @@ does not pass — recorded honestly, not silently.
   material edges, and smaller uninvestigated shader-chunk deltas of the same
   general shape as the lightmap one, each individually below the threshold
   where hand-forensics on a single frame can separate it from the others.
+
+## Fix round: grain/vignette was one of those "smaller uninvestigated
+## shader-chunk deltas" — and the biggest one found
+
+Coordinator-flagged: `GrainVignetteShader` sits before `OutputPass` in
+`post.js`'s chain, so — exactly like the bloom threshold — it reads and
+writes linear HDR values where r128 fed it gamma-encoded ones (r128's own
+pre-task-5 comment says so outright, recovered via git history). Confirmed
+by direct resemblance measurement first, not just pixel diff: coordinator's
+`tools/delta_e.py --apt serenity --phase b1-check` on the state above gave
+**mean ΔE2000 17.79** against phase A's committed **16.58**
+(`serenity-a6-palette-fix2.json`) — resemblance regressed 1.2 points, ~15%
+of phase A's gain, not just pixels moving.
+
+**Disable-test (asked-for first step) was inconclusive on its own**: worst
+MAD 41.33 → 41.96 with the pass off entirely — most frames got *slightly
+worse*. Confounded: r128's own captures also carry grain/vignette
+(correctly domained), so "disable" removes both the bug and the
+r128-matching effect at once. Reported as a non-collapse, not overridden.
+
+**Real test: reorder, don't convert.** Unlike the bloom threshold (a
+comparison point) or the lightmap scalar (a pure pre-nonlinearity multiply),
+neither grain constant has an exact linear-domain equivalent — additive
+noise added pre-tonemap produces a brightness-dependent lift after encoding
+(large near black, negligible near white; provable from the shader alone),
+and the vignette multiply changes which part of ACES's compressive curve a
+pixel lands on. `OutputPass`'s own class doc says passes needing sRGB input
+must follow it — moved `composer.addPass(grain)` to after
+`composer.addPass(new OutputPass())`, zero constants touched. Exact
+behaviour preservation, not an approximate conversion.
+
+**Result — reordering alone, no constant changed:**
+
+```
+30 frames, worst MAD 34.97, threshold 2.00, 27 failing   (was 41.33 / 30 failing)
+mean dE2000 (serenity): 17.26                             (was 17.79; baseline 16.58)
+```
+
+Three frames now pass the 2.0 threshold outright (both `horkyone-10`
+dollhouse frames, `kings-court`'s ground-floor dollhouse frame) — the
+largest single-change improvement of anything found in this whole task.
+ΔE2000 recovered 0.53 of the 1.21-point regression (~44%), still 0.68 above
+the phase-A baseline. Both gates still fail. Full derivation, the exact
+disable-test numbers, and the argument for why a constant conversion isn't
+possible here (not just harder) are in
+`.superpowers/sdd/2026-08-12-phase-b1-migration/task-6-report.md`'s "Fix
+round" section.
+
+**Left alone, flagged for next time:** `app.js`'s `invertR128Sky` (previous
+round) inverts the same tonemap chain at each apartment's *current*
+`toneMappingExposure`. The next plan reportedly re-fits exposure from
+scratch — when that happens this goes stale for every apartment
+simultaneously, silently (no `window.__issues` entry). It already takes
+`exposure` as a parameter rather than a baked-in constant so re-running it
+is cheap, but that has to actually happen alongside the refit, not be
+assumed.

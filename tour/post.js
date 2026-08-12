@@ -120,13 +120,51 @@ const Post = (() => {
       const bloom = new UnrealBloomPass(size, 0.22, 0.5, 1.294);
       composer.addPass(bloom);
 
+      // Tone mapping and the sRGB conversion happen here, once. This is
+      // what replaces r128's per-material encoding and the render target
+      // patch deleted in task 4.
+      composer.addPass(new OutputPass());
+
+      // Grain/vignette runs LAST, after OutputPass, not before it -- moved
+      // here as a fix-round finding, not the original placement. r128's
+      // patched composer (see git history of this file before task 5) fed
+      // GrainVignetteShader fully tonemapped+sRGB-encoded pixels, and its
+      // own pre-task-5 comment says so explicitly: "bloom and the
+      // grain/vignette pass now read and write gamma-encoded (not linear)
+      // values". Placed before OutputPass (this file's state through the
+      // rest of task 6), the shader instead got raw linear HDR radiance --
+      // the identical domain bug already found and fixed for the bloom
+      // threshold, but for a full shader instead of one constant.
+      //
+      // A constant-conversion fix (compensate 0.035/0.55 for the linear
+      // domain, the way 0.92 was converted to 1.294 above) is not just
+      // harder here, it is not *possible* to make exact: the grain term is
+      // ADDITIVE (`c.rgb += n * amount`), and ACESFilmicToneMapping+sRGB is
+      // a nonlinear function of the pixel value it's added to, so the same
+      // fixed linear offset produces a wildly different encoded-domain
+      // delta depending on how bright the underlying pixel already is (a
+      // large lift near black, negligible near white) -- there is no
+      // single amount that reproduces a uniform ±0.035 in encoded space for
+      // every pixel simultaneously. The vignette multiply has the same
+      // shape of problem one level down (multiplying pre-tonemap changes
+      // which part of the compressive ACES curve a pixel lands on).
+      //
+      // Reordering sidesteps both: it puts the shader back in the exact
+      // domain its constants were always written for, with the constants
+      // themselves untouched -- true behaviour preservation, not an
+      // approximation of it. `OutputPass`'s own class doc says as much:
+      // "If a pass requires sRGB input ... the pass must follow OutputPass
+      // in the pass chain." EffectComposer.render() sets `renderToScreen`
+      // on whichever pass is last and *enabled* on every call
+      // (`isLastEnabledPass`), so grain still renders straight to the
+      // canvas exactly as it did when task 5 removed its old, now-stale
+      // `grain.renderToScreen = true` line -- nothing else needed.
+      //
+      // Measured (docs/superpowers/metrics/r128-reference.md): reordering
+      // alone, no constant changed, dropped worst-of-30 MAD from 41.33 to
+      // 34.97 and moved three frames under the 2.0 threshold outright.
       const grain = new ShaderPass(GrainVignetteShader);
       composer.addPass(grain);
-
-      // Tone mapping and the sRGB conversion happen here, once, at the end.
-      // This is what replaces r128's per-material encoding and the render
-      // target patch deleted in task 4.
-      composer.addPass(new OutputPass());
 
       return {
         composer: composer,
