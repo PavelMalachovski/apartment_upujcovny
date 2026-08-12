@@ -1,0 +1,189 @@
+# Phase B step 0 — what is actually wrong with the product
+
+`docs/PHASE-B-HANDOFF.md` opens its sequencing with:
+
+> 0. **Walk both tours and produce the observation table above.** Everything
+>    below is a hypothesis until that table exists.
+
+This is that table. Nothing here was planned, coded or fixed — this document
+only records what a visitor sees, measured where measuring was possible.
+
+---
+
+## Method
+
+All three apartments were opened on a local server at 1280×820, at the tip of
+`main` (4bbfce8), and walked from every `spawn`, plus the dollhouse on its
+cutaways, the terraces, and photo-spot cameras compared against the
+photographs themselves. Renders go through the post chain, exactly as a
+visitor gets them.
+
+Evidence images are in `docs/superpowers/observations/`, referenced per row.
+Every one is a contact sheet rendered offscreen at a fixed size, so the frames
+are comparable to each other.
+
+Two caveats on the evidence, stated up front:
+
+- **The photo-vs-render sheets render at a corrected field of view, not the
+  harness's.** See observation **C1** — the shipped harness compares at a
+  field of view the photographs do not have, so a like-for-like sheet had to
+  correct it. Sheets 03 and 04 are the working for that finding.
+- Machine: 12 logical cores, DPR 1 capture. Timing numbers below are medians
+  of three page loads.
+
+---
+
+## Corrections to `PHASE-B-HANDOFF.md`
+
+Both were found by trying to reproduce the document's own numbers, which is
+what it asks the reader to do.
+
+**1. kings-court now has 14 `compare` spots and a committed baseline.** The
+handoff says it has "**no `compare` spots at all**" and that "nothing in phase
+A measured it". That was true when it was written and stopped being true one
+commit later: `b147e2e` (PR #26, merged as `4bbfce8`) flags all 14 photo spots
+`compare` and commits `docs/superpowers/metrics/kings-court-baseline.json`,
+mean ΔE2000 **22.44**. The handoff's advice to walk kings-court carefully
+still stands — the walk below found plenty — but it is no longer unmeasured.
+
+**2. The 10-second kings-court bake does not reproduce.** Handoff fact 4 gives
+medians of three: serenity 318 ms, horkyone-10 1555 ms, kings-court 10094 ms.
+Measured here, same method (`window.__bakeMs`, median of three loads):
+
+| Apartment | Handoff | Measured here | Ratio |
+|---|---:|---:|---:|
+| serenity | 318 ms | **309 ms** | 0.97 |
+| horkyone-10 | 1555 ms | **669 ms** | 0.43 |
+| kings-court | 10094 ms | **1937 ms** | 0.19 |
+
+Serenity reproduces to within 3%, so this is not a faster machine — a machine
+effect would move all three together. Something else differs, and until it is
+explained, "kings-court bakes in about 10 seconds" cannot be used as the
+justification for moving the bake into a Worker. **Re-derive this number
+before planning around it.** (Individual kings-court loads: 2469 cold, then
+1944, 1902.)
+
+Handoff facts 1 and 3 **do** check out against the source, line by line:
+`EXP = 1.7` (`bake.js:61`), indoor ambient base `0.40/0.385/0.36` (`:128`),
+point coefficient `2.1` (`:143`), window coefficient `0.26` (`:166`), sun
+`0.62` (`:175`), `WEXP = 1.25` (`:250`), and `aoAt` returning
+`0.35 + 0.65 * (open / n)` (`:120`) — an occlusion floor no corner can go
+below. `bakeWalls` calls `lightAt` and never `aoAt` (`:264`), so the claim
+that **walls receive no ambient occlusion at all** is correct.
+
+---
+
+## The three tours as they ship today
+
+Measured over every `spawn` of each apartment, 480×300, through the post
+chain. Luminance is sRGB-encoded 0–255 (not the linear domain
+`tools/luminance.py` reports — these numbers are internally comparable, not
+comparable to that tool's).
+
+| Apartment | `exposure` | mean L | 5th pct L | mean/p05 | pixels ≥250 | ΔE2000 | validator |
+|---|---:|---:|---:|---:|---:|---:|---|
+| serenity | **0.33** | 144.6 | 80.9 | 1.83 | 0.00% | 16.58 | clean |
+| kings-court | 1.05 | 189.8 | 135.9 | 1.44 | 1.37% | 22.44 | clean |
+| horkyone-10 | 1.05 | 193.1 | 155.7 | 1.25 | — | — | clean |
+
+Serenity is the only apartment whose exposure was ever fitted. The other two
+ship at the renderer default and sit some 45 luminance points brighter with
+measurably less shadow range. And even in serenity — the darkest of the three
+— the **darkest 5% of the frame never falls below 32% grey**.
+
+Draw calls, kings-court (the heaviest), 1280×820: entry hall **144**, dining
+121, upper living 97, bedroom 1 79, terrace 64 — against a documented ceiling
+of 150, for a scene of **32,164 triangles**. The budget is bound by material
+count, not geometry; there is a great deal of triangle headroom under it.
+
+---
+
+## The observation table
+
+Column 3 is the point of the exercise, per the handoff: ΔE2000 over an 8×8
+grid is direction-blind, spatially averaging and geometry-blind. Where it
+cannot see an observation, column 4 gives that observation its own acceptance
+criterion **now**, before any work starts, so it cannot later be declared
+fixed on the strength of a number that never described it.
+
+### A — Light and tone
+
+| # | What looks wrong | Which feature would fix it | Can the metric see it? | Acceptance criterion if not |
+|---|---|---|---|---|
+| A1 | kings-court and horkyone-10 ship at the default `exposure` 1.05 and render ~45 L points brighter than serenity: whites at 190+, no dark end. Two of the three properties in the catalogue are visibly over-exposed. Sheets 06, 07, 09 | Per-apartment exposure fit against that flat's photographs, after the migration's lighting-unit change | **kings-court: yes** — 14 compare spots exist. **horkyone-10: no** — 2 photo spots, 0 flagged `compare` | horkyone-10 has no photographs to fit against. Either flag its spots `compare` first, or accept it on mean L landing within ±10 of the two fitted flats and say so in the commit |
+| A2 | No shadow range anywhere. p05 luminance runs 81 (serenity) to 156 (horkyone-10); corners, skirtings and wall joins do not darken. Every sheet | GTAO, or path-traced lightmaps; removing `lightAt`'s unconditional ambient base and `aoAt`'s 0.35 floor at the source | **No.** ΔE averages spatially — this is exactly the blind spot the handoff records for lifted blacks | p05 sRGB luminance must fall, and the linear-domain contrast from `tools/luminance.py` must move toward the photographs' 7.6. Both reported per apartment, before and after |
+| A3 | A floor-to-wall corner darkens on the floor side only: `bakeWalls` (`bake.js:264`) calls `lightAt` and never `aoAt`. Verified in source | GTAO, which covers walls and floors alike | **No** — a half-lit corner is a small fraction of any grid cell | A rendered corner at 1 m must show a continuous gradient across the joint. One screenshot per apartment, A/B against today |
+
+### B — Content and geometry
+
+| # | What looks wrong | Which feature would fix it | Can the metric see it? | Acceptance criterion if not |
+|---|---|---|---|---|
+| B1 | **serenity's living room does not match its own photograph.** The flat has a floor-to-ceiling sliding door with sheer curtains; the model has a punched window (sill 0.85, head 2.45). No curtains, no rug, no air-conditioner, and the artwork is a radial-gradient blob. A yaw sweep at spot 3 finds *no* camera angle that reproduces the photograph. Sheets 03, 04 | Fix the opening in `serenity.json`; add curtains, rug and A/C as furniture; real artwork textures | **No.** Spot 3 scores 16.25 — mid-pack, better than average — while the two frames are visibly of different rooms | A human A/B at spot 3 must show the same opening shape and the same three objects present. This is a geometry bug found by eye and only fixable by eye |
+| B2 | serenity's outdoors is three flat bands — sky, hedge, pool — with a smeared blob on the water. Spot 10 is the worst frame in the catalogue at **ΔE 29.02** and the pool is the property's headline feature. Sheets 01, 05 | HDRI sky, real planting and pool geometry, a water material | **Yes** — spot 10 is the largest single outlier in serenity's residual table | — |
+| B3 | kings-court's black-marble bathrooms render as near-white blank walls; the feature material is simply absent. Spots 13 and 14, **ΔE 33.22 and 33.38** — the two worst in that flat. Sheet 08 | PBR texture sets (albedo + normal + roughness) | **Yes** | — |
+| B4 | kings-court spot 4, "Coffee corner", **ΔE 33.21**, is a product detail photograph — a coffee machine on marble. The model has no coffee corner; the render is a blank wall. Sheet 08 | Either model the props, or remove the spot from the compare set | **Yes, but it measures the wrong thing** — a missing object, not a material or a light | Decide explicitly whether detail-shot photographs belong in a resemblance metric at all. Whichever way, record the decision, because dropping it moves the mean and that must not read as an improvement |
+| B5 | Every window in kings-court and horkyone-10 is a white or flat-blue void — there is no exterior geometry. The dollhouse shows the building floating in blue nothing, with no ground plane and casting no shadow. Sheets 06, 07, 09 | HDRI environment, a ground plane, a sun that casts | **Partially** — windows occupy grid cells, so the ΔE will move, but it cannot tell "sky through a window" from "white wall" | A dollhouse screenshot must show the building standing on ground with a cast shadow |
+| B6 | Furniture is boxes throughout — the residual the phase A decomposition already identified as dominant | Real GLTF furniture | **Yes** | — |
+| B7 | Procedural textures read as artefacts up close: marble is white scribbles, the bedroom feature wall is camouflage blobs, the quilted headboard is a flat grid of rectangles, string lights are dots on a straight line, artwork is a radial gradient. Sheets 02, 06, 07, 09 | Scanned CC0 PBR texture sets (Poly Haven, ambientCG) | **Weakly.** They carry roughly the right average colour, which is all an 8×8 cell mean sees | A screenshot at 1 m from each named surface must read as the material it claims to be, A/B against the photograph |
+
+### C — The measurement harness itself
+
+| # | What looks wrong | Which feature would fix it | Can the metric see it? | Acceptance criterion if not |
+|---|---|---|---|---|
+| C1 | **The comparison camera has the wrong field of view, and nothing has ever checked it.** `camera.fov` is 72° vertical and `measure.js` sets `camera.aspect` per photograph but never touches `fov`. A 16:9 photograph is therefore compared against a **104.5° horizontal** render; the three portrait photographs against a **55°** one. Every cell of the 8×8 grid looks at a different part of the room from the photograph's corresponding cell. Sheet 03 | Store a per-photograph field of view (or focal length) in the config and set `camera.fov` in the harness before each capture | **This *is* the metric.** It changes what every number in the phase A trend table means | Re-baseline after the fix. The absolute numbers will move, and phase A's trend cannot be compared across the change — say so in `metrics/README.md` rather than quietly restating the series |
+| C2 | `validate.js` reports **zero issues on all three apartments** while everything above is true | Nothing — this is a scope statement, not a bug. The validator checks navigation, not appearance | n/a | Phase B must never cite a clean validator as evidence about quality. Worth one line in the rewritten `CLAUDE.md` |
+
+### D — Product surface
+
+| # | What looks wrong | Which feature would fix it | Can the metric see it? | Acceptance criterion if not |
+|---|---|---|---|---|
+| D1 | Photo-spot markers are large black camera discs that land in the middle of first-person frames — four at once in serenity's living room, and one floating against open sky on the terrace. Sheets 01, 02 | UI, not rendering: scale with distance, fade, or reveal on proximity | **No** — and worse, they are *in* the captured comparison frames, so they contribute to ΔE as pure noise | Markers must not occlude the subject at any spawn. Also: exclude markers from measurement captures, or they are scored as part of the room |
+
+---
+
+## Ruled out — two things that looked like bugs and are not
+
+Recorded so the next session does not re-chase them.
+
+**Area labels leaking into the first-person view.** A dollhouse area badge
+("Upper hall 11 m²") appeared in an early first-person capture. It is an
+artifact of the capture harness, not the product: the sheet builder set
+`doll.on = false` directly to freeze the orbit camera, which then skipped
+`doll.exit()`. Checked directly — 18 label sprites exist, 5 visible in the
+dollhouse, and **0 visible after `exit()`**, on both the plain and the
+teleport exit paths. The product is correct.
+
+**A sky leak in kings-court's upper bathroom.** Blue appeared above the walls
+in a render at spot 13. Rays cast straight up from four points around that
+spot all hit a ceiling mesh at 0.84–1.26 m, and the four horizontal rays all
+hit walls at 1.1–6.1 m. There is no hole. The blue is a window with nothing
+modelled behind it — observation **B5**, not a shell defect.
+
+---
+
+## What this implies for the plan
+
+Three things the walk changes about the handoff's suggested sequencing.
+
+1. **C1 comes before step 1, not inside it.** The handoff's step 1 is "port
+   the measurement harness and re-baseline". Porting it as-is carries a
+   field-of-view error into phase B's safety net. Fix the FOV, re-baseline
+   all three apartments, and treat that as the new zero — phase A's trend line
+   ends there.
+
+2. **A1 is nearly free and affects two of three properties.** The handoff
+   frames exposure as something to re-fit at the end (its step 4). But
+   kings-court and horkyone-10 have never been fitted at all, and exposure was
+   worth 6.6 of phase A's 7.8 points on serenity. Whatever the migration does
+   to lighting units, these two flats are over-exposed today and will be
+   over-exposed differently tomorrow.
+
+3. **B1 is the observation nothing on the feature list fixes**, and the
+   handoff says that is the most important kind: "A defect nothing on the
+   feature list fixes is more important than anything on it." No amount of
+   HDRI, GTAO, PBR or GLTF makes a punched window into a sliding door. It is a
+   config-geometry error, it is invisible to every automated gate the project
+   owns, and the only reason it surfaced is that someone put the render and
+   the photograph side by side. That argues for making the render-versus-
+   photograph comparison a routine step with a fixed camera, rather than a
+   feature to ship later.
