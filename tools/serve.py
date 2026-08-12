@@ -7,6 +7,7 @@ import base64
 import http.server
 import os
 import socketserver
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOUR = os.path.join(ROOT, 'tour')
@@ -23,13 +24,48 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return
-        rel = self.path[len('/save/'):]
-        parts = [p for p in rel.split('/') if p not in ('', '.', '..')]
+        # self.path is the raw request-line token: BaseHTTPRequestHandler
+        # never percent-decodes it (only SimpleHTTPRequestHandler's own
+        # GET/HEAD file serving does, via translate_path). Decode it the
+        # same way before doing anything else, so an encoded separator
+        # ('..%2F..%2Fescape.txt') is seen as the traversal it spells out
+        # instead of sailing through as a literal, harmless-looking
+        # filename containing a '%'.
+        rel = urllib.parse.unquote(self.path[len('/save/'):])
+        parts = [p for p in rel.split('/') if p]
         if not parts:
             self.send_response(400)
             self.end_headers()
             return
         dest = os.path.join(SHOTS, *parts)
+        # A plain '..'-segment blocklist (the previous version of this
+        # check) only ever looks at '/'. On Windows, os.path.join and the
+        # filesystem both also treat '\' as a separator, so a single
+        # segment with no '/' in it at all -- '..\\..\\..\\Windows\\
+        # win.ini', never the literal string '..' -- still walks upward
+        # once opened. A drive-absolute segment ('C:\\Windows\\win.ini')
+        # is worse: os.path.join discards every earlier component and
+        # returns just that absolute path, dropping SHOTS entirely. Both
+        # reproduced directly against the old code: realpath(dest) landed
+        # at C:\Git\Windows\win.ini and C:\Windows\win.ini respectively.
+        # Resolving and checking containment catches all of these plus
+        # the plain '../' case plus whatever separator or absolute-path
+        # scheme a future caller invents, in one place, instead of
+        # growing the blocklist every time a new shape turns up -- so
+        # this is now the *only* traversal check; nothing upstream
+        # special-cases '.' or '..' any more. Checked before any
+        # filesystem mutation, including makedirs: an out-of-bounds
+        # destination must not even get its directory created.
+        real_shots = os.path.realpath(SHOTS)
+        real_dest = os.path.realpath(dest)
+        try:
+            contained = os.path.commonpath([real_dest, real_shots]) == real_shots
+        except ValueError:
+            contained = False  # e.g. a different drive on Windows
+        if not contained:
+            self.send_response(400)
+            self.end_headers()
+            return
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         n = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(n).decode()
