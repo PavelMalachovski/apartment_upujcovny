@@ -52,4 +52,14 @@ const BUILD_V = (function () {
   }
 
   window.initApp();
+
+  // Resemblance capture harness, off by default and never downloaded
+  // by normal visitors. BUILD_V (captured synchronously above, before any
+  // await) versions this the same way the config fetch is versioned —
+  // document.currentScript is null by this point inside an async IIFE.
+  if (new URLSearchParams(location.search).has('measure')) {
+    const s = document.createElement('script');
+    s.src = 'measure.js' + (BUILD_V ? '?v=' + BUILD_V : '');
+    document.head.appendChild(s);
+  }
 })();
