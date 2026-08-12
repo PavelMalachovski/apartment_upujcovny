@@ -366,6 +366,11 @@ for.
 
 **Files:**
 - Create: `tour/lib/three-0.185.0/build/three.module.js`
+- Create: `tour/lib/three-0.185.0/build/three.core.js` — 0.185.0 splits the
+  build into a facade (`three.module.js`) plus the core, which the facade
+  imports by relative path and which holds `REVISION`. Step 2's closure scan
+  is what finds this; it is listed here so the next reader does not have to
+  rediscover it.
 - Create: `tour/lib/three-0.185.0/examples/jsm/postprocessing/{EffectComposer,RenderPass,ShaderPass,MaskPass,Pass,UnrealBloomPass,OutputPass}.js`
 - Create: `tour/lib/three-0.185.0/examples/jsm/shaders/{CopyShader,LuminosityHighPassShader,OutputShader}.js`
 - Create: `tour/lib/three-0.185.0/LICENSE`
@@ -420,10 +425,13 @@ the list closes.
 - [ ] **Step 3: Confirm the revision**
 
 ```bash
-grep -oE "REVISION = '[0-9]+" tour/lib/three-0.185.0/build/three.module.js | head -1
+grep -rhoE "REVISION = '[0-9]+" tour/lib/three-0.185.0/build/ | head -1
 ```
 
-Expected: `REVISION = '185`.
+Expected: `REVISION = '185`. Search the whole `build/` directory, not
+`three.module.js` alone — in 0.185.0 the constant is defined in
+`three.core.js` and only re-exported by the facade, so grepping the facade
+returns nothing and looks like a failed download.
 
 - [ ] **Step 4: Commit**
 
