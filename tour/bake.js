@@ -314,7 +314,14 @@ const Baker = (() => {
       geo.setAttribute('position', new T.Float32BufferAttribute(b.pos, 3));
       geo.setAttribute('normal', new T.Float32BufferAttribute(b.nrm, 3));
       geo.setAttribute('color', new T.Float32BufferAttribute(b.col, 3));
-      const mat = new T.MeshBasicMaterial({ vertexColors: true, color: 0xfdfbf6 });
+      // Base tint for the merged wall mesh. Fallback is this file's own
+      // long-standing constant, NOT M.wall's -- the baked per-vertex light
+      // in this function was tuned against 0xfdfbf6, so defaulting to
+      // M.wall's 0xe8e4db would silently relight every apartment's walls,
+      // including the two with no palette block at all. Only an apartment
+      // that sets palette.wall moves off this constant. Materials.color()
+      // holds the one copy of the hex validation (Task 8 fix round 1).
+      const mat = new T.MeshBasicMaterial({ vertexColors: true, color: Materials.color('wall', 0xfdfbf6) });
       const mesh = new T.Mesh(geo, mat);
       mesh.userData.doll = key === 'low' ? 'walls1' : 'walls2';
       scene.add(mesh);

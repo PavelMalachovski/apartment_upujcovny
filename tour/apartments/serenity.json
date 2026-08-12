@@ -5,7 +5,7 @@
   "exposure": 0.33,
   "palette": {
     "floorWood": "#f7ffff",
-    "wall": "#f9fbe0",
+    "wall": "#fffffc",
     "sofa": "#132743",
     "tileGray": "#fde4cb",
     "counter": "#fcfff6"

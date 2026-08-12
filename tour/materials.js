@@ -339,13 +339,22 @@ const Materials = (() => {
   // (Task 8). Every key is optional; an absent or invalid value falls back
   // to the hardcoded constant it always had, so an apartment with no
   // palette block renders exactly as before.
+  //
+  // Reads APT.palette directly (rather than the `palette` argument below)
+  // so it can also be called as Materials.color() from outside init() --
+  // bake.js's merged wall mesh (see bakeWalls()) needs the same validated
+  // hex lookup for its own base tint, since wall pieces are baked straight
+  // from wallPieces data and never touch M.wall. Keeping the hex
+  // parsing/validation in this one place avoids a second copy of the
+  // regex drifting out of sync.
+  function color(key, fallback) {
+    const v = APT.palette && APT.palette[key];
+    if (typeof v !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(v)) return fallback;
+    return parseInt(v.slice(1), 16);
+  }
+
   function init(palette) {
-    const P = palette || {};
-    const col = (key, fallback) => {
-      const v = P[key];
-      if (typeof v !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(v)) return fallback;
-      return parseInt(v.slice(1), 16);
-    };
+    const col = color;
 
     const wood = floorTex();
     wood.repeat.set(3, 3);
@@ -412,5 +421,5 @@ const Materials = (() => {
     M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
   }
 
-  return { M, init, canvasTex, artTex, throwMat, dotsMat };
+  return { M, init, canvasTex, artTex, throwMat, dotsMat, color };
 })();
