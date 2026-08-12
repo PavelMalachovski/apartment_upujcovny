@@ -87,36 +87,6 @@ const Post = (() => {
 
       const composer = new T.EffectComposer(renderer);
 
-      // EffectComposer's auto-created render targets default to
-      // LinearEncoding regardless of renderer.outputEncoding. None of the
-      // full-screen-quad shaders in this chain (UnrealBloomPass's internal
-      // passes, our own grain/vignette pass) apply sRGB encoding themselves
-      // — they are hand-written GLSL with no <encodings_fragment> chunk, so
-      // nothing in the chain ever encodes. Three.js derives the *scene*
-      // shader's output encoding from the currently bound render target's
-      // texture.encoding, not from renderer.outputEncoding directly — so
-      // with an unpatched (Linear) target, RenderPass's scene materials
-      // compile with an identity linearToOutputTexel and the sRGB encode
-      // that should happen there simply never runs, rather than a decode
-      // running that shouldn't. Numerically the same missing step either
-      // way, but worth being precise about: there is no stray decode
-      // anywhere in this chain to go hunting for. Measured directly: the
-      // same surface reads ~148 out of 255 rendered straight to the screen
-      // but ~76 through an unpatched composer target — matches leaving that
-      // one encode out. Match the render targets' encoding to the
-      // renderer's so RenderPass actually performs it.
-      //
-      // Consequence worth knowing if these tuning numbers ever need
-      // revisiting: bloom and the grain/vignette pass now read and write
-      // gamma-encoded (not linear) values, since nothing downstream decodes
-      // before operating on them and nothing re-encodes after. The 0.92
-      // bloom threshold therefore acts on encoded values — roughly 0.83 in
-      // linear light. The corner vignette factor (~0.789, see
-      // GrainVignetteShader) is correspondingly closer to 0.57x in linear
-      // terms than its face-value 0.79 suggests.
-      composer.renderTarget1.texture.encoding = renderer.outputEncoding;
-      composer.renderTarget2.texture.encoding = renderer.outputEncoding;
-
       composer.addPass(new T.RenderPass(scene, camera));
 
       // strength, radius, threshold — threshold high so only real daylight blooms

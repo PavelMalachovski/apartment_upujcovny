@@ -62,7 +62,7 @@ window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   // Fitted per-apartment against its own photographs (task 7); apartments
   // with no photographs flagged for comparison keep this same 1.05 they

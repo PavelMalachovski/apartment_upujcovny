@@ -16,6 +16,11 @@ const Materials = (() => {
     const c = document.createElement('canvas');
     c.width = w; c.height = h;
     draw(c.getContext('2d'), w, h);
+    // Deliberately no texture.colorSpace: these canvases were authored against
+    // r128's linear default, and tagging them sRGB shifts every colour in the
+    // scene. Revisit with the resemblance metric watching, not during a
+    // migration whose gate is "nothing changed". See
+    // docs/superpowers/plans/2026-08-12-phase-b1-migration.md task 4.
     const t = new T.CanvasTexture(c);
     t.wrapS = t.wrapT = T.RepeatWrapping;
     t.repeat.set(repX, repY);
