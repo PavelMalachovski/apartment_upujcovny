@@ -1310,9 +1310,90 @@ git commit -m "Add a restrained bloom, grain and vignette chain"
 
 ---
 
-### Task 7: Palette sampled from the photographs
+### Task 7: Exposure matched to the photographs
+
+**Added after Task 3, on evidence Task 3 produced.** The luminance measurement taken during Task 3 showed the renders running at 0.6588 mean linear luminance against the photographs' 0.2945 — a factor of 2.24, about 1.2 stops. The gap predates all of this work; nothing in the original plan addressed it, because nobody had measured it.
+
+It has to be fixed before the palette task, not after. That task samples colours straight out of the photographs and installs them as material albedo. But a colour in a photograph is an *already-lit* colour, recorded at that photograph's exposure. Feed it as albedo into a scene running 1.2 stops hotter and the error compounds instead of cancelling — the palette task would actively make resemblance worse while appearing to serve it.
+
+**Files:**
+- Modify: `tour/app.js` (exposure from config; suspend tone mapping around the capture)
+- Modify: `tour/apartments/serenity.json` (`exposure`)
+- Modify: `tools/luminance.py` (report the 5th percentile alongside the mean)
+
+**Interfaces:**
+- Consumes: `APT.exposure`, optional number, defaulting to the current 1.05 so apartments without photographs to match are untouched.
+- Produces: nothing new; the environment capture keeps its existing signature.
+
+- [ ] **Step 1: Break the exposure feedback loop first**
+
+Do this before fitting anything, or the fit will chase its own tail.
+
+Tone mapping is applied in the fragment shader for every material whose `toneMapped` is true, which is the default — including during the six `CubeCamera` face renders. So the captured environment currently stores display-referred, ACES-compressed values, which are then tone-mapped a second time when the scene is drawn. Two consequences: the environment carries less energy in its highlights than the real room does, and changing the exposure changes the captured environment, which changes the lighting, which changes the measured luminance. Fitting against a moving target converges slowly if at all.
+
+In `captureEnvironment` in `tour/app.js`, suspend tone mapping for the duration of the capture and restore it afterwards, in a way that survives the exception path:
+
+```js
+  const prevToneMapping = renderer.toneMapping;
+  renderer.toneMapping = THREE.NoToneMapping;
+  try {
+    // ... existing capture body ...
+  } catch (e) {
+    // ... existing handling ...
+  } finally {
+    renderer.toneMapping = prevToneMapping;
+  }
+```
+
+This also resolves a finding deferred from Task 3, recorded in the ledger as the double tone-mapping of the capture.
+
+Re-measure luminance after this change alone and report it. The number will move before you have fitted anything — that movement is this step's evidence, and it must be recorded separately from the fit, or the two effects become indistinguishable.
+
+- [ ] **Step 2: Make exposure configurable**
+
+In `initApp`, replace the hardcoded exposure with a config read, keeping the present value as the default so the two apartments without flagged photographs are unaffected:
+
+```js
+  renderer.toneMappingExposure = (APT.exposure !== undefined) ? APT.exposure : 1.05;
+```
+
+The JSON stays the single source of data; no fitted constant may live in the source.
+
+- [ ] **Step 3: Fit the exposure, and fit it to luminance — not to ΔE**
+
+Add `"exposure": <value>` to `tour/apartments/serenity.json` and iterate: set a value, reload so the environment is re-captured, run `window.__measure()`, then `python tools/luminance.py`.
+
+The target is mean linear luminance within 10% of the photographs' 0.2945, measured over the same 11 spots.
+
+Fit against luminance, never against ΔE2000. Luminance parity is a physical target with a defined right answer; ΔE is a 64-cell colour statistic, and tuning a global constant until it bottoms out is overfitting that would corrupt every later measurement in this plan. Report what ΔE does as a **consequence** of the fit.
+
+Because the capture is now linear, the loop is broken and this should converge in two or three iterations. If it does not, stop and say so — that would mean something else is feeding back and it is worth understanding before proceeding.
+
+- [ ] **Step 4: Check you have not crushed the shadows**
+
+Lowering exposure darkens everything, including regions that were already correct. A render that matches on mean luminance while losing all shadow detail is worse, not better, and the mean cannot see it.
+
+Extend `tools/luminance.py` to report the 5th percentile of the luminance distribution alongside the mean, and compare that percentile between the render and the photographs. If the render's 5th percentile falls well below the photographs', the fit has crushed the blacks — report it plainly rather than accepting the mean.
+
+- [ ] **Step 5: Verify and commit**
+
+Validator `[]` on all three apartments at a version-confirmed load. Confirm the two apartments without an `exposure` key render exactly as before — that is the whole point of the default. Draw calls unchanged.
+
+Bump `?v=` on all `<script src>` tags as the last edit.
+
+```bash
+git add tour/app.js tour/apartments/serenity.json tools/luminance.py tour/index.html \
+        docs/superpowers/metrics/serenity-a6-exposure.json
+git commit -m "Match render exposure to the photographs"
+```
+
+---
+
+### Task 8: Palette sampled from the photographs
 
 The only change in this plan that serves resemblance directly rather than beauty generally, and it is available only because the flat exists and was photographed.
+
+This task now runs **after** the exposure fit, and depends on it: sampling photographic colour into a scene whose exposure does not match the photographs compounds the error rather than correcting it.
 
 **Files:**
 - Create: `tools/sample_palette.py`
@@ -1469,7 +1550,7 @@ git commit -m "Sample the material palette from the real photographs"
 
 ---
 
-### Task 8: Close out phase A
+### Task 9: Close out phase A
 
 **Files:**
 - Create: `docs/superpowers/metrics/README.md`
@@ -1515,7 +1596,9 @@ Open a PR whose description states the mean ΔE2000 at baseline and after each t
 
 ## Self-review
 
-**Spec coverage.** A1 environment capture → Task 3. A2 chamfer → Task 4. A3 ambient occlusion, both floor contact shadows and per-vertex on furniture → Task 5. A4 post-processing → Task 6, minus SAO, deviation documented above. A5 palette from photographs → Task 7. The `materials.js` split the spec calls for → Task 2. The ΔE2000 resemblance metric with a baseline captured before any work → Task 1. Revised draw-call budget and the sub-3-second phase A bake → enforced in Tasks 3–6 and audited in Task 8. Error handling — every asset degrades to the procedural path — → Tasks 3, 6 and 7 each verify their own fallback explicitly.
+**Spec coverage.** A1 environment capture → Task 3. A2 chamfer → Task 4. A3 ambient occlusion, both floor contact shadows and per-vertex on furniture → Task 5. A4 post-processing → Task 6, minus SAO, deviation documented above. A5 palette from photographs → Task 8. The `materials.js` split the spec calls for → Task 2. The ΔE2000 resemblance metric with a baseline captured before any work → Task 1. Revised draw-call budget and the sub-3-second phase A bake → enforced in Tasks 3–6 and audited in Task 9.
+
+**Task 7 is not in the spec**, and was added mid-execution on evidence produced by Task 3: the renders run about 1.2 stops brighter than the photographs, a gap that predates this work and that no spec item addressed because nobody had measured it. It is placed before the palette task because sampling photographic colour into a mis-exposed scene compounds the error instead of correcting it. Approved by the human partner before insertion. Error handling — every asset degrades to the procedural path — → Tasks 3, 6 and 7 each verify their own fallback explicitly.
 
 Not covered here by design, and belonging to phase B: the engine migration, HDRI, KTX2 texture sets, GLTF furniture, two-bounce GI, and the render-versus-photo comparison slider in the UI. The slider is a user-facing feature rather than a rendering change; it rides on the same `compare` flag introduced in Task 1 and is planned separately.
 
