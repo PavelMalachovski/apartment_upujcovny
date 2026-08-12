@@ -401,17 +401,31 @@ const Builder = (() => {
     // overlay with uv2 and its own albedo; Baker assigns the lightMap
     let mat;
     if (matKey === 'white') {
-      mat = new T.MeshBasicMaterial({ color: 0xf3f2ee });
+      // Ceiling overlay. Wired to a 'ceiling' palette key (fallback stays
+      // this file's own long-standing constant) so the capability exists,
+      // but no apartment samples a value for it yet -- the photographs
+      // this task works from barely show ceiling, and a value guessed off
+      // a sliver of frame would be worse than none (Task 8 fix round 2).
+      mat = new T.MeshBasicMaterial({ color: Materials.color('ceiling', 0xf3f2ee) });
     } else {
+      const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray }[matKey];
       const key = matKey + '|' + Math.round(w / tile * 4) + '|' + Math.round(h / tile * 4);
       if (!albedoCache[key]) {
-        const src = { wood: M.floorWood, marbleW: M.marbleW, deck: M.deck, terracotta: M.terracotta, tileGray: M.tileGray }[matKey];
         const map = src.map.clone();
         map.needsUpdate = true;
         map.repeat.set(w / tile, h / tile);
         albedoCache[key] = map;
       }
-      mat = new T.MeshBasicMaterial({ map: albedoCache[key] });
+      // Carry the source material's colour tint through to this overlay --
+      // it used to be dropped here, so palette.floorWood/tileGray (etc.)
+      // never reached the actual visible floor mesh (Task 8 fix round 2).
+      // Safe by construction: every material reachable through `src` above
+      // defaults to white (0xffffff) when its palette key is absent --
+      // M.floorWood and M.tileGray explicitly via col(key, 0xffffff),
+      // M.marbleW/M.deck/M.terracotta implicitly via THREE's own
+      // MeshStandardMaterial default -- and multiplying a map by white is
+      // the identity, so apartments with no palette block are unaffected.
+      mat = new T.MeshBasicMaterial({ map: albedoCache[key], color: src.color });
     }
     const geo = new T.PlaneGeometry(w, h);
     geo.setAttribute('uv2', new T.BufferAttribute(geo.attributes.uv.array.slice(), 2));

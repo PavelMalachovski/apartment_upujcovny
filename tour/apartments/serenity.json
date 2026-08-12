@@ -4,10 +4,10 @@
   "terraceY": -0.05,
   "exposure": 0.33,
   "palette": {
-    "floorWood": "#f7ffff",
+    "floorWood": "#fdffff",
     "wall": "#fffffc",
     "sofa": "#132743",
-    "tileGray": "#fde4cb",
+    "tileGray": "#fadfc6",
     "counter": "#fcfff6"
   },
   "roomCenter": {
