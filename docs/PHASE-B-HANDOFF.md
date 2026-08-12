@@ -122,16 +122,24 @@ re-checked it. The final review measured it directly (render every
 `compare` spot, read back the max encoded channel value the threshold
 acts on): bloom is inert at 11 of serenity's 12 tested camera positions —
 nothing in frame reaches 0.92 at the fitted exposure — but **not fully
-inert**. One live (unbaked) specular highlight, a chrome fixture in the
-bathroom, still crosses the threshold and produces a small, visibly
-confirmed bloom (5.96% of that frame's pixels change with the pass
-toggled off vs. on). Baked diffuse surfaces can't reach the threshold at
-this exposure, as the arithmetic predicted; live specular highlights on
-near-mirror metal aren't bounded by that same ceiling and can still
-exceed it locally, exposure or no. Full detail in
-`docs/superpowers/metrics/README.md`'s "Is bloom still doing anything?"
-section. Bloom was kept, not removed — it wasn't proven inert, only
-mostly so.
+inert**. One live specular highlight still crosses the threshold and
+produces a small, visibly confirmed bloom — 5.96% of that frame's pixels
+change with the pass toggled off against on, versus 0% at a control spot.
+Baked diffuse surfaces cannot reach the threshold at this exposure, as the
+arithmetic predicted; a live, low-roughness, high-metalness surface
+reflecting the environment cube is not bounded by that ceiling and can
+exceed it locally, exposure or no. Bloom was kept, not removed — it was
+never proven inert, only mostly so.
+
+**Correction pending, and it is instructive.** Both this document and
+`docs/superpowers/metrics/README.md` first attributed that highlight to "a
+chrome fixture". The re-reviewer traced the cited parameters against
+`tour/materials.js` and found they belong to `M.smoke` — the bathroom's
+backlit mirror panel — not `M.chrome`, whose roughness is 0.25 rather than
+0.1. The conclusion stands; the identification did not. It is the same
+"written from memory instead of from the code" failure this document warns
+about two sections down, committed inside the document doing the warning.
+Correct it in `metrics/README.md` during the `CLAUDE.md` rewrite.
 
 Your plan touches exposure, tone mapping and lighting units. **Add an
 explicit step that re-validates every hand-tuned constant chosen earlier in
@@ -311,8 +319,57 @@ lands naturally with a path-traced baker and not before.
 
 ---
 
+## Before anything: walk the actual product and write down what is wrong
+
+Do this first, before planning, before touching the version number. Open the
+deployed tours and go through them room by room as a visitor would.
+
+Two apartments specifically, because they fail differently:
+
+**`serenity`** — 45 m², one level, Thai, and the only flat with photographs
+flagged for comparison. Every claim in this document was measured on it. Walk
+it with the photographs open beside the screen.
+
+**`kings-court`** — 195 m², two levels, four bedrooms, a roof terrace, and
+**no `compare` spots at all**. Nothing in phase A measured it. It is the
+largest and most complex property in the catalogue and it is judged by eye or
+not at all. Whatever is wrong there has been wrong for the whole phase and
+nobody has looked.
+
+Cover the first-person walk in every room, the dollhouse on all cutaways, the
+terrace and anything visible through a window, and at least one photo spot
+per room where photographs exist.
+
+For each thing that looks wrong, write three columns:
+
+| What looks wrong | Which feature would fix it | Can the metric see it? |
+|---|---|---|
+
+The third column is the point of the exercise. ΔE2000 over an 8×8 grid is
+blind to geometry, averages away anything small, and cannot distinguish a
+correct colour in the wrong place from a wrong colour in the right one. **An
+observation the metric cannot see needs its own acceptance criterion decided
+up front**, or it will be declared fixed on the strength of a number that
+never described it. That is precisely how phase A shipped a bloom pass it
+believed was working and a palette feature that reached nothing.
+
+Map each observation against the candidate features rather than the reverse:
+HDRI environment with `PMREMGenerator`, AgX or Neutral tone mapping, GTAO,
+`MeshPhysicalMaterial` with `transmission` for windows and `clearcoat` /
+`sheen` / `anisotropy` elsewhere, KTX2 with Basis, the node-based
+post-processing chain, path tracing for the dollhouse and for offline
+lightmaps, IES light profiles, and real GLTF furniture.
+
+A feature nothing on your list needs does not go in the plan, however good it
+looks in a demo. A defect nothing on the feature list fixes is more important
+than anything on it — that is the gap worth designing for.
+
+---
+
 ## Suggested sequencing, to be argued with rather than followed
 
+0. **Walk both tours and produce the observation table above.** Everything
+   below is a hypothesis until that table exists.
 1. Port the measurement harness and re-baseline. Nothing else until it works.
 2. Migrate to r185 with the existing feature set. Goal: **no regression**.
    Clear `serenity.exposure` as part of this.
