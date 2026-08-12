@@ -413,6 +413,186 @@ restores ΔE2000 to at least the r128 baseline on both scored apartments.**
 Recorded here so the next task starts from the right number, not from 16.58
 or 22.44 as if this task hadn't moved them.
 
+---
+
+## Fix wave after the whole-branch review — the differences table becomes six
+
+A whole-branch code review found a **sixth** r128→r185 behavioural difference
+that tasks 1–7 missed, and two changes that are real but deliberately not
+converted. The table above is superseded by the one here.
+
+### Difference 6 — the legacy-lights π was converted for lightmaps and missed for direct light
+
+**This is the same units change as difference 3, on the other half of the
+pipeline.** r128 shipped `WebGLRenderer.physicallyCorrectLights = false`
+(verified in the recovered r128 build: `this.physicallyCorrectLights=!1`) and
+this app never set it, so `#define PHYSICALLY_CORRECT_LIGHTS` was never
+emitted and **three** shader chunks took their legacy branch, each
+multiplying irradiance by π:
+
+| r128 chunk | Function | Legacy branch |
+|---|---|---|
+| `lights_pars_begin` | `getAmbientLightIrradiance()` | `#ifndef PHYSICALLY_CORRECT_LIGHTS  irradiance *= PI; #endif` |
+| `lights_pars_begin` | `getHemisphereLightIrradiance()` | same |
+| `lights_physical_pars_fragment` | `RE_Direct_Physical()` — directional **and** point | same |
+
+r155 removed the legacy switch. Verified in the vendored r185 copy before
+applying anything: `PHYSICALLY_CORRECT_LIGHTS` appears **nowhere** in
+`tour/lib/three-0.185.0/`, `getAmbientLightIrradiance()` now returns
+`ambientLightColor` unchanged, and `RE_Direct_Physical()` is a bare
+`irradiance = dotNL * directLight.color`. Difference 3 already answered the
+`MeshBasicMaterial` lightmap half of this exact units change with
+`lightMapIntensity = 1.7 * Math.PI` (`bake.js:251`). The direct-light half
+was never done — every light intensity in `builder.js` was authored under
+r128 and is short by exactly π on r185.
+
+**Conversion:** every intensity `builder.js` creates is multiplied by
+`LEGACY_PI` (`Math.PI`), with the derivation in a comment above
+`buildLights`. This is a mechanism, not a tuning: r185's `WebGLLights.setup()`
+builds every one of these uniforms as a plain `color * intensity`, so scaling
+`intensity` by π reproduces r128's `irradiance *= PI` **exactly**, not
+approximately.
+
+| Light | Before | After |
+|---|---:|---:|
+| `AmbientLight` 0xfff2e2 | 0.22 | 0.6912 |
+| `HemisphereLight` 0xdfeaf5/0x8a7a66 | 0.38 | 1.1938 |
+| `DirectionalLight` 0xfff0d8 (sun) | 0.55 | 1.7279 |
+| `PointLight` 0xffe4c0 (per `dyn` lamp) | 0.42 | 1.3195 |
+
+**Only two of those four are live in normal operation.** `app.js` detaches
+the `envFallback`-tagged `AmbientLight` and `HemisphereLight` before
+`captureEnvironment()` and re-attaches them only if the capture fails, so a
+scene traverse after load shows just the sun and the point lights. The
+ambient/hemisphere conversion still matters — it is the fallback every
+old device and every context-loss path lands on — but the measured effect
+below is the sun plus the lamps alone.
+
+### Accepted, documented, deliberately unconverted
+
+Two changes in the same category as the BRDF/IBL residual: real, identified,
+and **not** converted, because converting either would mean re-implementing
+r128 inside r185 rather than migrating to it.
+
+**A. `PointLight` distance attenuation.** r128's legacy branch of
+`punctualLightIntensityToIrradianceFactor()` is a windowed
+`pow(saturate(1 - d/distance), decay)`; r185's `getDistanceAttenuation()` is
+the physical `1/max(d^decay, 0.01) * (1 - (d/distance)^4)^2`. Both recovered
+from source, not from memory. At the values actually used
+(`intensity 0.42`, `distance 7.0`, `decay 1.6`) the magnitude is:
+
+| Distance from lamp | r185 / r128 |
+|---:|---:|
+| 0.5 m | ≈1.1× (slightly brighter) |
+| 2 m | ≈5.6× **dimmer** |
+| 3 m | ≈8× **dimmer** |
+
+Converting this means shipping r128's attenuation in a custom shader — i.e.
+shipping r128's shaders, which the redefined gate explicitly rejects.
+Accepted as an r185 correction. Recorded, not compensated.
+
+**B. Bloom `strength`.** Difference 2 converted the bloom *threshold*, which
+fixes **which** pixels bloom. It does not fix **how much** they add.
+`LuminosityHighPassShader` passes the whole texel through above threshold
+(`mix(black, texel, alpha)`), and `UnrealBloomPass` composites
+`3.0 * bloomStrength * sum(mips)` with `AdditiveBlending` — so the pass adds
+`strength × (radiance of the bright pixels)` in whatever domain it sits in.
+On r128 that domain was display-referred and capped near 1.0, so `0.22`
+added at most ≈0.22. On r185 it is raw linear radiance, measured on this
+branch at **15.32** max luminance / 17.01 max channel at serenity's bathroom
+spot and 2.20 / 2.68 at its entrance (task-5-report.md, determinism-checked
+across three renders and a page reload) — so the additive term reaches
+≈3.4 where r128's was ≤0.22, roughly **15×**, and higher again now that
+difference 6 has restored the direct lights' π.
+
+This is structurally the same additive-in-the-wrong-domain bug as difference
+4, with the same absence of an exact constant conversion — and unlike
+difference 4 it **cannot be fixed by reordering**: bloom must read the HDR
+buffer to have anything above 1.0 to bloom at all, so moving it past
+`OutputPass` would defeat the pass entirely. Not retuned: any "corrected"
+value would be taste, not mechanism, and bloom tuning belongs to plan 2
+alongside the exposure re-fit that changes what these radiances are.
+Documented in `post.js` beside the constant.
+
+### Resemblance after difference 6 — and what it does to the load-bearing split
+
+Captured with the unchanged harness (same unfixed FOV, per plan 1's scope) at
+`?apt=<id>&measure=1`, scored with `tools/delta_e.py --phase b1-final2`.
+
+**Noise floor first**, because the conclusion depends on the deltas being
+real: a same-code repeat (fresh page load, procedural textures reshuffled)
+scored serenity 17.12 → 17.13 and kings-court 22.09 → 22.06. **±0.03.**
+
+| Apartment | phase-A baseline | before this wave | after difference 6 | vs baseline |
+|---|---:|---:|---:|---:|
+| serenity | 16.58 | 17.22 | **17.12** | +0.54 (worse) |
+| kings-court | 22.44 | 21.20 | **22.09** | −0.35 (better) |
+
+Attribution is clean by construction — difference 6 is the only rendering
+change in the wave (the other five findings touch a comment, an HTML failure
+handler, a dev-server status code, and `CLAUDE.md`). Confirmed anyway with a
+same-session A/B: dividing every light intensity by π at runtime and
+re-measuring returned **serenity 17.22** (matching the branch's committed
+pre-wave number exactly) and **kings-court 21.33** (vs 21.20 committed; the
+0.13 gap is because `captureEnvironment()` had already baked the PMREM
+panorama with π-boosted lights, so a runtime revert cannot un-bake it — the
+control is slightly brighter than a true pre-wave build).
+
+**The split no longer holds as load-bearing evidence.** Its *sign* survives
+— serenity is still above its baseline, kings-court still below — but the
+asymmetry that made it persuasive is gone, and one new data point cuts
+directly against the story it was telling:
+
+1. **72% of kings-court's "improvement" was the missing π, not the absence
+   of a fit.** Its margin over baseline fell from 1.23 to 0.35. The
+   reviewer's competing explanation — that a globally missing light factor is
+   also diffuse and of the same magnitude — was correct, and it accounted for
+   most of one half of the split.
+2. **A strictly correct conversion made kings-court worse, by 0.89, thirty
+   times the noise floor.** If kings-court genuinely "had no fit to break",
+   fixing a real defect should not have hurt it. It did. The clean
+   per-apartment framing (serenity has a fitted `exposure: 0.33`,
+   kings-court has none) missed that the light intensities themselves are
+   **global** constants shared by all three apartments and were equally
+   authored under r128 — so kings-court always had a fit to break too, just
+   not a per-apartment one.
+3. **Serenity barely moved**: 0.65 → 0.54, only 17% of its regression
+   recovered, against 72% of kings-court's improvement erased. The same
+   correction landing that unevenly is better explained by where each
+   apartment sits relative to its own photographs (serenity renders too dark
+   at `exposure` 0.33 and got closer; kings-court was already about right at
+   1.05 and overshot) than by which one had been fitted.
+
+**What survives:** serenity is +0.54 above its baseline and still needs plan
+2's exposure re-fit; the do-not-merge condition is unchanged and, if
+anything, better supported now that kings-court's cushion is 0.35 rather than
+1.23. **What does not survive:** using the serenity/kings-court split as
+proof that the regression is a mis-fitted constant rather than a rendering
+defect. It is a 0.89-wide difference between two apartments after a
+correction that moved them in opposite directions, which is an observation,
+not evidence. Plan 2 should re-fit against r185's actual output for **both**
+apartments and stop treating kings-court as the unfitted control.
+
+### Structural gate after the fix wave — unchanged, still passing
+
+All three apartments at `?v=71`, `THREE.REVISION 185`:
+
+| | serenity | kings-court | horkyone-10 |
+|---|---:|---:|---:|
+| `window.__issues` | `[]` | `[]` | `[]` |
+| Console errors / page errors | 0 | 0 | 0 |
+| Draw calls, full chain, 1280×820, own start position | 72 | 165 | 83 |
+| Bake ms | 298 | 2221 | 674 |
+| Post chain built | yes | yes | yes |
+
+Sky-leak raycasts: every indoor spawn on all three apartments hits a mesh;
+only `Terrace` (kings-court) and `Terrace` (horkyone-10) report
+`NOTHING ABOVE`, both open to the sky by design. serenity's `Pool Terrace`
+hits a canopy at 1.05 m. kings-court walk simulations: westbound from the
+entry hall (22.6, 5, ground 0) ended at x 13.14 still on `ground 0`;
+westbound from the `Upper hall` spawn (13.6, 0.9, ground 3.1) ended at
+x 4.44 still on `ground 3.1`.
+
 ## Task 7: draw-call baseline method
 
 The **144** r128 draw-call figure for kings-court's entry hall (`CLAUDE.md`'s
