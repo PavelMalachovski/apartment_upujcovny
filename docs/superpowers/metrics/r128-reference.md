@@ -412,3 +412,32 @@ should chase.** Two independent, sufficient reasons:
 restores ΔE2000 to at least the r128 baseline on both scored apartments.**
 Recorded here so the next task starts from the right number, not from 16.58
 or 22.44 as if this task hadn't moved them.
+
+## Task 7: draw-call baseline method
+
+The **144** r128 draw-call figure for kings-court's entry hall (`CLAUDE.md`'s
+"Draw calls" line, and every task-1-through-6 comparison against it) was
+measured with the **naive method** — a bare `a.renderer.render(a.scene,
+a.camera)` with no post chain, no `info.autoReset` handling. Recorded here
+because it was never written down anywhere in the repo until now: task 7's
+gate re-ran the brief's script (itself the naive method, taken verbatim) and
+got 150, a plausible-looking "+6, ~4%, in budget" result that was actually
+unverifiable against 144 without knowing what 144 measured. The coordinator
+confirmed the method by having taken the 144 reading personally, during the
+step-0 walkthrough, with the same bare-`render()` call.
+
+**With the method now attached, both draw-call numbers for kings-court's
+entry hall (22.6, 5, ground 0, yaw 90°, 1280×820):**
+
+| Method | r128 | r185 | Note |
+|---|---:|---:|---|
+| Naive (`a.renderer.render()`, no post chain) | **144** | **150** | Like-for-like — same method both times. +6 calls (~4%), nothing stopped merging. |
+| Full chain (`a.post.render(0)`, manual `info.autoReset`) | *(no r128 comparable — pre-migration build not checked out)* | **165** | What a visitor actually pays. CLAUDE.md's current "Draw calls in a spot" recipe; the naive method undercounts the post chain's own draw calls by 15 here (matches its documented ~14-call undercount at serenity's entrance). |
+
+Both numbers are inside the ≤400 desktop budget by a wide margin. The lesson
+generalizes past this one figure: `CLAUDE.md` hard rule 4a already flags the
+same failure shape for bake-time numbers ("say what the data supports and no
+more") — a measurement without its method attached is a number nobody can
+actually compare against, which is a more useful thing to fix than the
+number itself. Any draw-call figure recorded from here on should name its
+method (naive vs. full-chain) alongside the count.
