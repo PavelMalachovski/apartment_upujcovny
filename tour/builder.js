@@ -1325,37 +1325,40 @@ const Builder = (() => {
   const furnGroups = [];
   function buildFurniture(scene) {
     CHAMFER = 0.005;
-    for (const item of APT.furniture) {
-      const fn = F[item.type];
-      if (!fn) continue;
-      const g = new T.Group();
-      furnGroups.push(g);
-      const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
-      g.position.set(item.x, baseY, item.z);
-      g.rotation.y = item.rot || 0;
-      const res = fn(item, g) || {};
-      scene.add(g);
-      // a street-level terrace shares the walking level with 'main'
-      const clvl = (item.lvl === 'terrace' && APT.terraceY < 1.5) ? 'main' : item.lvl;
-      const occH = OCC_H[item.type] || 0.8;
-      const canOcclude = !OCC_SKIP.includes(item.type);
-      if (res.custom) {
-        // rotated custom AABBs unsupported — used as-is (rot=0 for sofaL)
-        for (const b of res.custom) {
-          colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
-          if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
-            b.x2 - b.x1, occH, b.z2 - b.z1);
-        }
-      } else if (!res.noCollide) {
-        addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
-        if (canOcclude) {
-          const bb = colliders.boxes[colliders.boxes.length - 1];
-          addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
-            bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
+    try {
+      for (const item of APT.furniture) {
+        const fn = F[item.type];
+        if (!fn) continue;
+        const g = new T.Group();
+        furnGroups.push(g);
+        const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
+        g.position.set(item.x, baseY, item.z);
+        g.rotation.y = item.rot || 0;
+        const res = fn(item, g) || {};
+        scene.add(g);
+        // a street-level terrace shares the walking level with 'main'
+        const clvl = (item.lvl === 'terrace' && APT.terraceY < 1.5) ? 'main' : item.lvl;
+        const occH = OCC_H[item.type] || 0.8;
+        const canOcclude = !OCC_SKIP.includes(item.type);
+        if (res.custom) {
+          // rotated custom AABBs unsupported — used as-is (rot=0 for sofaL)
+          for (const b of res.custom) {
+            colliders.boxes.push({ x1: item.x + b.x1, z1: item.z + b.z1, x2: item.x + b.x2, z2: item.z + b.z2, lvl: clvl });
+            if (canOcclude) addOccluder(item.x + (b.x1 + b.x2) / 2, baseY + occH / 2, item.z + (b.z1 + b.z2) / 2,
+              b.x2 - b.x1, occH, b.z2 - b.z1);
+          }
+        } else if (!res.noCollide) {
+          addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
+          if (canOcclude) {
+            const bb = colliders.boxes[colliders.boxes.length - 1];
+            addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
+              bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
+          }
         }
       }
+    } finally {
+      CHAMFER = 0;
     }
-    CHAMFER = 0;
   }
 
   // ---------- Light ----------
