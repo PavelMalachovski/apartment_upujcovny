@@ -1,62 +1,62 @@
 {
   "apartment": "serenity",
   "phase": "a1-env",
-  "mean": 25.75,
+  "mean": 24.81,
   "spots": [
     {
       "file": "1.webp",
       "name": "Bathroom",
-      "deltaE": 32.51
+      "deltaE": 31.78
     },
     {
       "file": "2.webp",
       "name": "Pool Terrace",
-      "deltaE": 24.86
+      "deltaE": 24.07
     },
     {
       "file": "3.webp",
       "name": "Living Room",
-      "deltaE": 27.94
+      "deltaE": 26.64
     },
     {
       "file": "4.webp",
       "name": "Living Room",
-      "deltaE": 28.22
+      "deltaE": 27.08
     },
     {
       "file": "5.webp",
       "name": "Kitchen & Hall",
-      "deltaE": 22.0
+      "deltaE": 20.46
     },
     {
       "file": "6.webp",
       "name": "Bedroom",
-      "deltaE": 22.41
+      "deltaE": 21.95
     },
     {
       "file": "7.webp",
       "name": "Bedroom",
-      "deltaE": 21.01
+      "deltaE": 20.5
     },
     {
       "file": "8.webp",
       "name": "Bedroom",
-      "deltaE": 26.11
+      "deltaE": 25.18
     },
     {
       "file": "9.webp",
       "name": "Living Room",
-      "deltaE": 28.97
+      "deltaE": 28.07
     },
     {
       "file": "10.webp",
       "name": "Pool Terrace",
-      "deltaE": 28.59
+      "deltaE": 28.02
     },
     {
       "file": "11.webp",
       "name": "Bedroom",
-      "deltaE": 20.66
+      "deltaE": 19.12
     }
   ],
   "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
