@@ -1,7 +1,11 @@
 # CLAUDE.md — rules for working in this repository
 
-Platform for interactive apartment 3D tours. Three.js r128 (local UMD
-copy), no bundler, no build step — the site is static files.
+Platform for interactive apartment 3D tours. Three.js r185 (vendored ESM,
+resolved through an importmap in `index.html`), no bundler, no build step —
+the site is still just static files. Migrated from r128 in phase B; the
+r128→r185 behavioural differences and the ones deliberately left
+unconverted are recorded in
+[docs/superpowers/metrics/r128-reference.md](docs/superpowers/metrics/r128-reference.md).
 Prod: Vercel, repo `PavelMalachovski/apartment_upujcovny`, branch `main`.
 
 [docs/PROMPT.md](docs/PROMPT.md) is the project-independent
@@ -45,7 +49,7 @@ accepted description style.
 | `builder.js` | Config → scene: walls with openings, attic slopes, floors/ceilings, stairs, terrace, furniture constructors `F.*` (chamfered edges via `chamferBoxGeometry`), occluders and light sources for the bake, `mergeStatic` |
 | `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic) including baked ambient occlusion (`aoAt`), also called on furniture vertices (`bakeFurnitureAO`); walls → one merged mesh per level with per-vertex baked light only, **no AO** — `bakeWalls()` calls `lightAt()` alone, so a floor-to-wall corner darkens on the floor side only. Known limitation, recorded during the AO task, not yet closed |
 | `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — AO lives in the bake, for floors and furniture (not walls, see `bake.js` above) |
-| `lib/` | Vendored r128-compatible Three.js example files the post chain needs: `EffectComposer`, `RenderPass`, `ShaderPass`, `UnrealBloomPass`, `CopyShader`, `LuminosityHighPassShader` — none of these ship in `three.min.js` itself |
+| `lib/three-0.185.0/` | Vendored Three.js r185: `build/three.module.js` + `build/three.core.js` (the facade imports the core, which is where `REVISION` lives), and the `examples/jsm/` addons the post chain needs — `postprocessing/{EffectComposer,RenderPass,ShaderPass,MaskPass,Pass,UnrealBloomPass,OutputPass}`, `shaders/{CopyShader,LuminosityHighPassShader,OutputShader}` — none of which ship in the core build. **The version is in the directory name, not a `?v=` query**: addons import each other by relative path and a relative specifier does not inherit the importing module's query string, so `?v=` would version only the files named in the importmap and leave every transitively-imported file cacheable forever. Never edit anything under here |
 | `measure.js` | Resemblance capture, loaded only under `?measure=1`: renders every `compare`-flagged photo spot from its own camera/aspect and POSTs the frame to `tools/serve.py`'s save endpoint for offline `tools/delta_e.py` scoring |
 | `validate.js` | Layout self-check: blocked openings, openings into the void, unreachable rooms, markers inside solids |
 | `controls.js` | Walking: WASD + drag-look (NOT pointer lock), touch joystick + swipe, collisions against wall segments and furniture AABBs, floor levels via `groundZones`, camera clamped under attic slopes |
@@ -152,12 +156,17 @@ wall — quilting invisible, and every automated check stayed green
 because a hidden object is still perfectly walkable. Raycast for the
 real face, then confirm a second cast hits your object first.
 
-**3. Cache.** Any JS or JSON change requires bumping `?v=N` on **all**
-`<script src>` tags in `index.html`, and bump it **after** the last code
-edit or the new code caches under the old version. The config is fetched
-with the same `?v=` (main.js reads it off its own tag), so without a
-bump JSON edits simply never arrive — that bug cost an hour. Verify by
-comparing a field of `APT` in the console against the file.
+**3. Cache.** Any JS or JSON change requires bumping `?v=N` on the **single
+module tag** in `index.html` (`<script type="module" src="main.js?v=N">`),
+and bump it **after** the last code edit or the new code caches under the
+old version. One tag is now enough: `main.js` reads the version off its own
+URL (`import.meta.url`) and passes it to the config fetch, to every classic
+script it loads, and to the `measure`/`refshots` harnesses — so that one
+number versions everything the browser caches. (Vendored library files are
+the exception and need no bump: their version is in the directory path, see
+the `lib/three-0.185.0/` row above.) Without a bump JSON edits simply never
+arrive — that bug cost an hour. Verify by comparing a field of `APT` in the
+console against the file.
 
 **4. Performance budget: ≤400 draw calls desktop, ≤250 mobile.** Raised
 from the original ≤150 in the photorealism phase: that ceiling was
