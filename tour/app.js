@@ -66,8 +66,21 @@ window.initApp = function () {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   // Fitted per-apartment against its own photographs (task 7); apartments
   // with no photographs flagged for comparison keep this same 1.05 they
-  // always had, via the default.
-  renderer.toneMappingExposure = (APT.exposure !== undefined) ? APT.exposure : 1.05;
+  // always had, via the default. A plain `!== undefined` guard would let
+  // `null`, `0` or a stringified `"0.33"` straight through to
+  // toneMappingExposure and produce a black or near-black render with no
+  // warning -- exactly the failure mode this project's config-degrades-
+  // with-a-warning rule exists to prevent (see Materials.color()'s hex
+  // validation in materials.js for the same shape of guard). Require a
+  // finite positive number or fall back, same as every other config key.
+  const rawExposure = APT.exposure;
+  let exposure = 1.05;
+  if (typeof rawExposure === 'number' && isFinite(rawExposure) && rawExposure > 0) {
+    exposure = rawExposure;
+  } else if (rawExposure !== undefined) {
+    console.warn('[app] APT.exposure must be a positive number, got', JSON.stringify(rawExposure), '-- falling back to 1.05');
+  }
+  renderer.toneMappingExposure = exposure;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xbcd5e8);

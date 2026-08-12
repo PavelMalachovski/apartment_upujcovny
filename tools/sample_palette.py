@@ -1,8 +1,33 @@
 """Sample material colours out of the real photographs.
 
+*** WARNING: this script's output is NOT what goes in APT.palette. ***
+
+This prints raw photograph pixel colour -- albedo times whatever light was
+falling on that patch when the photo was taken. Installing it directly as
+a material's tint double-counts illumination: the renderer lights the
+surface AGAIN with its own lights, so a patch that already reads bright
+in the photo comes out too bright/saturated in the render, and a
+shadowed patch comes out too dark. Task 8 (see
+`.superpowers/sdd/2026-08-12-photorealism-phase-a/task-8-report.md`)
+measured this directly on serenity: applying this script's raw output
+made mean ΔE2000 against the real photographs *worse* than shipping no
+palette at all (16.79 vs. the 16.57 no-palette control).
+
+The palette actually committed in `tour/apartments/serenity.json` was
+derived by a closed-loop correction instead: sample this script's output
+AND the render's own current colour at the same material, then scale the
+material's existing tint by the photo:render ratio (clamped to a byte per
+channel) rather than installing the photo colour as-is. That correction
+is not implemented here -- it was done by hand for task 8 (full working,
+including the render-side sample points and the per-channel ratio maths,
+is in the task-8 report cited above) because it needs a render already on
+disk to compare against, which this script has no access to. Treat this
+script's output as a diagnostic input to that by-hand process, not as a
+`palette` block you can paste into a config directly.
+
 Sample points are normalised (x, y) in [0,1] over the named photo, chosen
-by eye on a flat, evenly lit patch of the material. Prints a `palette`
-block to paste into the apartment config.
+by eye on a flat, evenly lit patch of the material. Prints the raw
+sampled colours -- see the warning above before using them.
 
 Run: python tools/sample_palette.py --apt serenity
 """
@@ -55,7 +80,9 @@ def main():
         out[key] = sample(os.path.join(base, f), x, y)
         print('%-12s %s   (from %s)' % (key, out[key], f))
     print()
-    print('"palette": ' + json.dumps(out, indent=2))
+    print('Raw sampled photo colour -- NOT a palette block, see the module')
+    print('docstring above. Do not paste this into apartment JSON as-is:')
+    print(json.dumps(out, indent=2))
 
 
 if __name__ == '__main__':

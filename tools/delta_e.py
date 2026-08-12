@@ -95,6 +95,11 @@ def main():
     cfg = json.load(open(os.path.join(ROOT, 'tour', 'apartments', args.apt + '.json'),
                          encoding='utf-8'))
     spots = [s for s in cfg['photoSpots'] if s.get('compare')]
+    if not spots:
+        raise SystemExit(
+            'no compare-flagged photo spots for apartment "%s" -- this '
+            'metric only exists for apartments with photographs flagged '
+            '`compare` in their photoSpots (currently just serenity)' % args.apt)
     rows = []
     for s in spots:
         photo = os.path.join(ROOT, 'tour', cfg['meta']['photoBase'], s['file'])

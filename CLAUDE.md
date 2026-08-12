@@ -78,8 +78,8 @@ now carries:
 
 | Key | One-liner |
 |---|---|
-| `exposure` | `renderer.toneMappingExposure` override, fitted per-apartment against its own photographs (`app.js`); apartments with nothing to fit against keep the default 1.05 |
-| `palette` | Map of material key → `#rrggbb`, sampled from the real photographs (`tools/sample_palette.py`); every key optional, an invalid or absent value falls back to the hardcoded constant (`Materials.color`) |
+| `exposure` | `renderer.toneMappingExposure` override, fitted per-apartment against its own photographs (`app.js`); apartments with nothing to fit against keep the default 1.05. Must be a finite number `> 0` — `app.js` warns and falls back to 1.05 for anything else (`null`, `0`, a string). **Compensates for the scene running about twice as hot at source**: serenity's fitted value is 0.33. Anyone correcting `lightAt`'s constants in `bake.js` must re-fit or clear this per-apartment override, or the render goes about three times too dark. |
+| `palette` | Map of material key → `#rrggbb`; every key optional, an invalid or absent value falls back to the hardcoded constant (`Materials.color`). **Not** produced by directly sampling the photographs — that was measured and rejected (ΔE2000 16.79 vs. 16.57 doing nothing, task 8) because it double-counts illumination as albedo. The committed values were derived by a closed-loop correction (render's own colour vs. the photograph, old albedo scaled by the ratio) done by hand for task 8; `tools/sample_palette.py` outputs raw sampled photo colour only — see its header — and is a diagnostic input to that by-hand process, not something whose output can be pasted into `palette` directly. |
 | `quality.aoRays` | Ray count for the baked ambient-occlusion sampler (`bake.js aoAt`); defaults to 8 when the block or key is absent |
 | `env.capture` | `{x, y, z}` override for where the environment-reflection panorama is shot from; falls back to `roomCenter.main`, then `start`, then the world origin (`app.js`) |
 | `compare` (on a `photoSpots` entry) | Flags that spot for the resemblance harness — `measure.js` renders it, `tools/delta_e.py` scores it, `residual.py` decomposes it |
@@ -87,12 +87,19 @@ now carries:
 ## Hard rules
 
 **1. Every visual change is verified with a screenshot.** Debug API:
-`window.__app = {scene, camera, renderer, controls, doll, composer, post}`,
-`window.__bakeReady` (Promise), `window.__issues` (array, filled once
-`__bakeReady` resolves), and `window.__bakeMs` (number, set the instant
-`Baker.run`'s own promise settles — read it after awaiting
-`__bakeReady`). `composer`/`post` are `null` when the post-processing
-chain didn't build (missing example files, weak GPU) — always guard with
+`window.__app = {scene, camera, renderer, controls, doll, composer, post}`
+and `window.__issues` (array) are both set **synchronously inside
+`initApp()`, before the light bake even starts** (`app.js`: `Builder.build`
+then `Validate.run` run immediately, well before `Baker.run` is called) —
+read either one right away, no `await` needed. `window.__bakeReady`
+(Promise) resolves once the light bake and the environment-reflection
+capture that follows it both finish; `window.__bakeMs` (number) is set
+the instant `Baker.run`'s own promise settles, so it does need
+`await window.__bakeReady` first or it may still be `undefined`.
+Screenshots and anything else that depends on the baked lighting looking
+right should wait for `__bakeReady` too — the scene renders before that,
+just unlit. `composer`/`post` are `null` when the post-processing chain
+didn't build (missing example files, weak GPU) — always guard with
 `if (a.post && a.post.enabled)` rather than assuming either exists.
 Recipes are below.
 
@@ -286,8 +293,12 @@ calls — reading it right after `composer.render()` returns only the
 *last* pass's count (1), not the chain's total.
 
 ```js
+// Serenity's own start position (APT.start: {x:3.6, z:0.75, yaw:178}) —
+// not kings-court's. Serenity's walls span x 0-5.75, z 0-6.95, so
+// kings-court's old (22.6, 5) parked the camera ~17 m outside the flat
+// and still returned a number, just not this apartment's entrance.
 const a = window.__app, c = a.controls;
-c.pos.x = 22.6; c.pos.z = 5; c.ground = 0; c.yaw = Math.PI / 2; c.update(0.001);
+c.pos.x = 3.6; c.pos.z = 0.75; c.ground = 0; c.yaw = 178 * Math.PI / 180; c.update(0.001);
 a.renderer.info.autoReset = false;
 a.renderer.info.reset();
 if (a.post && a.post.enabled) a.post.render(0);

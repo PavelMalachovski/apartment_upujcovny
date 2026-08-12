@@ -28,6 +28,19 @@ window.__measure = function () {
     c.yaw = spot.yaw;          // main.js has already converted to radians
     c.pitch = 0;
     c.update(0.001);
+    // initApp sets renderer.setPixelRatio(min(devicePixelRatio, 2)), so on
+    // a DPR-2 (retina) machine setSize(W, H, false) leaves
+    // domElement.width/height at W*2/H*2 -- a following
+    // drawImage(domElement, 0, 0) with no destination size draws at the
+    // canvas's natural (device-pixel) size, so the capture canvas (sized
+    // W x H below) only receives the top-left quarter of the frame. Force
+    // pixel ratio to 1 for the capture so domElement is exactly W x H,
+    // and restore it afterwards -- this function runs once per compare
+    // spot and leaves the live view resized at the end regardless, so the
+    // ratio has to come back before that final resize for the live view
+    // to render at its normal density again.
+    const prevRatio = a.renderer.getPixelRatio();
+    a.renderer.setPixelRatio(1);
     a.renderer.setSize(W, H, false);
     a.camera.aspect = W / H;
     a.camera.updateProjectionMatrix();
@@ -42,21 +55,42 @@ window.__measure = function () {
     const cv = document.createElement('canvas');
     cv.width = W;
     cv.height = H;
-    cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0);
+    cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
+    a.renderer.setPixelRatio(prevRatio);
     return cv.toDataURL('image/jpeg', 0.92);
+  }
+
+  // Restore the live view to a normal full-window size/aspect/pixel-ratio
+  // once every spot is captured. Without this, __measure() leaves the
+  // renderer at the last capture's 1024xH from renderAt() -- correct
+  // pixel ratio now (the fix above restores that per-call), but still the
+  // wrong canvas size -- until the next window resize event happens to
+  // fire.
+  function restoreLiveView() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const ratio = Math.min(window.devicePixelRatio, a.controls.isTouch ? 1.6 : 2);
+    a.renderer.setPixelRatio(ratio);
+    a.renderer.setSize(w, h, false);
+    a.camera.aspect = w / h;
+    a.camera.updateProjectionMatrix();
+    if (a.composer) a.composer.setSize(w, h);
   }
 
   return (async () => {
     const out = [];
-    for (const s of spots) {
-      const img = await loadImage(base + s.file);
-      const W = 1024;
-      const H = Math.round(W * img.naturalHeight / img.naturalWidth);
-      const data = renderAt(s, W, H);
-      await fetch('/save/render_' + APT.meta.id + '_' + s.file.replace('.webp', '.jpg'), {
-        method: 'POST', body: data
-      });
-      out.push({ file: s.file, w: W, h: H });
+    try {
+      for (const s of spots) {
+        const img = await loadImage(base + s.file);
+        const W = 1024;
+        const H = Math.round(W * img.naturalHeight / img.naturalWidth);
+        const data = renderAt(s, W, H);
+        await fetch('/save/render_' + APT.meta.id + '_' + s.file.replace('.webp', '.jpg'), {
+          method: 'POST', body: data
+        });
+        out.push({ file: s.file, w: W, h: H });
+      }
+    } finally {
+      restoreLiveView();
     }
     console.log('[measure] captured ' + out.length + ' spots');
     return out;
