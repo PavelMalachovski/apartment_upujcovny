@@ -72,6 +72,27 @@ const Post = (() => {
     renderer.getSize(size);
 
     const composer = new T.EffectComposer(renderer);
+
+    // EffectComposer's auto-created render targets default to
+    // LinearEncoding regardless of renderer.outputEncoding. None of the
+    // full-screen-quad shaders in this chain (UnrealBloomPass's internal
+    // passes, our own grain/vignette pass) re-apply sRGB encoding — they
+    // are hand-written GLSL with no <encodings_fragment> chunk, so nothing
+    // downstream ever compensates. RenderPass draws the scene into that
+    // linear-encoded target, so the scene's sRGB-encoded output gets
+    // stored as if it were already linear (i.e. treated as if a gamma
+    // decode had happened that never did), and every later pass just
+    // relays those too-low values straight to the screen. Measured
+    // directly: the same surface reads ~148 out of 255 rendered straight
+    // to the screen but ~76 through an unpatched composer target — almost
+    // exactly what sRGB-decoding that pixel's own encoded value would
+    // produce, i.e. one full unwanted gamma decode with no matching
+    // encode anywhere in the chain. Match the render targets' encoding to
+    // the renderer's so RenderPass's output actually is what every later
+    // pass assumes it already is.
+    composer.renderTarget1.texture.encoding = renderer.outputEncoding;
+    composer.renderTarget2.texture.encoding = renderer.outputEncoding;
+
     composer.addPass(new T.RenderPass(scene, camera));
 
     // strength, radius, threshold — threshold high so only real daylight blooms
