@@ -14,3 +14,7 @@
 Thumbs.db
 node_modules/
 .playwright-mcp/
+
+# Isolated worktrees and agent scratch space
+.claude/worktrees/
+.superpowers/
