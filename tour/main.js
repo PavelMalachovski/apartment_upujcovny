@@ -14,6 +14,13 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
+// Tells index.html's failure watchdog that the module graph resolved and this
+// entry is executing. Must be the first statement of the module body, and it
+// only runs if every import above succeeded — that is the whole signal. See
+// the comment block above the module tag in index.html for why an `onerror`
+// attribute alone does not cover the importmap-unsupported case.
+window.__tourEntryRan = true;
+
 // The version comes from ?v= on this module's own URL — the same value
 // versions the config fetch and every classic script loaded below, otherwise
 // the browser serves stale JSON and stale code from cache and edits never

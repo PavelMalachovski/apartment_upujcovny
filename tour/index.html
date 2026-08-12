@@ -187,6 +187,63 @@
   }
 }
 </script>
-<script type="module" src="main.js?v=69"></script>
+<script>
+// Failure path for the module tag below. Everything the tour does now hangs
+// off ONE <script type="module">: if the importmap is unsupported, or any of
+// the six vendored files it imports 404s, the module never executes at all.
+// main.js's own try/catch blocks (config fetch, classic-script loader) are
+// inside that module and never get to run, and post.js's missing-addon guard
+// is unreachable for the same reason — a failed import kills the module
+// before any classic script loads. Without this handler the visitor sits on
+// "Click to enter" forever with nothing but a console error, where r128's
+// fifteen independent classic tags degraded to a warning and a working tour.
+//
+// This must be a plain classic script, defined before the module tag: it is
+// the one piece of code guaranteed to have run when the module fails.
+// The error event on a module script element carries no detail about which
+// import failed (deliberately, so cross-origin fetches stay opaque), so the
+// message names the entry file and the two things that actually cause this,
+// and points at the console for the specific URL.
+window.__tourModuleFailed = function (why) {
+  var go = document.getElementById('goBtn');
+  var txt = document.getElementById('overlayText');
+  if (go) go.textContent = 'Could not load the tour';
+  if (txt) {
+    txt.innerHTML =
+      '<b>main.js</b> or one of the Three.js files it imports failed to load.<br>' +
+      (why ? '<code>' + String(why).replace(/[<&]/g, '') + '</code><br>' : '') +
+      'Check that <b>lib/three-0.185.0/</b> is present and that this browser ' +
+      'supports import maps (Chrome/Edge 89+, Firefox 108+, Safari 16.4+).<br>' +
+      'The browser console names the exact file.';
+  }
+};
+// Two mechanisms, because one does not cover both failure shapes. Measured,
+// not assumed — each case below was reproduced with request interception
+// before this code was written:
+//
+//   * A FETCH failure (the entry 404s, a vendored file 404s, an addon deep
+//     in the graph 404s) fires `error` on the <script> element -> the
+//     onerror attribute below. Verified for all three.
+//   * A SPECIFIER RESOLUTION failure — which is exactly what an unsupported
+//     importmap produces, since the bare specifier 'three' then maps to
+//     nothing — does NOT fire the element's error event. Per the HTML spec
+//     that is a parse-time error, not a fetch error; it is reported to the
+//     global error handler instead. Verified: with a resolution failure the
+//     module body never ran AND the onerror attribute never fired, leaving
+//     the visitor on "Click to enter" — the exact stuck state this whole
+//     block exists to prevent.
+//
+// So the global listener below catches the second shape. It is scoped by
+// `__tourEntryRan`, which main.js sets as the first statement of its module
+// body: once the entry has executed, this listener is inert and ordinary
+// runtime errors are none of its business.
+window.addEventListener('error', function (ev) {
+  if (window.__tourEntryRan) return;
+  if (ev && ev.target && ev.target !== window) return;   // resource error: onerror owns it
+  window.__tourModuleFailed(ev && ev.message);
+});
+</script>
+<script type="module" src="main.js?v=71"
+        onerror="__tourModuleFailed('failed to fetch ' + (this.getAttribute('src') || 'main.js') + ' or one of its imports')"></script>
 </body>
 </html>
