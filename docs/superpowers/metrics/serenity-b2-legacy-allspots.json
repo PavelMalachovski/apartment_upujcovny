@@ -1,0 +1,77 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-legacy-allspots",
+  "note": "Supplementary, not a plan-5 deliverable phase. Same renders as the committed b2-legacy.json (fov=legacy, markers hidden per task 2), but scored over every compare-flagged spot instead of only poseVerified ones -- isolates the marker-hiding effect from the population-reduction effect when read against plan 1's 17.12 (serenity) / 22.09 (kings-court), which had neither change. Produced by a one-off script that imports tools/delta_e.py's own cell_means()/ciede2000() unmodified; tools/delta_e.py itself was not changed.",
+  "mean": 17.14,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "deltaE": 18.76,
+      "poseVerified": true
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "deltaE": 18.15,
+      "poseVerified": false
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "deltaE": 16.49,
+      "poseVerified": false
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "deltaE": 15.44,
+      "poseVerified": false
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "deltaE": 12.21,
+      "poseVerified": false
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "deltaE": 16.55,
+      "poseVerified": false
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "deltaE": 19.6,
+      "poseVerified": false
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "deltaE": 12.68,
+      "poseVerified": false
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "deltaE": 20.18,
+      "poseVerified": false
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "deltaE": 25.27,
+      "poseVerified": false
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "deltaE": 13.22,
+      "poseVerified": true
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "meanPoseVerifiedOnlyCrossCheck": 15.99
+}

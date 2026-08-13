@@ -92,6 +92,117 @@ metric, and a future regression there would go undetected:
 Plan 4 fixes the geometry defects above and re-verifies against them;
 this plan only stops measuring through them in the meantime.
 
+## Re-baseline: the field of view was wrong, and the phase A series ends here (task 5)
+
+Every number in "The trend" below — the phase A series that ran 24.36 down
+to 16.58 — and both of plan 1's r128-migration bridge numbers (serenity
+**17.12**, kings-court **22.09**, recorded in `r128-reference.md`) were
+measured through a broken camera. `camera.fov` was fixed at 72° vertical for
+every capture regardless of what the photograph was actually framed at (task
+3's finding): a 16:9 photograph was scored against a 104.5°-horizontal
+render, a portrait one against 55°. Fixing the field of view changes *which
+pixels of the room* land in each of the 8×8 grid's cells, not just how well
+those pixels agree with the photograph — that is not something this metric's
+own arithmetic can back out after the fact. **The phase A series cannot be
+converted into the corrected one; it can only be ended.** Nothing below
+restates 24.36–16.58 or 17.12/22.09 in "corrected" terms. They stand as what
+they always were — measurements taken through the old lens — and a new
+series starts at this task.
+
+Both apartments were captured and scored twice, once per mode, on the same
+pose-verified population described above (serenity 2/11, kings-court 8/14).
+`tools/shots/render_*.jpg` carries no mode suffix, so the legacy-mode frames
+had to be scored before the fixed-mode capture overwrote them:
+
+```
+# legacy: ?apt=<id>&measure=1&fov=legacy, then
+python tools/delta_e.py --apt serenity --phase b2-legacy
+python tools/delta_e.py --apt kings-court --phase b2-legacy
+# fixed:  ?apt=<id>&measure=1 (recaptured — no &fov=legacy), then
+python tools/delta_e.py --apt serenity --phase b2-newzero
+python tools/delta_e.py --apt kings-court --phase b2-newzero
+```
+
+| Apartment | Mode | Spots scored | mean ΔE2000 | File |
+|---|---|---:|---:|---|
+| serenity | `&fov=legacy` (bridge to plan 1) | 2/11 | **15.99** | `serenity-b2-legacy.json` |
+| serenity | fixed, per-photograph fov ("new zero") | 2/11 | **16.30** | `serenity-b2-newzero.json` |
+| kings-court | `&fov=legacy` (bridge to plan 1) | 8/14 | **19.80** | `kings-court-b2-legacy.json` |
+| kings-court | fixed, per-photograph fov ("new zero") | 8/14 | **19.86** | `kings-court-b2-newzero.json` |
+
+**The `&fov=legacy` row is a bridge, not a restatement — and it is not plan
+1's own measurement either, because it differs in two ways at once, not
+one.** `?fov=legacy` reproduces the old fixed-72°-vertical camera, so the
+field of view really is held the same as plan 1's 17.12 / 22.09. But
+`measure.js` also now hides photo-spot markers unconditionally (task 2), and
+`delta_e.py` now scores only `poseVerified` spots (task 4) — neither existed
+when 17.12 / 22.09 were recorded, and neither can be switched back off for
+this comparison. Presenting 15.99 / 19.80 next to 17.12 / 22.09 as if the
+field of view were the only thing that changed would be wrong.
+
+### Separating the two confounds
+
+Cheap to isolate, because `window.__measure()` captures every `compare`-
+flagged spot regardless of `poseVerified` — the legacy-mode renders already
+on disk cover all 11 / 14 spots, not just the 2 / 8 scorable ones. A one-off
+script (not a committed tool: it imports `tools/delta_e.py`'s own
+`cell_means()` and `ciede2000()` unmodified and reuses them over the full
+spot list, rather than patching the filter into the committed scorer) scored
+those same b2-legacy renders both ways. Output kept as
+`serenity-b2-legacy-allspots.json` / `kings-court-b2-legacy-allspots.json`
+for anyone who wants to check the arithmetic; its poseVerified-only subset
+reproduced 15.99 / 19.80 exactly, confirming the two scoring paths agree.
+
+| Apartment | Plan 1 (fov=legacy, markers visible, all 11/14 spots) | + markers hidden, same spots | + poseVerified filter = official b2-legacy | Marker effect | Population effect |
+|---|---:|---:|---:|---:|---:|
+| serenity | 17.12 | 17.14 | 15.99 | +0.02 | **−1.15** |
+| kings-court | 22.09 | 22.12 | 19.80 | +0.03 | **−2.32** |
+
+**The marker effect is not distinguishable from zero.** ±0.02 / ±0.03 sits
+inside the same-code repeat-run noise floor `r128-reference.md` already
+measured for this exact metric (±0.03 on rounded means, ±0.039 at full
+precision) — consistent with photo-spot markers being a handful of
+`THREE.Points` sprites, too small a share of any 8×8 cell to move its mean
+colour measurably. **The population filter is what actually moved the
+number**, by 1.15 and 2.32 points respectively — well past the noise floor,
+and past the marker effect too. That is not evidence the render changed: it
+means the spots that survived pose verification (serenity's `1.webp`
+Bathroom and `11.webp` Bedroom; kings-court's eight) happen to average lower
+ΔE than the ones that did not. Which spots pass pose verification is decided
+by geometry and camera-pose correctness (task 3), not by this metric, so
+this is a population change riding along with the FOV bridge, not a
+resemblance change.
+
+### What moved between the bridge and the new zero
+
+Holding the population and the marker-hiding fixed and changing only the
+field of view — legacy → fixed — moves serenity from 15.99 to 16.30 (+0.31)
+and kings-court from 19.80 to 19.86 (+0.06). Both small, on populations
+already flagged above as too thin to treat a fraction of a point as signal
+(a 2-spot mean swings on a single frame). Not a regression to chase: task 3
+calibrated the fixed field of view by eye, against straight edges lining up
+between render and photograph
+(`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`),
+not by minimizing this score, and a wider, more correct field of view pulls
+more of each room's
+background into the 8×8 grid — background a box-furniture, procedural-
+texture scene was never going to match as well as whatever was already
+centred in frame under the old, narrower crop. That is a plausible reading
+of a small move, not the only one, and nothing measured here isolates it
+further.
+
+### Going forward
+
+**`b2-newzero` (16.30 serenity, 19.86 kings-court) is the new zero** — the
+number future work on these two apartments is compared against, not
+16.58/22.44 and not 17.12/22.09. It is not comparable to anything measured
+before this task. It rests on the same 2/11 and 8/14 populations as
+everything else in this section, and plan 4's geometry fixes are expected to
+flip some `poseVerified: false` spots to `true` — which changes *which*
+spots feed this mean before it changes *how well* any of them score. Whoever
+compares a future number to 16.30 / 19.86 must check the population first —
+the same caveat this section just applied to plan 1's numbers.
+
 ## The trend
 
 | Stage | mean ΔE2000 | File |
@@ -220,10 +331,11 @@ with the reviewer's arithmetic that baked `MeshBasicMaterial` surfaces
 can't reach it at this exposure.
 
 **At the Bathroom spot, one small live (non-baked) surface does cross
-it.** A chrome/metal fixture (`MeshStandardMaterial`, `metalness: 0.9`,
-`roughness: 0.1`) catches a specular highlight from the baked environment
-reflection, reaching an encoded 246/255 (0.965) on 0.17% of the frame's
-pixels. That single spot's arithmetic differs from the reviewer's: the
+it.** The bathroom vanity's backlit mirror panel (`MeshStandardMaterial`,
+`metalness: 0.9`, `roughness: 0.1`) catches a specular highlight from the
+baked environment reflection, reaching an encoded 246/255 (0.965) on
+0.17% of the frame's pixels. That single spot's arithmetic differs from
+the reviewer's: the
 1.6 ceiling only bounds *baked, diffuse* surfaces (the lightmap's clamp
 times `lightMapIntensity`); a live specular highlight on a near-mirror
 metal is unbaked and unclamped, and can exceed it locally regardless of
@@ -232,6 +344,16 @@ confirms it is visible, not just numerically above threshold: 5.96% of
 the Bathroom frame's pixels change (max per-channel-sum diff 62/255)
 with bloom on vs. off, against 0% pixel difference at a spot with no
 threshold-crossing pixels (Living Room, checked as a control).
+
+*Attribution corrected, task 5 of plan 2.* This paragraph originally
+credited the highlight to "a chrome/metal fixture," which reads as
+`M.chrome` (`materials.js:384`) — but `M.chrome` is roughness **0.25**, not
+0.1. `metalness: 0.9, roughness: 0.1` is `M.smoke`'s own signature
+(`materials.js:415`), and the only `M.smoke` surface at this spot is the
+vanity's backlit mirror panel (`F.vanity` in `builder.js`, the mesh
+explicitly commented `// backlit mirror`). The measured numbers above —
+246/255, 0.17%, the 5.96% pixel-diff — are unchanged; only which object
+they belong to.
 
 **Conclusion: bloom is not inert, so it was not removed.** It is inert
 or near-inert across nearly the whole apartment at the shipped exposure,
