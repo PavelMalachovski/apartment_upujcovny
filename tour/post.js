@@ -86,74 +86,79 @@ const Post = (() => {
       const composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
 
-      // strength, radius, threshold. r128 ran its composer with the render
-      // targets patched to sRGBEncoding (see git history of this file before
-      // task 5), so RenderPass there emitted fully tonemapped+sRGB-encoded
+      // strength, radius, threshold -- fitted empirically, task 7 of plan 2
+      // (full sweep data: .superpowers/sdd/2026-08-13-phase-b2-measurement-
+      // exposure/task-7-report.md). Both constants moved from where phase B1
+      // left them (0.22, 0.5, 1.294); history below.
+      //
+      // BACKGROUND: r128 ran its composer with the render targets patched to
+      // sRGBEncoding (see git history of this file before task 5 of phase
+      // B1), so RenderPass there emitted fully tonemapped+sRGB-encoded
       // pixels and UnrealBloomPass's LuminosityHighPassShader thresholded a
       // display-referred 0.92. On r185 RenderPass writes a *linear*,
       // untonemapped target -- OutputPass alone owns tonemap+encode, once,
-      // at the end -- so the same literal 0.92 now compares against raw
-      // scene radiance instead, and ~17-21% of the frame crosses it where
-      // r128 was near-inert (measured task 5).
+      // at the end -- so the literal 0.92 compared against raw scene
+      // radiance instead of the intended display-referred value. Phase B1
+      // derived a like-for-like replacement analytically from the vendored
+      // ACES/sRGB formulas: undo the sRGB OETF, undo RRTAndODTFit for a
+      // neutral input, undo the exposure/0.6 pre-scale -- giving 1.293512,
+      // calibrated at exposure 1.05 (full derivation, superseded, in this
+      // file's git history before this commit). `strength` was left
+      // unconverted at 0.22 in the same commit, flagged as a known residual:
+      // the additive term it controls (`strength * radiance of the
+      // thresholded pixels`) was capped near 1.0 in r128's display-referred
+      // domain but not in r185's raw linear one, measured there at up to
+      // **15.32** at serenity's bathroom spot (task-5-report.md, phase B1).
       //
-      // Converted threshold, derived from the actual vendored ACES/sRGB
-      // formulas (tour/lib/three-0.185.0's tonemapping_pars_fragment /
-      // colorspace_pars_fragment), not tuned by eye:
-      //   1. Undo sRGB OETF: encoded 0.92 -> y = ((0.92+0.055)/1.055)^2.4
-      //                                       = 0.82757 (ACES-output space;
-      //      matches this file's own pre-task-5 comment, "roughly 0.83 in
-      //      linear light", independently derived at the time).
-      //   2. Undo RRTAndODTFit (ACESFilmicToneMapping's rational fit) for a
-      //      neutral/grey input -- exact for grey because both ACES 3x3
-      //      matrices have row sums of 1.0, so they're a no-op on r=g=b:
-      //      solve y = (x^2+0.0245786x-0.000090537)/(0.983729x^2+0.432951x+0.238081)
-      //      for x, positive root: x = 2.263646.
-      //   3. Undo the exposure/0.6 pre-scale: L = x * 0.6 / exposure.
-      //      Calibrated at exposure 1.05 -- the app.js fallback default,
-      //      and what kings-court and horkyone-10 actually run at (only
-      //      serenity overrides exposure, to 0.33, which this single global
-      //      constant can't also match; see task-6-report.md for the
-      //      residual that leaves).
-      //      L = 2.263646 * 0.6 / 1.05 = 1.293512.
-      // Round-trip-verified: full_forward(1.293512, exposure=1.05) = 0.92
-      // exactly (script in task-6-report.md).
+      // WHY 1.293512 DOESN'T SURVIVE PLAN 2: that derivation solved for one
+      // threshold at one shared exposure (1.05, the only value any apartment
+      // ran at when it was written). Task 7 fits exposure *per apartment*
+      // instead -- serenity 0.32, kings-court 0.56, horkyone-10 stays at the
+      // 1.05 default (no photographs to fit against; accepted on luminance
+      // proximity instead, see the apartment JSONs and metrics/README.md).
+      // There is no single exposure left to solve the analytic derivation's
+      // step 3 against, so task 7 measured empirically instead of re-solving
+      // it: reproduced RenderPass's own call pattern (setRenderTarget to an
+      // offscreen FloatType target, render, read back) to get the same
+      // pre-tonemap linear buffer LuminosityHighPassShader thresholds, then
+      // swept threshold and read the fraction of frame area above it across
+      // both fitted apartments' spawns plus known specular spots, tracking
+      // fraction over threshold rather than the peak pixel (the peak is a
+      // single specular sample whose magnitude is unstable across
+      // render-target sizes; the fraction is not -- established phase B1).
       //
-      // KNOWN UNCONVERTED RESIDUAL -- the `strength` 0.22 below.
-      // The threshold conversion above fixes *which* pixels bloom. It does
-      // not fix *how much* they add, and that moved domain too. The chain:
-      //   LuminosityHighPassShader:  gl_FragColor = mix(black, texel, alpha)
-      //       -- above threshold the whole texel passes through unscaled, at
-      //          whatever magnitude the buffer holds;
-      //   UnrealBloomPass composite: bloom = 3.0 * bloomStrength * sum(mips),
-      //       blended with AdditiveBlending over the base.
-      // So the pass adds `strength x (radiance of the bright pixels)` in the
-      // domain it sits in. On r128 that domain was display-referred and
-      // capped near 1.0, so 0.22 could add at most ~0.22. On r185 the same
-      // pass sits in raw linear radiance, which this branch measured at up
-      // to **15.32** max luminance / 17.01 max single channel at serenity's
-      // bathroom spot, and 2.20 / 2.68 at its entrance (task-5-report.md,
-      // determinism-checked across three renders and a reload). At 15.32
-      // the additive term is ~3.4 where r128's was <=0.22 -- roughly 15x,
-      // and higher again now that the direct lights carry their legacy PI
-      // factor (builder.js).
+      // At the old 1.294, serenity's entrance -- ordinary daylight, not a
+      // highlight -- measured 10.51% of frame area over threshold at its
+      // fitted exposure (0.32): a visibly blown-out ceiling wash, confirmed
+      // by eye, not the near-inert result r128 had there. The wash has a
+      // sharp edge around luminance 1.6-1.7; **threshold 1.8** clears it
+      // (entrance and every other ordinary position tested, both fitted
+      // apartments, land at <=0.05% of frame area) while the one apartment's
+      // one known specular highlight -- the backlit bathroom mirror, plan 1
+      // -- keeps a small, real crossing (0.19-0.21% of frame), close to
+      // r128's own reference behaviour for that same highlight (0.17%,
+      // metrics/README.md "Is bloom still doing anything?"). Also checked
+      // against horkyone-10 at its un-fit, brighter 1.05 default (the
+      // apartment most likely to push a shared threshold too low): every
+      // spawn measured 0% over threshold, so 1.8 holds across all three
+      // apartments' different exposures, not just the two that got refit.
       //
-      // This is structurally the same additive-in-the-wrong-domain bug that
-      // was found and fixed for GrainVignetteShader below, and it has the
-      // same non-solution: no single `strength` reproduces r128's behaviour
-      // for every pixel, because the needed factor depends on how bright
-      // each bloomed pixel is. Grain was fixed by reordering it past
-      // OutputPass. **Bloom cannot be reordered** -- it must read the HDR
-      // buffer to have anything above 1.0 to bloom at all, and putting it
-      // after OutputPass would defeat the whole pass.
+      // With threshold fixed, **strength 0.1** (down from 0.22) was chosen
+      // by rendering the bathroom highlight through the full composited,
+      // tonemapped chain with bloom on vs off and looking at the frames: 0.22
+      // produced a visibly soft, spreading halo dominating the highlight
+      // (about 16% of that frame's pixels changed vs bloom-off) where 0.1
+      // reads as a contained glint on the mirror and the shower glass, much
+      // closer to r128's own reference proportion for the same comparison
+      // (~5.96%, metrics/README.md). Confirmed on both serenity and
+      // kings-court; frames in task-7-report.md.
       //
-      // Deliberately NOT retuned here. Any "corrected" number would be
-      // taste, not mechanism, and this plan's discipline is mechanism only.
-      // Bloom tuning is plan 2's, alongside the exposure re-fit that changes
-      // what these radiances even are. Recorded as an accepted, documented
-      // r185 residual in docs/superpowers/metrics/r128-reference.md, the
-      // same category as the point-light attenuation change and the BRDF/IBL
-      // changes.
-      const bloom = new UnrealBloomPass(size, 0.22, 0.5, 1.294);
+      // These are global constants, not per-apartment -- there is one bloom
+      // pass for all three flats, at three different fitted (or unfitted)
+      // exposures, so "fitted" here means "verified inert-or-glint-shaped at
+      // ordinary positions across all three," not tuned against any one
+      // apartment's photographs the way exposure itself is.
+      const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);
       composer.addPass(bloom);
 
       // Tone mapping and the sRGB conversion happen here, once. This is

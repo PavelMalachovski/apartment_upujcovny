@@ -1,0 +1,94 @@
+{
+  "apartment": "kings-court",
+  "phase": "b2-final-legacy-allspots",
+  "mean": 18.77,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "poseVerified": false,
+      "deltaE": 18.21
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "poseVerified": true,
+      "deltaE": 10.41
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "poseVerified": true,
+      "deltaE": 14.45
+    },
+    {
+      "file": "4.webp",
+      "name": "Coffee corner",
+      "poseVerified": false,
+      "deltaE": 25.54
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "poseVerified": true,
+      "deltaE": 11.49
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "poseVerified": true,
+      "deltaE": 21.43
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "poseVerified": true,
+      "deltaE": 18.94
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "poseVerified": false,
+      "deltaE": 26.56
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "poseVerified": false,
+      "deltaE": 13.23
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "poseVerified": true,
+      "deltaE": 19.91
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "poseVerified": true,
+      "deltaE": 16.72
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "poseVerified": false,
+      "deltaE": 17.53
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "poseVerified": true,
+      "deltaE": 26.84
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "poseVerified": false,
+      "deltaE": 21.57
+    }
+  ],
+  "scored": 14,
+  "compareTotal": 14,
+  "note": "All-spot population: every compare-flagged spot regardless of poseVerified. This is the population plan 1 and the merge condition (16.58/22.44) were measured against -- see docs/superpowers/metrics/README.md, \"What this means for the merge condition.\""
+}

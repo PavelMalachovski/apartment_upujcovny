@@ -308,6 +308,251 @@ spots feed this mean before it changes *how well* any of them score. Whoever
 compares a future number to 16.30 / 19.86 must check the population first —
 the same caveat this section just applied to plan 1's numbers.
 
+## Exposure and bloom fitted together, and the merge condition re-read (task 7)
+
+The task the whole plan exists for. Three things happened in order, per the
+phase's own rule that exposure and bloom are coupled through the same buffer
+and must not be fitted in isolation: **(1)** `serenity.exposure`'s old
+r128-fitted `0.33` was deleted outright — carrying a compensation fitted
+against a different pipeline into a new fit produces a fit of a fit — and the
+`app.js` fallback confirmed clean (`renderer.toneMappingExposure` read back
+`1.05`, no warning, since an *absent* key is the documented "nothing to fit
+against" case, not the "present but invalid" case that actually warns).
+**(2)** Exposure was refitted per apartment with bloom disabled. **(3)** Bloom's
+threshold and strength were set with exposure fixed. Full sweep data, bloom
+frames and the horkyone-10 diagnostic are in
+`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-7-report.md`.
+
+### Exposure: fitted toward luminance, ΔE read as a consequence
+
+Target is each apartment's own photographs' mean and p5 linear-light
+luminance (`tools/luminance.py`), not the lowest ΔE — the phase's own rule,
+restated here because the two very nearly disagreed for kings-court (below).
+Every sweep point, both apartments, bloom disabled throughout:
+
+| Serenity exposure | mean lum | p5 lum | ΔE2000 |
+|---:|---:|---:|---:|
+| 0.6 | 0.4735 | 0.2091 | 19.07 |
+| 0.8 | 0.5524 | 0.2876 | 21.32 |
+| 1.0 | 0.6089 | 0.3555 | 23.13 |
+| 1.2 | 0.6508 | 0.4115 | 24.43 |
+| 1.4 | 0.6833 | 0.4551 | 25.38 |
+| 0.3 | 0.2772 | 0.0807 | 16.13 |
+| **0.32 (chosen)** | **0.2945** | 0.0887 | **16.09** |
+| 0.33 | 0.3029 | 0.0927 | 16.11 |
+| 0.34 | 0.3111 | 0.0972 | 16.14 |
+| 0.4 | 0.3567 | 0.1230 | 16.58 |
+| *photographs* | *0.2993* | *0.0483* | — |
+
+| Kings-court exposure | mean lum | p5 lum | ΔE2000 |
+|---:|---:|---:|---:|
+| 0.6 | 0.3670 | 0.1151 | 17.10 |
+| 0.8 | 0.4473 | 0.1663 | 18.06 |
+| 1.0 | 0.5081 | 0.2149 | 19.10 |
+| 1.2 | 0.5553 | 0.2594 | 20.08 |
+| 1.4 | 0.5933 | 0.2998 | 20.93 |
+| 0.5 | 0.3172 | 0.0897 | 17.00 |
+| 0.53 | 0.3329 | 0.0972 | 16.98 |
+| **0.56 (chosen)** | **0.3479** | 0.1047 | 17.00 |
+| 0.58 | 0.3576 | 0.1100 | 17.05 |
+| *photographs* | *0.3479* | *0.0247* | — |
+
+Both apartments' initial 5-point sweep (0.6-1.4, the brief's own prescribed
+range) overshot the luminance target at every point — the render only gets
+brighter as exposure rises, so the fit for both flats lies below the range
+that was expected to bracket it. Serenity's mean-luminance-optimal point
+(0.32) coincides almost exactly with r128's own retired 0.33, despite the
+migration changing lighting units, tone-mapping placement and colour
+management — a coincidence worth recording plainly, not reading as
+significance; the fit was run blind to that old number and would have landed
+wherever the sweep took it. **Kings-court 0.56 is the first exposure fit that
+apartment has ever had** — it shipped at the renderer default (1.05) through
+all of phase A and phase B1.
+
+Kings-court is also the case where luminance and ΔE nearly disagreed:
+0.53 has the lowest ΔE (16.98) but overshoots the luminance match (diff
+-0.0150); 0.56 matches the photographs' mean luminance exactly (0.3479 both)
+at ΔE 17.00 — 0.02 worse, inside this metric's own documented repeat-run
+noise floor (±0.03 rounded / ±0.039 full precision, `r128-reference.md`).
+Chosen 0.56 on the luminance criterion, per the phase's rule; the ΔE
+difference this cost is not distinguishable from noise.
+
+**p5 (shadow) luminance is not reachable by exposure alone at either
+apartment** — even at the best-fitting exposure, rendered p5 sits well above
+the photographs' p5 (serenity 0.0887 vs. 0.0483; kings-court 0.1047 vs.
+0.0247), while mean matches closely or exactly. This is the same lifted-black
+structural limit `PHASE-B-OBSERVATIONS.md` row A2 already named: `bakeWalls()`
+carries no AO and `aoAt`'s occlusion floor (`0.35 + 0.65*(open/n)`, `bake.js`)
+puts a hard floor under every corner regardless of exposure. A single
+exposure scalar cannot both match the mean and deepen the shadow floor at the
+same time when the floor itself is a baked-lighting property, not a tone-
+mapping one — out of scope for this task (exposure and bloom only), recorded
+here because it's the reason p5 doesn't close even at the winning exposure.
+
+### Bloom: threshold moved, strength moved, both empirically
+
+The old `1.293512` threshold was derived analytically for a single shared
+exposure (1.05 — the only value any apartment ran at when phase B1 derived
+it). Task 7 fits exposure per apartment, so there is no single exposure left
+to re-solve that derivation against; threshold and strength were measured
+empirically instead, tracking **fraction of frame area over threshold, never
+the peak pixel** (the peak is one specular sample whose magnitude is unstable
+across render-target sizes — established plan 1; the fraction is not).
+Method: reproduce `RenderPass`'s own `setRenderTarget`/`render` call pattern
+into an offscreen `FloatType` target, matching the exact pre-tonemap linear
+buffer `LuminosityHighPassShader` thresholds.
+
+At the old threshold (1.294), serenity's entrance — ordinary daylight, not a
+highlight — measured **10.51%** of frame area over threshold at its fitted
+exposure (0.32): a visibly blown-out ceiling wash confirmed by eye, not the
+near-inert result r128 had at this position. The wash has a sharp edge:
+
+| Serenity, fraction of frame over threshold | 1.294 | 1.5 | 1.6 | 1.7 | 1.8 | 2.0 | 3.0 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Entrance (ordinary daylight) | 10.51% | 6.42% | 4.02% | 0.02% | 0.02% | 0.02% | 0.02% |
+| Living Room (ordinary) | 3.32% | 1.43% | 0.16% | 0% | 0% | 0% | 0% |
+| Bathroom mirror highlight | 4.52% | 1.52% | 0.42% | 0.22% | 0.21% | 0.19% | 0.13% |
+
+**Threshold 1.8** sits just past the wash's cutoff (~1.6-1.7) with a small
+margin, while the one known specular highlight — the bathroom's backlit
+mirror, plan 1 — keeps a small, real crossing (0.21% of frame), close to
+r128's own reference proportion for that exact highlight (0.17%, "Is bloom
+still doing anything?" below). Checked across every spawn of all three
+apartments at threshold 1.8, including horkyone-10 at its un-fit, brighter
+1.05 default (the apartment likeliest to push a shared threshold too low):
+kings-court's worst spawn measured 0.20%, horkyone-10's every spawn measured
+0%, serenity's non-highlight positions all measured ≤0.05%. Layout check
+(`window.__issues`) stayed clean throughout on all three.
+
+With threshold fixed, **strength** was judged by rendering the bathroom
+highlight through the full composited, tonemapped chain with bloom on vs.
+off and counting changed pixels, then looking at the frames:
+
+| Strength | % of bathroom frame changed (bloom on vs. off) |
+|---:|---:|
+| 0.05 | 3.71% |
+| **0.1 (chosen)** | **7.95%** |
+| 0.15 | 13.16% |
+| 0.22 (old, unconverted) | 16.27% |
+| 0.3 | 17.93% |
+| 0.4 | 20.60% |
+
+At 0.22 the mirror highlight visibly bloomed into a soft, spreading halo —
+confirmed by eye, both apartments; at 0.1 it reads as a contained glint on
+the mirror and the shower glass, without a wash elsewhere. 0.1's pixel-change
+proportion (7.95%) is the closest round value to r128's own reference
+proportion for the identical on/off comparison (5.96%, below) without
+dropping the highlight below a confidently visible glint. **Both constants
+are global** (one bloom pass, three apartments at three different fitted-or-
+not exposures) — "fitted" here means verified inert-or-glint-shaped across
+all three, not tuned against any one apartment's photographs the way
+exposure itself is.
+
+### horkyone-10: fails the ±10 luminance check, not force-fitted
+
+Task 6 set the criterion and deferred the number to this task: accept
+horkyone-10 on mean sRGB luminance landing within ±10 of the two fitted
+apartments, since neither of its two photo spots survived pose verification
+(task 6) and there is nothing to fit its own exposure against. Measured the
+same way as `PHASE-B-OBSERVATIONS.md`'s original table — every `spawns` entry,
+480×300, through the full post chain, sRGB 0-255 — now that both siblings
+carry their real post-refit exposure:
+
+| Apartment | exposure | mean L | p5 L |
+|---|---:|---:|---:|
+| serenity | 0.32 | 142.21 | 85.24 |
+| kings-court | 0.56 | 140.59 | 76.38 |
+| horkyone-10 | 1.05 (unfit default) | **187.98** | 141.90 |
+
+**horkyone-10 misses by 45.77 against serenity and 47.39 against
+kings-court — not a close call, and not distinguishable from the original
+problem statement this whole plan exists to fix** (`PHASE-B-OBSERVATIONS.md`
+row A1: kings-court and horkyone-10 both ran ~45 L points brighter than
+serenity before any of phase B2's work). Kings-court's own fit closed that
+gap for kings-court; horkyone-10, having no photographs, was never in a
+position to close it the same way, and still hasn't.
+
+**Not force-fitted.** A diagnostic sweep (exposure only, not applied) shows
+what it would take: 0.9 → mean 179.73, 0.8 → 173.35, 0.75 → 169.70, 0.7 →
+165.71, extrapolating to roughly 0.40-0.45 for the mean to land mid-range —
+a cut of similar relative size to serenity's own (1.05 → 0.32). The
+difference is that serenity's cut is backed by two photographs and a
+resemblance score that moved from 23+ to 16 alongside it; horkyone-10 has
+no photograph this task is permitted to check the result against (its two
+spots both failed pose verification at every tested field of view, task 6),
+so picking an exposure purely to land the luminance mean in range would be
+tuning toward this fallback metric with no independent way to confirm the
+render actually got more correct — the same shape of mistake the phase's
+own ΔE rule warns against, applied to a different number. Per the task
+brief's own escape hatch ("if the fit cannot reach the gate, say so with the
+numbers... do not tune toward a passing number"), `horkyone-10.json` is
+**unchanged** by this task. This is a real, failing result for task 9, not
+a resolved one.
+
+### Final numbers: both apartments, both harness modes, both populations
+
+Recaptured fresh at the final settings (serenity 0.32, kings-court 0.56,
+bloom threshold 1.8 / strength 0.1) immediately before each scoring pass,
+per this project's own stale-frame warning. "poseVerified" is
+`tools/delta_e.py`'s native, filtered population (serenity 2/11, kings-court
+8/14); "all-spot" reuses `delta_e.py`'s own `cell_means()`/`ciede2000()`
+unmodified over every `compare`-flagged spot regardless of `poseVerified` —
+the same one-off, uncommitted technique task 5 used to produce the
+17.14/22.12 comparable-population figures above.
+
+| Apartment | Mode | Population | mean ΔE2000 | File |
+|---|---|---|---:|---|
+| serenity | fixed (new-zero) | poseVerified 2/11 | 16.02 | `serenity-b2-final.json` |
+| serenity | fixed (new-zero) | all-spot 11/11 | 16.87 | `serenity-b2-final-allspots.json` |
+| serenity | `&fov=legacy` | poseVerified 2/11 | 15.71 | `serenity-b2-final-legacy.json` |
+| serenity | `&fov=legacy` | all-spot 11/11 | **16.55** | `serenity-b2-final-legacy-allspots.json` |
+| kings-court | fixed (new-zero) | poseVerified 8/14 | 17.02 | `kings-court-b2-final.json` |
+| kings-court | fixed (new-zero) | all-spot 14/14 | 18.36 | `kings-court-b2-final-allspots.json` |
+| kings-court | `&fov=legacy` | poseVerified 8/14 | 17.52 | `kings-court-b2-final-legacy.json` |
+| kings-court | `&fov=legacy` | all-spot 14/14 | **18.77** | `kings-court-b2-final-legacy-allspots.json` |
+
+**Repeat-run check on serenity's legacy/all-spot number**, since it sits
+closest to its gate: a second, independent full-page-reload capture and
+score reproduced **16.54** against the first run's 16.55 — a 0.01 spread,
+tighter than this metric's own documented repeat-run noise floor (±0.03/
+±0.039). The margin below is real and reproducible, not noise that happened
+to land on the right side once (`serenity-b2-final-legacy-repeat*.json`).
+
+### The merge condition, read correctly
+
+PR #27's merge condition (serenity ≤ 16.58, kings-court ≤ 22.44) was scored
+in legacy mode over the full, unverified-pose population — **the "all-spot"
+row above, not "poseVerified"**, for the exact reason given earlier in this
+document ("What this means for the merge condition"): the poseVerified
+filter changes which spots feed the mean, not how well the render matches.
+
+- **Serenity: 16.55 ≤ 16.58 — passes, by 0.03.** Narrow, but confirmed
+  reproducible above, not a noise artifact. This is closer than comfortable;
+  a small future regression (or a stricter future population) could flip it,
+  and whoever reads this next should re-run rather than assume it still
+  holds.
+- **Kings-court: 18.77 ≤ 22.44 — passes, by 3.67.** Comfortable margin, and
+  kings-court's first-ever exposure fit is most of why: at the unfit 1.05
+  default it was already inside the gate in raw terms (`PHASE-B-OBSERVATIONS.md`,
+  22.44 was in fact *measured* at 1.05), but ran ~45 L points brighter than
+  serenity and visibly over-exposed; this task fixed the exposure without
+  spending the ΔE margin the apartment already had.
+- **horkyone-10 is not part of PR #27's stated ΔE gate** (it has no
+  `compare` spots to score), but fails its own separate luminance-proximity
+  acceptance criterion (above) — a real open item for task 9, distinct from
+  the ΔE gate both other apartments now clear.
+
+### Known staleness this task creates, out of scope to fix here
+
+Two documents describe state this task changed, and this task's scope
+(apartment JSONs' `exposure`, `post.js`'s bloom constants, this file) does
+not extend to either: `CLAUDE.md`'s `exposure` config-key entry still says
+"serenity's fitted value is 0.33" (now 0.32, and kings-court now has a fit
+where it previously had none), and `docs/superpowers/metrics/r128-reference.md`
+still describes bloom `strength: 0.22` as an accepted, kept-as-is r185
+residual (now 0.1, converted). Both were accurate when written and are
+narrated here, not silently left for a future reader to trip over.
+
 ## The trend
 
 | Stage | mean ΔE2000 | File |

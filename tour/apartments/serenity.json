@@ -2,7 +2,7 @@
   "mainFloorY": 0,
   "mainCeilH": 2.6,
   "terraceY": -0.05,
-  "exposure": 0.33,
+  "exposure": 0.32,
   "palette": {
     "floorWood": "#fdffff",
     "wall": "#fffffc",
