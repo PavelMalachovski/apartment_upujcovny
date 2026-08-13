@@ -345,6 +345,43 @@ window.initApp = function () {
   const preloaded = new Set();
   let photoIdx = -1;
 
+  // ---------- Render-vs-photograph compare control ----------
+  // Only spots BOTH flagged for comparison AND whose render is confirmed to
+  // show the same subject as the photograph -- serenity has 9 of 11 compare
+  // spots where it does not (a punched window rendered where the photo
+  // shows a sliding door, a bedroom rendered where the photo is the
+  // bathroom, and so on -- see each spot's poseNote), kings-court 6 of 14.
+  // Showing a visitor a side-by-side of two different rooms would be worse
+  // than showing nothing: the same contamination CLAUDE.md's palette note
+  // already rejected once for the metric, now for a human instead of a
+  // scorer. Absent poseVerified means verified -- the same default the
+  // Python scorers use (tools/delta_e.py etc.) -- so an apartment nobody
+  // has classified still shows the control on every compare spot.
+  const photoCompareBtn = document.getElementById('photoCompare');
+  const compareEligible = (s) => !!s && s.compare === true && s.poseVerified !== false;
+
+  // compare.js is deliberately not in main.js's CLASSIC list -- most
+  // visitors never open a compare-eligible spot, so it only loads the first
+  // time one actually clicks the control. Cache-busted with this page's own
+  // ?v=, read off the module tag directly, so an edit to compare.js is
+  // never served stale (CLAUDE.md rule 3) without main.js having to know
+  // this on-demand path exists at all.
+  let comparePromise = null;
+  function ensureCompareLoaded() {
+    if (window.__compare) return Promise.resolve();
+    if (comparePromise) return comparePromise;
+    comparePromise = new Promise((resolve, reject) => {
+      const tag = document.querySelector('script[src*="main.js"]');
+      const v = tag ? new URL(tag.src).searchParams.get('v') : '';
+      const el = document.createElement('script');
+      el.src = 'compare.js' + (v ? '?v=' + v : '');
+      el.onload = resolve;
+      el.onerror = () => { comparePromise = null; reject(new Error('failed to load compare.js')); };
+      document.head.appendChild(el);
+    });
+    return comparePromise;
+  }
+
   function preloadAround(i) {
     for (const d of [-1, 1]) {
       const s = APT.photoSpots[(i + d + APT.photoSpots.length) % APT.photoSpots.length];
@@ -359,6 +396,7 @@ window.initApp = function () {
     document.getElementById('photoImg').src = photoBase + s.file;
     document.getElementById('photoCap').textContent =
       s.name + ' — ' + (s.vis ? 'visualization' : 'real photo') + ' · ' + (photoIdx + 1) + ' / ' + APT.photoSpots.length;
+    photoCompareBtn.style.display = compareEligible(s) ? 'block' : 'none';
     preloadAround(photoIdx);
   }
   function openPhoto(s) {
@@ -397,6 +435,14 @@ window.initApp = function () {
   document.getElementById('photoClose').addEventListener('click', (e) => { e.stopPropagation(); closePhoto(); });
   document.getElementById('photoPrev').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(-1); });
   document.getElementById('photoNext').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(1); });
+  photoCompareBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const s = APT.photoSpots[photoIdx];
+    if (!compareEligible(s)) return;
+    ensureCompareLoaded()
+      .then(() => window.__compare(s.file))
+      .catch((err) => console.warn('[compare] could not open the comparison:', err.message));
+  });
 
   // F — nearby photo (when the cursor is busy and the button is hard to hit)
   document.addEventListener('keydown', (e) => {
