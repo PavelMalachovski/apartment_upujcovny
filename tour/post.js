@@ -113,9 +113,12 @@ const Post = (() => {
       // WHY 1.293512 DOESN'T SURVIVE PLAN 2: that derivation solved for one
       // threshold at one shared exposure (1.05, the only value any apartment
       // ran at when it was written). Task 7 fits exposure *per apartment*
-      // instead -- serenity 0.32, kings-court 0.56, horkyone-10 stays at the
-      // 1.05 default (no photographs to fit against; accepted on luminance
-      // proximity instead, see the apartment JSONs and metrics/README.md).
+      // instead -- serenity 0.326, kings-court 0.56, horkyone-10 0.45. All
+      // three are fitted, not two: horkyone-10 has no `compare` spots to fit
+      // an exposure against by resemblance, so it is fitted on mean scene
+      // luminance landing within ±10 of the other two instead (see the
+      // apartment JSONs and metrics/README.md) -- not left at the 1.05
+      // default.
       // There is no single exposure left to solve the analytic derivation's
       // step 3 against, so task 7 measured empirically instead of re-solving
       // it: reproduced RenderPass's own call pattern (setRenderTarget to an
@@ -129,7 +132,7 @@ const Post = (() => {
       //
       // At the old 1.294, serenity's entrance -- ordinary daylight, not a
       // highlight -- measured 10.51% of frame area over threshold at its
-      // fitted exposure (0.32): a visibly blown-out ceiling wash, confirmed
+      // fitted exposure (0.326): a visibly blown-out ceiling wash, confirmed
       // by eye, not the near-inert result r128 had there. The wash has a
       // sharp edge around luminance 1.6-1.7; **threshold 1.8** clears it
       // (entrance and every other ordinary position tested, both fitted
@@ -138,10 +141,13 @@ const Post = (() => {
       // -- keeps a small, real crossing (0.19-0.21% of frame), close to
       // r128's own reference behaviour for that same highlight (0.17%,
       // metrics/README.md "Is bloom still doing anything?"). Also checked
-      // against horkyone-10 at its un-fit, brighter 1.05 default (the
-      // apartment most likely to push a shared threshold too low): every
-      // spawn measured 0% over threshold, so 1.8 holds across all three
-      // apartments' different exposures, not just the two that got refit.
+      // against horkyone-10 (the apartment likeliest to push a shared
+      // threshold too low): every spawn measured 0% over threshold at its
+      // exposure then -- the un-fit 1.05 default; it is fitted now, to
+      // 0.45, see above -- so 1.8 holds regardless of which value was live:
+      // this buffer sits before OutputPass, the one stage that reads
+      // toneMappingExposure, so no apartment's own exposure moves what
+      // bloom thresholds against.
       //
       // With threshold fixed, **strength 0.1** (down from 0.22) was chosen
       // by rendering the bathroom highlight through the full composited,
