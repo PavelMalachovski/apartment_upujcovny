@@ -2383,8 +2383,7 @@
    "z": 1.35,
    "g": 0,
    "yaw": 270,
-   "compare": true,
-   "vfov": 140
+   "compare": true
   },
   {
    "file": "17.webp",
