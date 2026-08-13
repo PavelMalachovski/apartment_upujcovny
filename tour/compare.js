@@ -87,17 +87,80 @@ window.__compare = (function () {
     // of sync -- the divider slid across empty letterboxed space while the
     // real clip boundary sat far off-screen, and no drag position ever
     // revealed the render at all.
-    const setSplit = (x) => {
+    //
+    // That fixed a single open. It did not fix switching photos: only
+    // firstOpen (below) ever called setSplit, so opening a second,
+    // differently-shaped photo left bar.style.left at its last literal
+    // pixel value while the photo box it was measured against had moved --
+    // e.g. dragged to x=200 against a landscape photo spanning x 40-1240,
+    // still x=200 after switching to a portrait photo spanning x 320-960,
+    // now ~120px inside the LEFT letterbox instead of ~85px inside the
+    // photo. The clip-path percentage stayed numerically correct (it is
+    // relative to the photo's own box, which resizes itself), so bar and
+    // clip-path were each individually right and mutually out of sync.
+    // Fixed by keeping the split as a fraction -- ui.frac, the one piece
+    // of state that survives a resize or a new photo -- and re-deriving
+    // BOTH the bar position and the clip-path from it and the photo's
+    // CURRENT rect every time that rect can have changed: every open
+    // (layout(), called from compare() below) and every window resize
+    // (listener below), not only the first open.
+    const applyFrac = (f) => {
+      ui.frac = f;
       const photo = root.querySelector('#cmpPhoto');
       const r = photo.getBoundingClientRect();
-      const f = r.width ? Math.min(Math.max((x - r.left) / r.width, 0), 1) : 0.5;
       photo.style.clipPath = 'inset(0 ' + ((1 - f) * 100).toFixed(2) + '% 0 0)';
       bar.style.left = Math.round(r.left + f * r.width) + 'px';
+    };
+    const setSplit = (x) => {
+      const r = root.querySelector('#cmpPhoto').getBoundingClientRect();
+      applyFrac(r.width ? Math.min(Math.max((x - r.left) / r.width, 0), 1) : 0.5);
+    };
+    // Re-lays out canvas + photo + bar for the current viewport against
+    // the LAST CAPTURED frame (ui.W/ui.H -- the actual render resolution,
+    // fixed per-open and never touched here; see the capture-vs-display
+    // comment in compare()), then re-applies the current split fraction so
+    // the bar ends up on the photo's new box, not the old one. This is the
+    // same dispScale/dispW/dispH/offX/offY math that used to live only
+    // inline in compare(), factored out so both compare() (every open) and
+    // the resize listener below can run it. No-op before the first
+    // successful compare() call: ui.W is still its initial falsy 0.
+    const layout = () => {
+      if (!ui.W) return;
+      const dispScale = Math.min(1, window.innerWidth / ui.W);
+      const dispW = Math.round(ui.W * dispScale);
+      const dispH = Math.round(ui.H * dispScale);
+      const offX = Math.round((window.innerWidth - dispW) / 2);
+      const offY = Math.round((window.innerHeight - dispH) / 2);
+      for (const el of [root.querySelector('#cmpRender'), root.querySelector('#cmpPhoto')]) {
+        el.style.left = offX + 'px'; el.style.top = offY + 'px';
+        el.style.width = dispW + 'px'; el.style.height = dispH + 'px';
+      }
+      // Match the bar's own extent to the letterboxed content instead of
+      // the full viewport height (its `top:0;bottom:0` from build()) --
+      // purely cosmetic, a divider line poking out through the black
+      // letterbox bars above and below reads as a rendering glitch, not a
+      // slider. Setting top+height here overrides bottom per the CSS
+      // over-constrained rule (both are declared, bottom loses), no need
+      // to clear it separately.
+      bar.style.top = offY + 'px';
+      bar.style.height = dispH + 'px';
+      applyFrac(ui.frac);
     };
     bar.addEventListener('pointerdown', (e) => { dragging = true; e.preventDefault(); });
     window.addEventListener('pointerup', () => { dragging = false; });
     window.addEventListener('pointermove', (e) => { if (dragging) setSplit(e.clientX); });
     root.addEventListener('click', (e) => { if (e.target === root) setSplit(e.clientX); });
+    // The only way pane geometry changes WITHOUT a new compare() call:
+    // canvas/photo/bar are all sized in absolute px, not %, so root's own
+    // inset:0 tracking the viewport does not move or resize them, and they
+    // would otherwise sit frozen at whatever compare() last computed for a
+    // since-resized window. Guarded on visibility -- layout() is harmless
+    // but pointless while root is display:none (the photo rect is
+    // all-zero then, same as the setSplit guard above), and there is
+    // nothing to sync until the next open lays the pane out for real.
+    window.addEventListener('resize', () => {
+      if (root.style.display !== 'none') layout();
+    });
 
     // Task 1 shipped this view with no way to close it -- inert while
     // nothing but the console ever called compare() (reloading the page
@@ -130,15 +193,20 @@ window.__compare = (function () {
       close();
     });
 
-    ui = { root: root, setSplit: setSplit, close: close, wasDoll: false, wasControlsEnabled: true };
-    // NOT setSplit(window.innerWidth / 2) here: root is still display:none
-    // at this point (see cssText above), and getBoundingClientRect() on a
-    // display:none element is all-zero, so setSplit's (x - r.left) / r.width
-    // divides by zero -> Infinity -> clamps to 1. That pinned the divider
-    // at the far-right edge (100% photo, 0% render) on every first-ever
-    // open, confirmed empirically (barLeft "100%", clip-path 0% on a fresh
-    // load, before any interaction). Centering happens in compare() below,
-    // once, right after root is actually made visible.
+    ui = {
+      root: root, setSplit: setSplit, layout: layout, close: close,
+      frac: 0.5, W: 0, H: 0, wasDoll: false, wasControlsEnabled: true
+    };
+    // NOT u.layout() here: root is still display:none at this point (see
+    // cssText above), so getBoundingClientRect() on the photo is all-zero
+    // and applyFrac's (x - r.left) / r.width divides by zero -- the same
+    // failure setSplit(window.innerWidth / 2) hit here before layout()
+    // existed, confirmed empirically (barLeft "100%", clip-path 0% on a
+    // fresh load, before any interaction: divide-by-zero -> Infinity ->
+    // clamps to 1, i.e. 100% photo). ui.W is also still its initial 0, so
+    // layout() would no-op even called blind. compare() below sets
+    // ui.W/ui.H from the actual capture and calls u.layout() itself, once,
+    // right after root is actually made visible.
     return ui;
   }
 
@@ -209,36 +277,26 @@ window.__compare = (function () {
       // the instant viewport width is narrower than a landscape photo's
       // own W (see the long comment on setSplit above for what broke
       // without it); harmless and a no-op wherever W already fit.
-      const dispScale = Math.min(1, window.innerWidth / W);
-      const dispW = Math.round(W * dispScale);
-      const dispH = Math.round(H * dispScale);
-      const offX = Math.round((window.innerWidth - dispW) / 2);
-      const offY = Math.round((window.innerHeight - dispH) / 2);
-      for (const el of [cv, ph]) {
-        el.style.left = offX + 'px'; el.style.top = offY + 'px';
-        el.style.width = dispW + 'px'; el.style.height = dispH + 'px';
-      }
-      // Match the bar's own extent to the letterboxed content instead of
-      // the full viewport height (its `top:0;bottom:0` from build()) --
-      // purely cosmetic, a divider line poking out through the black
-      // letterbox bars above and below reads as a rendering glitch, not a
-      // slider. Setting top+height here overrides bottom per the CSS
-      // over-constrained rule (both are declared, bottom loses), no need
-      // to clear it separately. Looked up fresh (build()'s own `bar` local
-      // is out of scope here, same as cv/ph above).
-      const bar = u.root.querySelector('#cmpBar');
-      bar.style.top = offY + 'px';
-      bar.style.height = dispH + 'px';
+      //
+      // Stored on u (not a local const) so build()'s layout() -- run again
+      // below, and from the resize listener there -- can redo this same
+      // scaling later without a new capture. This is the only place either
+      // is written.
+      u.W = W; u.H = H;
       u.root.querySelector('#cmpLabel').textContent =
         s.file + (s.name ? ' · ' + s.name : '') +
         ' · fov ' + a.camera.fov.toFixed(1) + '° · drag the bar';
       u.root.style.display = 'block';
-      // Centre the divider on the very first open, now that root is
-      // actually laid out (see the comment in build() for why this can't
-      // happen there). Only on firstOpen -- later calls (a different
-      // photo, or __compareAll stepping through several spots) must leave
-      // the divider wherever the user last dragged it.
-      if (firstOpen) u.setSplit(window.innerWidth / 2);
+      // Lays out canvas + photo + bar for the current viewport (see
+      // layout() in build()) and re-applies the split. Centre on the very
+      // first open only, now that root is actually laid out (see the
+      // comment in build() for why this can't happen there) -- later calls
+      // (a different photo, __compareAll stepping through several spots,
+      // or the same photo reopened after a resize) must leave the divider
+      // wherever the user last dragged it, which is exactly what
+      // re-applying the stored u.frac instead of resetting it to 0.5 does.
+      if (firstOpen) u.frac = 0.5;
+      u.layout();
 
       return { file: s.file, w: W, h: H };
     } finally {
