@@ -26,6 +26,18 @@ window.__refshots = function (dir) {
     return out;
   }
 
+  // Photo-spot markers are scene objects, so a capture photographs them and
+  // the scorer counts them as part of the room. Hidden for the duration of
+  // each capture and restored afterwards, including on the exception path.
+  function withMarkersHidden(fn) {
+    const hidden = [];
+    a.scene.traverse((o) => {
+      if (o.isPoints && o.visible) { o.visible = false; hidden.push(o); }
+    });
+    try { return fn(); }
+    finally { for (const o of hidden) o.visible = true; }
+  }
+
   function renderOne(v) {
     const c = a.controls;
     if (v.kind === 'doll') {
@@ -56,24 +68,26 @@ window.__refshots = function (dir) {
       // set's walk frames came out upside down until this line was added.
       a.camera.rotation.z = 0;
     }
-    // a.post.render(t), not a.composer.render(): the grain/vignette pass's
-    // `time` uniform is otherwise only ever advanced by app.js's own
-    // requestAnimationFrame loop (post.render(now*0.001)), which keeps
-    // running in the background across our awaited fetch() calls. Two
-    // captures of the identical scene taken moments apart then differ by a
-    // few MAD purely from the grain dice roll, not from anything a
-    // migration could regress -- confirmed by a same-session repeat
-    // landing at MAD ~2.4-2.6 (just over the default 2.0 threshold) before
-    // this fix. Pinning t makes repeats comparable; a real visitor still
-    // sees the same grain amount, just not frozen at this instant.
-    // a.post can be null (weak GPU / missing vendor files, see post.js),
-    // matching the a.composer-null fallback below it.
-    if (a.post) a.post.render(0);
-    else if (a.composer) a.composer.render();
-    else a.renderer.render(a.scene, a.camera);
     const cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
-    cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
+    withMarkersHidden(() => {
+      // a.post.render(t), not a.composer.render(): the grain/vignette pass's
+      // `time` uniform is otherwise only ever advanced by app.js's own
+      // requestAnimationFrame loop (post.render(now*0.001)), which keeps
+      // running in the background across our awaited fetch() calls. Two
+      // captures of the identical scene taken moments apart then differ by a
+      // few MAD purely from the grain dice roll, not from anything a
+      // migration could regress -- confirmed by a same-session repeat
+      // landing at MAD ~2.4-2.6 (just over the default 2.0 threshold) before
+      // this fix. Pinning t makes repeats comparable; a real visitor still
+      // sees the same grain amount, just not frozen at this instant.
+      // a.post can be null (weak GPU / missing vendor files, see post.js),
+      // matching the a.composer-null fallback below it.
+      if (a.post) a.post.render(0);
+      else if (a.composer) a.composer.render();
+      else a.renderer.render(a.scene, a.camera);
+      cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
+    });
     return cv.toDataURL('image/jpeg', 0.92);
   }
 

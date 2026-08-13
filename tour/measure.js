@@ -19,6 +19,18 @@ window.__measure = function () {
     });
   }
 
+  // Photo-spot markers are scene objects, so a capture photographs them and
+  // the scorer counts them as part of the room. Hidden for the duration of
+  // each capture and restored afterwards, including on the exception path.
+  function withMarkersHidden(fn) {
+    const hidden = [];
+    a.scene.traverse((o) => {
+      if (o.isPoints && o.visible) { o.visible = false; hidden.push(o); }
+    });
+    try { return fn(); }
+    finally { for (const o of hidden) o.visible = true; }
+  }
+
   function renderAt(spot, W, H) {
     const c = a.controls;
     c.enabled = true;
@@ -44,18 +56,20 @@ window.__measure = function () {
     a.renderer.setSize(W, H, false);
     a.camera.aspect = W / H;
     a.camera.updateProjectionMatrix();
-    // render through the post chain when one exists, so the score
-    // reflects what a visitor actually sees
-    if (a.composer) {
-      a.composer.setSize(W, H);
-      a.composer.render();
-    } else {
-      a.renderer.render(a.scene, a.camera);
-    }
     const cv = document.createElement('canvas');
     cv.width = W;
     cv.height = H;
-    cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
+    withMarkersHidden(() => {
+      // render through the post chain when one exists, so the score
+      // reflects what a visitor actually sees
+      if (a.composer) {
+        a.composer.setSize(W, H);
+        a.composer.render();
+      } else {
+        a.renderer.render(a.scene, a.camera);
+      }
+      cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
+    });
     a.renderer.setPixelRatio(prevRatio);
     return cv.toDataURL('image/jpeg', 0.92);
   }
