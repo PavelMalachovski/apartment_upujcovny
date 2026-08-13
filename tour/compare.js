@@ -185,8 +185,27 @@ window.__compare = (function () {
       root.style.display = 'none';
       const app = window.__app;
       if (!app) return;
-      if (ui.wasDoll && app.doll) app.doll.enter();
-      else app.controls.enabled = ui.wasControlsEnabled;
+      if (ui.wasDoll && app.doll) {
+        app.doll.enter();
+        return;
+      }
+      // ui.wasControlsEnabled is a snapshot of controls.enabled from the
+      // moment compare() opened -- normally false, because openPhoto() in
+      // app.js had already disabled it for the gallery this control lives
+      // in. But the photo gallery can close itself in the meantime: its own
+      // Escape handler (app.js closePhoto()) runs while this pane is still
+      // covering the screen (compare.js deliberately has no Escape listener
+      // of its own, see the comment above), sets photoView to display:none
+      // AND controls.enabled = true, correctly, for a screen with nothing
+      // open. Restoring the stale snapshot here would clobber that with
+      // false, leaving nothing open on screen but the visitor unable to
+      // walk -- reproduced live on serenity (Escape, then click this ✕) and
+      // fixed by this check. Only trust the snapshot while the gallery it
+      // was captured under is still actually open; otherwise whatever
+      // already closed it also already decided the right value (true).
+      const photoView = document.getElementById('photoView');
+      const galleryStillOpen = !!photoView && photoView.style.display !== 'none';
+      app.controls.enabled = galleryStillOpen ? ui.wasControlsEnabled : true;
     }
     root.querySelector('#cmpClose').addEventListener('click', (e) => {
       e.stopPropagation();   // else root's own listener also reads e.target and drags the split
