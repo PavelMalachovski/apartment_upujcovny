@@ -92,6 +92,91 @@ metric, and a future regression there would go undetected:
 Plan 4 fixes the geometry defects above and re-verifies against them;
 this plan only stops measuring through them in the meantime.
 
+## horkyone-10: decided, not left open (task 6)
+
+horkyone-10 has exactly two photographs, `2.webp` ("Living room") and
+`3.webp` ("Kitchen"), and going into this task **neither was flagged
+`compare`** — nothing to score, nothing to fit an exposure to, since
+phase A. Observation A1 (`docs/PHASE-B-OBSERVATIONS.md`) gave this
+exactly two ways to close: flag the spots (if they qualify) or accept
+the apartment on mean luminance instead. Task 6 makes that call, so it
+stops being open.
+
+### Classification, same bar as task 3
+
+Same method as task 3's redo (`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`
+§1): hold the spot's recorded pose (`x`/`z`/`yaw`) fixed and sweep
+`vfov` 50°→170° vertical, and pass only if *some* value in that range
+shows recognizably the same room content as the photograph — a spot
+that shows different content at every tested value is a pose problem,
+not a lens one. Evidence: `evidence-horkyone10_{2,3}webp_fov-sweep.jpg`
+(8-point sweep grids) and the `_compare_center.png` / `_render_full.png`
+/ `_reverify_compare.png` files, all in
+`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/`; full
+per-spot writeup in that directory's `task-6-report.md`.
+
+| Spot | Room (per config) | Verdict | Why |
+|---|---|---|---|
+| `2.webp` | Living room | **FAIL** | Photo: the main open living/dining/kitchen space under the ridge skylight — chaise lounge, ottoman, sofa, wall-mounted TV, wood flooring, kitchen visible past a column. Render, at every vfov 50–170 from the recorded pose: a small enclosed nook — two plain walls, one storage-box-shaped object, a tall cabinet, a corridor opening onto a small decorative plinth. No skylight, no lounge furniture, no sofa, no TV at any zoom. |
+| `3.webp` | Kitchen | **FAIL** | Photo: a sink/faucet run on a wood countertop under dark upper cabinets, opening onto a living room (sofa, coffee table, glazed terrace door) past a column. Render, at every vfov 50–170: a cooktop under a suspended extractor hood, opening onto a *dining* table with chairs and curtains — not a sofa. No sink, no faucet, no wood backsplash, no terrace at any zoom: the room beyond the kitchen is a different room, not just a different crop of the same one. |
+
+**0 of 2 pass** — neither spot is reconcilable with its photograph at
+any tested field of view, holding the recorded pose fixed. This is the
+same "wrong wall / wrong room, not wrong lens" signature task 3 used to
+fail serenity's Living Room cluster and kings-court's `14.webp`: a
+low-level category match (it *is* a room with a kitchen fixture in it)
+is not enough when the photograph's dominant subject stays absent at
+every zoom, from three or more widely-spaced values through the
+extremes. Applied at full strength despite the small candidate pool —
+the brief is explicit that two candidates earns no discount.
+
+### Decision: do not flag; accept on luminance (task 7 runs the number)
+
+**Neither spot is flagged `compare`. `tour/apartments/horkyone-10.json`
+is unchanged by this task.** Flagging a spot that fails this bar "adds
+noise to the mean and buys nothing" (task brief) — with 0 of 2
+candidates qualifying, flagging either would only recreate the exact
+kind of contaminated spot task 3 spent itself removing from the other
+two apartments, on an apartment that only has two candidates to begin
+with.
+
+That leaves observation A1's fallback as the applicable criterion, not
+a consolation prize: **accept horkyone-10 on mean sRGB luminance landing
+within ±10 of the two fitted flats** (`docs/PHASE-B-OBSERVATIONS.md`,
+row A1). horkyone-10 currently ships at the default `exposure` 1.05,
+mean sRGB luminance **193.1**, p05 **155.7**, against serenity's
+**144.6** at 0.33 (`docs/PHASE-B-OBSERVATIONS.md`'s "three tours as they
+ship today" table). **That comparison is not evaluated here**: both
+flats it would be measured against are mid-refit. Task 7 clears
+serenity's old r128-fitted `0.33` before refitting exposure and bloom
+together against r185, and kings-court has never been fitted at all
+(`exposure` still absent, defaulting to 1.05, same table). Reading
+horkyone-10 against either number today would be reading it against a
+fit task 7 is about to replace. **Task 7 step 5 ("Fit horkyone-10 by
+whichever criterion task 6 decided") is where the ±10 check actually
+runs**, against the two flats' post-refit numbers — this section
+records which criterion applies and why, not the numeric verdict.
+
+### The guard this decision needed anyway
+
+With horkyone-10 at 0 `compare`-flagged spots, `python tools/delta_e.py
+--apt horkyone-10` and `python tools/residual.py --apt horkyone-10`
+already refuse cleanly — both scripts have always checked
+`if not compare_spots: raise SystemExit(...)`. `tools/luminance.py`
+never got that check, and divides by `len(spots)` twice (once per
+render set, once for the photographs) with nothing upstream stopping an
+empty list from reaching either division. horkyone-10 is what finally
+exercises the empty case in practice: this decision leaves it with 0
+spots flagged at all (the first guard), and it is also the apartment
+the brief points at for the second, sharper case — 2 spots flagged and
+both failing pose verification, exactly what flagging the two FAIL
+spots above would have produced. `tools/luminance.py` now has the same
+two guards `delta_e.py` already had, in the same place relative to the
+`scorable()` filter; proof both paths exit cleanly instead of crashing
+(the real 0-flagged state, and a temporary reproduction of the
+2-flagged-both-failing state, reverted before commit) is in
+`task-6-report.md`.
+
 ## Re-baseline: the field of view was wrong, and the phase A series ends here (task 5)
 
 Every number in "The trend" below — the phase A series that ran 24.36 down

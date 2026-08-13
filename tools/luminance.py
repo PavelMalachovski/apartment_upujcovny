@@ -52,10 +52,19 @@ def main():
     cfg = json.load(open(os.path.join(ROOT, 'tour', 'apartments', args.apt + '.json'),
                          encoding='utf-8'))
     compare_spots = [s for s in cfg['photoSpots'] if s.get('compare')]
+    if not compare_spots:
+        raise SystemExit(
+            'no compare-flagged photo spots for apartment "%s" -- this '
+            'diagnostic only exists for apartments with photographs flagged '
+            '`compare` in their photoSpots' % args.apt)
     spots = [s for s in compare_spots if scorable(s)]
     skipped = len(compare_spots) - len(spots)
     print('scoring %d of %d compare-flagged spots (%d skipped: failed pose verification)'
           % (len(spots), len(compare_spots), skipped))
+    if not spots:
+        raise SystemExit(
+            'all %d compare-flagged spots for apartment "%s" failed pose '
+            'verification -- nothing left to score' % (len(compare_spots), args.apt))
 
     results = {}
     for label in args.sets:
