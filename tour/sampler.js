@@ -112,47 +112,96 @@ const Sampler = (() => {
     return !!handle.bvh.raycastFirst(_ray, SIDE, 0, maxDist);
   }
 
-  // Geometry with a known answer: a single large floor plane under the
-  // sample point. A hemisphere sampled from just above it, pointing up,
-  // should see nothing -- visibility 1. Sampled from just above it pointing
-  // DOWN, every ray hits immediately -- visibility 0. A point in the corner
-  // of two perpendicular walls sees roughly half the hemisphere.
+  // ---- Case group 1: a single floor, analytic either-or answers ----
+  // A single large floor plane under the sample point. A hemisphere
+  // sampled from just above it, pointing up, sees nothing above it at all
+  // -- there is no occluder anywhere in the upper hemisphere, so this is
+  // exactly 1, not just "usually clear" -- no sampling noise to tolerate.
+  // Pointed DOWN, every ray hits the floor within its first fraction of a
+  // metre -- exactly 0. A single ray straight down hits it; a single ray
+  // straight up escapes.
   //
-  // These three are chosen because they are analytic: they do not depend on
-  // ray count, jitter or the apartment, so a wrong answer means the sampler
-  // is wrong rather than under-sampled.
+  // Floor-only, unlike the original brief's floor+wall combination: that
+  // `wall` sat only 4m from P=(0,0.5,3) and spanned +-10m in y, so a
+  // correct cosine-weighted hemisphere around `up` genuinely put ~28-30%
+  // of its rays into it and >0.95 was never achievable there -- confirmed
+  // by isolating floor-only (measured exactly 1.0) from wall-only
+  // (reproduced the same ~0.70-0.73). That was the test's geometry being
+  // wrong, not the sampler (task-1-report.md has the full diagnosis), so
+  // the fix is to remove the wall from this case, not to lower the
+  // threshold: both thresholds stay >0.95/<0.05 because both answers are
+  // still exactly 1/0 analytically on this geometry.
+
+  // ---- Case group 2: a true 90-degree corner, its own geometry ----
+  // Floor (y=0) meeting a perpendicular wall (x=0), sampled from just
+  // inside the corner with the normal on the bisector. This one is not
+  // all-or-nothing -- the wall genuinely occludes a known fraction of the
+  // hemisphere -- so it needs a derived number and a real tolerance
+  // instead of a >0.95/<0.05 cliff. It is also the only case here
+  // sensitive to the sampling *distribution* rather than just whether the
+  // tangent basis is non-zero: see the perturbation note below.
   //
-  // KNOWN RESULT, left un-"fixed" deliberately (task-1-report.md has the
-  // full derivation): 'open hemisphere sees sky' fails, ~0.70-0.73 rather
-  // than >0.95, because `wall` is not actually inert for this check. It
-  // sits only 4m from P=(0,0.5,3) (the closest point on its z=-1 plane is
-  // (0,0.5,-1)) and spans y in [-10,10], so a correct cosine-weighted
-  // hemisphere around `up` genuinely puts ~28-30% of its (weighted) rays
-  // into it -- confirmed by isolating floor-only (visibility 1.0 exactly)
-  // from wall-only (reproduces the same ~0.70-0.73), and cross-checked
-  // against an independent analytic case (a true 90-degree floor/wall
-  // corner, bisector normal: cosine-weighted theory predicts exactly
-  // cos(45 deg) = 0.7071; this sampler measures 0.71-0.72 there over
-  // several 512-ray runs). The other three checks -- including
-  // 'hemisphere into the floor is blocked', which the same wall could in
-  // principle have spoiled the same way -- pass on every run. Changing
-  // `wall`'s placement, P, or the 0.95 threshold to force a 4/4 pass would
-  // just be moving the goalposts this task exists to guard against, so the
-  // geometry below is exactly what the brief specified, unmodified.
+  // Derivation. In the tangent frame visibility() builds around this N
+  // (T1=(0,0,-1), T2=(-.7071,.7071,0), both perpendicular to N via
+  // tangentBasis's own construction), a ray escapes iff it misses BOTH
+  // infinite planes, which reduces to lz >= |ly| in tangent space --
+  // independent of lx. Substituting Malley's method (r=sqrt(u1) on the
+  // unit disk, lz=sqrt(1-u1)) and integrating over theta:
+  //   P(escape) = (1/2pi) * integral[0,2pi] dtheta / (1 + sin^2 theta)
+  //             = (1/2pi) * (2pi/sqrt(2)) = 1/sqrt(2) = 0.70710678...
+  // This matches task-1-report.md's own number (0.7071) though not the
+  // formula it wrote down for it ("1 - sin(45deg)" evaluates to 0.2929,
+  // not 0.7071 -- a transcription slip in the report's prose, not in the
+  // number, which this derivation confirms independently).
+  //
+  // Geometry scale. Finite planes over-count escapes relative to the
+  // ideal above: a ray that grazes nearly parallel to a plane can cross
+  // its *infinite* extension beyond where the finite mesh (or maxDist)
+  // actually reaches, and gets counted as escaped when the idealized
+  // answer would still block it. Measured directly, mean visibility over
+  // 8-20 runs at 4096 rays: 20m planes / maxDist 50 (the original brief's
+  // scale) -> 0.720; 200m/300 -> 0.712-0.715; 4000m/5000 -> 0.7085. The
+  // bias shrinks with scale but is still present at 200m -- 200m/maxDist
+  // 300 (used below) is where it's small enough to fold into the
+  // tolerance rather than dominate it.
+  //
+  // Tolerance. 20 runs at the exact parameters below (1024 rays): range
+  // 0.678-0.730, mean 0.7125, max deviation from the 0.70710678 target
+  // 0.0294, sample std 0.0138. 0.06 is ~2x that observed max and ~4.3
+  // sample-sigma -- comfortable headroom above both the Monte Carlo noise
+  // and the finite-geometry bias above -- while staying under a third of
+  // the gap to what a *wrong* distribution gives here: a sampler that
+  // draws z uniformly instead of cosine-weighting (a believable bug --
+  // exactly the "naive uniform-angle" answer this derivation is already
+  // contrasted against) measures 0.48-0.51 on this identical geometry,
+  // ~0.2 off. task-1-report.md's addendum has the perturbation test
+  // proving this specific assertion fails when it should.
   const selfTest = function () {
     const T = THREE;
+
     const floor = new T.Mesh(new T.PlaneGeometry(20, 20).rotateX(-Math.PI / 2));
-    const wall = new T.Mesh(new T.PlaneGeometry(20, 20).translate(0, 0, -1));
-    const h = Sampler.build([floor, wall]);
+    const hFloor = Sampler.build([floor]);
     const P = new T.Vector3(0, 0.5, 3);
     const up = new T.Vector3(0, 1, 0), down = new T.Vector3(0, -1, 0);
-    const openSky = Sampler.visibility(P, up, 64, 50, h);
-    const intoFloor = Sampler.visibility(P, down, 64, 50, h);
+    const openSky = Sampler.visibility(P, up, 64, 50, hFloor);
+    const intoFloor = Sampler.visibility(P, down, 64, 50, hFloor);
+
+    const cornerFloor = new T.Mesh(new T.PlaneGeometry(200, 200).rotateX(-Math.PI / 2));
+    const cornerWall = new T.Mesh(new T.PlaneGeometry(200, 200).rotateY(Math.PI / 2));
+    const hCorner = Sampler.build([cornerFloor, cornerWall]);
+    const cornerP = new T.Vector3(0.3, 0.3, 0);
+    const cornerN = new T.Vector3(1, 1, 0).normalize();
+    const CORNER_EXPECTED = 1 / Math.sqrt(2);   // 0.70710678..., see derivation above
+    const CORNER_TOL = 0.06;                    // see "Tolerance" above
+    const cornerVis = Sampler.visibility(cornerP, cornerN, 1024, 300, hCorner);
+
     const results = [
       ['open hemisphere sees sky', openSky > 0.95, openSky],
       ['hemisphere into the floor is blocked', intoFloor < 0.05, intoFloor],
-      ['a downward ray hits the floor', Sampler.rayHit(P, down, 50, h) === true, null],
-      ['an upward ray escapes', Sampler.rayHit(P, up, 50, h) === false, null]
+      ['a downward ray hits the floor', Sampler.rayHit(P, down, 50, hFloor) === true, null],
+      ['an upward ray escapes', Sampler.rayHit(P, up, 50, hFloor) === false, null],
+      ['a 90-degree corner matches the cosine-weighted derivation',
+        Math.abs(cornerVis - CORNER_EXPECTED) < CORNER_TOL, cornerVis]
     ];
     const failed = results.filter((r) => !r[1]);
     console.log('[sampler] selfTest', failed.length ? 'FAILED' : 'passed', results);

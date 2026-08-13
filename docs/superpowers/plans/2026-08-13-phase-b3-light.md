@@ -117,35 +117,69 @@ that could not.
 Add to `tour/sampler.js`, exported as `Sampler.selfTest()`:
 
 ```js
-  // Geometry with a known answer: a single large floor plane under the
-  // sample point. A hemisphere sampled from just above it, pointing up,
-  // should see nothing -- visibility 1. Sampled from just above it pointing
-  // DOWN, every ray hits immediately -- visibility 0. A point in the corner
-  // of two perpendicular walls sees roughly half the hemisphere.
+  // Floor-only geometry: a hemisphere sampled just above it, pointing up,
+  // sees nothing above it -- visibility exactly 1, no occluder exists to
+  // sample. Pointed DOWN, every ray hits the floor immediately --
+  // visibility 0. A single ray answers the last two the same way,
+  // deterministically. These are analytic: they do not depend on ray
+  // count, jitter or the apartment, so a wrong answer means the sampler is
+  // wrong rather than under-sampled.
   //
-  // These three are chosen because they are analytic: they do not depend on
-  // ray count, jitter or the apartment, so a wrong answer means the sampler
-  // is wrong rather than under-sampled.
+  // A true 90-degree corner (floor y=0, wall x=0, both large squares) is
+  // its own case with its own geometry: sampled from just inside the
+  // corner with the normal on the bisector, the escaping fraction is not
+  // 0 or 1 but a specific cosine-weighted value, 1/sqrt(2) = 0.70710678,
+  // derived by integrating the cosine-weighted hemisphere density against
+  // the two half-planes -- see tour/sampler.js for the full derivation and
+  // the measurement the 0.06 tolerance is drawn from.
   selfTest: function () {
     const T = THREE;
+
     const floor = new T.Mesh(new T.PlaneGeometry(20, 20).rotateX(-Math.PI / 2));
-    const wall = new T.Mesh(new T.PlaneGeometry(20, 20).translate(0, 0, -1));
-    const h = Sampler.build([floor, wall]);
+    const hFloor = Sampler.build([floor]);
     const P = new T.Vector3(0, 0.5, 3);
     const up = new T.Vector3(0, 1, 0), down = new T.Vector3(0, -1, 0);
-    const openSky = Sampler.visibility(P, up, 64, 50, h);
-    const intoFloor = Sampler.visibility(P, down, 64, 50, h);
+    const openSky = Sampler.visibility(P, up, 64, 50, hFloor);
+    const intoFloor = Sampler.visibility(P, down, 64, 50, hFloor);
+
+    const cornerFloor = new T.Mesh(new T.PlaneGeometry(200, 200).rotateX(-Math.PI / 2));
+    const cornerWall = new T.Mesh(new T.PlaneGeometry(200, 200).rotateY(Math.PI / 2));
+    const hCorner = Sampler.build([cornerFloor, cornerWall]);
+    const cornerP = new T.Vector3(0.3, 0.3, 0);
+    const cornerN = new T.Vector3(1, 1, 0).normalize();
+    const cornerVis = Sampler.visibility(cornerP, cornerN, 1024, 300, hCorner);
+
     const results = [
       ['open hemisphere sees sky', openSky > 0.95, openSky],
       ['hemisphere into the floor is blocked', intoFloor < 0.05, intoFloor],
-      ['a downward ray hits the floor', Sampler.rayHit(P, down, 50, h) === true, null],
-      ['an upward ray escapes', Sampler.rayHit(P, up, 50, h) === false, null]
+      ['a downward ray hits the floor', Sampler.rayHit(P, down, 50, hFloor) === true, null],
+      ['an upward ray escapes', Sampler.rayHit(P, up, 50, hFloor) === false, null],
+      ['a 90-degree corner matches the cosine-weighted derivation',
+        Math.abs(cornerVis - 1 / Math.sqrt(2)) < 0.06, cornerVis]
     ];
     const failed = results.filter((r) => !r[1]);
     console.log('[sampler] selfTest', failed.length ? 'FAILED' : 'passed', results);
     return failed.length === 0;
   }
 ```
+
+**Corrected after task 1 shipped** (task-1-report.md's addendum has the
+full story — why this was wrong, not just that it was). The version above
+replaces what this step originally specified, which put a `wall` plane
+only 4m from the sample point into the *same* geometry as the open-sky
+check, spanning ±10m. A correct cosine-weighted hemisphere around `up`
+then had ~28-30% of it genuinely occluded by that wall, so
+`openSky > 0.95` could never pass there on *any* implementation, correct
+or broken — the test's geometry was wrong, not the sampler. Task 1
+diagnosed this (floor-only measured exactly 1.0 in isolation; wall-only
+reproduced the failing ~0.70-0.73) and cross-checked it against an
+independent 90-degree-corner case, which the fix above promotes into its
+own assertion instead of folding it back into the open-sky one. The two
+floor-only thresholds (`>0.95`/`<0.05`) are unchanged from the original —
+they were always analytically correct; only the *other* geometry sharing
+their BVH was wrong. Do not "fix" a future failure here by loosening
+either threshold or the corner's tolerance — reach for the geometry first,
+the same way this correction did.
 
 - [ ] **Step 3: Run it against nothing and watch it fail**
 
@@ -164,7 +198,10 @@ materials — it takes geometry and returns numbers.
 
 - [ ] **Step 5: Run the self-test again**
 
-Expected: `passed`, all four. Report the numbers, not just the verdict.
+Expected: `passed`, all five (the corrected Step 2 has five assertions, not
+four — the corner case is its own, added when the open-sky case's original
+geometry turned out to be unachievable, not a replacement for it). Report
+the numbers, not just the verdict.
 
 - [ ] **Step 6: Confirm it is not yet wired to anything**
 
