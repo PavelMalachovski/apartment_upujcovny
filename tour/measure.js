@@ -56,7 +56,19 @@ window.__measure = function () {
     a.renderer.setPixelRatio(1);
     a.renderer.setSize(W, H, false);
     a.camera.aspect = W / H;
-    if (window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
+    // ?fov=legacy reproduces the pre-fix camera (fixed 72 vertical, aspect-
+    // only, no per-photograph fov): the PR #27 merge gate's thresholds
+    // (serenity <=16.58, kings-court <=22.44) were themselves measured
+    // under that exact camera -- see "What this means for the merge
+    // condition" in docs/superpowers/metrics/README.md. Removed once, in
+    // commit 0181023, on the belief task 9's gate reading was the last time
+    // this would be needed; restored here because it wasn't -- plan 3
+    // (docs/superpowers/plans/2026-08-13-phase-b3-light.md) re-runs this
+    // same gate after every task that touches light, and each of those
+    // re-runs needs this exact camera to stay comparable to the threshold.
+    // Not a one-off bridge this time: a permanent capability.
+    const legacyFov = new URLSearchParams(location.search).get('fov') === 'legacy';
+    if (!legacyFov && window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
     a.camera.updateProjectionMatrix();
     const cv = document.createElement('canvas');
     cv.width = W;
