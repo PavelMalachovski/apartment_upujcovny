@@ -2384,7 +2384,7 @@
    "g": 0,
    "yaw": 270,
    "compare": true,
-   "vfov": 85
+   "vfov": 140
   },
   {
    "file": "17.webp",
@@ -2402,8 +2402,7 @@
    "z": 1.7,
    "g": 0,
    "yaw": 2.9,
-   "compare": true,
-   "vfov": 100
+   "compare": true
   },
   {
    "file": "3.webp",
@@ -2675,6 +2674,6 @@
   "title": "Kings Court Apartment",
   "description": "Two-level apartment with a roof terrace",
   "photoBase": "photos/kings-court/",
-  "photoFovLong": 130
+  "photoFovLong": 120
  }
 }
