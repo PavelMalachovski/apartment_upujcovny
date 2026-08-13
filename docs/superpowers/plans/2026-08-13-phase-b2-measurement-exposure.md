@@ -63,7 +63,7 @@ record of six r128→r185 mechanisms and two accepted residuals.
 
 | File | Responsibility |
 |---|---|
-| `tour/compare.js` | **New.** Renders a compare spot beside its photograph with a draggable divider. `?compare=1` acceptance mode; visitor control added in task 7 |
+| `tour/compare.js` | **New.** Renders a compare spot beside its photograph with a draggable divider. `?compare=1` acceptance mode; visitor control added in task 8 |
 | `tour/measure.js` | Modified: derives `camera.fov` per photograph; hides markers during capture |
 | `tour/refshots.js` | Modified: hides markers during capture, same helper |
 | `tour/apartments/*.json` | `meta.photoFovLong`, `photoSpots[].vfov`, `exposure` |
@@ -426,7 +426,7 @@ where the fov is chosen:
 
 ```js
     // ?fov=legacy reproduces the pre-fix behaviour (fixed 72 vertical,
-    // aspect-only) so task 4 can publish one bridging measurement against
+    // aspect-only) so task 5 can publish one bridging measurement against
     // the phase A numbers. Remove after that bridge is committed.
     const legacyFov = new URLSearchParams(location.search).get('fov') === 'legacy';
     if (!legacyFov && window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
@@ -454,7 +454,105 @@ git commit -m "Score each photograph at its own field of view, not a fixed 72 ve
 
 ---
 
-### Task 4: Re-baseline — the new zero, and the bridge
+### Task 4: Carry the pose classification into the data
+
+**Inserted after task 3 ran.** Task 3's classification found that most compare
+spots do not render the subject their photograph shows — **serenity 2 of 11
+pass, kings-court 8 of 14.** Those are camera-pose and modelling defects, not
+lens ones, and they are fatal to everything downstream: ΔE2000 and luminance
+both assume the rendered and photographed pixels are the same surface. Fitting
+exposure against a wardrobe compared to a sunlit door minimises error between
+unrelated things. This project already rejected that exact contamination once —
+`CLAUDE.md` records the palette task measuring *worse* than doing nothing
+because it sampled illumination as albedo.
+
+**Do not delete the failing spots.** They are the only automated trail of the
+defects they expose — serenity's living-room cluster fails because of
+observation B1 (a punched window where the flat has a floor-to-ceiling sliding
+door), and kings-court's `14.webp` fails because Bathroom 2's shower was never
+modelled at all: none of that config's four `type: "shower"` entries fall
+inside the room's bounds. Delete the spots and those defects become invisible,
+and a future regression there goes undetected.
+
+Record the classification as data instead, and let the scorers exclude by
+construction.
+
+**Files:**
+- Modify: `tour/apartments/serenity.json`, `kings-court.json` — add
+  `"poseVerified": true|false` to every `compare`-flagged spot
+- Modify: `tools/delta_e.py`, `tools/luminance.py`, `tools/residual.py`
+- Modify: `docs/superpowers/metrics/README.md`
+
+**Interfaces:**
+- Produces: `photoSpots[].poseVerified` — absent means **true**, so an
+  apartment nobody has classified keeps its current behaviour rather than
+  silently scoring zero spots.
+
+- [ ] **Step 1: Write the classification into the configs**
+
+Take it from task 3's table in
+`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`.
+Serenity passes `1.webp` and `11.webp`; kings-court passes `3, 7, 8, 11, 12,
+13, 19, 20` and fails `14` and `17` among others. Copy the table's verdicts —
+do not re-judge them here.
+
+Add a one-line `"poseNote"` to each failing spot saying what it actually
+renders, so the next reader does not have to re-derive it.
+
+- [ ] **Step 2: Teach the scorers to skip unverified spots**
+
+In each of the three Python tools, where spots are selected for scoring, skip
+any whose `poseVerified` is explicitly `false`:
+
+```python
+def scorable(spot):
+    """Spots whose render and photograph show the same subject.
+
+    A spot that fails pose verification photographs one thing and renders
+    another, so scoring it measures the mismatch rather than the render.
+    Absent key means verified: an unclassified apartment keeps its old
+    behaviour instead of silently scoring nothing.
+    """
+    return spot.get('compare') and spot.get('poseVerified', True)
+```
+
+Print the count of skipped spots in each tool's output. A metric that silently
+drops two thirds of its population is worse than one that reports it.
+
+- [ ] **Step 3: Prove the filter works and can fail**
+
+```bash
+python tools/delta_e.py --apt serenity --phase b2-poseverified
+```
+
+Expected: it scores **2** spots for serenity and says so, and **8** for
+kings-court. Then flip one spot's `poseVerified` to `true` temporarily,
+re-run, confirm the count rises by one, and put it back. A filter that cannot
+be shown to change the population is not a filter.
+
+- [ ] **Step 4: Record the asymmetry, prominently**
+
+In `metrics/README.md`: serenity's number now rests on **2 spots**,
+kings-court's on **8**. They are not equally trustworthy and must never be
+compared as if they were. State it where the numbers are, not in a footnote.
+
+- [ ] **Step 5: Hand the defects forward**
+
+Add to `metrics/README.md` a short list of what the failing spots exposed —
+serenity's living-room cluster (B1, plan 4 owns it), kings-court's missing
+Bathroom 2 shower, and the spots whose pose is simply wrong. Plan 4 fixes the
+geometry and re-verifies; this plan only stops measuring through them.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add tour/apartments/ tools/ docs/superpowers/metrics/
+git commit -m "Score only the spots whose render and photograph show the same subject"
+```
+
+---
+
+### Task 5: Re-baseline — the new zero, and the bridge
 
 **Files:**
 - Modify: `docs/superpowers/metrics/README.md`
@@ -507,7 +605,7 @@ git commit -m "Re-baseline against a correct field of view and end the phase A s
 
 ---
 
-### Task 5: Decide horkyone-10, explicitly
+### Task 6: Decide horkyone-10, explicitly
 
 It has two photo spots and **none flagged `compare`**, so there is nothing to
 score it against and nothing to fit an exposure to. Plan 1 left this open on
@@ -542,7 +640,7 @@ decision nobody made.
 
 ---
 
-### Task 6: Clear the compensation, then fit exposure and bloom together
+### Task 7: Clear the compensation, then fit exposure and bloom together
 
 The task the whole plan exists for.
 
@@ -642,7 +740,7 @@ with one bathroom highlight crossing. Set threshold and strength so the
 fraction over threshold is single-digit percent at most positions, then
 **look at the frames** and confirm it reads as a glint.
 
-- [ ] **Step 5: Fit horkyone-10 by whichever criterion task 5 decided**
+- [ ] **Step 5: Fit horkyone-10 by whichever criterion task 6 decided**
 
 - [ ] **Step 6: Write the values into the configs and `post.js`**
 
@@ -661,7 +759,7 @@ ones comparable to 16.58 and 22.44.
 
 ---
 
-### Task 7: The visitor-facing compare control
+### Task 8: The visitor-facing compare control
 
 Deliberately last of the feature work: a "compare with the photo" button is a
 trust argument, and it is only worth making once the render is worth showing.
@@ -682,7 +780,7 @@ trust argument, and it is only worth making once the render is worth showing.
 
 ---
 
-### Task 8: The gate, and the merge decision
+### Task 9: The gate, and the merge decision
 
 **Files:**
 - Modify: `tour/index.html` (version bump, after the last code edit)
