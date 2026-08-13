@@ -2,7 +2,9 @@
 
 Mean CIEDE2000 (ΔE2000) between the render and the real photograph, over
 an 8×8 grid of cell-mean colours, at the 11 Serenity photo spots flagged
-`compare`. Raw data for every run is the sibling `*.json` files in this
+`compare` (of which 2 currently pass pose verification — see "Pose
+verification" below, this restriction postdates everything in "The
+trend"). Raw data for every run is the sibling `*.json` files in this
 directory; `tools/delta_e.py` produces them, `tools/residual.py` produces
 the decomposition below.
 
@@ -10,6 +12,85 @@ the decomposition below.
 lens, exposure and furniture model — an 8×8 grid mean will never reach
 zero, and it isn't supposed to. Only the *trend* between phases carries
 information.
+
+## Pose verification (phase B2)
+
+Every `compare`-flagged photo spot was classified by whether its render
+and its photograph show the *same room content* — subject, not lens, not
+exposure. Most do not: **serenity 2 of 11 pass, kings-court 8 of 14**
+(classification and evidence:
+`.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`).
+The failures are camera-pose and modelling defects, not lens ones, and
+they are fatal to everything this directory measures — ΔE2000, luminance
+and the residual decomposition all assume the rendered and photographed
+pixels are the same surface. Scoring through a mismatched spot measures
+the mismatch, not the render — the exact contamination the palette task
+already showed makes a metric *worse* than doing nothing (`CLAUDE.md`,
+the `palette` config key).
+
+The verdict is recorded as data: `photoSpots[].poseVerified`
+(`true`/`false`) in `serenity.json` and `kings-court.json`, with a
+`poseNote` on every failing spot describing what it actually renders so
+the next reader doesn't have to re-derive it. **Absent means verified** —
+an apartment nobody has classified yet (horkyone-10) keeps scoring every
+`compare` spot it has, instead of silently scoring zero. `tools/delta_e.py`,
+`tools/luminance.py` and `tools/residual.py` all skip `poseVerified: false`
+spots by construction and print how many they skipped.
+
+**Serenity's number now rests on 2 spots (`1.webp`, `11.webp`). Kings-court's
+rests on 8 (`3, 7, 8, 11, 12, 13, 19, 20`). These are not equally
+trustworthy and must never be read as comparable to each other, or to the
+trend table below** — a 2-spot mean swings on a single frame; an 8-spot
+mean is only somewhat steadier; no error bar accompanies either. Proof run
+that the filter is live, 2026-08-13 (`serenity-b2-poseverified.json`,
+`kings-court-b2-poseverified.json` — a filter check, not a new baseline;
+task 5 draws that line):
+
+| Apartment | Scored / total compare spots | mean ΔE2000 |
+|---|---:|---:|
+| serenity | 2 / 11 | 14.95 |
+| kings-court | 8 / 14 | 19.78 |
+
+Every ΔE2000/luminance number elsewhere in this file, and every other
+`*.json` file already in this directory (`serenity-baseline.json` through
+`serenity-a6-palette-fix2.json`, every `kings-court-*.json`), predates this
+filter and was scored over the *full*, unverified spot set (11 and 14
+respectively) — none of it was retroactively recomputed. Task 5 draws the
+line between that series and the pose-verified one.
+
+### What the failing spots exposed
+
+Marked `poseVerified: false` with a `poseNote`, not deleted and not left
+unflagged — deleting them would make these defects invisible to the
+metric, and a future regression there would go undetected:
+
+- **Serenity's Living Room cluster (`3.webp`, `4.webp`, `9.webp`)** —
+  observation B1 (`docs/PHASE-B-OBSERVATIONS.md`): the flat has a
+  floor-to-ceiling sliding door with sheer curtains; the model has a
+  punched window. No camera angle reproduces the photograph. Plan 4 owns
+  the fix.
+- **Kings-court's `14.webp` (Bathroom 2)** — none of the config's four
+  `type: "shower"` furniture entries fall inside Bathroom 2's bounds
+  (x 8.8–11.4, z 0–2.6); the photograph's actual subject was never
+  modelled here. Not the same defect as observation B3's near-blank
+  marble walls — task 3 checked and ruled that out for this spot
+  specifically (the render is a fully lit tub, just the wrong subject) —
+  the geometry itself is missing, not the material.
+- **Kings-court's `4.webp` (Coffee corner)** — observation B4: a
+  product-detail shot of a coffee machine the model never built; the
+  render is a plain wall regardless of fov.
+- **Spots whose recorded pose is simply wrong** — no fov value
+  reconciles them with their photograph at any tested zoom (each swept
+  across three or more widely-spaced values; most spanned 50°–170°
+  vertical, kings-court's `2.webp` specifically 80°–130° — see each
+  spot's own `poseNote` for its tested range): serenity `2.webp`,
+  `5.webp`, `6.webp`, `7.webp`, `8.webp`, `10.webp`; kings-court
+  `2.webp`, `10.webp`, `17.webp`, `18.webp`. These need position/yaw
+  recalibration, not a geometry fix or a metric change, and are not
+  owned by this plan.
+
+Plan 4 fixes the geometry defects above and re-verifies against them;
+this plan only stops measuring through them in the meantime.
 
 ## The trend
 

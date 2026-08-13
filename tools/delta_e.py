@@ -86,6 +86,17 @@ def cell_means(path):
     return srgb_to_lab(arr)
 
 
+def scorable(spot):
+    """Spots whose render and photograph show the same subject.
+
+    A spot that fails pose verification photographs one thing and renders
+    another, so scoring it measures the mismatch rather than the render.
+    Absent key means verified: an unclassified apartment keeps its old
+    behaviour instead of silently scoring nothing.
+    """
+    return spot.get('compare') and spot.get('poseVerified', True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--apt', required=True)
@@ -94,12 +105,20 @@ def main():
 
     cfg = json.load(open(os.path.join(ROOT, 'tour', 'apartments', args.apt + '.json'),
                          encoding='utf-8'))
-    spots = [s for s in cfg['photoSpots'] if s.get('compare')]
-    if not spots:
+    compare_spots = [s for s in cfg['photoSpots'] if s.get('compare')]
+    if not compare_spots:
         raise SystemExit(
             'no compare-flagged photo spots for apartment "%s" -- this '
             'metric only exists for apartments with photographs flagged '
-            '`compare` in their photoSpots (currently just serenity)' % args.apt)
+            '`compare` in their photoSpots' % args.apt)
+    spots = [s for s in compare_spots if scorable(s)]
+    skipped = len(compare_spots) - len(spots)
+    print('scoring %d of %d compare-flagged spots (%d skipped: failed pose verification)'
+          % (len(spots), len(compare_spots), skipped))
+    if not spots:
+        raise SystemExit(
+            'all %d compare-flagged spots for apartment "%s" failed pose '
+            'verification -- nothing left to score' % (len(compare_spots), args.apt))
     rows = []
     for s in spots:
         photo = os.path.join(ROOT, 'tour', cfg['meta']['photoBase'], s['file'])
@@ -122,6 +141,9 @@ def main():
         'phase': args.phase,
         'mean': mean,
         'spots': rows,
+        'scored': len(spots),
+        'compareTotal': len(compare_spots),
+        'skippedPoseVerification': skipped,
         'caveat': ('Absolute values are meaningless: render and photograph differ in '
                    'lens, exposure and furniture model. Only the trend between phases '
                    'carries information.')

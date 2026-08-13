@@ -2320,7 +2320,9 @@
    "z": 5.4,
    "g": 0,
    "yaw": 99,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders a curtain wall with the TV wall at a steep angle at every fov 80-130 deg; not the photo's composition."
   },
   {
    "file": "7.webp",
@@ -2329,7 +2331,8 @@
    "z": 2.0,
    "g": 0,
    "yaw": 350,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "20.webp",
@@ -2338,7 +2341,8 @@
    "z": 4.6,
    "g": 0,
    "yaw": -27,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "4.webp",
@@ -2347,7 +2351,9 @@
    "z": 1.8,
    "g": 0,
    "yaw": 0,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders a featureless beige wall -- the recorded camera isn't aimed at the counter at any zoom (observation B4)."
   },
   {
    "file": "8.webp",
@@ -2356,7 +2362,8 @@
    "z": 5.7,
    "g": 0,
    "yaw": -5.7,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "11.webp",
@@ -2365,7 +2372,8 @@
    "z": 4.6,
    "g": 0,
    "yaw": 144,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "12.webp",
@@ -2374,7 +2382,8 @@
    "z": 5.8,
    "g": 0,
    "yaw": 8.6,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "14.webp",
@@ -2383,7 +2392,9 @@
    "z": 1.35,
    "g": 0,
    "yaw": 270,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders a full ceiling-to-floor room shot of the tub and both walls; the photo is a tight shower-fixture crop, and none of the config's four shower entries fall inside Bathroom 2's bounds (8.8-11.4, 0-2.6) -- the shower was never modelled here."
   },
   {
    "file": "17.webp",
@@ -2392,7 +2403,9 @@
    "z": 2.6,
    "g": 0,
    "yaw": 180,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders a blank marble wall at every fov 50-170 deg -- no value shows the mirror or sink; a pose problem, not fov."
   },
   {
    "file": "19.webp",
@@ -2401,7 +2414,8 @@
    "z": 1.7,
    "g": 0,
    "yaw": 2.9,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "3.webp",
@@ -2410,7 +2424,8 @@
    "z": 4.1,
    "g": 3.1,
    "yaw": 270,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "10.webp",
@@ -2419,7 +2434,9 @@
    "z": 5.6,
    "g": 3.1,
    "yaw": 178,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders a blank wall at every fov tested."
   },
   {
    "file": "13.webp",
@@ -2428,7 +2445,8 @@
    "z": -0.2,
    "g": 3.1,
    "yaw": 5.7,
-   "compare": true
+   "compare": true,
+   "poseVerified": true
   },
   {
    "file": "18.webp",
@@ -2437,7 +2455,9 @@
    "z": 4.9,
    "g": 2.98,
    "yaw": 216,
-   "compare": true
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Renders the wood railing and sky; the rattan seating set the photo is centred on never appears."
   }
  ],
  "areas": [
