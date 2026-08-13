@@ -173,6 +173,26 @@ by geometry and camera-pose correctness (task 3), not by this metric, so
 this is a population change riding along with the FOV bridge, not a
 resemblance change.
 
+### What this means for the merge condition
+
+PR #27's merge condition is serenity ≤ 16.58 and kings-court ≤ 22.44,
+measured in legacy mode (`docs/superpowers/plans/2026-08-13-phase-b2-measurement-exposure.md`,
+Task 9 Step 2). Both thresholds were scored over the full, marker-visible,
+unverified-pose population — the population of the "+ markers hidden, same
+spots" column above, not the poseVerified-filtered one. **17.14 and 22.12
+are the numbers comparable to 16.58 and 22.44; 15.99 and 19.80 are not** —
+the same population gap already noted above between 15.99/19.80 and plan
+1's 17.12/22.09: a smaller population, not a better render.
+
+Read on the comparable population, **serenity's 17.14 is above its 16.58
+ceiling and fails**, by 0.56 — not the pass 15.99 implies. Kings-court's
+22.12 is inside 22.44, but by 0.32, not the 2.64 that 19.80 suggests. No
+apartment JSON or rendering code changed to produce any number in this
+section — only the capture camera and the scorer's spot filter did. This
+is not a result: it is the ground the still-pending exposure/bloom re-fit
+starts from, and whoever closes that work owes this same population check
+before reading its own legacy-mode number against 16.58 / 22.44.
+
 ### What moved between the bridge and the new zero
 
 Holding the population and the marker-hiding fixed and changing only the
