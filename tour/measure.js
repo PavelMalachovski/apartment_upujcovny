@@ -52,9 +52,15 @@ window.__measure = function () {
     // ratio has to come back before that final resize for the live view
     // to render at its normal density again.
     const prevRatio = a.renderer.getPixelRatio();
+    const prevFov = a.camera.fov;
     a.renderer.setPixelRatio(1);
     a.renderer.setSize(W, H, false);
     a.camera.aspect = W / H;
+    // ?fov=legacy reproduces the pre-fix behaviour (fixed 72 vertical,
+    // aspect-only) so task 4 can publish one bridging measurement against
+    // the phase A numbers. Remove after that bridge is committed.
+    const legacyFov = new URLSearchParams(location.search).get('fov') === 'legacy';
+    if (!legacyFov && window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
     a.camera.updateProjectionMatrix();
     const cv = document.createElement('canvas');
     cv.width = W;
@@ -71,6 +77,7 @@ window.__measure = function () {
       cv.getContext('2d').drawImage(a.renderer.domElement, 0, 0, W, H);
     });
     a.renderer.setPixelRatio(prevRatio);
+    a.camera.fov = prevFov;
     return cv.toDataURL('image/jpeg', 0.92);
   }
 

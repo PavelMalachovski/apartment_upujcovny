@@ -87,6 +87,24 @@ function loadClassic(src) {
   for (const s of cfg.spawns) s.yaw = rad(s.yaw);
   for (const p of cfg.photoSpots || []) p.yaw = rad(p.yaw);
 
+  // Per-photograph field of view. The capture camera's fov was fixed at 72
+  // vertical while only the aspect changed, so 16:9 photographs were scored
+  // against a 104.5-degree horizontal render and portrait ones against 55.
+  // meta.photoFovLong is the angle across the frame's LONG edge, one value
+  // per apartment because one camera shot the set; per-spot vfov overrides.
+  const DEG = Math.PI / 180;
+  window.__spotFov = function (spot, aspect) {
+    if (spot && typeof spot.vfov === 'number' && spot.vfov > 0) return spot.vfov;
+    const long = cfg.meta && cfg.meta.photoFovLong;
+    if (!(typeof long === 'number' && long > 0 && long < 179)) return 72;
+    // landscape: long edge is horizontal, so convert to vertical through the
+    // aspect. portrait: the long edge IS vertical, use it directly.
+    if (aspect >= 1) {
+      return 2 * Math.atan(Math.tan(long * DEG / 2) / aspect) / DEG;
+    }
+    return long;
+  };
+
   window.APT = cfg;
 
   if (cfg.meta) {
