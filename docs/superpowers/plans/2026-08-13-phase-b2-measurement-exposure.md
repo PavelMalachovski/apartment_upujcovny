@@ -615,6 +615,13 @@ for another whole phase.
 **Files:**
 - Modify: `tour/apartments/horkyone-10.json` (only if the decision is to flag)
 - Modify: `docs/superpowers/metrics/README.md`
+- Modify: `tools/luminance.py` — **added to this task's scope during execution.**
+  Task 4 gave all three scorers the `scorable()` filter but only `delta_e.py`
+  and `residual.py` the empty-population guard, so an apartment whose compare
+  spots are all `poseVerified: false` raises `ZeroDivisionError` in
+  `luminance.py`. This task is the path that makes that reachable — flagging
+  horkyone-10's two spots and failing both produces exactly that state — so
+  the guard is fixed here rather than left for whoever trips it.
 
 - [ ] **Step 1: Look at the two photographs and the spots they claim**
 
