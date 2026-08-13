@@ -1,0 +1,77 @@
+{
+  "apartment": "serenity",
+  "phase": "b3-task1-baseline",
+  "mean": 16.87,
+  "meanFullPrecision": 16.866690909090906,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "poseVerified": true,
+      "deltaE": 19.3341
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 18.4396
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 17.447
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 14.4575
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "poseVerified": false,
+      "deltaE": 11.8444
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 17.0722
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 20.0344
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 12.5056
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 19.6654
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 22.0052
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "poseVerified": true,
+      "deltaE": 12.7282
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "note": "Same-environment control, captured on the unmodified pre-task code (git stash of tour/index.html + tour/main.js, main.js?v=92, no sampler.js/three-mesh-bvh) in this same session, to isolate this task's effect from cross-session/cross-machine variance against the historical serenity-b2-task9-legacy-allspots.json baseline (mean 16.57, a different session). Compare against serenity-b3-task1-legacy-allspots.json (mean 16.86, this task's code, same session): 0.005 full-precision difference, inside the +/-0.03-0.039 noise floor. The ~0.3 gap from the 16.57 historical figure is this session's own environment (GPU/driver/browser), present before this task's changes and reproduced here without them."
+}

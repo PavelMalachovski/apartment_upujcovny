@@ -13,6 +13,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { MeshBVH } from 'three-mesh-bvh';
 
 // Tells index.html's failure watchdog that the module graph resolved and this
 // entry is executing. Must be the first statement of the module body, and it
@@ -42,12 +43,12 @@ window.THREE = THREE;
 // the r128<->r185 gap of everything task 6 found -- see
 // docs/superpowers/metrics/r128-reference.md.
 THREE.ColorManagement.enabled = false;
-Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass });
+Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass, MeshBVH });
 
 // The classic scripts only declare classes and touch THREE inside functions,
 // so publishing the globals first is enough — but they must load in this
 // order, and they must load before initApp is called.
-const CLASSIC = ['post.js', 'bake.js', 'materials.js', 'builder.js',
+const CLASSIC = ['post.js', 'sampler.js', 'bake.js', 'materials.js', 'builder.js',
                  'controls.js', 'doll.js', 'validate.js', 'app.js'];
 
 function loadClassic(src) {

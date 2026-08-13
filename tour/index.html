@@ -190,7 +190,8 @@
 {
   "imports": {
     "three": "./lib/three-0.185.0/build/three.module.js",
-    "three/addons/": "./lib/three-0.185.0/examples/jsm/"
+    "three/addons/": "./lib/three-0.185.0/examples/jsm/",
+    "three-mesh-bvh": "./lib/three-mesh-bvh-0.9.14/src/index.js"
   }
 }
 </script>
@@ -250,7 +251,7 @@ window.addEventListener('error', function (ev) {
   window.__tourModuleFailed(ev && ev.message);
 });
 </script>
-<script type="module" src="main.js?v=92"
+<script type="module" src="main.js?v=96"
         onerror="__tourModuleFailed('failed to fetch ' + (this.getAttribute('src') || 'main.js') + ' or one of its imports')"></script>
 </body>
 </html>
