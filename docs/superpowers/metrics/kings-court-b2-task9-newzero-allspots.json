@@ -1,0 +1,96 @@
+{
+  "apartment": "kings-court",
+  "phase": "b2-task9-newzero",
+  "mean": 18.35,
+  "meanFullPrecision": 18.347392627464398,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "poseVerified": false,
+      "deltaE": 18.05
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "poseVerified": true,
+      "deltaE": 10.38
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "poseVerified": true,
+      "deltaE": 14.23
+    },
+    {
+      "file": "4.webp",
+      "name": "Coffee corner",
+      "poseVerified": false,
+      "deltaE": 25.83
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "poseVerified": true,
+      "deltaE": 11.89
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "poseVerified": true,
+      "deltaE": 17.03
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "poseVerified": true,
+      "deltaE": 18.37
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "poseVerified": false,
+      "deltaE": 25.05
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "poseVerified": false,
+      "deltaE": 12.08
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "poseVerified": true,
+      "deltaE": 21.15
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "poseVerified": true,
+      "deltaE": 17.28
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "poseVerified": false,
+      "deltaE": 17.03
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "poseVerified": true,
+      "deltaE": 25.85
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "poseVerified": false,
+      "deltaE": 22.64
+    }
+  ],
+  "scored": 14,
+  "compareTotal": 14,
+  "note": "ALL-SPOT population: every compare-flagged spot regardless of poseVerified. This, not the poseVerified-filtered population, is what PR #27's merge condition (serenity <=16.58, kings-court <=22.44) was scored against -- see metrics/README.md, \"What this means for the merge condition\". Produced by a one-off script (scratchpad/all_spots_delta_e.py) that imports delta_e.py's own cell_means()/ciede2000() unmodified, not a committed tool.",
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

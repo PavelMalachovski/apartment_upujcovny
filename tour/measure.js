@@ -56,11 +56,7 @@ window.__measure = function () {
     a.renderer.setPixelRatio(1);
     a.renderer.setSize(W, H, false);
     a.camera.aspect = W / H;
-    // ?fov=legacy reproduces the pre-fix behaviour (fixed 72 vertical,
-    // aspect-only) so task 4 can publish one bridging measurement against
-    // the phase A numbers. Remove after that bridge is committed.
-    const legacyFov = new URLSearchParams(location.search).get('fov') === 'legacy';
-    if (!legacyFov && window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
+    if (window.__spotFov) a.camera.fov = window.__spotFov(spot, W / H);
     a.camera.updateProjectionMatrix();
     const cv = document.createElement('canvas');
     cv.width = W;

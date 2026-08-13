@@ -632,6 +632,203 @@ residual (it has been 0.1, converted, since the original task 7) — still out
 of scope for both that task and this fix wave, still narrated here rather
 than silently left for a future reader to trip over.
 
+## Task 9: the gate, and the merge decision
+
+Everything above this section was recorded by tasks 4–7. This section is the
+gate itself — re-measured independently rather than trusted from the last
+commit, because the merge decision is the one place in this plan where
+"probably still true" isn't good enough.
+
+### Structural — clean on all three, method attached
+
+`window.__issues` empty and zero console errors on all three apartments.
+Draw calls at each apartment's own `start` position, both methods (naive
+undercounts the post chain — see `r128-reference.md`'s own rule to always
+name the method):
+
+| Apartment | Naive | Full chain | Budget |
+|---|---:|---:|---:|
+| serenity (3.6, 0.75, yaw 178) | 57 | **72** | ≤400 |
+| kings-court (22.6, 5, yaw 90) | 150 | **165** | ≤400 |
+| horkyone-10 (7.75, 5.85, yaw 0) | 68 | **83** | ≤400 |
+
+kings-court's and horkyone-10's full-chain figures reproduce
+`r128-reference.md`'s own "Structural gate after the fix wave" table
+(165, 83) exactly. Serenity's 72 matches that same table rather than
+`CLAUDE.md` hard rule 4's older 69 — the two numbers predate and postdate
+the whole-branch review's difference 6 (the direct-light π correction)
+respectively; 72 is the one this session reproduced independently.
+
+Sky-leak raycasts (markers hidden first — an unhidden `Points` marker
+sitting 0.3 m above a spawn otherwise returns a false "hit" before the
+raycast ever reaches the ceiling) from every spawn, all three apartments:
+every indoor spawn hits a mesh. Only the apartments' actual terraces report
+`NOTHING ABOVE` (kings-court's Terrace, horkyone-10's Terrace — both open to
+the sky by design); serenity's Pool Terrace hits a canopy at 1.05 m, same as
+every prior measurement of that spot.
+
+Walk simulations: kings-court's two established regression routes reproduce
+their recorded endpoints exactly — entry hall (22.6, 5, ground 0) westbound
+6 s → **x 13.14**, ground 0; upper hall (13.6, 0.9, ground 3.1) westbound 6 s
+→ **x 4.44**, ground 3.1 (both match `r128-reference.md`'s own figures to two
+decimal places). Serenity (start, forward 6 s → 3.24, 2.13, ground 0, moved
+1.43 m) and horkyone-10 (start, forward 6 s → 7.75, 1.26, ground 0, moved
+4.58 m) both moved a plausible distance without producing `NaN` or getting
+stuck; neither has a standing precedent route to reproduce exactly.
+
+### The merge condition, re-measured fresh
+
+**Population, restated because getting this wrong quietly is the one
+failure this task cannot afford:** the merge condition (serenity ≤16.58,
+kings-court ≤22.44) was set over the **all-spot** population — every
+`compare`-flagged spot, pose-verified or not — not the pose-verified
+subset. See "What this means for the merge condition" above. Every number
+in this subsection was captured fresh this task (`?measure=1`, `await
+window.__bakeReady` first, per apartment per mode — old renders on disk are
+never trusted for a gate reading) and scored with `tools/delta_e.py`
+(pose-verified) and the same one-off all-spot technique tasks 5 and 7 used
+(`scratchpad/all_spots_delta_e.py`, not committed — imports `delta_e.py`'s
+own `cell_means()`/`ciede2000()` unmodified over every compare-flagged spot).
+
+| Apartment | Mode | Population | mean ΔE2000 | File |
+|---|---|---|---:|---|
+| serenity | `&fov=legacy` | poseVerified 2/11 | 15.66 | `serenity-b2-task9-legacy.json` |
+| serenity | `&fov=legacy` | **all-spot 11/11** | **16.57** | `serenity-b2-task9-legacy-allspots.json` |
+| serenity | `&fov=legacy` (repeat) | poseVerified 2/11 | 15.68 | `serenity-b2-task9-legacy-repeat.json` |
+| serenity | `&fov=legacy` (repeat) | **all-spot 11/11** | **16.56** | `serenity-b2-task9-legacy-repeat-allspots.json` |
+| serenity | fixed (new-zero) | poseVerified 2/11 | 16.02 | `serenity-b2-task9-newzero.json` |
+| serenity | fixed (new-zero) | all-spot 11/11 | 16.88 | `serenity-b2-task9-newzero-allspots.json` |
+| kings-court | `&fov=legacy` | poseVerified 8/14 | 17.51 | `kings-court-b2-task9-legacy.json` |
+| kings-court | `&fov=legacy` | **all-spot 14/14** | **18.75** | `kings-court-b2-task9-legacy-allspots.json` |
+| kings-court | fixed (new-zero) | poseVerified 8/14 | 17.02 | `kings-court-b2-task9-newzero.json` |
+| kings-court | fixed (new-zero) | all-spot 14/14 | 18.35 | `kings-court-b2-task9-newzero-allspots.json` |
+
+**Serenity: 16.57, repeat 16.56, both ≤16.58 — margin 0.01 / 0.02 rounded.**
+At full precision (unrounded per-spot dE2000, averaged, not rounded first)
+the repeat run is **16.5550**, margin **0.025**; the first run's own
+full-precision figure wasn't recoverable (a scripting fix landed between the
+two captures and the render files carry no mode suffix, so the first run's
+frames were already overwritten by the time the fix existed — its rounded
+mean, 16.57, is unaffected and is what's cited). Both margins sit inside
+this metric's own documented repeat-run noise floor (±0.03 rounded / ±0.039
+full precision, `r128-reference.md`). This session's two numbers (16.57,
+16.56) run about 0.02 above task 7's own committed pair (16.55, 16.54) —
+itself within the noise floor, and the same shape of session-to-session
+drift `r128-reference.md` already attributes to `builder.js`'s procedural
+textures reshuffling their `Math.random()` seed on every fresh page load.
+Four independent measurements now exist (task 7's two, this task's two),
+**all four ≤16.58.** Not chased further, and nothing was tuned toward a
+better number — the instruction for this task is to report what's
+measured, not to improve it.
+
+**Kings-court: 18.75 ≤22.44 — margin 3.69.** Consistent with task 7's 18.77
+(margin 3.67) to within noise. Comfortable, not a close call.
+
+**What changed since task 7:** nothing upstream of the render. `exposure`
+in all three apartment JSONs is unchanged (serenity 0.326, kings-court 0.56,
+horkyone-10 0.45 — confirmed by reading the files, not assumed), `post.js`'s
+bloom constants are unchanged, no `compare`/`poseVerified` flag moved, no
+geometry moved (task 8 touched only `compare.js`/`app.js`/`index.html`, all
+UI). This section exists to prove that, not assert it — the numbers above
+are a fresh, independent re-derivation, not a copy of task 7's.
+
+### The judgement call, made explicitly
+
+**"Reaches parity within noise" is what serenity's number is — not "passes"
+and not "fails".** The numeric letter of the condition is satisfied: every
+one of four independent measurements across two sessions (task 7's and this
+one) landed at or under 16.58. But the margin (0.01–0.04 across those four
+readings) is the same order of magnitude as the metric's own documented
+repeat-run noise floor, which means the true population mean and the 16.58
+ceiling are not distinguishable from each other with the precision this
+metric has — a fifth measurement landing at 16.59 would not be a surprise
+and would not by itself prove a regression either.
+
+**I consider the merge condition met**, for three reasons rather than the
+arithmetic alone: (1) the arithmetic does hold, consistently, across every
+independent attempt to break it (repeat run, full-precision recompute, a
+separate session roughly two hours after task 7's, with task 8's UI work
+landed in between); (2) the pass is not manufactured — task
+7's exposure refit closed a real, ~0.6-point gap (17.14 pre-refit → ~16.55–
+16.57 now, see "What this means for the merge condition" above), so this is
+"a real fix landed exactly at the edge of measurement precision," not "a
+fix that didn't work being reported as if it did"; (3) the structural gate
+and horkyone-10's separate criterion (below) are both unambiguous, so the
+overall picture is not "everything is marginal," just this one number.
+
+**This does not survive a future regression, and the margin is not
+headroom.** Plan 4's own scope includes serenity's living-room geometry
+(observation B1) — the exact apartment sitting at this margin. The next
+change that touches serenity's render, however unrelated it looks, must
+re-run this exact check before assuming today's reading still holds in
+either direction. A margin this size is a statement about today, not a
+guarantee about tomorrow.
+
+### horkyone-10: the luminance criterion, reconfirmed
+
+Task 7 fitted horkyone-10 to exposure 0.45 on the criterion task 6 set —
+mean sRGB luminance within ±10 of the two fitted flats. Re-measured fresh
+this task (mean/p5 sRGB luminance 0–255, full post chain, 480×300, every
+`spawns` entry, pixels pooled across all spawns before computing the mean
+and 5th percentile — same method as `PHASE-B-OBSERVATIONS.md`'s original
+table and task 7's own remeasurement):
+
+| Apartment | exposure (confirmed unchanged) | mean L (this task) | mean L (task 7) |
+|---|---:|---:|---:|
+| serenity | 0.326 | 138.31 | 138.36 |
+| kings-court | 0.56 | 149.82 | 149.66 |
+| horkyone-10 | 0.45 | 143.25 | 143.78 |
+
+horkyone-10 vs. serenity: **+4.94** (task 7: +5.42). horkyone-10 vs.
+kings-court: **−6.57** (task 7: −5.88). Both comfortably inside ±10, both
+sessions. **Holds.** `window.__issues` stayed empty throughout.
+
+### Looked at the tours, not just the numbers
+
+Walked all three apartments (clean layout badge, no visible defects — no
+floating furniture, no blocked passages, no exposure blowout or crush) and
+stepped through `?compare=1`:
+
+- **Serenity `1.webp` (Bathroom) and `11.webp` (Bedroom)** — the two
+  poseVerified spots — both show genuinely the same room and camera pose as
+  their photograph: same mirror position and backlit-mirror highlight in
+  `1.webp`, same bed/window/headboard layout in `11.webp` (fabric pattern
+  and wall tone differ, expected content mismatch, not a pose one).
+- **Serenity `3.webp` (Living Room)** — observation B1, confirmed still
+  present exactly as documented: the photograph shows the dining nook
+  against a wall; the render shows the sofa and a wardrobe wall from the
+  same room. Different content, not a lens or exposure problem. Plan 4's
+  job; not chased here.
+- **Kings-court `7.webp` (Dining room)** — one of the eight poseVerified
+  spots — matches well: same table, chairs, pendant lights, kitchen beyond.
+- **Kings-court `14.webp` (Bathroom 2)** — the missing-shower defect,
+  confirmed still present: photograph shows a marble shower with a
+  rain-head and glass door, render shows a bathtub wall with no shower
+  geometry at all. Matches task 3's finding exactly. Plan 4's job.
+
+Nothing observed here changes the numeric decision above — the metric was
+already known to be blind to this defect class, and this pass exists to
+confirm nothing *new* is wrong, not to re-litigate what plan 4 owns.
+
+### The `?fov=legacy` bridge, removed
+
+`tour/measure.js` no longer reads the `fov` query parameter at all —
+removed after, not before, the last legacy-mode capture in this section.
+Confirmed functionally, not just by reading the diff: with `&fov=legacy`
+still in the URL (an inert query parameter now, harmless), a fresh capture
+scored **16.89** all-spot — matching the new-zero population (16.88), not
+the legacy one (16.56–16.57) — proving the code path is actually gone, not
+merely unreferenced. That verification capture was discarded, not committed
+(it exists to prove a removal, not to record a resemblance finding).
+
+### Decision
+
+**Gate met. PR #27 un-drafted.** Structural clean on all three, the ΔE2000
+gate satisfied on both scored apartments (serenity within noise of its
+ceiling, kings-court comfortably clear), horkyone-10's separate luminance
+criterion holds. The fragility above is carried into the PR body, not
+hidden by the word "passes."
+
 ## The trend
 
 | Stage | mean ΔE2000 | File |
