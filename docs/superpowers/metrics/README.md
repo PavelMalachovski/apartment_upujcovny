@@ -632,6 +632,16 @@ residual (it has been 0.1, converted, since the original task 7) — still out
 of scope for both that task and this fix wave, still narrated here rather
 than silently left for a future reader to trip over.
 
+**Closed by a later whole-branch review.** That pass found a second,
+undisclosed instance of the same problem in the same file: difference 2's
+table row also still called the bloom *threshold* `1.294` "Kept" — true of
+the migration this document records, not of what has shipped since task 7
+refit it to 1.8. Leaving the threshold error undisclosed while the strength
+error was at least narrated here was judged not a coherent deferral, so
+both are now corrected in place in `r128-reference.md` itself — beside
+difference 2's table row and beside "B. Bloom `strength`" — rather than
+adding a third paragraph of disclosure on top of this one.
+
 ## Task 9: the gate, and the merge decision
 
 Everything above this section was recorded by tasks 4–7. This section is the

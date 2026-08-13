@@ -297,10 +297,25 @@ Re-fitting those constants (`EXP`, `WEXP`, the ambient base, serenity's
 | # | Difference | Mechanism | Conversion | Status |
 |---|---|---|---|---|
 | 1 | `ColorManagement.enabled` | Defaults `true` from r155; r128 had no colour-management system, hex `Color`s passed straight through as linear | Disabled globally in `main.js`, before any classic script constructs a `Color` | Kept — largest single contributor to closing the gap |
-| 2 | Bloom threshold | r128's patched composer fed `UnrealBloomPass` fully tonemapped+sRGB-encoded pixels; r185's `RenderPass` writes raw linear radiance | `0.92` → `1.294`, exact ACES/sRGB inversion for a neutral input (both ACES matrices have row-sum 1, exact not approximate), calibrated at exposure 1.05 | Kept |
+| 2 | Bloom threshold | r128's patched composer fed `UnrealBloomPass` fully tonemapped+sRGB-encoded pixels; r185's `RenderPass` writes raw linear radiance | `0.92` → `1.294`, exact ACES/sRGB inversion for a neutral input (both ACES matrices have row-sum 1, exact not approximate), calibrated at exposure 1.05 | Kept, then superseded — see note below |
 | 3 | Lightmap intensity | r185's `MeshBasicMaterial` `USE_LIGHTMAP` shader branch (`three.module.js`, `fragment$a`) gained `* RECIPROCAL_PI` that r128 never had; every baked floor/ceiling/attic surface rendered ~⅓ as bright (walls use vertex colours, a different chunk, unaffected) | `lightMapIntensity` `1.7` → `1.7 * Math.PI` — exact cancellation, a pure pre-nonlinearity multiply | Kept — biggest single mechanism by frame-count affected |
 | 4 | Grain/vignette domain | Same domain move as #2, for a whole shader instead of one constant: `GrainVignetteShader` ran before `OutputPass`, reading/writing linear HDR instead of encoded values | **Not a constant conversion** — proven not to have an exact one (additive grain's needed offset is brightness-dependent; provable from the shader). Pass reordered to run after `OutputPass`, restoring the exact domain its constants were always written for, with the constants themselves untouched | Kept — second-biggest mechanism, moved 3 frames under the old 2.0 diagnostic threshold outright |
 | 5 | Background/fog tone-mapping | r128 never tone-mapped or sRGB-encoded a plain `Color` background/fog clear; r185's single-final-resolve `OutputPass` processes the whole buffer uniformly, background included | Built (76 lines, exact per-apartment-exposure ACES inversion), measured, **removed** | **Reverted** — see below |
+
+**Difference 2's status, corrected (a later whole-branch review).** "Kept"
+was accurate for this table's own scope — the r128→r185 migration itself,
+whose mechanism and conversion columns above are unchanged history — but it
+stopped being true of the shipped constant the same phase this document
+already tracks changes for: phase B2 task 7 found there was no longer one
+shared exposure to hold `1.294`'s analytic derivation valid for (each
+apartment fits its own now, see `docs/superpowers/metrics/README.md`
+task 7), refit it empirically instead, and shipped **1.8**. `strength`
+moved the same task, `0.22` → **0.1** — see "B. Bloom `strength`" below,
+corrected the same way. Both current in `tour/post.js`; full derivation in
+`docs/superpowers/metrics/README.md`, "Bloom: threshold moved, strength
+moved, both empirically." This file went uncorrected long enough after that
+task that a later review found the table above still reading as current
+state instead of migration history.
 
 **The plan's `PointLight.decay` assumption was wrong.** The brief expected a
 bare `new THREE.PointLight(color, intensity, distance)` silently defaulting
@@ -513,6 +528,17 @@ buffer to have anything above 1.0 to bloom at all, so moving it past
 value would be taste, not mechanism, and bloom tuning belongs to plan 2
 alongside the exposure re-fit that changes what these radiances are.
 Documented in `post.js` beside the constant.
+
+**Corrected (a later whole-branch review): "not retuned" stopped being true
+the same task this constraint was written for.** Plan 2's task 7 retuned
+`strength` from `0.22` to **0.1**, threshold-first, once bloom's own
+threshold (difference 2, above) was itself refit to 1.8 — not the "taste"
+outcome the paragraph above warned against, since 0.1 was derived the same
+empirical, fraction-of-frame-over-threshold way as the threshold itself,
+against exposure held fixed while each was set, per the constraint below.
+Current value and full derivation: `tour/post.js`,
+`docs/superpowers/metrics/README.md`, "Bloom: threshold moved, strength
+moved, both empirically."
 
 **Constraint for plan 2, not a suggestion: fit bloom and exposure together.**
 They are coupled through the same buffer — exposure scales the radiances that
