@@ -1,0 +1,134 @@
+{
+  "apartment": "serenity",
+  "metric": "spawn-pooled luminance",
+  "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels of all spawns pooled, then mean and 5th percentile of sRGB-ENCODED luminance 0-255 (Rec.709 weights, no linearisation). This is the domain of the table in docs/PHASE-B-OBSERVATIONS.md and is NOT comparable to tools/luminance.py, which reports linear-light values over a different population.",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist. The default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain. Spawn yaw is asserted against the raw JSON degrees on every frame.",
+  "phases": {
+    "first-pass": {
+      "note": "task 2 as first committed (2e55bff): AMB_DIST 1.2, aoAt still multiplying lightmaps, blanket dilation",
+      "meanL": 135.9,
+      "p5L": 78.1,
+      "contrast_mean_over_p5": 1.739,
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 136.3,
+          "p5L": 59.1
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 133.8,
+          "p5L": 81.1
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 144.3,
+          "p5L": 83.2
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 137.1,
+          "p5L": 93.8
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 128.0,
+          "p5L": 75.2
+        }
+      ]
+    },
+    "isolation-0.65-with-aoAt": {
+      "note": "diagnostic only, never committed: AMB_DIST 0.65 but aoAt still multiplying lightmaps -- isolates fix 1 from fix 4",
+      "meanL": 136.4,
+      "p5L": 78.1,
+      "contrast_mean_over_p5": 1.745,
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 137.2,
+          "p5L": 60.6
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 134.1,
+          "p5L": 81.1
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 144.8,
+          "p5L": 83.1
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 137.8,
+          "p5L": 94.8
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 127.9,
+          "p5L": 75.1
+        }
+      ]
+    },
+    "fix1": {
+      "note": "task 2 after review fix round 1: AMB_DIST 0.65, aoAt dropped from lightmapped surfaces, dilation conditional, attic roof in the sampler",
+      "meanL": 138.0,
+      "p5L": 79.2,
+      "contrast_mean_over_p5": 1.742,
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 139.6,
+          "p5L": 65.3
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 135.5,
+          "p5L": 81.1
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 146.8,
+          "p5L": 87.6
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 139.1,
+          "p5L": 97.5
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129.0,
+          "p5L": 75.2
+        }
+      ]
+    }
+  },
+  "linearLuminance": {
+    "tool": "tools/luminance.py",
+    "population": "2 of 11 (poseVerified filter, hard-coded in tools/luminance.py)",
+    "note": "Linear-light Rec.709 relative luminance over the compare spots, captured at ?fov=legacy. Diagnostic only -- no gate is taken from it. Contrast is mean/p5, quoted so the render can be compared with the photographs.",
+    "sets": {
+      "before": {
+        "mean": 0.2854,
+        "p5": 0.09,
+        "contrast": 3.17
+      },
+      "first-pass": {
+        "mean": 0.2711,
+        "p5": 0.0796,
+        "contrast": 3.41
+      },
+      "fix1": {
+        "mean": 0.2796,
+        "p5": 0.0828,
+        "contrast": 3.38
+      },
+      "photographs": {
+        "mean": 0.2993,
+        "p5": 0.0483,
+        "contrast": 6.2
+      }
+    }
+  }
+}

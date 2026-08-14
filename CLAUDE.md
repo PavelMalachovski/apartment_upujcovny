@@ -47,8 +47,8 @@ accepted description style.
 | `main.js` | Loader: reads `?apt=<id>`, fetches the config with the same `?v=` as its own tag, degrees→radians, calls `initApp()` |
 | `materials.js` | Material palette `M.*` and procedural canvas textures, split out of `builder.js`; `Materials.color(key, fallback)` resolves an `APT.palette` hex or falls back, shared with `bake.js`'s wall tint |
 | `builder.js` | Config → scene: walls with openings, attic slopes, floors/ceilings, stairs, terrace, furniture constructors `F.*` (chamfered edges via `chamferBoxGeometry`), occluders and light sources for the bake, `mergeStatic` |
-| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic) with baked ambient occlusion (`aoAt`, no lower clamp — a fully enclosed sample really is 0) and an indoor ambient scaled by hemisphere visibility through `sampler.js` (`ambientVis`, 16 rays to 1.2 m); `aoAt` also runs on furniture vertices (`bakeFurnitureAO`). Lightmaps are edge-dilated one texel so the boundary texel, which lands under the wall, is not stretched across the visible edge. Walls → one merged mesh per level with per-vertex baked light only, **no occlusion of any kind**: `bakeWalls()` calls `lightAt()` with `sampled=false`, so a floor-to-wall corner still darkens on the floor side only. Two defects block closing it, both measured on the tip and written up above `bakeWalls`: its `grid()` winds along-z wall faces backwards so the renderer shows the far face (verified 8/8 serenity, 17/18 kings-court), and 0.45 m corner-sampled Gouraud cannot carry contact shading |
-| `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — AO lives in the bake, for floors and furniture (not walls, see `bake.js` above) |
+| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic). Occlusion on those surfaces is **one** estimator, the hemisphere visibility that scales the indoor ambient (`ambientVis` → `sampler.js`, 16 cosine-weighted rays to `AMB_DIST` 0.65 m over the real triangles); `aoAt` is deliberately NOT applied there any more — it measured the same thing at 0.6 m over AABBs and multiplying both squared the occlusion. `aoAt` (no lower clamp — a fully enclosed sample really is 0) still runs on furniture vertices via `bakeFurnitureAO`, its only remaining caller and the only consumer of `quality.aoRays`. Lightmaps are edge-dilated **per boundary texel, only where that texel's footprint overlaps a wall** — a blanket border would plant a plateau down the interior seam between two floor plates (hard rule 2f). `window.__ambSampled` reports whether the sampler was live; false means the render is the flat pre-B3 ambient and any measurement of it is void. Walls → one merged mesh per level with per-vertex baked light only, **no occlusion of any kind**: `bakeWalls()` calls `lightAt()` with `sampled=false`, so a floor-to-wall corner still darkens on the floor side only. Two defects block closing it, both written up above `bakeWalls`: `grid()` reverses the winding on **8 of its 12 faces** — all six of an along-z piece, plus top and bottom of an along-x one — so the renderer shows the far face (measured on the tip: along-z shows far 8/8 serenity, 17/18 kings-court; along-x verticals are correct 6/6 and 14/16). Fix the sign test, not the `else` branch, or top and bottom stay broken everywhere. And 0.45 m corner-sampled Gouraud cannot carry contact shading |
+| `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — occlusion lives in the bake: hemisphere visibility on floors/ceilings/slopes, `aoAt` on furniture, nothing on walls (see `bake.js` above) |
 | `lib/three-0.185.0/` | Vendored Three.js r185: `build/three.module.js` + `build/three.core.js` (the facade imports the core, which is where `REVISION` lives), and the `examples/jsm/` addons the post chain needs — `postprocessing/{EffectComposer,RenderPass,ShaderPass,MaskPass,Pass,UnrealBloomPass,OutputPass}`, `shaders/{CopyShader,LuminosityHighPassShader,OutputShader}` — none of which ship in the core build. **The version is in the directory name, not a `?v=` query**: addons import each other by relative path and a relative specifier does not inherit the importing module's query string, so `?v=` would version only the files named in the importmap and leave every transitively-imported file cacheable forever. Never edit anything under here |
 | `measure.js` | Resemblance capture, loaded only under `?measure=1`: renders every `compare`-flagged photo spot from its own camera/aspect and POSTs the frame to `tools/serve.py`'s save endpoint for offline `tools/delta_e.py` scoring |
 | `validate.js` | Layout self-check: blocked openings, openings into the void, unreachable rooms, markers inside solids |
@@ -69,7 +69,7 @@ accepted description style.
 | Reachability grid / max step | 0.25 m / 0.35 m | `validate.js` |
 | HDR headroom `EXP` | 1.7 (= `lightMapIntensity`) | `bake.js` |
 | Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures 69) | measured, revised in phase A — see rule 4 |
-| Bake time | no fixed ceiling; measured medians (3 runs): serenity 267 ms, horkyone-10 1323 ms, kings-court 8674 ms | see rule 4a |
+| Bake time | no fixed ceiling; latest medians (3 runs, one machine, phase B3 task 2): serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms — **ratios, not seconds** | see rule 4a |
 | Dynamic PointLights | ≤8, flagged `dyn` in the config | `builder.js` |
 
 Yaw convention: forward is `(-sin(yaw), -cos(yaw))` — **yaw 0 looks
@@ -84,7 +84,7 @@ now carries:
 |---|---|
 | `exposure` | `renderer.toneMappingExposure` override, fitted per-apartment against its own photographs where it has any (`app.js`); an apartment with none is still fitted, not left at the default — horkyone-10 has zero `compare` spots and ships 0.45, fitted on mean-scene-luminance proximity to the other two (within ±10) instead of resemblance (`docs/superpowers/metrics/README.md`, "horkyone-10: fitted, and it passes the ±10 luminance check"). The bare default 1.05 is only what an apartment with an absent or invalid key falls back to. Must be a finite number `> 0` — `app.js` warns and falls back to 1.05 for anything else (`null`, `0`, a string). **Compensates for the scene running about three times as hot at source** (1.05 / 0.326 ≈ 3.2): serenity's fitted value is 0.326. Anyone correcting `lightAt`'s constants in `bake.js` must re-fit or clear this per-apartment override, or the render goes about three times too dark. |
 | `palette` | Map of material key → `#rrggbb`; every key optional, an invalid or absent value falls back to the hardcoded constant (`Materials.color`). **Not** produced by directly sampling the photographs — that was measured and rejected (ΔE2000 16.79 vs. 16.57 doing nothing, task 8) because it double-counts illumination as albedo. The committed values were derived by a closed-loop correction (render's own colour vs. the photograph, old albedo scaled by the ratio) done by hand for task 8; `tools/sample_palette.py` outputs raw sampled photo colour only — see its header — and is a diagnostic input to that by-hand process, not something whose output can be pasted into `palette` directly. |
-| `quality.aoRays` | Ray count for the baked ambient-occlusion sampler (`bake.js aoAt`); defaults to 8 when the block or key is absent |
+| `quality.aoRays` | Ray count for the baked ambient-occlusion sampler (`bake.js aoAt`); defaults to 8 when the block or key is absent. Since phase B3 it reaches **furniture vertices only** — lightmapped surfaces get `ambientVis` instead, whose ray count is `AMB_RAYS` in `bake.js` and is deliberately not configurable |
 | `env.capture` | `{x, y, z}` override for where the environment-reflection panorama is shot from; falls back to `roomCenter.main`, then `start`, then the world origin (`app.js`) |
 | `compare` (on a `photoSpots` entry) | Flags that spot for the resemblance harness — `measure.js` renders it, `tools/delta_e.py` scores it, `residual.py` decomposes it |
 
@@ -200,6 +200,23 @@ costing something everywhere; the two measurements were not taken on the
 same machine, so this cannot be isolated further with what's on hand.
 Don't read more into it than that — say what the data supports (a
 same-direction, similar-sized rise on all three apartments) and no more.
+
+**Phase B3 task 2 raised it again, deliberately.** Same machine both
+sides, medians of three loads: serenity 2026 → **2620 ms** (1.29×),
+kings-court 8443 → **11460 ms** (1.36×), horkyone-10 2620 → **2715 ms**
+(1.04×). That is the hemisphere sampler (`ambientVis`, 16 BVH rays per
+lightmap texel) minus what dropping `aoAt` from those same texels gave
+back. It is a bought cost, not a regression — do not go hunting for one.
+Note the absolute seconds here are much larger than the two older rows
+above and **the three sets are not comparable**: they were taken on three
+different machines, and this one's spread on an *identical* build reached
+2× (kings-court 11301–21768 ms across three loads). Compare ratios within
+one machine's before/after pair and nothing else. An intermediate
+configuration measured on this same machine ran the sampler at 1.2 m with
+`aoAt` still multiplying and cost 1.70× / 1.99× / 2.41× — roughly double
+the shipped cost, which is what the radius and the removed second
+estimator are worth.
+
 Do not chase kings-court's underlying slowness down inside `bake.js`
 regardless of which explanation is right — the fix is architectural
 (move the bake into a Worker so it stops blocking the main thread) and is
