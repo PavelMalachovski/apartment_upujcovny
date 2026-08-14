@@ -1157,20 +1157,25 @@ different exposures, in three different tasks' harness runs, is a real
 miss.
 
 **Exposure cannot reach it, measured in the gate's own camera.** One page
-load, `&fov=legacy`, shipped chain, only exposure changing, all-spot,
-full precision (`serenity-b3-task4-exposure-reach.json`):
+load, `&fov=legacy`, shipped chain, only exposure changing, all-spot
+11/11. Each point is its own `tools/delta_e.py` file — `…-reach-e0.30`
+through `…-reach-e0.34`, indexed by
+`serenity-b3-task4-exposure-reach.json` — so every mean re-derives from
+its own per-spot list, like the gate files:
 
 | exposure | 0.30 | 0.31 | **0.32** | 0.326 | **0.329 (ships)** | 0.34 |
 |---|---:|---:|---:|---:|---:|---:|
-| all-spot legacy ΔE2000 | 16.6424 | 16.6147 | **16.6085** | 16.6121 | 16.6142 | 16.6437 |
+| ΔE2000 (`delta_e.py`) | 16.64 | 16.62 | **16.61** | 16.61 | 16.61 | 16.65 |
+| full precision, same frames | 16.6433 | 16.6161 | **16.6104** | 16.6133 | 16.6160 | 16.6454 |
+| an earlier independent load | 16.6424 | 16.6147 | 16.6085 | 16.6121 | 16.6142 | 16.6437 |
 
 The curve is a shallow U whose **minimum over the whole neighbourhood is
 16.61**, at exposure 0.32 — still above the 16.58 ceiling, and worth only
-0.0057 against the shipped value, a sixth of the shortfall and a seventh
-of the noise floor. It rises on both sides (and, from the fixed-camera
-sweep, keeps rising: 19.17 at 0.6, 22.58 at 1.0). **There is no exposure
-that passes this gate**, so the trade-off between the luminance fit and
-a passing score does not exist to be made — the question of whether it
+0.0056 against the shipped value, a sixth of the shortfall and a seventh
+of the noise floor. It rises on both sides, and two independent page
+loads agree on every point to within 0.002. **There is no exposure that
+passes this gate**, so the trade-off between the luminance fit and a
+passing score does not exist to be made — the question of whether it
 would have been allowed never arises. The residual is a redistribution
 across the 8×8 cell means, and a single scalar on the mean cannot undo
 one; the decision about it belongs to whoever owns the merge.
