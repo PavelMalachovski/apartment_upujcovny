@@ -48,8 +48,8 @@ Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass,
 // The classic scripts only declare classes and touch THREE inside functions,
 // so publishing the globals first is enough — but they must load in this
 // order, and they must load before initApp is called.
-const CLASSIC = ['post.js', 'sampler.js', 'bake.js', 'materials.js', 'builder.js',
-                 'controls.js', 'doll.js', 'validate.js', 'app.js'];
+const CLASSIC = ['post.js', 'sampler.js', 'lightmaps.js', 'bake.js', 'materials.js',
+                 'builder.js', 'controls.js', 'doll.js', 'validate.js', 'app.js'];
 
 function loadClassic(src) {
   return new Promise((res, rej) => {

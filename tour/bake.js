@@ -244,13 +244,26 @@ const Baker = (() => {
   // flat constant, and that is a measured decision, not an oversight -- see
   // the block above bakeWalls for what happens when walls opt in and why
   // closing it needs the wall atlas (the plan's task 4).
+  //
+  // `ambFn`, when given, replaces the indoor ambient outright: it is called
+  // as ambFn(P, N) and must return an [r, g, b] triple in these same units,
+  // i.e. AMB_RGB in the fully open case. That hook exists for exactly one
+  // caller, tools/bake_lightmaps.mjs, which substitutes a multi-bounce path
+  // integrator for the single-bounce visibility scaling above. Nothing in
+  // the runtime passes it, so the shipped behaviour is unchanged; what it
+  // buys is that the offline baker reuses the direct lamp, window and sun
+  // terms below verbatim instead of owning a second copy of them.
+  const AMB_RGB = [0.40, 0.385, 0.36];
   const _Q = new T.Vector3();
-  function lightAt(P, N, occ, data, outdoor, sampled) {
+  function lightAt(P, N, occ, data, outdoor, sampled, ambFn) {
     let r, g, b;
     if (outdoor) { r = 0.66; g = 0.70; b = 0.78; }
-    else {
+    else if (ambFn) {
+      const a = ambFn(P, N);
+      r = a[0]; g = a[1]; b = a[2];
+    } else {
       const v = sampled ? ambientVis(P, N) : 1;
-      r = 0.40 * v; g = 0.385 * v; b = 0.36 * v;
+      r = AMB_RGB[0] * v; g = AMB_RGB[1] * v; b = AMB_RGB[2] * v;
     }
 
     for (const L of data.lights) {
@@ -305,8 +318,18 @@ const Baker = (() => {
     return [r, g, b];
   }
 
-  function bakeSurface(surf, data) {
-    const { mesh, w, h, res, outdoor } = surf;
+  // opts (all optional, all for the offline baker — the runtime passes none):
+  //   resScale  multiplies the surface's texels-per-metre
+  //   shade     (P, N, occ, outdoor) => [r, g, b], replacing the default
+  //             lightAt(...) call below
+  // Returns the canvas it wrote, so the offline baker can encode it.
+  function bakeSurface(surf, data, opts) {
+    // Not `o`: the texel loop below declares its own block-scoped `o` for the
+    // pixel offset, and reading an outer `o` in that same block hits the
+    // temporal dead zone rather than the outer binding.
+    const opt = opts || {};
+    const { mesh, w, h, outdoor } = surf;
+    const res = surf.res * (opt.resScale || 1);
     mesh.updateMatrixWorld(true);
     const mw = mesh.matrixWorld;
     const W = Math.max(4, Math.round(w * res));
@@ -353,7 +376,8 @@ const Baker = (() => {
         const u = (i + 0.5) / W;
         P.set((u - 0.5) * w, (v - 0.5) * h, 0).applyMatrix4(mw);
         P.x += N.x * 0.03; P.y += N.y * 0.03; P.z += N.z * 0.03;
-        const [r, g, b] = lightAt(P, N, occ, data, outdoor, true);
+        const [r, g, b] = opt.shade ? opt.shade(P, N, occ, outdoor)
+                                    : lightAt(P, N, occ, data, outdoor, true);
         const o = (j * W + i) * 4;
         px[o] = Math.min(255, r / EXP * 255);
         px[o + 1] = Math.min(255, g / EXP * 255);
@@ -409,6 +433,19 @@ const Baker = (() => {
         if (onWall(0, j)) copy(j * line, j * line + 4);
         if (onWall(W - 1, j)) copy(j * line + (W - 1) * 4, j * line + (W - 2) * 4);
       }
+      // ONE ring, and the replacement is taken from the immediate neighbour
+      // without asking whether that neighbour is spoiled too. That is
+      // deliberate and it is a ceiling on texel density, not an oversight.
+      // Generalising it to "walk inward to the first clean texel" was written,
+      // measured and reverted in phase B3 task 5: at the SHIPPED densities the
+      // spoiled run is already longer than one texel on 254 / 454 / 122 edge
+      // scans (serenity / kings-court / horkyone-10) and spans a whole row or
+      // column on 72 / 212 / 48 of them, so walking the run would smear a
+      // clean value tens of texels down a plate and would change every
+      // apartment's runtime bake -- kings-court's spawn-pooled p5 moved 55.9
+      // to 54.5 when it was tried. Whatever replaces this has to be
+      // distance-based rather than texel-count-based, and it needs its own
+      // before/after on all three apartments. See task-5-report.md §6.
     }
 
     ctx.putImageData(img, 0, 0);
@@ -417,7 +454,16 @@ const Baker = (() => {
     ctx.drawImage(canvas, 0, 0);
     ctx.globalAlpha = 1;
 
-    const tex = new T.CanvasTexture(canvas);
+    applyLightmap(mesh, new T.CanvasTexture(canvas));
+    return canvas;
+  }
+
+  // The one place a lightmap is attached to a material, shared by the bake
+  // above and by the offline pack loaded in run(). Both paths must produce
+  // an identically-configured texture or a pack would not render the same
+  // as the bake it replaces, and a second copy of these five lines is
+  // exactly how that drifts apart.
+  function applyLightmap(mesh, tex) {
     tex.wrapS = tex.wrapT = T.ClampToEdgeWrapping;
     tex.minFilter = T.LinearFilter;
     tex.magFilter = T.LinearFilter;
@@ -623,8 +669,25 @@ const Baker = (() => {
     });
   }
 
-  // Async pass so the page keeps painting
+  // Async pass so the page keeps painting.
+  //
+  // Before the first texel: ask lightmaps.js whether this apartment ships an
+  // offline pack that still matches its config. A verified pack replaces
+  // bakeSurface() per surface; anything else — no pack, a stale one, an
+  // image that would not load — falls through to baking that surface here,
+  // which is why the whole sampler/occluder path below is set up
+  // unconditionally rather than skipped when a pack is present.
   function run(scene, data, onProgress) {
+    const packReady = (typeof Lightmaps === 'undefined')
+      ? Promise.resolve(null)
+      : Lightmaps.load(window.APT).catch((e) => {
+          console.warn('[lightmaps] loader failed, runtime bake:', e);
+          return null;
+        });
+    return packReady.then((pack) => runBake(scene, data, onProgress, pack));
+  }
+
+  function runBake(scene, data, onProgress, pack) {
     // Built before the first surface is baked, because lightAt() reads it on
     // every sample. Anything going wrong here (sampler.js absent, MeshBVH
     // missing from the module graph, a degenerate geometry) degrades to the
@@ -651,13 +714,18 @@ const Baker = (() => {
       window.__issues.push('bake: hemisphere sampler unavailable, ambient is the flat pre-B3 constant');
     }
     return new Promise((resolve) => {
-      const list = data.surfaces.slice();
+      // Indices are the pack's key, so the list is walked with its own
+      // position rather than shifted off the front.
+      const list = data.surfaces.map((s, i) => [i, s]);
       const total = list.length + 3; // walls ≈ 3 progress steps
       let done = 0;
       const step = () => {
         const t0 = performance.now();
         while (list.length && performance.now() - t0 < 120) {
-          bakeSurface(list.shift(), data);
+          const [i, surf] = list.shift();
+          const tex = pack ? Lightmaps.textureFor(pack, i, surf) : null;
+          if (tex) applyLightmap(surf.mesh, tex);
+          else bakeSurface(surf, data);
           done++;
         }
         if (onProgress) onProgress(done / total);
@@ -680,5 +748,9 @@ const Baker = (() => {
     });
   }
 
-  return { run };
+  // `run` is the whole runtime surface. The rest is exported for
+  // tools/bake_lightmaps.mjs, which drives this same page offline and must
+  // bake through the same texel mapping, the same direct-light terms and the
+  // same occluder set as the runtime — not a second copy of them.
+  return { run, bakeSurface, lightAt, ambientMeshes, AMB_RGB, AMB_DIST };
 })();

@@ -1189,3 +1189,52 @@ midpoint.
 `grid()` winding defect (8 of 12 wall faces backwards, `bake.js`),
 knowingly and by agreement; when that fix lands, exposure and bloom both
 have to be re-fitted.
+
+## Phase B3 plan 3 task 5: the offline lightmap baker, and it is flat
+
+`tools/bake_lightmaps.mjs` drives headless Chrome through Playwright and
+bakes serenity's floor/ceiling lightmaps offline at 2048 cosine-weighted
+paths per texel with 2 bounces, against the runtime bake's 16 single-hop
+rays. `tour/lightmaps.js` loads the result, but only while a SHA-256 of
+the config's geometry keys still matches the manifest — otherwise it
+warns, pushes into `window.__issues` and bakes at runtime. Only serenity
+ships a pack (13.3 KB, 0.16% of the task's 8 MB ceiling). Full method,
+guard proof and per-surface data:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-5-report.md`; committed
+numbers in `serenity-b3-task5-luminance.json` and the two
+`serenity-b3-task5-*-legacy-allspots.json` files.
+
+**Linear contrast, the quantity task 6 gates on, did not move:**
+
+| set | mean | p5 | contrast |
+|---|---:|---:|---:|
+| runtime bake | 0.2819 | 0.0833 | **3.384** |
+| offline pack | 0.2891 | 0.0854 | **3.385** |
+| photographs | 0.2993 | 0.0483 | **6.196** |
+
+Mean moved toward the photographs and p5 moved away from them, and the
+two cancel. That is what a bounce term *does*: its only mechanism is to
+put light back into the near-field shadows the runtime bake crushes to
+black, which raises the floor, and contrast is mean/p5. A configuration
+that raised contrast would have to take light out of the darkest 5%, and
+the surfaces owning the darkest 5% of a first-person frame are the walls
+— which have no lightmap and cannot get one until the `grid()` winding
+defect is fixed.
+
+All-spot legacy ΔE2000 moved **16.59 → 16.75**, away from the 16.58
+ceiling. Spawn-pooled sRGB luminance moved 138.7 / 80.1 to **140.2 /
+80.3** (contrast 1.732 → 1.746) against a run-to-run noise floor of 0.1.
+
+**Two things worth carrying forward.** The pack does not make the page
+load faster and on the dev server makes it slower: the texel loop it
+skips costs 233 ms for all ten surfaces, while its eleven HTTP requests
+cost 4.5–6.8 s of wall time — `Baker.run`'s cost is the BVH build, the
+wall pass and the furniture AO pass, none of which a pack touches. And
+lightmaps cannot currently be baked at a finer texel grid than the config
+asks for: `bakeSurface`'s edge dilation replaces exactly one boundary
+ring from a neighbour that may itself be spoiled, so at 3× density
+serenity's ceilings came back with a black band 13/255 against an
+interior of 185. The obvious generalisation was written, measured and
+reverted — at the *shipped* densities the spoiled run already exceeds one
+texel on 254 / 454 / 122 edge scans, so it changes every apartment's
+bake.
