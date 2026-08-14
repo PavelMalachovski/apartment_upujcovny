@@ -1,0 +1,21 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-final-legacy",
+  "mean": 15.71,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "deltaE": 18.41
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "deltaE": 13.01
+    }
+  ],
+  "scored": 2,
+  "compareTotal": 11,
+  "skippedPoseVerification": 9,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

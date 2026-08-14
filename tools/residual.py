@@ -23,25 +23,31 @@ from PIL import Image  # noqa: F401  (imported for parity/side effects with delt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from delta_e import srgb_to_lab, ciede2000, cell_means, GRID  # noqa: E402
+from delta_e import srgb_to_lab, ciede2000, cell_means, GRID, scorable  # noqa: E402
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--apt', default='serenity',
-                     help='apartment id (default: serenity -- currently the '
-                          'only apartment with compare-flagged photo spots)')
+                     help='apartment id (default: serenity)')
     args = ap.parse_args()
 
     cfg = json.load(open(os.path.join(ROOT, 'tour', 'apartments', args.apt + '.json'),
                         encoding='utf-8'))
-    spots = [s for s in cfg['photoSpots'] if s.get('compare')]
-    if not spots:
+    compare_spots = [s for s in cfg['photoSpots'] if s.get('compare')]
+    if not compare_spots:
         raise SystemExit(
             'no compare-flagged photo spots for apartment "%s" -- this '
             'decomposition only exists for apartments with photographs '
-            'flagged `compare` in their photoSpots (currently just '
-            'serenity)' % args.apt)
+            'flagged `compare` in their photoSpots' % args.apt)
+    spots = [s for s in compare_spots if scorable(s)]
+    skipped = len(compare_spots) - len(spots)
+    print('scoring %d of %d compare-flagged spots (%d skipped: failed pose verification)'
+          % (len(spots), len(compare_spots), skipped))
+    if not spots:
+        raise SystemExit(
+            'all %d compare-flagged spots for apartment "%s" failed pose '
+            'verification -- nothing left to score' % (len(compare_spots), args.apt))
 
     rows = []
     for s in spots:

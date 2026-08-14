@@ -1,0 +1,76 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-final-allspots",
+  "mean": 16.87,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "poseVerified": true,
+      "deltaE": 19.26
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 18.55
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 17.38
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 14.45
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "poseVerified": false,
+      "deltaE": 11.89
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 17.1
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 20.17
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 12.37
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 19.56
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 22.07
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "poseVerified": true,
+      "deltaE": 12.77
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "note": "All-spot population: every compare-flagged spot regardless of poseVerified. This is the population plan 1 and the merge condition (16.58/22.44) were measured against -- see docs/superpowers/metrics/README.md, \"What this means for the merge condition.\""
+}

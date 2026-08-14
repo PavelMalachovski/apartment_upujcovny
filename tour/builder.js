@@ -1403,14 +1403,54 @@ const Builder = (() => {
   // too low-resolution to reproduce its crisp direction-specific
   // highlight/shadow, so it is not part of this fallback pair and is never
   // detached.
+  // r128 shipped `WebGLRenderer.physicallyCorrectLights = false` by default
+  // (verified in the r128 build: `this.physicallyCorrectLights=!1`) and this
+  // app never set it, so `#define PHYSICALLY_CORRECT_LIGHTS` was never
+  // emitted and r128's shaders took the legacy branch of three chunks, every
+  // one of which multiplied irradiance by PI:
+  //
+  //   lights_pars_begin      getAmbientLightIrradiance()
+  //                          getHemisphereLightIrradiance()
+  //   lights_physical_pars   RE_Direct_Physical()   <- directional + point
+  //     all three: `#ifndef PHYSICALLY_CORRECT_LIGHTS  irradiance *= PI; #endif`
+  //
+  // r155 removed the legacy switch and r185 has none of those three
+  // multiplies (checked in tour/lib/three-0.185.0/build/three.module.js:
+  // getAmbientLightIrradiance now returns ambientLightColor unchanged, and
+  // PHYSICALLY_CORRECT_LIGHTS does not appear anywhere in the vendored
+  // tree). So every intensity below, authored and fitted under r128, is
+  // short by exactly a factor of PI on r185.
+  //
+  // This is the SAME units change bake.js already converts on the lightmap
+  // path -- r185's MeshBasicMaterial multiplies the lightmap by
+  // RECIPROCAL_PI, and bake.js:251 answers with `lightMapIntensity =
+  // 1.7 * Math.PI`. Only that half was done; this is the other half, the
+  // direct-light path, converted the same way and for the same reason.
+  // Mechanism, not tuning: the uniform for every light type here is a plain
+  // `color * intensity` (r185 WebGLLights.setup()), so scaling `intensity`
+  // by PI reproduces r128's `irradiance *= PI` exactly, not approximately.
+  //
+  // What this does NOT restore is PointLight *attenuation*. r128's legacy
+  // branch of punctualLightIntensityToIrradianceFactor() is a windowed
+  // `pow(saturate(1 - d/distance), decay)`; r185's getDistanceAttenuation()
+  // is the physical `1/max(d^decay, 0.01) * (1-(d/distance)^4)^2`. At the
+  // values used below (intensity 0.42, distance 7.0, decay 1.6) r185 is
+  // ~1.1x brighter at 0.5 m but ~5.6x dimmer at 2 m and ~8x dimmer at 3 m.
+  // Converting that would mean re-implementing r128's falloff in a custom
+  // shader -- i.e. shipping r128's shaders, which is the opposite of
+  // migrating -- so it is accepted and recorded as an r185 correction
+  // alongside the BRDF/IBL changes. See docs/superpowers/metrics/
+  // r128-reference.md.
+  const LEGACY_PI = Math.PI;
+
   function buildLights(scene) {
-    const amb = new T.AmbientLight(0xfff2e2, 0.22);
+    const amb = new T.AmbientLight(0xfff2e2, 0.22 * LEGACY_PI);
     amb.userData.envFallback = true;
     scene.add(amb);
-    const hemi = new T.HemisphereLight(0xdfeaf5, 0x8a7a66, 0.38);
+    const hemi = new T.HemisphereLight(0xdfeaf5, 0x8a7a66, 0.38 * LEGACY_PI);
     hemi.userData.envFallback = true;
     scene.add(hemi);
-    const sun = new T.DirectionalLight(0xfff0d8, 0.55);
+    const sun = new T.DirectionalLight(0xfff0d8, 0.55 * LEGACY_PI);
     sun.position.set(-30, 40, 20);
     scene.add(sun);
     for (const l of APT.lights) {
@@ -1425,7 +1465,11 @@ const Builder = (() => {
       else y = APT.upperFloorY + Math.min(2.3, atticH(l.z) - 0.3);
       // only lights marked dyn stay dynamic — the rest live in the bake
       if (l.dyn) {
-        const pt = new T.PointLight(0xffe4c0, 0.42, 7.0, 1.6);
+        // * LEGACY_PI: r128's RE_Direct_Physical multiplied point-light
+        // irradiance by PI too (see the block above buildLights). The
+        // distance/decay pair is left exactly as it was -- only the PI
+        // factor is recoverable without shipping r128's attenuation shader.
+        const pt = new T.PointLight(0xffe4c0, 0.42 * LEGACY_PI, 7.0, 1.6);
         pt.position.set(l.x, y, l.z);
         scene.add(pt);
       }

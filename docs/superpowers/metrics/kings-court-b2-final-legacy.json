@@ -1,0 +1,51 @@
+{
+  "apartment": "kings-court",
+  "phase": "b2-final-legacy",
+  "mean": 17.52,
+  "spots": [
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "deltaE": 10.41
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "deltaE": 14.45
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "deltaE": 11.49
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "deltaE": 21.43
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "deltaE": 18.94
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "deltaE": 19.91
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "deltaE": 16.72
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "deltaE": 26.84
+    }
+  ],
+  "scored": 8,
+  "compareTotal": 14,
+  "skippedPoseVerification": 6,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

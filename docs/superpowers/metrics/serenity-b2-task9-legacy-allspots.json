@@ -1,0 +1,78 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-task9-legacy",
+  "mean": 16.57,
+  "meanFullPrecision": null,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "poseVerified": true,
+      "deltaE": 18.48
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 18.08
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 15.29
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 14.25
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "poseVerified": false,
+      "deltaE": 11.65
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 16.56
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 19.46
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 11.7
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 18.66
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 25.29
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "poseVerified": true,
+      "deltaE": 12.85
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "note": "ALL-SPOT population: every compare-flagged spot regardless of poseVerified. This, not the poseVerified-filtered population, is what PR #27's merge condition (serenity <=16.58, kings-court <=22.44) was scored against -- see metrics/README.md, \"What this means for the merge condition\". Produced by a one-off script (scratchpad/all_spots_delta_e.py) that imports delta_e.py's own cell_means()/ciede2000() unmodified, not a committed tool. This file's meanFullPrecision is left null on purpose: it was computed by averaging already-per-spot-rounded values (a scripting inconsistency fixed before the repeat run), not the true unrounded per-spot mean. The rounded mean (16.57) is unaffected and is the number every comparison in task 9 cites. See serenity-b2-task9-legacy-repeat-allspots.json for a run with a genuine full-precision figure.",
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

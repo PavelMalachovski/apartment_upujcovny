@@ -1,0 +1,76 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-fixwave-final",
+  "population": "all-spot (every compare-flagged spot, regardless of poseVerified)",
+  "mean": 16.89,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "poseVerified": true,
+      "deltaE": 19.37
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 18.55
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 17.47
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 14.44
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "poseVerified": false,
+      "deltaE": 11.87
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 17.02
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 20.08
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 12.52
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 19.68
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 22.04
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "poseVerified": true,
+      "deltaE": 12.76
+    }
+  ],
+  "scored": 11,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

@@ -1,0 +1,78 @@
+{
+  "apartment": "serenity",
+  "phase": "b2-task9-legacy-repeat",
+  "mean": 16.56,
+  "meanFullPrecision": 16.554962786224095,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "poseVerified": true,
+      "deltaE": 18.5
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 18.07
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 15.28
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 14.25
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "poseVerified": false,
+      "deltaE": 11.63
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 16.52
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 19.45
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "poseVerified": false,
+      "deltaE": 11.65
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "poseVerified": false,
+      "deltaE": 18.63
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "poseVerified": false,
+      "deltaE": 25.28
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "poseVerified": true,
+      "deltaE": 12.86
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "note": "ALL-SPOT population: every compare-flagged spot regardless of poseVerified. This, not the poseVerified-filtered population, is what PR #27's merge condition (serenity <=16.58, kings-court <=22.44) was scored against -- see metrics/README.md, \"What this means for the merge condition\". Produced by a one-off script (scratchpad/all_spots_delta_e.py) that imports delta_e.py's own cell_means()/ciede2000() unmodified, not a committed tool.",
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

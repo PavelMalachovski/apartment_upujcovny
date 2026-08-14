@@ -43,14 +43,21 @@ function captureEnvironment(renderer, scene, point) {
     return env;
   } catch (e) {
     console.warn('[env] capture failed, materials stay unreflective:', e);
-    // CubeCamera.update() and PMREMGenerator only restore the renderer's
-    // previous render target on the normal exit path in r128 — an
-    // exception partway through the six cube-face renders (context loss, a
-    // WebGL error) can leave the renderer bound to an offscreen cube face,
-    // so every frame after this one would render into it instead of the
-    // canvas: a black screen, exactly what this handler exists to prevent.
-    // Restore defensively, in its own try/catch, so a failure in the
-    // restore itself can never mask the warning above or re-throw past it.
+    // CubeCamera.update() and PMREMGenerator still restore the renderer's
+    // previous render target only on the normal exit path — re-verified in
+    // the vendored r185 copy, not carried over from the r128 comment this
+    // replaces. `CubeCamera.update()` (three.core.js) reads
+    // `renderer.getRenderTarget()` into a local, renders the six faces, and
+    // restores at the very end with no try/finally around any of it;
+    // `PMREMGenerator._fromTexture()` (three.module.js) does the same,
+    // stashing `_oldTarget` and only putting it back in `_cleanup()`, which
+    // is the last statement of the normal path. So an exception partway
+    // through (context loss, a WebGL error) still leaves the renderer bound
+    // to an offscreen cube face, and every frame after this one would
+    // render into it instead of the canvas: a black screen, exactly what
+    // this handler exists to prevent. Restore defensively, in its own
+    // try/catch, so a failure in the restore itself can never mask the
+    // warning above or re-throw past it.
     try { renderer.setRenderTarget(null); } catch (e2) { /* nothing more we can do */ }
     return null;
   } finally {
@@ -62,7 +69,7 @@ window.initApp = function () {
   const canvas = document.getElementById('view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   // Fitted per-apartment against its own photographs (task 7); apartments
   // with no photographs flagged for comparison keep this same 1.05 they
@@ -83,6 +90,19 @@ window.initApp = function () {
   renderer.toneMappingExposure = exposure;
 
   const scene = new THREE.Scene();
+  // Known accepted r128->r185 difference, not compensated for: r128 never
+  // tone-mapped or sRGB-encoded a plain Color background/fog clear (the
+  // per-material path skipped it for a bare clear colour); r185's single
+  // final-resolve OutputPass processes the whole composited buffer
+  // uniformly, background included, so the same 0xbcd5e8 now reads
+  // differently once rendered. A numeric compensation (inverting the ACES
+  // chain per-apartment exposure) was built and measured in task 6 -- it
+  // cost 76 lines, coupled the result to toneMappingExposure (which plan 2
+  // re-fits from scratch), and was worth -0.04 dE2000 against the
+  // resemblance metric that actually matters (17.26 with it, 17.22
+  // without) -- nothing, slightly the wrong way. Removed. Left as a
+  // recorded, accepted difference; see docs/superpowers/metrics/
+  // r128-reference.md for the measurement.
   scene.background = new THREE.Color(0xbcd5e8);
   scene.fog = new THREE.Fog(0xbcd5e8, 40, 90);
 
@@ -325,6 +345,43 @@ window.initApp = function () {
   const preloaded = new Set();
   let photoIdx = -1;
 
+  // ---------- Render-vs-photograph compare control ----------
+  // Only spots BOTH flagged for comparison AND whose render is confirmed to
+  // show the same subject as the photograph -- serenity has 9 of 11 compare
+  // spots where it does not (a punched window rendered where the photo
+  // shows a sliding door, a bedroom rendered where the photo is the
+  // bathroom, and so on -- see each spot's poseNote), kings-court 6 of 14.
+  // Showing a visitor a side-by-side of two different rooms would be worse
+  // than showing nothing: the same contamination CLAUDE.md's palette note
+  // already rejected once for the metric, now for a human instead of a
+  // scorer. Absent poseVerified means verified -- the same default the
+  // Python scorers use (tools/delta_e.py etc.) -- so an apartment nobody
+  // has classified still shows the control on every compare spot.
+  const photoCompareBtn = document.getElementById('photoCompare');
+  const compareEligible = (s) => !!s && s.compare === true && s.poseVerified !== false;
+
+  // compare.js is deliberately not in main.js's CLASSIC list -- most
+  // visitors never open a compare-eligible spot, so it only loads the first
+  // time one actually clicks the control. Cache-busted with this page's own
+  // ?v=, read off the module tag directly, so an edit to compare.js is
+  // never served stale (CLAUDE.md rule 3) without main.js having to know
+  // this on-demand path exists at all.
+  let comparePromise = null;
+  function ensureCompareLoaded() {
+    if (window.__compare) return Promise.resolve();
+    if (comparePromise) return comparePromise;
+    comparePromise = new Promise((resolve, reject) => {
+      const tag = document.querySelector('script[src*="main.js"]');
+      const v = tag ? new URL(tag.src).searchParams.get('v') : '';
+      const el = document.createElement('script');
+      el.src = 'compare.js' + (v ? '?v=' + v : '');
+      el.onload = resolve;
+      el.onerror = () => { comparePromise = null; reject(new Error('failed to load compare.js')); };
+      document.head.appendChild(el);
+    });
+    return comparePromise;
+  }
+
   function preloadAround(i) {
     for (const d of [-1, 1]) {
       const s = APT.photoSpots[(i + d + APT.photoSpots.length) % APT.photoSpots.length];
@@ -339,6 +396,7 @@ window.initApp = function () {
     document.getElementById('photoImg').src = photoBase + s.file;
     document.getElementById('photoCap').textContent =
       s.name + ' — ' + (s.vis ? 'visualization' : 'real photo') + ' · ' + (photoIdx + 1) + ' / ' + APT.photoSpots.length;
+    photoCompareBtn.style.display = compareEligible(s) ? 'block' : 'none';
     preloadAround(photoIdx);
   }
   function openPhoto(s) {
@@ -377,6 +435,14 @@ window.initApp = function () {
   document.getElementById('photoClose').addEventListener('click', (e) => { e.stopPropagation(); closePhoto(); });
   document.getElementById('photoPrev').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(-1); });
   document.getElementById('photoNext').addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(1); });
+  photoCompareBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const s = APT.photoSpots[photoIdx];
+    if (!compareEligible(s)) return;
+    ensureCompareLoaded()
+      .then(() => window.__compare(s.file))
+      .catch((err) => console.warn('[compare] could not open the comparison:', err.message));
+  });
 
   // F — nearby photo (when the cursor is busy and the button is hard to hit)
   document.addEventListener('keydown', (e) => {

@@ -1,0 +1,94 @@
+{
+  "apartment": "kings-court",
+  "phase": "b2-final-allspots",
+  "mean": 18.36,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "poseVerified": false,
+      "deltaE": 18.02
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "poseVerified": true,
+      "deltaE": 10.34
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "poseVerified": true,
+      "deltaE": 14.24
+    },
+    {
+      "file": "4.webp",
+      "name": "Coffee corner",
+      "poseVerified": false,
+      "deltaE": 25.89
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "poseVerified": true,
+      "deltaE": 11.85
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "poseVerified": true,
+      "deltaE": 17.12
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "poseVerified": true,
+      "deltaE": 18.44
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "poseVerified": false,
+      "deltaE": 25.08
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "poseVerified": false,
+      "deltaE": 12.13
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "poseVerified": true,
+      "deltaE": 21.12
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "poseVerified": true,
+      "deltaE": 17.27
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "poseVerified": false,
+      "deltaE": 17.04
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "poseVerified": true,
+      "deltaE": 25.8
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "poseVerified": false,
+      "deltaE": 22.66
+    }
+  ],
+  "scored": 14,
+  "compareTotal": 14,
+  "note": "All-spot population: every compare-flagged spot regardless of poseVerified. This is the population plan 1 and the merge condition (16.58/22.44) were measured against -- see docs/superpowers/metrics/README.md, \"What this means for the merge condition.\""
+}

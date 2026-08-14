@@ -9,6 +9,11 @@ exposure and furniture model. Only the trend across phases carries
 information.
 
 Run: python tools/delta_e.py --apt serenity --phase baseline
+Add --all-spots to bypass the poseVerified filter and score every
+compare-flagged spot instead -- this is the population PR #27's merge gate
+(serenity <=16.58, kings-court <=22.44) was actually set against, per
+docs/superpowers/metrics/README.md, "What this means for the merge
+condition". The default stays poseVerified-filtered.
 """
 import argparse
 import json
@@ -86,20 +91,53 @@ def cell_means(path):
     return srgb_to_lab(arr)
 
 
+def scorable(spot):
+    """Spots whose render and photograph show the same subject.
+
+    A spot that fails pose verification photographs one thing and renders
+    another, so scoring it measures the mismatch rather than the render.
+    Absent key means verified: an unclassified apartment keeps its old
+    behaviour instead of silently scoring nothing.
+    """
+    return spot.get('compare') and spot.get('poseVerified', True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--apt', required=True)
     ap.add_argument('--phase', required=True)
+    ap.add_argument('--all-spots', action='store_true',
+                     help='bypass the poseVerified filter and score every '
+                          'compare-flagged spot -- reproduces the population '
+                          'the PR #27 merge gate was set on, not the default '
+                          'poseVerified-filtered one')
     args = ap.parse_args()
 
     cfg = json.load(open(os.path.join(ROOT, 'tour', 'apartments', args.apt + '.json'),
                          encoding='utf-8'))
-    spots = [s for s in cfg['photoSpots'] if s.get('compare')]
-    if not spots:
+    compare_spots = [s for s in cfg['photoSpots'] if s.get('compare')]
+    if not compare_spots:
         raise SystemExit(
             'no compare-flagged photo spots for apartment "%s" -- this '
             'metric only exists for apartments with photographs flagged '
-            '`compare` in their photoSpots (currently just serenity)' % args.apt)
+            '`compare` in their photoSpots' % args.apt)
+    population = 'all-spot' if args.all_spots else 'poseVerified'
+    if args.all_spots:
+        spots = compare_spots
+        skipped = 0
+        print('scoring %d of %d compare-flagged spots -- ALL-SPOT population '
+              '(poseVerified filter bypassed via --all-spots)'
+              % (len(spots), len(compare_spots)))
+    else:
+        spots = [s for s in compare_spots if scorable(s)]
+        skipped = len(compare_spots) - len(spots)
+        print('scoring %d of %d compare-flagged spots -- poseVerified population '
+              '(%d skipped: failed pose verification)'
+              % (len(spots), len(compare_spots), skipped))
+    if not spots:
+        raise SystemExit(
+            'all %d compare-flagged spots for apartment "%s" failed pose '
+            'verification -- nothing left to score' % (len(compare_spots), args.apt))
     rows = []
     for s in spots:
         photo = os.path.join(ROOT, 'tour', cfg['meta']['photoBase'], s['file'])
@@ -112,7 +150,7 @@ def main():
         print('%-10s %-16s dE2000 %6.2f' % (s['file'], s.get('name', ''), de))
 
     mean = round(sum(r['deltaE'] for r in rows) / len(rows), 2)
-    print('mean dE2000: %.2f' % mean)
+    print('mean dE2000 (%s population): %.2f' % (population, mean))
 
     out_dir = os.path.join(ROOT, 'docs', 'superpowers', 'metrics')
     os.makedirs(out_dir, exist_ok=True)
@@ -120,8 +158,12 @@ def main():
     json.dump({
         'apartment': args.apt,
         'phase': args.phase,
+        'population': population,
         'mean': mean,
         'spots': rows,
+        'scored': len(spots),
+        'compareTotal': len(compare_spots),
+        'skippedPoseVerification': skipped,
         'caveat': ('Absolute values are meaningless: render and photograph differ in '
                    'lens, exposure and furniture model. Only the trend between phases '
                    'carries information.')

@@ -1,0 +1,78 @@
+{
+  "apartment": "kings-court",
+  "phase": "b1-migration",
+  "mean": 21.2,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "deltaE": 18.73
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "deltaE": 14.08
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "deltaE": 17.28
+    },
+    {
+      "file": "4.webp",
+      "name": "Coffee corner",
+      "deltaE": 28.99
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "deltaE": 16.01
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "deltaE": 16.73
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "deltaE": 21.2
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "deltaE": 32.08
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "deltaE": 14.87
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "deltaE": 13.09
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "deltaE": 23.28
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "deltaE": 21.24
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "deltaE": 31.27
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "deltaE": 27.94
+    }
+  ],
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}
