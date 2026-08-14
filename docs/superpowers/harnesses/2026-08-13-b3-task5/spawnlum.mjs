@@ -2,7 +2,7 @@
 // 480x300, full post chain, pixelRatio 1, pixels pooled across every spawn
 // before the mean and the INTERPOLATED 5th percentile (task 3's stats(), so
 // the value is a fraction like 79.2 rather than an integer bin).
-//   node t5/spawnlum.mjs <label> [apt]
+//   node spawnlum.mjs <label> [apt]
 import fs from 'node:fs';
 import path from 'node:path';
 import { launch, BASE, openTour } from './lib5.mjs';

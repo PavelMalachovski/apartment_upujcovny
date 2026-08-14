@@ -1,0 +1,60 @@
+{
+  "label": "before-final",
+  "apt": "serenity",
+  "yawOk": true,
+  "errors": [
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pooled": {
+    "meanL": 138.7,
+    "p5L": 80.1,
+    "pctPixelsBelowLuma16": 0.1
+  },
+  "per": [
+    {
+      "spawn": "Entrance",
+      "meanL": 140.3,
+      "p5L": 66.4,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Living Room",
+      "meanL": 136.1,
+      "p5L": 81.7,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bedroom",
+      "meanL": 147.5,
+      "p5L": 89.3,
+      "pctPixelsBelowLuma16": 0.3
+    },
+    {
+      "spawn": "Bathroom",
+      "meanL": 139.7,
+      "p5L": 98.1,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Pool Terrace",
+      "meanL": 129.6,
+      "p5L": 75.9,
+      "pctPixelsBelowLuma16": 0
+    }
+  ],
+  "lightmaps": {
+    "status": "missing",
+    "dir": "lightmaps/serenity/",
+    "hash": null,
+    "want": null,
+    "loaded": 0,
+    "total": 0
+  },
+  "ambSampled": true,
+  "issues": [
+    "lightmaps: no readable manifest at lightmaps/serenity/ (HTTP 404)"
+  ],
+  "bakeMs": 6264,
+  "exposure": 0.329,
+  "contrast_mean_over_p5": 1.732
+}

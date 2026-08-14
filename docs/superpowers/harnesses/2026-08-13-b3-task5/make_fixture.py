@@ -1,17 +1,33 @@
 """Hand-made lightmap pack for the guard proof, written BEFORE the baker
 exists. Solid mid-grey images so an applied pack is unmistakable, and a
 manifest whose hash is whatever the caller passes -- deliberately wrong on
-the first run, correct on the second."""
+the first run, correct on the second.
+
+    python make_fixture.py wrong      # 64 zeros: the guard must reject
+    python make_fixture.py correct    # the real hash: the guard must accept
+
+*** THIS OVERWRITES tour/lightmaps/serenity/ *** -- the SHIPPED pack lives
+there, and these fixtures are flat mid-grey, not light. Restore it when you
+are done, or the flat's floors and ceilings ship unlit:
+
+    git checkout -- tour/lightmaps/serenity
+
+Reads dump.json (written by dump.mjs) for the surface list. It has no
+dependency on tools/bake_lightmaps.mjs at all, which is what let the guard be
+proved before the baker existed."""
 import json
 import os
 import sys
 
 from PIL import Image
 
-ROOT = r'C:\Git\AirBNB'
-DUMP = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dump.json')
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+DUMP = os.path.join(HERE, 'dump.json')
 OUT = os.path.join(ROOT, 'tour', 'lightmaps', 'serenity')
 
+if len(sys.argv) < 2 or sys.argv[1] not in ('wrong', 'correct'):
+    raise SystemExit(__doc__)
 want = sys.argv[1]           # 'wrong' or 'correct'
 d = json.load(open(DUMP, encoding='utf-8'))
 real = d['hash']

@@ -1,17 +1,45 @@
 """Assemble docs/superpowers/metrics/serenity-b3-task5-luminance.json from the
-harness outputs, so every number in it is copied by a program and not by hand.
+harness outputs in this directory, so every number in it is derived by a
+program from a committed input rather than typed by hand.
 
-Inputs (all written by the harnesses in this directory):
-  spawnlum-<phase>.json     spawn-pooled sRGB luminance, one per phase
-  linear.json               {phase: [mean, p5]} transcribed from tools/luminance.py
-  baketime.json             {phase: {loads, median}}
-  pack.json                 {bytes, files, cfg, bakeSeconds}
+Run it from anywhere:  python write_metrics.py
+Add --check to compare against the committed file and write nothing; that is
+the mode that proves the claim above, and it is what fix round 2 used.
+
+Inputs, all committed alongside this script:
+  spawnlum-<phase>.json  spawn-pooled sRGB luminance, one file per phase,
+                         written by spawnlum.mjs
+  linear.json            every tools/luminance.py capture, as raw
+                         (mean, p5) pairs per set -- the aggregates, the
+                         ranges and the contrasts below are all computed
+                         from these, not transcribed
+  baketime.json          window.__bakeMs loads and the packCost decomposition
+  pack.json              the shipped pack's weight, settings and outcome
+
+HISTORY, because it matters for trusting this file: the first version of
+this script produced the PRE-fix-round-1 content (cacheVersion 103, 2-dp
+contrasts, no repeatability or identity data) while the committed JSON had
+already been updated by hand. The provenance claim in the README was
+therefore false for exactly those fields. This version reproduces the
+committed file, and `--check` is how that is verified rather than asserted.
 """
+import argparse
 import json
 import os
+from decimal import Decimal, ROUND_HALF_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = r'C:\Git\AirBNB\docs\superpowers\metrics\serenity-b3-task5-luminance.json'
+ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+OUT = os.path.join(ROOT, 'docs', 'superpowers', 'metrics',
+                   'serenity-b3-task5-luminance.json')
+
+# Half-up, from a string, so a tie like the mean of [0.0854, 0.0853, 0.0853,
+# 0.0854] = 0.08535 rounds the same way on every machine. Plain round() would
+# use banker's rounding on a float that is not exactly 0.08535 anyway.
+def r(value, places):
+    q = Decimal(1).scaleb(-places)
+    return float(Decimal(repr(value)).quantize(q, rounding=ROUND_HALF_UP))
+
 
 PHASES = [
     ('runtime-bake', 'spawnlum-before-final.json',
@@ -27,7 +55,14 @@ PHASES = [
      'estimator. It reproduces the runtime bake to the reported precision, which is what '
      'proves the texel mapping, the WebP encoding, the loading, the colour space and the '
      'lightMapIntensity are all neutral -- so the shipped pack row differs by the '
-     'integrator and nothing else.'),
+     'integrator and nothing else.'
+     ' LIMIT, measured in fix round 1: this identity is established for the pooled MEAN and '
+     'not for p5. Per spawn the p5 residual under this nominal identity reaches -0.9 '
+     '(Entrance) and -1.2 (Bedroom), which is the same size as or larger than the shipped '
+     'pack effect on those same spawns (+2.2 and 0.0); the pooled p5 agrees (80.0 vs 80.1) '
+     'only because pooling averages the residuals away. p5 is half of the ratio being gated.'
+     ' NOTE THE SIGN, recorded in fix round 2: these per-spawn residuals are NEGATIVE, while '
+     'the same identity lifts p5 in tools/luminance.py. See linearLuminance.identityCaveat.'),
     ('withdrawn-3x-bounces0', 'spawnlum-res3-b0.json',
      'WITHDRAWN, not shipped: 3x texel density, bounces = 0. Recorded because it is the '
      'evidence for why resScale stayed at 1 -- at 3x the texels are finer than the 0.14 m '
@@ -53,7 +88,38 @@ def load(name):
         return json.load(f)
 
 
-def main():
+def linear_block(linear):
+    """sets / captures / repeatability, all derived from the raw captures."""
+    caps = {k: v for k, v in linear.items() if not k.startswith('_')}
+    sets, repeat = {}, {}
+    for key, pairs in caps.items():
+        means = [p[0] for p in pairs]
+        p5s = [p[1] for p in pairs]
+        agg_mean = sum(means) / len(means)
+        agg_p5 = sum(p5s) / len(p5s)
+        mean = r(agg_mean, 4)
+        p5 = r(agg_p5, 4)
+        # Contrast is the ratio of the UNROUNDED aggregates, not of the
+        # 4-dp values quoted beside it. The two can differ in the last digit
+        # -- offline-pack is 3.38576 -> 3.386 unrounded and 0.2890/0.0854 ->
+        # 3.384 from the quoted pair -- because its four captures do not all
+        # share a p5. Quoting the unrounded ratio is the more accurate of the
+        # two and it matches the mean of the per-capture ratios (3.38577).
+        sets[key] = {'mean': mean, 'p5': p5, 'contrast': r(agg_mean / agg_p5, 3)}
+        if key != 'photographs':
+            sets[key]['n'] = len(pairs)
+            repeat[key] = {
+                'meanRange': [min(means), max(means)],
+                'p5Range': [min(p5s), max(p5s)],
+                'contrastRange': [r(min(m / p for m, p in pairs), 3),
+                                  r(max(m / p for m, p in pairs), 3)],
+            }
+    repeat['note'] = ('measured in fix round 1; the first draft quoted single shots against '
+                      'an uncharacterised harness')
+    return sets, caps, repeat
+
+
+def build():
     linear = load('linear.json')
     times = load('baketime.json')
     pack = load('pack.json')
@@ -75,7 +141,9 @@ def main():
                          for p in d['per']],
         }
 
-    out = {
+    sets, captures, repeat = linear_block(linear)
+
+    return {
         'apartment': 'serenity',
         'metric': 'spawn-pooled luminance',
         'task': 'phase B plan 3, task 5 -- the offline lightmap baker',
@@ -94,18 +162,18 @@ def main():
                     'spread measured on an identical build is 0.1 of meanL and 0.0 of p5L '
                     '(BASE-fef2d07 measured twice: 138.7/80.0 and 138.6/80.0).'),
         'exposure': 0.329,
-        'cacheVersion': 103,
+        'cacheVersion': 104,
         'pack': pack,
         'phases': phases,
         'linearLuminance': {
             'tool': 'tools/luminance.py',
-            'population': '2 of 11 (poseVerified filter, hard-coded in tools/luminance.py)',
-            'note': ('Linear-light Rec.709 relative luminance over the compare spots, captured '
-                     'at ?fov=legacy. Diagnostic only -- no gate is taken from it here. '
-                     'Contrast is mean/p5, quoted so the render can be compared with the '
-                     'photographs. This is the number task 6 applies its >= 4.9 criterion to.'),
-            'sets': {k: {'mean': v[0], 'p5': v[1],
-                         'contrast': round(v[0] / v[1], 2)} for k, v in linear.items()},
+            'population': linear['_population'],
+            'note': linear['_note'],
+            'identityCaveat': linear['_identityCaveat'],
+            'sets': sets,
+            'captures': dict({'note': ('independent captures of each state, frames re-captured '
+                                       'every time; (mean, p5) pairs')}, **captures),
+            'repeatability': repeat,
         },
         'bakeMs': {
             'note': ('window.__bakeMs, five fresh page loads per side, twice. With a pack it '
@@ -120,6 +188,25 @@ def main():
             'phases': times,
         },
     }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--check', action='store_true',
+                    help='compare with the committed file and write nothing')
+    args = ap.parse_args()
+    out = build()
+    if args.check:
+        with open(OUT, encoding='utf-8') as f:
+            committed = json.load(f)
+        if committed == out:
+            print('MATCH: this script reproduces %s' % OUT)
+            return
+        print('DIFFERS from %s' % OUT)
+        for k in sorted(set(committed) | set(out)):
+            if committed.get(k) != out.get(k):
+                print('  key %r differs' % k)
+        raise SystemExit(1)
     with open(OUT, 'w', encoding='utf-8') as f:
         json.dump(out, f, indent=2)
     print('wrote', OUT)

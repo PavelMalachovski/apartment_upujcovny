@@ -1215,15 +1215,24 @@ in the flat. Repeats are independent captures of the same state:
 | runtime bake | 4 | 0.2820 | 0.0833 | **3.385** (3.383–3.387) |
 | offline pack, bounces 0 — identity | 2 | 0.2821 | 0.0836 | **3.374** (3.370–3.378) |
 | offline pack, as shipped | 4 | 0.2890 | 0.0854 | **3.386** (3.384–3.387) |
-| photographs | — | 0.2993 | 0.0483 | **6.196** |
+| photographs | — | 0.2993 | 0.0483 | **6.197** |
 
 **The identity row is the one to read first.** A pack baked at
 `bounces = 0` is the runtime's own estimator and should reproduce it. It
-reproduces the mean and not p5 (2048 paths per texel remove the noise the
-runtime's 16 rays carry, and p5 is a tail statistic), so **the pipeline's
-own identity residual on contrast is −0.011 — an order of magnitude
-larger than the shipped pack's +0.001.** No contrast claim of that size
-is available from this harness at all.
+reproduces the mean and not p5, so **the pipeline's own identity residual
+on contrast is −0.011 — an order of magnitude larger than the shipped
+pack's +0.001.** No contrast claim of that size is available from this
+harness at all.
+
+Why p5 moves under a nominal identity is **not settled**. Denoising fits
+(2048 paths per texel remove the 4.8/255 per-texel noise `bake.js:186-193`
+records at 16 rays, and p5 is a tail statistic) but does not obviously
+explain the sign: the same identity moves per-spawn p5 *down* in the sRGB
+population (Entrance −0.9 = −1.4%), four times the relative size and the
+opposite way. The identity set is also n=2 with a contrast spread of
+0.008. **The conclusion holds either way** — denoising or uncharacterised
+variance, −0.011 dominates +0.001, and an unexplained residual widens the
+harness's uncertainty rather than rescuing the result.
 
 What the shipped pack does on this population is a **near-uniform gain of
 ~2.5%**: mean ×1.02482, p5 ×1.02461, differing by 0.022 pp against the

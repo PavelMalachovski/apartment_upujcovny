@@ -1,7 +1,7 @@
 // Visual check (hard rule 1): one frame per spawn through the post chain,
 // plus the top-down floor cutaway rendered RAW (CLAUDE.md's recipe -- the
 // vignette darkens exactly the corners that shot exists to inspect).
-//   node t5/frames.mjs <tag> [apt]
+//   node frames.mjs <tag> [apt]
 import fs from 'node:fs';
 import path from 'node:path';
 import { launch, BASE, openTour } from './lib5.mjs';

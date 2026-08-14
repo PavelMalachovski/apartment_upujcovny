@@ -1,0 +1,57 @@
+{
+ "note": "window.__bakeMs, five fresh page loads per side; see the report -- the two paired runs disagree in sign and no net claim is supportable from them. The decomposition in packCost is the usable measurement.",
+ "runA_3x_pack": {
+  "withPack": [
+   2813,
+   1723,
+   2380,
+   2403,
+   2097
+  ],
+  "medianWithPack": 2380,
+  "noPack": [
+   2742,
+   1315,
+   1157,
+   1237,
+   1228
+  ],
+  "medianNoPack": 1237
+ },
+ "runB_shipped_pack": {
+  "withPack": [
+   5305,
+   1917,
+   1843,
+   1964,
+   2144
+  ],
+  "medianWithPack": 1964,
+  "noPack": [
+   9183,
+   2601,
+   2585,
+   2680,
+   2756
+  ],
+  "medianNoPack": 2680
+ },
+ "packCost": {
+  "note": "measured inside one page load each, three loads: texelLoopMs is Baker.bakeSurface re-run at runtime settings over all 10 surfaces (exactly what a pack skips); packFetchMs is the wall time of the 11 /lightmaps/ requests against tools/serve.py",
+  "texelLoopMs": [
+   233,
+   294,
+   215
+  ],
+  "packFetchMs": [
+   4522,
+   4668,
+   6760
+  ],
+  "bakeMsSameLoads": [
+   4843,
+   4976,
+   7284
+  ]
+ }
+}

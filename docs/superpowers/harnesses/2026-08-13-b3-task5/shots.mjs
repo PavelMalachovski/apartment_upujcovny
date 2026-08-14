@@ -2,7 +2,7 @@
 // for the bake, asserts the post chain is live and that the lightmap pack is
 // in the state the caller expects, then runs window.__measure() and moves the
 // frames into tools/shots/<label>/.
-//   node t5/shots.mjs <label> <expected lightmaps status> [apt]
+//   node shots.mjs <label> <expected lightmaps status> [apt]
 import fs from 'node:fs';
 import path from 'node:path';
 import { launch, BASE, openTour } from './lib5.mjs';
@@ -10,9 +10,9 @@ import { launch, BASE, openTour } from './lib5.mjs';
 const label = process.argv[2];
 const expect = process.argv[3];              // 'off' | 'missing' | 'ok' | 'any'
 const apt = process.argv[4] || 'serenity';
-if (!label || !expect) throw new Error('usage: node t5/shots.mjs <label> <expected-status> [apt]');
+if (!label || !expect) throw new Error('usage: node shots.mjs <label> <expected-status> [apt]');
 
-const SHOTS = 'C:/Git/AirBNB/tools/shots';
+const SHOTS = path.resolve(import.meta.dirname, '..', '..', '..', '..', 'tools', 'shots');
 const dest = path.join(SHOTS, label);
 fs.rmSync(dest, { recursive: true, force: true });
 for (const f of fs.readdirSync(SHOTS)) {

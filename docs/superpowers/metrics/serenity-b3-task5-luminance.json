@@ -2,7 +2,7 @@
   "apartment": "serenity",
   "metric": "spawn-pooled luminance",
   "task": "phase B plan 3, task 5 -- the offline lightmap baker",
-  "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.196 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict.",
+  "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.197 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict.",
   "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels pooled across all spawns before the mean and the INTERPOLATED 5th percentile of Rec.709 luma on the sRGB-encoded frame (0-255). Same method and same harness as <apt>-b3-task2-luminance.json and <apt>-b3-task3-luminance.json. NOT comparable to tools/luminance.py, which reports linear-light values over a different population.",
   "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist. The default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain. Spawn yaw is asserted against the raw JSON degrees on every run. Each phase is a separate page load; the run-to-run spread measured on an identical build is 0.1 of meanL and 0.0 of p5L (BASE-fef2d07 measured twice: 138.7/80.0 and 138.6/80.0).",
   "exposure": 0.329,
@@ -31,7 +31,7 @@
       "note": "every surface decoded back from the WebP it ships as and compared with the canvas it came from; Chrome toDataURL(image/webp, 1) is lossless here"
     },
     "hash": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
-    "outcome": "The pack ships on serenity only. Linear-domain contrast (tools/luminance.py, the quantity task 6 gates on) moved 3.384 -> 3.385 against a criterion of >= 4.9 and photographs at 6.196: the offline bake is flat on that measure. Mean luminance moved toward the photographs (0.2819 -> 0.2891 against 0.2993) and p5 moved away from them (0.0833 -> 0.0854 against 0.0483), which is what a bounce term does -- it fills the near-field shadows the runtime bake crushes to black. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict."
+    "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.197 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict."
   },
   "phases": {
     "runtime-bake": {
@@ -109,7 +109,7 @@
       ]
     },
     "offline-pack-bounces0": {
-      "note": "PIPELINE IDENTITY CHECK, never committed: the same pack re-baked with bounces = 0, at which the integrator reduces exactly to bake.js own AMB_RGB x escaped-fraction estimator. It reproduces the runtime bake to the reported precision, which is what proves the texel mapping, the WebP encoding, the loading, the colour space and the lightMapIntensity are all neutral -- so the shipped pack row differs by the integrator and nothing else. LIMIT, measured in fix round 1: this identity is established for the pooled MEAN and not for p5. Per spawn the p5 residual under this nominal identity reaches -0.9 (Entrance) and -1.2 (Bedroom), which is the same size as or larger than the shipped pack effect on those same spawns (+2.2 and 0.0); the pooled p5 agrees (80.0 vs 80.1) only because pooling averages the residuals away. p5 is half of the ratio being gated.",
+      "note": "PIPELINE IDENTITY CHECK, never committed: the same pack re-baked with bounces = 0, at which the integrator reduces exactly to bake.js own AMB_RGB x escaped-fraction estimator. It reproduces the runtime bake to the reported precision, which is what proves the texel mapping, the WebP encoding, the loading, the colour space and the lightMapIntensity are all neutral -- so the shipped pack row differs by the integrator and nothing else. LIMIT, measured in fix round 1: this identity is established for the pooled MEAN and not for p5. Per spawn the p5 residual under this nominal identity reaches -0.9 (Entrance) and -1.2 (Bedroom), which is the same size as or larger than the shipped pack effect on those same spawns (+2.2 and 0.0); the pooled p5 agrees (80.0 vs 80.1) only because pooling averages the residuals away. p5 is half of the ratio being gated. NOTE THE SIGN, recorded in fix round 2: these per-spawn residuals are NEGATIVE, while the same identity lifts p5 in tools/luminance.py. See linearLuminance.identityCaveat.",
       "meanL": 138.6,
       "p5L": 80,
       "contrast_mean_over_p5": 1.733,
@@ -257,6 +257,7 @@
     "tool": "tools/luminance.py",
     "population": "2 of 11. tools/luminance.py:60 filters through delta_e.scorable, which requires poseVerified; serenity has exactly two that pass, 1.webp (Bathroom) and 11.webp (Bedroom). Both are among the highest-p5 rooms in the flat, i.e. the least shadow available to change; the darkest spawn (Entrance, spawn-pooled p5 66.4) is NOT in this population.",
     "note": "Linear-light Rec.709 relative luminance over the poseVerified compare spots, captured at ?fov=legacy. This is the number task 6 applies its >= 4.9 criterion to. READ THE IDENTITY ROW FIRST: a pack baked at bounces = 0 is the runtime bake own estimator and should reproduce it; it reproduces the mean (x1.00044) and not p5 (x1.00360), because 2048 paths per texel remove the per-texel Monte Carlo noise the runtime 16 rays carry and p5 is a tail statistic. The resulting identity residual on contrast is -0.011, an order of magnitude larger than the shipped pack contrast change of +0.001. What the shipped pack does here is a near-uniform gain of ~2.5% (mean x1.02482, p5 x1.02461, differing by 0.022 pp against the +-0.06 pp that four-decimal rounding alone puts on the p5 ratio), and a mean/p5 ratio is blind to a uniform gain by construction.",
+    "identityCaveat": "The denoising ATTRIBUTION for the identity residual is not settled, and the conclusion does not depend on it. In this population the bounces-0 identity lifts p5 (+0.36%); in the spawn-pooled population the same identity moves per-spawn p5 DOWN (Entrance -0.9 = -1.4%, Bedroom -1.2), four times the relative size and the opposite sign. This set is also n=2 with a contrast spread of 0.008 against a residual of 0.011. So the residual may be denoising, uncharacterised harness variance, or both. EITHER READING SUPPORTS THE SAME CONCLUSION: -0.011 dominates the shipped +0.001, so no contrast claim of that size is available from this harness, and an unexplained residual strengthens the No-Go rather than softening it. Only the derived \"~15% of the p5 move is denoising\" inherits the attribution risk, and nothing rests on it.",
     "sets": {
       "runtime-bake": {
         "mean": 0.282,
@@ -279,7 +280,7 @@
       "photographs": {
         "mean": 0.2993,
         "p5": 0.0483,
-        "contrast": 6.196
+        "contrast": 6.197
       }
     },
     "captures": {
@@ -328,6 +329,12 @@
         [
           0.2891,
           0.0854
+        ]
+      ],
+      "photographs": [
+        [
+          0.2993,
+          0.0483
         ]
       ]
     },

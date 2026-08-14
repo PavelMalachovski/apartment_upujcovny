@@ -2,7 +2,7 @@
 // With a pack this number covers the manifest fetch, the hash, the texture
 // loads and the wall/furniture passes that still run -- i.e. everything
 // between initApp and a lit scene, which is what it has always covered.
-//   node t5/baketime.mjs <label> [apt] [loads]
+//   node baketime.mjs <label> [apt] [loads]
 import { launch, BASE, openTour } from './lib5.mjs';
 
 const label = process.argv[2] || 'run';

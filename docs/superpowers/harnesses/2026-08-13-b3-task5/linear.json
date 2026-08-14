@@ -1,0 +1,57 @@
+{
+ "_population": "2 of 11. tools/luminance.py:60 filters through delta_e.scorable, which requires poseVerified; serenity has exactly two that pass, 1.webp (Bathroom) and 11.webp (Bedroom). Both are among the highest-p5 rooms in the flat, i.e. the least shadow available to change; the darkest spawn (Entrance, spawn-pooled p5 66.4) is NOT in this population.",
+ "_note": "Linear-light Rec.709 relative luminance over the poseVerified compare spots, captured at ?fov=legacy. This is the number task 6 applies its >= 4.9 criterion to. READ THE IDENTITY ROW FIRST: a pack baked at bounces = 0 is the runtime bake own estimator and should reproduce it; it reproduces the mean (x1.00044) and not p5 (x1.00360), because 2048 paths per texel remove the per-texel Monte Carlo noise the runtime 16 rays carry and p5 is a tail statistic. The resulting identity residual on contrast is -0.011, an order of magnitude larger than the shipped pack contrast change of +0.001. What the shipped pack does here is a near-uniform gain of ~2.5% (mean x1.02482, p5 x1.02461, differing by 0.022 pp against the +-0.06 pp that four-decimal rounding alone puts on the p5 ratio), and a mean/p5 ratio is blind to a uniform gain by construction.",
+ "_identityCaveat": "The denoising ATTRIBUTION for the identity residual is not settled, and the conclusion does not depend on it. In this population the bounces-0 identity lifts p5 (+0.36%); in the spawn-pooled population the same identity moves per-spawn p5 DOWN (Entrance -0.9 = -1.4%, Bedroom -1.2), four times the relative size and the opposite sign. This set is also n=2 with a contrast spread of 0.008 against a residual of 0.011. So the residual may be denoising, uncharacterised harness variance, or both. EITHER READING SUPPORTS THE SAME CONCLUSION: -0.011 dominates the shipped +0.001, so no contrast claim of that size is available from this harness, and an unexplained residual strengthens the No-Go rather than softening it. Only the derived \"~15% of the p5 move is denoising\" inherits the attribution risk, and nothing rests on it.",
+ "runtime-bake": [
+  [
+   0.2821,
+   0.0833
+  ],
+  [
+   0.2818,
+   0.0833
+  ],
+  [
+   0.2821,
+   0.0833
+  ],
+  [
+   0.2819,
+   0.0833
+  ]
+ ],
+ "offline-pack-bounces0-identity": [
+  [
+   0.2821,
+   0.0837
+  ],
+  [
+   0.2821,
+   0.0835
+  ]
+ ],
+ "offline-pack": [
+  [
+   0.289,
+   0.0854
+  ],
+  [
+   0.2889,
+   0.0853
+  ],
+  [
+   0.2889,
+   0.0853
+  ],
+  [
+   0.2891,
+   0.0854
+  ]
+ ],
+ "photographs": [
+  [
+   0.2993,
+   0.0483
+  ]
+ ]
+}
