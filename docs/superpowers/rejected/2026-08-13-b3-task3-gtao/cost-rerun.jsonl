@@ -1,0 +1,6 @@
+{"apt":"kings-court","profile":"desktop","dpr":1,"spawn":"Entry hall","buffer":[1280,820],"callsOff":165,"callsOn":311,"dCalls":146,"msOff":23.798,"msOn":94.095,"msOffRange":[6.67,25.03],"msOnRange":[71.96,103.06]}
+{"apt":"kings-court","profile":"mobile","dpr":1.6,"spawn":"Entry hall","buffer":[624,1350],"callsOff":150,"callsOn":282,"dCalls":132,"msOff":18.732,"msOn":64.007,"msOffRange":[3.43,21.49],"msOnRange":[45.74,65.22]}
+{"apt":"serenity","profile":"desktop","dpr":1,"spawn":"Entrance","buffer":[1280,820],"callsOff":71,"callsOn":128,"dCalls":57,"msOff":2.058,"msOn":47.032,"msOffRange":[1.85,7.77],"msOnRange":[18.82,65.41]}
+{"apt":"serenity","profile":"mobile","dpr":1.6,"spawn":"Entrance","buffer":[624,1350],"callsOff":62,"callsOn":110,"dCalls":48,"msOff":2.027,"msOn":33.655,"msOffRange":[1.49,4.23],"msOnRange":[16.61,72.47]}
+{"apt":"horkyone-10","profile":"desktop","dpr":1,"spawn":"Living room","buffer":[1280,820],"callsOff":56,"callsOn":98,"dCalls":42,"msOff":1.675,"msOn":41.152,"msOffRange":[1.51,1.96],"msOnRange":[32.23,87.85]}
+{"apt":"horkyone-10","profile":"mobile","dpr":1.6,"spawn":"Living room","buffer":[624,1350],"callsOff":54,"callsOn":94,"dCalls":40,"msOff":1.39,"msOn":25.053,"msOffRange":[1.32,1.5],"msOnRange":[23.05,64.53]}

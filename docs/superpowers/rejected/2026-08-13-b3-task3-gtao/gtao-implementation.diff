@@ -1,0 +1,117 @@
+diff --git a/tour/main.js b/tour/main.js
+index f81155a..0dbbacd 100644
+--- a/tour/main.js
++++ b/tour/main.js
+@@ -13,6 +13,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
++import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+ import { MeshBVH } from 'three-mesh-bvh';
+ 
+ // Tells index.html's failure watchdog that the module graph resolved and this
+@@ -43,7 +44,7 @@ window.THREE = THREE;
+ // the r128<->r185 gap of everything task 6 found -- see
+ // docs/superpowers/metrics/r128-reference.md.
+ THREE.ColorManagement.enabled = false;
+-Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass, MeshBVH });
++Object.assign(window, { EffectComposer, RenderPass, ShaderPass, UnrealBloomPass, OutputPass, GTAOPass, MeshBVH });
+ 
+ // The classic scripts only declare classes and touch THREE inside functions,
+ // so publishing the globals first is enough — but they must load in this
+diff --git a/tour/post.js b/tour/post.js
+index 09688cd..64e3a2b 100644
+--- a/tour/post.js
++++ b/tour/post.js
+@@ -1,11 +1,21 @@
+ // ============================================================
+-// Post-processing: bloom on bright daylight, then film grain and
+-// vignette. Deliberately restrained — past a low threshold these
+-// read as cheap filters and cost more trust than they earn.
++// Post-processing: screen-space ambient occlusion, bloom on bright
++// daylight, then film grain and vignette. Deliberately restrained —
++// past a low threshold these read as cheap filters and cost more
++// trust than they earn.
+ //
+-// No SSAO: bake.js bakes real ambient occlusion into the floors and
+-// the furniture vertices, and every object here is static, so a
+-// screen-space pass would recompute worse data at runtime.
++// This file used to say "No SSAO", on the reasoning that bake.js bakes
++// real AO into the floors and the furniture vertices and every object
++// here is static, so a screen-space pass would only recompute worse
++// data at runtime. That reasoning was sound for the surfaces the bake
++// reaches and wrong for the ones it does not: `bakeWalls()` calls
++// `lightAt()` alone (see bake.js), so walls carry no occlusion at all —
++// a floor-to-wall corner darkens on the floor side only, and no amount
++// of bake work fixes that while the wall path stays blocked on the
++// pre-existing winding defect recorded in CLAUDE.md. GTAO is the only
++// thing in the pipeline that can darken a wall crease today. What it
++// costs and what it buys are measured in
++// .superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md.
+ // ============================================================
+ 
+ const Post = (() => {
+@@ -86,6 +96,63 @@ const Post = (() => {
+       const composer = new EffectComposer(renderer);
+       composer.addPass(new RenderPass(scene, camera));
+ 
++      // ---- GTAO: screen-space ambient occlusion ----
++      //
++      // GUARD SHAPE: optional, unlike the five classes above. Adding
++      // GTAOPass to the `need` map would make a missing file return null
++      // from create() -- i.e. lose bloom, tone mapping and grain as well,
++      // for one absent addon. The brief's own wording is the requirement:
++      // "a missing pass must degrade to the chain without it". So it is
++      // checked separately, and `typeof` rather than a bare identifier
++      // reference, because an unassigned global throws ReferenceError
++      // where an undefined property is merely falsy. The inner try/catch
++      // covers the same ground the outer one does for the rest of the
++      // chain, but scoped: GTAOPass allocates two extra half-float render
++      // targets plus a depth texture and compiles two large shaders, so it
++      // is the likeliest construction here to fail on a real device, and a
++      // GTAO-only failure should cost GTAO only.
++      //
++      // POSITION: after RenderPass, before UnrealBloomPass, and that is
++      // three separate constraints all pointing the same way.
++      //   * Before OutputPass, because occlusion attenuates *light*. Its
++      //     Default output path multiplies the read buffer by the denoised
++      //     AO (GTAOBlendShader, CustomBlending DstColor x Zero), and a
++      //     multiply is only physically meaningful on linear radiance.
++      //     After OutputPass it would scale ACES-tonemapped, sRGB-encoded
++      //     values instead -- the same display-referred-vs-linear domain
++      //     bug this file already carries two long comments about. Note
++      //     this is the opposite conclusion from the grain pass below,
++      //     which was moved *after* OutputPass for exactly the same
++      //     reason: grain's constants were written for encoded pixels,
++      //     GTAO's multiply belongs on linear ones. OutputPass's own class
++      //     doc only requires sRGB input for passes that need it; GTAO
++      //     does not -- it reads colour solely to scale it, and builds its
++      //     own depth/normal G-buffer from the scene, untouched by
++      //     whatever the colour buffer is encoded in.
++      //   * Before UnrealBloomPass, so bloom thresholds the darkened
++      //     image. Bloom after AO cannot bleed light back into a crease
++      //     the AO just closed; bloom before AO could, and the threshold
++      //     (1.8, fitted in plan 2 task 7) was fitted against the
++      //     pre-bloom linear buffer, which is what it still reads here.
++      //   * It renders its own scene depth+normal G-buffer (a full extra
++      //     scene pass with an override material), so it does not depend
++      //     on any earlier pass having produced depth for it.
++      //
++      // Parameters are upstream's constructor defaults -- radius 0.25 m,
++      // 16 samples, scale 1, thickness 1, blendIntensity 1, output
++      // Default. Nothing was swept or tuned: this project's measurement
++      // rules forbid fitting toward the resemblance score, and there was
++      // no luminance target for an AO radius to be fitted against.
++      if (typeof GTAOPass === 'undefined' || !GTAOPass) {
++        console.warn('[post] GTAOPass missing, rendering the chain without ambient occlusion');
++      } else {
++        try {
++          composer.addPass(new GTAOPass(scene, camera, size.x, size.y));
++        } catch (e) {
++          console.warn('[post] GTAOPass failed to build, rendering the chain without ambient occlusion:', e);
++        }
++      }
++
+       // strength, radius, threshold -- fitted empirically, task 7 of plan 2
+       // (full sweep data: .superpowers/sdd/2026-08-13-phase-b2-measurement-
+       // exposure/task-7-report.md). Both constants moved from where phase B1

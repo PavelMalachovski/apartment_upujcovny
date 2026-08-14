@@ -5,7 +5,25 @@
 //
 // No SSAO: bake.js bakes real ambient occlusion into the floors and
 // the furniture vertices, and every object here is static, so a
-// screen-space pass would recompute worse data at runtime.
+// screen-space pass would recompute worse data at runtime. That
+// reasoning holds for the surfaces the bake reaches; walls it does
+// not reach — bakeWalls() calls lightAt() alone, so a floor-to-wall
+// corner darkens on the floor side only (see bake.js).
+//
+// SCREEN-SPACE AO WAS MEASURED AND REJECTED — do not re-add it
+// without reading why. Phase B plan 3 task 3 vendored GTAOPass from
+// three 0.185.0, wired it in here between RenderPass and the bloom
+// pass, and measured it on all three apartments. Rejected on two
+// grounds of unequal reach: (1) it blackens whole walls, on every
+// device — GTAO is the first thing in this pipeline that reads scene
+// normals, and the walls present their far face (the deferred winding
+// defect in bake.js grid()); (2) its depth/normal prepass is a second
+// full scene pass, taking kings-court to 282 mobile draw calls
+// against a hard ≤250 (desktop 311 against ≤400 is inside budget).
+// Ground 1 is what closes it today. Numbers, causal proof and the
+// preserved working code: the OUTCOME block under task 3 in
+// docs/superpowers/plans/2026-08-13-phase-b3-light.md, and
+// docs/superpowers/rejected/2026-08-13-b3-task3-gtao/.
 // ============================================================
 
 const Post = (() => {

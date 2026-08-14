@@ -349,10 +349,28 @@ objects, which no aggregate number will show you.
 #### OUTCOME: GTAO was evaluated and NOT adopted
 
 The pass was vendored, wired into the chain, guarded, measured and looked at.
-The measurements say do not ship it, on two independent grounds, either one
-sufficient on its own. No `tour/` file changed as a result of this task.
-Full evidence: `.superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md`
-and `docs/superpowers/metrics/*-b3-task3-*.json`.
+The measurements say do not ship it. No `tour/` file changed as a result of
+this task — beyond the pointer comment in `post.js` that this block exists.
+
+**The two grounds do not have equal reach, and the difference is the useful
+part of this record.** Ground 1 blackens walls on *every* device, so it is
+what closes GTAO today, everywhere. Ground 2 is a **mobile** draw-call breach
+— desktop measures 311 against ≤400 and is inside budget — plus a desktop
+frame-time cost. So: **GTAO is rejected today on ground 1. If the winding
+defect is ever fixed, what remains is a mobile breach and a desktop frame-time
+cost, and gating GTAO to desktop only is an unexplored option at that point**
+— `post.js` already drops work per device inside `capable()`, so a conditional
+pass is the shape of something the file does rather than a new mechanism
+(`capable()` tests GPU strength, not device class, so the *signal* would be
+new; `controls.isTouch` exists). Nobody needs to decide that today; ground 1
+makes it moot.
+
+Working code preserved so reconsidering costs a copy, not a redo:
+`docs/superpowers/rejected/2026-08-13-b3-task3-gtao/` — the implementation
+diff, the four vendored 0.185.0 addon files, and the cost harness with its raw
+output. Full evidence:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md` (workspace-only,
+deleted when this plan finishes) and `docs/superpowers/metrics/*-b3-task3-*.json`.
 
 **1. It blackens walls, because it is the first thing in this pipeline that
 reads scene normals.** The deferred winding defect in `bake.js grid()` makes
@@ -369,26 +387,53 @@ camera-facing, immune to the winding — removes the black entirely (dark
 fraction back to 0.3/0.5/0.3%) and produces well-behaved AO. **This is new
 evidence against the WINDING deferral's premise that the defect is
 "invisible today": it is invisible only while nothing reads normals.** It
-does not by itself reopen that deferral, because ground 2 below is fatal
-independently.
+does not by itself reopen that deferral — nothing in this plan depends on
+fixing the winding, and GTAO is not shipping either way — but whoever picks
+the deferral up should know its blast radius is "screen-space effects are
+unavailable", not only "the atlas is blocked".
 
-**2. Its G-buffer prepass breaks the mobile draw-call budget, structurally.**
+**2. Its G-buffer prepass breaks the *mobile* draw-call budget, structurally.**
 kings-court's entry hall: 150 → **282** mobile against a hard ≤250 (desktop
-165 → 311, inside ≤400). The +132/+146 is one extra full scene pass plus four
-full-screen passes, and it does not shrink with resolution, quality settings
-or AO radius — the only escape is supplying an external depth+normal buffer,
-and that path throws in upstream 0.185.0 (`setGBuffer` dereferences
-`this.normalRenderTarget` before it exists). Frame time through the chain,
-same spot on ANGLE/Intel UHD 630: 15.4 → 65.3 ms desktop, 19.1 → 105.0 ms
-mobile.
+165 → 311, inside ≤400 — desktop is not breached). The +132/+146 is one extra
+full scene pass plus four full-screen passes, and it does not shrink with
+resolution, quality settings or AO radius. All six draw-call figures are
+deterministic and were re-measured in fix round 1, reproducing exactly; raw
+output in `docs/superpowers/metrics/*-b3-task3-cost.json`. Frame time through
+the chain, same spot on ANGLE/Intel UHD 630: 15.4 → 65.3 ms desktop, 19.1 →
+105.0 ms mobile — ≈4.2× and ≈5.5×. Those milliseconds are the weakest numbers
+here: the re-run put the same desktop pair at 23.8 → 94.1 ms, so read the
+direction and rough size, never the absolute figure.
+
+**The one escape from the prepass is held shut by an upstream bug, and that
+bug is what makes both grounds bite at once.** `parameters.depthTexture` is
+the only way to skip the G-buffer prepass, and on that path
+`GTAOPass.js:341` dereferences `this.normalRenderTarget.depthTexture`
+unconditionally while `:317` only assigns `normalRenderTarget` on the
+*internal*-G-buffer branch — a certain `TypeError`, repeated at `:253` in
+`setSize`. What that costs is larger than it looks: on that same external path,
+with a depth texture supplied and no normal texture, `:328` computes
+`normalVectorType = 0` — normals reconstructed from depth, i.e. exactly the
+winding-immune mode used as the causal control for ground 1 — and `:502` skips
+the scene pass entirely, leaving **+4 draw calls instead of +132**. One
+upstream dereference is therefore what keeps *both* rejection grounds alive
+simultaneously; without it, the cheap path would sidestep the budget and the
+winding defect in one move. This does **not** change the verdict — this repo
+vendors third-party code verbatim, so patching upstream is not on the table,
+and depth-normals mode still carries the halo below. It is recorded so that a
+future reader knows the door is held shut by two upstream lines rather than by
+a property of the technique, and does not conclude that "fix the winding
+first" is the only route in.
 
 Even in the hypothetical where the winding is fixed, the pass is not clearly
 worth it: the depth-normal variant moves the spawn-pooled mean −1.6 to −3.2%
 and p5 −7 to −20% (right direction — p5 falls further than the mean on all
 three), while still costing the above, and it puts a visible soft dark halo
 along silhouette edges against distant backgrounds — the exact failure mode
-step 5 exists to catch. **If GTAO is reconsidered, it needs the winding fixed
-first and a way to avoid the second scene pass; neither is a tuning change.**
+step 5 exists to catch. **If GTAO is reconsidered it needs either the winding
+fixed, or the upstream external-G-buffer path fixed (which supplies both a
+winding-immune normal source and the cheap draw-call cost at once); and then a
+decision about mobile, where desktop-only gating is the unexplored option.
+None of those is a tuning change.**
 
 Consequence for task 4: **task 3 changed no radiance.** Task 4's re-fit
 follows task 2 alone, not "tasks 2 and 3".
