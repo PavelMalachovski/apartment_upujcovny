@@ -292,6 +292,26 @@ available in the vendored tree — no new dependency. Place it after
 `RenderPass` and before `UnrealBloomPass`. It needs the camera and the scene's
 depth; read the vendored source for its constructor rather than guessing.
 
+**Corrected before task 3 was dispatched.** "Already available in the
+vendored tree — no new dependency" was FALSE. `tour/lib/three-0.185.0/
+examples/jsm/` held exactly ten files — `postprocessing/{EffectComposer,
+MaskPass, OutputPass, Pass, RenderPass, ShaderPass, UnrealBloomPass}.js`
+and `shaders/{CopyShader, LuminosityHighPassShader, OutputShader}.js` — with
+no `GTAOPass.js` and none of its dependencies. Vendoring was therefore part
+of task 3, not a precondition of it. Cost: small, because the repo already
+has the procedure (fetch from unpkg at the pinned version, take the ESM
+entry plus its relative imports, then closure-check until every bare
+specifier is `three` and every relative one resolves on disk) and task 1 had
+just run it at 58 files for `three-mesh-bvh`. The real closure came to six
+files, four of them new: `postprocessing/GTAOPass.js`,
+`shaders/GTAOShader.js`, `shaders/PoissonDenoiseShader.js`,
+`math/SimplexNoise.js`; `postprocessing/Pass.js` and `shaders/CopyShader.js`
+were already present and verified byte-identical to unpkg's 0.185.0. Those
+four files are **not** in the tree now — see the outcome block below. The
+rest of the step's advice held: read the vendored source rather than
+guessing, and the constructor is
+`new GTAOPass(scene, camera, width, height, parameters, aoParameters, pdParameters)`.
+
 - [ ] **Step 2: Guard it like the rest of the chain**
 
 `post.js`'s guard already covers five classes by name and returns `null`
@@ -303,6 +323,15 @@ to the chain without it, never to a black screen.
 Draw calls and frame time at kings-court's entry hall, before and after,
 through the post chain per CLAUDE.md's recipe (`a.post.render(0)` with
 `info.autoReset` handled). Budget is ≤400 desktop; it was 165 full-chain.
+
+**Corrected before task 3 was dispatched.** The budget is ≤400 desktop **and
+≤250 mobile**, and quoting only the desktop half hid the ceiling that
+actually binds. GTAO renders a depth/normal prepass over the whole scene, so
+it adds roughly one more scene pass on top of its four full-screen passes,
+and kings-court's scene pass alone is ~150 calls. Measured: kings-court's
+entry hall went 165 → 311 desktop (inside ≤400) and **150 → 282 mobile
+(past ≤250)**. Quoting the desktop number alone would have read as
+comfortably inside budget.
 
 - [ ] **Step 4: Measure its effect, and re-check the gate**
 
@@ -317,11 +346,60 @@ objects, which no aggregate number will show you.
 
 - [ ] **Step 6: Commit**
 
+#### OUTCOME: GTAO was evaluated and NOT adopted
+
+The pass was vendored, wired into the chain, guarded, measured and looked at.
+The measurements say do not ship it, on two independent grounds, either one
+sufficient on its own. No `tour/` file changed as a result of this task.
+Full evidence: `.superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md`
+and `docs/superpowers/metrics/*-b3-task3-*.json`.
+
+**1. It blackens walls, because it is the first thing in this pipeline that
+reads scene normals.** The deferred winding defect in `bake.js grid()` makes
+every along-z wall present its *far* face to the camera, so the surface a
+visitor looks at carries a vertex normal pointing away from them. GTAO reads
+that normal, finds the hemisphere fully closed, and multiplies those pixels
+to black. Spawn-pooled over every spawn, the fraction of frame below luma 16
+goes 0.1 → **21.4%** (serenity), 0.2 → **11.9%** (kings-court), 0.3 →
+**11.1%** (horkyone-10), and the 5th percentile collapses to ~0 on all three.
+All-spot legacy ΔE goes 16.61 → **21.68** (serenity) and 18.78 → **20.47**
+(kings-court). This is confirmed causally, not inferred: forcing
+`NORMAL_VECTOR_TYPE = 0` so normals are reconstructed from depth — always
+camera-facing, immune to the winding — removes the black entirely (dark
+fraction back to 0.3/0.5/0.3%) and produces well-behaved AO. **This is new
+evidence against the WINDING deferral's premise that the defect is
+"invisible today": it is invisible only while nothing reads normals.** It
+does not by itself reopen that deferral, because ground 2 below is fatal
+independently.
+
+**2. Its G-buffer prepass breaks the mobile draw-call budget, structurally.**
+kings-court's entry hall: 150 → **282** mobile against a hard ≤250 (desktop
+165 → 311, inside ≤400). The +132/+146 is one extra full scene pass plus four
+full-screen passes, and it does not shrink with resolution, quality settings
+or AO radius — the only escape is supplying an external depth+normal buffer,
+and that path throws in upstream 0.185.0 (`setGBuffer` dereferences
+`this.normalRenderTarget` before it exists). Frame time through the chain,
+same spot on ANGLE/Intel UHD 630: 15.4 → 65.3 ms desktop, 19.1 → 105.0 ms
+mobile.
+
+Even in the hypothetical where the winding is fixed, the pass is not clearly
+worth it: the depth-normal variant moves the spawn-pooled mean −1.6 to −3.2%
+and p5 −7 to −20% (right direction — p5 falls further than the mean on all
+three), while still costing the above, and it puts a visible soft dark halo
+along silhouette edges against distant backgrounds — the exact failure mode
+step 5 exists to catch. **If GTAO is reconsidered, it needs the winding fixed
+first and a way to avoid the second scene pass; neither is a tuning change.**
+
+Consequence for task 4: **task 3 changed no radiance.** Task 4's re-fit
+follows task 2 alone, not "tasks 2 and 3".
+
 ---
 
 ### Task 4: Re-fit exposure and bloom, together
 
-Mandatory, not conditional. Tasks 2 and 3 changed the radiances that both
+Mandatory, not conditional. **Amended: task 2 alone changed the radiances —
+task 3 shipped nothing, see its outcome block above.** Original wording,
+written before that was known: tasks 2 and 3 changed the radiances that both
 constants act on.
 
 **Files:**
