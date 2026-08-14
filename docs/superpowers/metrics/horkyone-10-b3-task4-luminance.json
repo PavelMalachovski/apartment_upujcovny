@@ -74,7 +74,7 @@
    "note": "fails: 10.5 above serenity"
   }
  ],
- "sweepNote": "One page load, exposure set in-page, full post chain at the final bloom constants (threshold 1.8, strength 0.1), so every row shares one set of procedural textures.",
+ "sweepNote": "One page load, exposure set in-page, full post chain at the final bloom constants (threshold 1.8, strength 0.1), so every row shares one set of procedural textures. DELIBERATE DEVIATION from the phase order (which fits exposure with bloom disabled): this apartment was fitted with the bloom pass ENABLED, after bloom was settled, because its criterion is proximity to sibling numbers that are themselves measured through the full chain. It cannot matter here: every horkyone-10 spawn measures 0.00% of frame over the bloom threshold (bloom-b3-task4.json), so the pass contributes nothing to these frames.",
  "chosen": {
   "exposure": 0.46,
   "previousValue": 0.45,

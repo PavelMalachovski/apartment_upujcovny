@@ -1,0 +1,69 @@
+{
+ "apartment": "serenity",
+ "metric": "reach of exposure on the merge-gate metric, measured in the gate's own camera",
+ "task": "phase B3 plan 3 task 4, review fix round 1",
+ "question": "Can ANY exposure bring serenity under the <=16.58 all-spot legacy ceiling? Round 0 answered this by transferring an inference from the fixed-fov sweep plus a two-point same-load diagnostic 0.003 apart; review round 1 asked for the direct measurement in the gate camera, which is this file.",
+ "method": "One page load, ?apt=serenity&measure=1&fov=legacy, full shipped post chain (bloom enabled, threshold 1.8, strength 0.1), only renderer.toneMappingExposure changing between captures, frames re-captured fresh per point into their own folder, scored with tools/delta_e.py's own cell_means()/ciede2000() over every compare-flagged spot (all-spot, 11 of 11). One load means one set of the procedural textures materials.js randomises, so the differences between these rows are exposure and nothing else.",
+ "notAFit": "DIAGNOSTIC ONLY, run after 0.329 was chosen, committed and verified. The shipped value is the luminance fit and does not move; choosing an exposure because it scored better on dE2000 is the rule violation this phase exists to prevent. This file exists so the merge owner knows whether a passing exposure exists at all. It does not.",
+ "ceiling": 16.58,
+ "shippedExposure": 0.329,
+ "points": [
+  {
+   "exposure": 0.3,
+   "allSpot_dE2000_full": 16.6424,
+   "allSpot_dE2000_rounded": 16.64,
+   "poseVerified_dE2000_full": 16.2045,
+   "allSpot_meanLum": 0.2558,
+   "poseVerified_meanLum": 0.2579,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.3"
+  },
+  {
+   "exposure": 0.31,
+   "allSpot_dE2000_full": 16.6147,
+   "allSpot_dE2000_rounded": 16.61,
+   "poseVerified_dE2000_full": 16.124,
+   "allSpot_meanLum": 0.2643,
+   "poseVerified_meanLum": 0.2665,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.31"
+  },
+  {
+   "exposure": 0.32,
+   "allSpot_dE2000_full": 16.6085,
+   "allSpot_dE2000_rounded": 16.61,
+   "poseVerified_dE2000_full": 16.0687,
+   "allSpot_meanLum": 0.2726,
+   "poseVerified_meanLum": 0.2749,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.32"
+  },
+  {
+   "exposure": 0.326,
+   "allSpot_dE2000_full": 16.6121,
+   "allSpot_dE2000_rounded": 16.61,
+   "poseVerified_dE2000_full": 16.0437,
+   "allSpot_meanLum": 0.2775,
+   "poseVerified_meanLum": 0.2798,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.326"
+  },
+  {
+   "exposure": 0.329,
+   "allSpot_dE2000_full": 16.6142,
+   "allSpot_dE2000_rounded": 16.61,
+   "poseVerified_dE2000_full": 16.0346,
+   "allSpot_meanLum": 0.28,
+   "poseVerified_meanLum": 0.2823,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.329"
+  },
+  {
+   "exposure": 0.34,
+   "allSpot_dE2000_full": 16.6437,
+   "allSpot_dE2000_rounded": 16.64,
+   "poseVerified_dE2000_full": 16.0126,
+   "allSpot_meanLum": 0.2889,
+   "poseVerified_meanLum": 0.2912,
+   "set": "t4reach-serenity-legacy-bloomOn-e0.34"
+  }
+ ],
+ "result": "The curve is a shallow U with its minimum at exposure 0.32, dE2000 16.6085 -- above the 16.58 ceiling. The best exposure anywhere in the neighbourhood is worth 0.0057 against the shipped 0.329 (16.6142): a sixth of the 0.03 shortfall and a seventh of this metric's repeat-run noise floor. Both ends rise (16.6424 at 0.30, 16.6437 at 0.34) and the fixed-camera sweep shows it keeps rising far out (19.17 at 0.6, 22.58 at 1.0). NO EXPOSURE PASSES THIS GATE.",
+ "corroboration": "Six independent readings above the ceiling across three tasks and two exposures: serenity-b3-task2-fix1-allspots.json 16.60 and serenity-b3-task3-off-allspots.json 16.61, both at the old 0.326 and both predating this task, plus task 4's four runs at 0.329 (16.60, 16.62, 16.61, 16.60).",
+ "windingDefect": "Measured against a render carrying the deferred grid() winding defect (8 of 12 wall faces backwards, bake.js). Re-run this when that fix lands."
+}

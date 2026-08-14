@@ -310,6 +310,13 @@ the same caveat this section just applied to plan 1's numbers.
 
 ## Exposure and bloom fitted together, and the merge condition re-read (task 7)
 
+> **Superseded in part — see "Phase B3 plan 3 task 4" at the end of this
+> file.** The three fitted exposures below (serenity 0.326, kings-court
+> 0.56, horkyone-10 0.45) were re-fitted after plan 3 task 2 changed the
+> radiances, and ship today as 0.329 / 0.575 / 0.46. Both bloom constants
+> were re-measured and held. The method described here is unchanged and
+> still current; only the values and the gate reading moved.
+
 The task the whole plan exists for. Three things happened in order, per the
 phase's own rule that exposure and bloom are coupled through the same buffer
 and must not be fitted in isolation: **(1)** `serenity.exposure`'s old
@@ -644,6 +651,15 @@ adding a third paragraph of disclosure on top of this one.
 
 ## Task 9: the gate, and the merge decision
 
+> **Superseded — see "Phase B3 plan 3 task 4" at the end of this file.**
+> This section's decision ("I consider the merge condition met", below)
+> was correct for the code it measured and is kept as the record of that
+> moment. It is no longer the current state: plan 3 task 2 changed the
+> bake, and serenity now reads **16.61 all-spot legacy against the same
+> ≤16.58 ceiling**, over six independent readings spanning three tasks
+> and two exposure values. Do not quote this section as the live gate
+> status.
+
 Everything above this section was recorded by tasks 4–7. This section is the
 gate itself — re-measured independently rather than trusted from the last
 commit, because the merge decision is the one place in this plan where
@@ -754,7 +770,10 @@ ceiling are not distinguishable from each other with the precision this
 metric has — a fifth measurement landing at 16.59 would not be a surprise
 and would not by itself prove a regression either.
 
-**I consider the merge condition met**, for three reasons rather than the
+**I consider the merge condition met** — *true of the code this section
+measured, and no longer true today: plan 3 task 2 changed the bake and
+serenity now reads 16.61 against the same ceiling. See "Phase B3 plan 3
+task 4" at the end of this file* — for three reasons rather than the
 arithmetic alone: (1) the arithmetic does hold, consistently, across every
 independent attempt to break it (repeat run, full-precision recompute, a
 separate session roughly two hours after task 7's, with task 8's UI work
@@ -1128,14 +1147,33 @@ pre-task-2 state landed under it in all four of its runs — so it is a
 consistent, reproducible miss whose magnitude merely equals the noise
 floor, not parity.
 
-**Exposure could not have fixed it, and this is measured, not argued.**
-On one page load, in the gate's own mode, through the shipped chain, with
-only exposure changing: 0.326 → 16.5989, 0.329 → 16.6028. The re-fit
-moved the gate metric by 0.004, a tenth of the noise floor, and ΔE is
-flat to ±0.05 across 0.32–0.34 and rises steeply outside it. Task 2
-darkened p5 — shadow *shape* — and exposure is a single scalar on the
-mean. Wrong lever; the decision about the residual 0.03 belongs to
-whoever owns the merge.
+**It is not this task's fit, and it is not noise: six independent
+readings above the ceiling, across three tasks and two exposure values.**
+`serenity-b3-task2-fix1-allspots.json` 16.60 and
+`serenity-b3-task3-off-allspots.json` 16.61 both predate this task and
+were taken at the old 0.326; the four task-4 runs read 16.60, 16.62,
+16.61, 16.60 at 0.329. A miss that reproduces six times, on two
+different exposures, in three different tasks' harness runs, is a real
+miss.
+
+**Exposure cannot reach it, measured in the gate's own camera.** One page
+load, `&fov=legacy`, shipped chain, only exposure changing, all-spot,
+full precision (`serenity-b3-task4-exposure-reach.json`):
+
+| exposure | 0.30 | 0.31 | **0.32** | 0.326 | **0.329 (ships)** | 0.34 |
+|---|---:|---:|---:|---:|---:|---:|
+| all-spot legacy ΔE2000 | 16.6424 | 16.6147 | **16.6085** | 16.6121 | 16.6142 | 16.6437 |
+
+The curve is a shallow U whose **minimum over the whole neighbourhood is
+16.61**, at exposure 0.32 — still above the 16.58 ceiling, and worth only
+0.0057 against the shipped value, a sixth of the shortfall and a seventh
+of the noise floor. It rises on both sides (and, from the fixed-camera
+sweep, keeps rising: 19.17 at 0.6, 22.58 at 1.0). **There is no exposure
+that passes this gate**, so the trade-off between the luminance fit and
+a passing score does not exist to be made — the question of whether it
+would have been allowed never arises. The residual is a redistribution
+across the 8×8 cell means, and a single scalar on the mean cannot undo
+one; the decision about it belongs to whoever owns the merge.
 
 **horkyone-10** (no `compare` spots, so no ΔE) passes its own criterion:
 spawn-pooled mean sRGB luminance **143.6** against serenity 138.7 and
