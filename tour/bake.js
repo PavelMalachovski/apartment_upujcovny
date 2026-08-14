@@ -3,15 +3,20 @@
 //
 // Computes per-texel lighting for floors, ceilings and attic slopes:
 // direct lamp light with visibility tests (soft shadows), windows as
-// cool-light area sources, sun on the terrace, and a constant bounce
-// term. The result is a CanvasTexture attached as a lightMap (uv2) to
-// MeshBasicMaterial, so baked surfaces spend no GPU on dynamic light.
+// cool-light area sources, sun on the terrace, and an indoor bounce term
+// scaled by hemisphere visibility. The result is a CanvasTexture attached
+// as a lightMap (uv2) to MeshBasicMaterial, so baked surfaces spend no GPU
+// on dynamic light.
 //
 // Input: Builder.bakeData = { occluders, lights, windows, surfaces }
 //   occluder: {x1,y1,z1, x2,y2,z2}
 //   light:    {x,y,z, int}
 //   window:   {x,y,z, nx,nz, area, lvl}
 //   surface:  {mesh, w, h, res, lvl, outdoor}
+//
+// The indoor ambient term is no longer a constant: it is scaled by
+// hemisphere visibility sampled against the real scene geometry through
+// sampler.js. See "Ambient visibility" below.
 // ============================================================
 
 const Baker = (() => {
@@ -116,16 +121,114 @@ const Baker = (() => {
       );
       if (!blocked(P, _B, near)) open++;
     }
-    // never crush to black: contact shadows, not holes
-    return 0.35 + 0.65 * (open / n);
+    // A fully enclosed sample returns a true 0. This used to be floored at
+    // 0.35 ("never crush to black"), which put a hard lower bound on every
+    // render's darkest 5% -- the lifted blacks phase B3 exists to fix.
+    //
+    // No epsilon. `near` only ever holds boxes this sample can actually see
+    // (the containing-box skip and the behind-the-plane cull above) and the
+    // empty case returned 1 before this line, so a 0 here means the
+    // hemisphere really is closed -- under a sofa, inside a cabinet -- and
+    // black is right there. Checked rather than assumed: with the floor gone
+    // 15% of serenity's lightmap texels and 14% of its furniture vertices
+    // reach 0, and every one of them was looked at in a render. They read as
+    // contact shadow. The one place a zero DID misbehave was the boundary
+    // texel of a floor or ceiling plate, and that is an edge-filtering
+    // problem with its own fix -- see the dilation pass in bakeSurface.
+    return open / n;
+  }
+
+  // ---------- Ambient visibility ----------
+  // The indoor ambient term used to be a constant: every sample got the same
+  // 0.40/0.385/0.36 no matter what was above it, so nothing could occlude it
+  // and no corner could darken. It is now scaled by how much of the sample's
+  // own hemisphere is open. A cosine-weighted ray that travels AMB_DIST
+  // without hitting anything has reached either the sky or the far side of
+  // the room -- both lit, and both are what the constant stood in for. A ray
+  // blocked before that is in a crevice, under furniture or against a
+  // neighbouring surface, and brings back much less.
+  //
+  // AMB_DIST is chosen so the magnitude in the open is unchanged. Every
+  // ceiling in the catalogue is at least 2.6 m (serenity 2.60, horkyone-10
+  // 2.62, kings-court 2.80) and no room is narrower than about 2.4 m, so at
+  // 1.2 m a floor texel out in the middle of a room reaches nothing at all
+  // and scores exactly 1: an unoccluded ceiling-lit floor lands where it did
+  // before this change, and only shadowed regions move. Raising it past the
+  // narrowest room half-width would start darkening open floor as well,
+  // which is the global-darkening failure this is written to avoid.
+  const AMB_DIST = 1.2;
+  // The sampler is Monte Carlo, so this sets the noise floor, and it is the
+  // whole cost of the change. Ray count against bake time, kings-court (the
+  // largest flat, and the one rule 4a already records as slow), median of
+  // three page loads, swept while every lightAt caller was sampling:
+  // 8.4 s unsampled -> 11.5 / 15.6 / 23.2 s at 8 / 16 / 32 rays. As shipped
+  // (16 rays, lightmapped surfaces only) the medians are serenity
+  // 2.0 -> 3.5 s, kings-court 8.4 -> 16.8 s, horkyone-10 2.6 -> 6.3 s, on a
+  // machine whose run-to-run spread on the same build reached 2x -- treat
+  // the ratios, not the absolute seconds, as the measurement.
+  //
+  // 16 buys the quiet without the top of that. Measured on serenity's indoor
+  // lightmaps, RMS second difference / sqrt(6) -- which cancels any smooth
+  // gradient, so what is left is sampling noise: 15.25 / 14.55 / 13.99 /
+  // 13.86 of 255 at 8 / 16 / 32 / 64 rays. Those fit sigma^2 = detail^2 + K/n
+  // for a per-texel noise of 6.8 / 4.8 / 3.4 / 2.4 against 13.7 of
+  // non-sampling roughness the bake already had, so even 8 rays only moves
+  // the total 10%. The binding consumer is not the lightmap though: walls are
+  // per-vertex at 0.45 m and interpolate, so their noise reads as broad
+  // mottling rather than speckle, and by eye 8 rays visibly mottles
+  // horkyone-10's wall panels where 16 is indistinguishable from 32.
+  const AMB_RAYS = 16;
+
+  // Sampler handle over the scene's real geometry, built in run() and torn
+  // down when the bake finishes. Null means no sampler (the library or the
+  // file failed to load), in which case the ambient falls back to the flat
+  // constant it was before -- a dimmer-looking bake is a worse failure than
+  // an older-looking one.
+  let ambHandle = null;
+  function ambientVis(P, N) {
+    if (!ambHandle) return 1;
+    return Sampler.visibility(P, N, AMB_RAYS, AMB_DIST, ambHandle);
+  }
+
+  // Every mesh the bake should treat as opaque, plus one box per wall piece.
+  // Walls are not in the scene yet at this point -- bakeWalls() builds them
+  // at the very end of the bake, from these same AABBs -- so without the
+  // boxes the sampler would see an apartment with no walls in it. Dollhouse
+  // overlays are excluded because a visitor never sees them, and transparent
+  // materials because glass must not shadow the daylight coming through it
+  // (the AABB occluder set makes the same exclusion: builder.js never calls
+  // addOccluder for window glass).
+  function ambientMeshes(scene, data) {
+    const meshes = [];
+    scene.traverse((o) => {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      if (o.userData.doll || o.userData.dollRoof) return;
+      if (o.material && (o.material.transparent || o.material.opacity < 1)) return;
+      meshes.push(o);
+    });
+    for (const p of data.wallPieces) {
+      const m = new T.Mesh(new T.BoxGeometry(p.x2 - p.x1, p.y2 - p.y1, p.z2 - p.z1));
+      m.position.set((p.x1 + p.x2) / 2, (p.y1 + p.y2) / 2, (p.z1 + p.z2) / 2);
+      meshes.push(m);
+    }
+    return meshes;
   }
 
   // Lighting at point P with normal N (shared by lightmaps and wall vertices)
+  //
+  // `sampled` asks for the visibility-scaled indoor ambient above. Only the
+  // lightmapped surfaces pass true. bakeWalls passes FALSE and keeps the old
+  // flat constant, and that is a measured decision, not an oversight -- see
+  // the block above bakeWalls for what happens when walls opt in and why
+  // closing it needs the wall atlas (the plan's task 4).
   const _Q = new T.Vector3();
-  function lightAt(P, N, occ, data, outdoor) {
+  function lightAt(P, N, occ, data, outdoor, sampled) {
     let r, g, b;
     if (outdoor) { r = 0.66; g = 0.70; b = 0.78; }
-    else { r = 0.40; g = 0.385; b = 0.36; }
+    else {
+      const v = sampled ? ambientVis(P, N) : 1;
+      r = 0.40 * v; g = 0.385 * v; b = 0.36 * v;
+    }
 
     for (const L of data.lights) {
       const ddx = L.x - P.x, ddy = L.y - P.y, ddz = L.z - P.z;
@@ -211,7 +314,7 @@ const Baker = (() => {
         const u = (i + 0.5) / W;
         P.set((u - 0.5) * w, (v - 0.5) * h, 0).applyMatrix4(mw);
         P.x += N.x * 0.03; P.y += N.y * 0.03; P.z += N.z * 0.03;
-        const [r, g, b] = lightAt(P, N, occ, data, outdoor);
+        const [r, g, b] = lightAt(P, N, occ, data, outdoor, true);
         const ao = aoAt(P, N, occ, aoRays);
         const o = (j * W + i) * 4;
         px[o] = Math.min(255, r * ao / EXP * 255);
@@ -220,6 +323,32 @@ const Baker = (() => {
         px[o + 3] = 255;
       }
     }
+
+    // Edge dilation (the lightmap "gutter"). A floor or ceiling plate runs
+    // to the wall CENTRELINE, so its outermost texel centre lands within
+    // half a texel of the wall face -- right where the new hemisphere
+    // visibility falls off a cliff (half that texel's sky is wall). The
+    // texture is ClampToEdge + LinearFilter, so that one dark texel is then
+    // stretched across the last half-texel of visible surface, and a
+    // ceiling picked up a hard black rim all round the room. Copying the
+    // second ring outward drops the compromised ring and lets the gradient
+    // from the first interior texel run to the edge instead. Standard
+    // lightmapper practice, and only needed now: under the old flat ambient
+    // the boundary texel was barely darker than its neighbour.
+    const line = W * 4;
+    for (let i = 0; i < W; i++) {
+      for (let k = 0; k < 4; k++) {
+        px[i * 4 + k] = px[line + i * 4 + k];
+        px[(H - 1) * line + i * 4 + k] = px[(H - 2) * line + i * 4 + k];
+      }
+    }
+    for (let j = 0; j < H; j++) {
+      for (let k = 0; k < 4; k++) {
+        px[j * line + k] = px[j * line + 4 + k];
+        px[j * line + (W - 1) * 4 + k] = px[j * line + (W - 2) * 4 + k];
+      }
+    }
+
     ctx.putImageData(img, 0, 0);
     // a light blur removes shadow banding
     ctx.globalAlpha = 0.5;
@@ -255,6 +384,42 @@ const Baker = (() => {
   // ---------- Walls: merged geometry with per-vertex light ----------
   // All wall pieces merge into ONE mesh (1 draw call). Every face is
   // segmented at ~0.45 m and baked lighting is written into the vertices.
+  //
+  // Walls do NOT take the visibility-scaled ambient: they pass sampled=false
+  // to lightAt and keep the flat constant. That is a measured decision, not
+  // an oversight. It was tried, and it broke on two defects in THIS function
+  // that the flat constant had been hiding, neither of them in the ambient
+  // term itself:
+  //
+  //   1. WINDING. `pts` below emits one fixed triangle order, so a quad's
+  //      geometric winding follows uVec x vVec whatever `n` says. For the
+  //      alongX branch the two agree. For the else branch (walls running
+  //      along z) they are opposite on BOTH large faces, so the renderer
+  //      draws each along-z wall's FAR face and culls the near one. Measured
+  //      on the unmodified tip, standing 1 m off each wall's centreline and
+  //      raycasting at it: along-x walls show the near face 6/6 (serenity)
+  //      and 14/16 (kings-court); along-z walls show the far face 8/8 and
+  //      17/18. So the surface a visitor looks at is shaded from a sample
+  //      point 14 cm away on the OTHER side of that wall -- outside the
+  //      building, for a shell wall. Under a flat ambient the two sides
+  //      differ only in the direct terms and it never showed. Under a
+  //      visibility-scaled one the outdoor sample sees a hedge 20 cm away
+  //      and returns ~0: serenity's living-room wall band rendered at pixel
+  //      value 1 where it had been 85.
+  //   2. RESOLUTION. Quads are shaded from their four geometric corners and
+  //      Gouraud-interpolated at 0.45 m, and each end reveal, top and bottom
+  //      is a single quad however large. Corners that sit on hidden surfaces
+  //      -- a reveal butted into the wall it meets, an underside buried in
+  //      the floor slab -- returned 0.32 under the constant and ~0 now, and
+  //      that zero is smeared 0.45 m across wall a visitor is looking
+  //      straight at. 14% of serenity's wall vertices went to a true zero.
+  //
+  // Defect 1 has to be fixed before walls can take any position-sensitive
+  // shading at all, including the plan's task 4 atlas -- an atlas baked onto
+  // inside-out walls records the wrong side. Defect 2 is precisely what that
+  // atlas replaces. Until both are done the honest state is the one
+  // CLAUDE.md already records: floors and furniture carry occlusion, walls
+  // do not, and a floor-to-wall corner darkens on the floor side only.
   function bakeWalls(scene, data) {
     // two buckets: lower- and upper-level walls — for the dollhouse cutaway
     const buckets = { low: { pos: [], nrm: [], col: [] }, high: { pos: [], nrm: [], col: [] } };
@@ -278,7 +443,7 @@ const Baker = (() => {
             o[1] + uVec[1] * i / su + vVec[1] * j / sv + N.y * 0.03,
             o[2] + uVec[2] * i / su + vVec[2] * j / sv + N.z * 0.03
           );
-          const L = shade ? lightAt(P, N, occ, data, false) : [0.5, 0.48, 0.46];
+          const L = shade ? lightAt(P, N, occ, data, false, false) : [0.5, 0.48, 0.46];
           c[j].push(L);
         }
       }
@@ -391,6 +556,20 @@ const Baker = (() => {
 
   // Async pass so the page keeps painting
   function run(scene, data, onProgress) {
+    // Built before the first surface is baked, because lightAt() reads it on
+    // every sample. Anything going wrong here (sampler.js absent, MeshBVH
+    // missing from the module graph, a degenerate geometry) degrades to the
+    // flat pre-B3 ambient rather than aborting the bake: no __bakeReady
+    // means a permanently stuck overlay, which is far worse than a flat one.
+    const temps = [];
+    try {
+      const meshes = ambientMeshes(scene, data);
+      for (const m of meshes) if (!m.parent) temps.push(m);
+      ambHandle = Sampler.build(meshes);
+    } catch (e) {
+      ambHandle = null;
+      console.warn('[bake] no hemisphere sampler, ambient falls back to a flat constant:', e);
+    }
     return new Promise((resolve) => {
       const list = data.surfaces.slice();
       const total = list.length + 3; // walls ≈ 3 progress steps
@@ -407,6 +586,12 @@ const Baker = (() => {
         setTimeout(() => {
           bakeWalls(scene, data);
           bakeFurnitureAO(scene, data);
+          // The BVH and its merged copy of every triangle in the apartment
+          // are worth several MB on the largest flat and are read only
+          // during the bake. Release them before handing control back.
+          if (ambHandle) ambHandle.geometry.dispose();
+          for (const m of temps) m.geometry.dispose();
+          ambHandle = null;
           if (onProgress) onProgress(1);
           resolve();
         }, 0);
