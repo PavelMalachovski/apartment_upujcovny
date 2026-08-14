@@ -1204,22 +1204,42 @@ guard proof and per-surface data:
 numbers in `serenity-b3-task5-luminance.json` and the two
 `serenity-b3-task5-*-legacy-allspots.json` files.
 
-**Linear contrast, the quantity task 6 gates on, did not move:**
+**Linear contrast, the quantity task 6 gates on, did not move.** The
+population is **2 of serenity's 11 `compare` spots** (`tools/luminance.py`
+filters through `delta_e.scorable`, which requires `poseVerified`) — and
+those two, Bathroom and Bedroom, are the two rooms with the *highest* p5
+in the flat. Repeats are independent captures of the same state:
 
-| set | mean | p5 | contrast |
-|---|---:|---:|---:|
-| runtime bake | 0.2819 | 0.0833 | **3.384** |
-| offline pack | 0.2891 | 0.0854 | **3.385** |
-| photographs | 0.2993 | 0.0483 | **6.196** |
+| set | n | mean | p5 | contrast |
+|---|---:|---:|---:|---:|
+| runtime bake | 4 | 0.2820 | 0.0833 | **3.385** (3.383–3.387) |
+| offline pack, bounces 0 — identity | 2 | 0.2821 | 0.0836 | **3.374** (3.370–3.378) |
+| offline pack, as shipped | 4 | 0.2890 | 0.0854 | **3.386** (3.384–3.387) |
+| photographs | — | 0.2993 | 0.0483 | **6.196** |
 
-Mean moved toward the photographs and p5 moved away from them, and the
-two cancel. That is what a bounce term *does*: its only mechanism is to
-put light back into the near-field shadows the runtime bake crushes to
-black, which raises the floor, and contrast is mean/p5. A configuration
-that raised contrast would have to take light out of the darkest 5%, and
-the surfaces owning the darkest 5% of a first-person frame are the walls
-— which have no lightmap and cannot get one until the `grid()` winding
-defect is fixed.
+**The identity row is the one to read first.** A pack baked at
+`bounces = 0` is the runtime's own estimator and should reproduce it. It
+reproduces the mean and not p5 (2048 paths per texel remove the noise the
+runtime's 16 rays carry, and p5 is a tail statistic), so **the pipeline's
+own identity residual on contrast is −0.011 — an order of magnitude
+larger than the shipped pack's +0.001.** No contrast claim of that size
+is available from this harness at all.
+
+What the shipped pack does on this population is a **near-uniform gain of
+~2.5%**: mean ×1.02482, p5 ×1.02461, differing by 0.022 pp against the
+±0.06 pp that four-decimal rounding alone puts on the p5 ratio. A
+mean/p5 ratio is blind to a uniform gain by construction. That is also
+the same order as what the exposure re-fit absorbs (task 2 cost −2.0% of
+linear mean; 0.326→0.329 put it back), and exposure scales mean and p5
+together — so on this population the effect is entirely of a kind a
+re-fit would undo.
+
+The effect is not uniform everywhere: in the 5-spawn sRGB population the
+**Entrance**, the darkest spawn and outside the gated two, is the one
+place p5 outruns the mean (+3.31% against +1.43%). Where a frame's
+darkest 5% is wall rather than floor or ceiling this pack cannot reach it
+at all — walls have no lightmap and cannot get one until the `grid()`
+winding defect is fixed.
 
 All-spot legacy ΔE2000 moved **16.59 → 16.75**, away from the 16.58
 ceiling. Spawn-pooled sRGB luminance moved 138.7 / 80.1 to **140.2 /
