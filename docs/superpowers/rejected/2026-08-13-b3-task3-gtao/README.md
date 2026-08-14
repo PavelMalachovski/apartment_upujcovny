@@ -40,9 +40,20 @@ cp docs/superpowers/rejected/2026-08-13-b3-task3-gtao/vendored-gtao-set/GTAOShad
 mkdir -p tour/lib/three-0.185.0/examples/jsm/math
 cp docs/superpowers/rejected/2026-08-13-b3-task3-gtao/vendored-gtao-set/SimplexNoise.js \
    tour/lib/three-0.185.0/examples/jsm/math/
-git apply docs/superpowers/rejected/2026-08-13-b3-task3-gtao/gtao-implementation.diff
+git apply -3 docs/superpowers/rejected/2026-08-13-b3-task3-gtao/gtao-implementation.diff
 # then bump ?v= in tour/index.html — rule 3
 ```
+
+**Expect one conflict, in `tour/post.js`'s header, and it is not a problem.**
+The diff was cut against `b06730e`, where the header still read "No SSAO:
+… a screen-space pass would recompute worse data at runtime"; it rewrites
+those lines. The header has since been rewritten *again*, by the fix round
+that recorded this rejection — so a plain `git apply` fails on that hunk with
+`patch does not apply`. `git apply -3` resolves `tour/main.js` cleanly and
+leaves conflict markers in that one comment block; keep whichever header
+wording you want and delete the markers. **Nothing executable is in
+conflict.** The pass-construction hunk further down `post.js` applies on its
+own.
 
 `GTAOPass.js` imports `../shaders/CopyShader.js` and `./Pass.js`, which are
 already vendored; `vendor_gtao.py` verified both byte-identical to what unpkg
