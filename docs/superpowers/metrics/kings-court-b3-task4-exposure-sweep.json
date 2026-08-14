@@ -1,0 +1,303 @@
+{
+ "apartment": "kings-court",
+ "metric": "exposure fit -- linear-light mean luminance vs the photographs",
+ "task": "phase B3 plan 3 task 4",
+ "fitTarget": "the photographs' own mean linear-light relative luminance (Rec.709) over tools/luminance.py's population, minimising |render mean - photograph mean|. dE2000 is recorded on every row and was NOT used to choose any value.",
+ "population": "tools/luminance.py hard-codes delta_e.py's poseVerified filter, so the fit target is the poseVerified population (serenity 2 of 11, kings-court 8 of 14). That is a fitting instrument, never a gate; the merge gate is read all-spot from tools/delta_e.py --all-spots. The all-spot luminance is recorded on every row as a diagnostic -- at serenity the two populations disagree by -0.010 (all-spot wants a brighter exposure, ~0.341), at kings-court by +0.016 the other way (all-spot wants ~0.535). The poseVerified population was used because a spot that fails pose verification photographs one subject and renders another, so its luminance difference is partly a framing error, and exposure fitted to it would compensate for that framing.",
+ "harnessMode": "fixed-fov (\"new zero\"): ?apt=<id>&measure=1 with NO &fov=legacy, the camera that matches each photograph's own field of view, i.e. the one where render and photograph frame the same subject. Same mode plan 2 task 7 fitted in, so these rows are directly comparable to its table. The legacy 72-degree camera exists only to keep the gate number comparable with a historical threshold; fitting in it would have chased a known framing mismatch (measured: at 0.329 the legacy camera reads 0.0174 below the photographs where the fixed camera reads 0.0001 below).",
+ "bloom": "DISABLED for every sweep row (bloom pass .enabled = false), per the phase's rule that exposure is fitted first with bloom off and bloom is then fitted with exposure fixed.",
+ "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (the default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain at all). GPU reported by the runs: ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11). photoSpot and spawn yaw were cross-checked against the raw JSON degrees on every page load (main.js converts once; a second conversion is ruled out by construction, not by inspection).",
+ "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code differ slightly. Measured here: linear mean luminance +-0.0004 (serenity) / +-0.0009 (kings-court) between loads, all-spot dE2000 +-0.01 to +-0.04. Rows captured in the same batch share one page load and one set of textures, so within-batch ordering is clean; across batches it is not.",
+ "windingDefect": "This fit is against a render carrying a known, deliberately deferred defect: grid() in bake.js emits a fixed triangle order, so 8 of 12 wall faces are wound backwards and those walls present their far face, shaded from a point on the other side of the wall. Invisible today only because walls are flat-shaded MeshBasicMaterial. The human partner deferred the fix to a later plan with the accepted consequence that these constants will have to be re-fitted once the winding is fixed. Nothing here compensates for it and no measurement excludes walls.",
+ "photographs": {
+  "poseVerified": {
+   "n": 8,
+   "meanLum": 0.3479,
+   "p5Lum": 0.0247
+  },
+  "allSpot": {
+   "n": 14,
+   "meanLum": 0.3252,
+   "p5Lum": 0.0168
+  }
+ },
+ "previousValue": 0.56,
+ "chosen": {
+  "exposure": 0.575,
+  "why": "pooled over three independent loads the closest tested value to the photographs' mean: 0.575 -0.00007 (-0.0002 / -0.0009 / +0.0009), against 0.574 -0.00105, 0.576 +0.0004, 0.577 +0.00125. The load-to-load spread (+-0.0009) is larger than a 0.001 exposure step (0.0005), so the fit resolves this apartment to about +-0.002: 0.573-0.577 are not distinguishable and 0.575 is the pooled minimum. COST, disclosed: the lowest all-spot dE2000 in the coarse sweep sits at 0.5 (18.37) and rises monotonically with exposure, so the luminance choice costs about +0.2 dE2000 against the dE-optimal end of the sweep; in the gate mode, same-load, 0.56 -> 18.78 and 0.575 -> 18.84, i.e. +0.06. Taken on the luminance criterion per the rule, with 3.5 of gate margin to spend."
+ },
+ "batches": [
+  {
+   "batch": "coarse (one page load)",
+   "note": "bloom disabled, fixed-fov; 0.8 and 1.05 came from the second load after the save endpoint dropped one POST mid-run",
+   "points": [
+    {
+     "exposure": 0.5,
+     "renderMeanLum": 0.3106,
+     "diffFromPhotographs": -0.0373,
+     "renderP5Lum": 0.0654,
+     "dE2000_poseVerified": 17.31,
+     "allSpotMeanLum": 0.3048,
+     "allSpotDiffFromPhotographs": -0.0204,
+     "dE2000_allSpot": 18.37,
+     "set": "t4-kings-court-fixed-bloomOff-e0.5"
+    },
+    {
+     "exposure": 0.53,
+     "renderMeanLum": 0.326,
+     "diffFromPhotographs": -0.0219,
+     "renderP5Lum": 0.0711,
+     "dE2000_poseVerified": 17.25,
+     "allSpotMeanLum": 0.3204,
+     "allSpotDiffFromPhotographs": -0.0048,
+     "dE2000_allSpot": 18.4,
+     "set": "t4-kings-court-fixed-bloomOff-e0.53"
+    },
+    {
+     "exposure": 0.56,
+     "renderMeanLum": 0.3407,
+     "diffFromPhotographs": -0.0072,
+     "renderP5Lum": 0.0773,
+     "dE2000_poseVerified": 17.24,
+     "allSpotMeanLum": 0.3354,
+     "allSpotDiffFromPhotographs": 0.0102,
+     "dE2000_allSpot": 18.47,
+     "set": "t4-kings-court-fixed-bloomOff-e0.56"
+    },
+    {
+     "exposure": 0.57,
+     "renderMeanLum": 0.3455,
+     "diffFromPhotographs": -0.0024,
+     "renderP5Lum": 0.0793,
+     "dE2000_poseVerified": 17.24,
+     "allSpotMeanLum": 0.3403,
+     "allSpotDiffFromPhotographs": 0.0151,
+     "dE2000_allSpot": 18.5,
+     "set": "t4-kings-court-fixed-bloomOff-e0.57"
+    },
+    {
+     "exposure": 0.58,
+     "renderMeanLum": 0.3502,
+     "diffFromPhotographs": 0.0023,
+     "renderP5Lum": 0.0812,
+     "dE2000_poseVerified": 17.25,
+     "allSpotMeanLum": 0.3451,
+     "allSpotDiffFromPhotographs": 0.0199,
+     "dE2000_allSpot": 18.54,
+     "set": "t4-kings-court-fixed-bloomOff-e0.58"
+    },
+    {
+     "exposure": 0.6,
+     "renderMeanLum": 0.3595,
+     "diffFromPhotographs": 0.0116,
+     "renderP5Lum": 0.0853,
+     "dE2000_poseVerified": 17.29,
+     "allSpotMeanLum": 0.3545,
+     "allSpotDiffFromPhotographs": 0.0292,
+     "dE2000_allSpot": 18.62,
+     "set": "t4-kings-court-fixed-bloomOff-e0.6"
+    },
+    {
+     "exposure": 0.65,
+     "renderMeanLum": 0.3814,
+     "diffFromPhotographs": 0.0335,
+     "renderP5Lum": 0.0951,
+     "dE2000_poseVerified": 17.44,
+     "allSpotMeanLum": 0.3767,
+     "allSpotDiffFromPhotographs": 0.0515,
+     "dE2000_allSpot": 18.87,
+     "set": "t4-kings-court-fixed-bloomOff-e0.65"
+    }
+   ]
+  },
+  {
+   "batch": "refine 1 (one page load, includes the two far points)",
+   "note": "0.001 steps across the crossing",
+   "points": [
+    {
+     "exposure": 0.573,
+     "renderMeanLum": 0.3467,
+     "diffFromPhotographs": -0.0011,
+     "renderP5Lum": 0.0814,
+     "dE2000_poseVerified": 17.33,
+     "allSpotMeanLum": 0.3413,
+     "allSpotDiffFromPhotographs": 0.0161,
+     "dE2000_allSpot": 18.55,
+     "set": "t4-kings-court-fixed-bloomOff-e0.573"
+    },
+    {
+     "exposure": 0.574,
+     "renderMeanLum": 0.3472,
+     "diffFromPhotographs": -0.0007,
+     "renderP5Lum": 0.0815,
+     "dE2000_poseVerified": 17.33,
+     "allSpotMeanLum": 0.3418,
+     "allSpotDiffFromPhotographs": 0.0166,
+     "dE2000_allSpot": 18.55,
+     "set": "t4-kings-court-fixed-bloomOff-e0.574"
+    },
+    {
+     "exposure": 0.575,
+     "renderMeanLum": 0.3477,
+     "diffFromPhotographs": -0.0002,
+     "renderP5Lum": 0.0819,
+     "dE2000_poseVerified": 17.33,
+     "allSpotMeanLum": 0.3423,
+     "allSpotDiffFromPhotographs": 0.0171,
+     "dE2000_allSpot": 18.56,
+     "set": "t4-kings-court-fixed-bloomOff-e0.575"
+    },
+    {
+     "exposure": 0.576,
+     "renderMeanLum": 0.3482,
+     "diffFromPhotographs": 0.0003,
+     "renderP5Lum": 0.0822,
+     "dE2000_poseVerified": 17.33,
+     "allSpotMeanLum": 0.3428,
+     "allSpotDiffFromPhotographs": 0.0176,
+     "dE2000_allSpot": 18.56,
+     "set": "t4-kings-court-fixed-bloomOff-e0.576"
+    },
+    {
+     "exposure": 0.577,
+     "renderMeanLum": 0.3486,
+     "diffFromPhotographs": 0.0007,
+     "renderP5Lum": 0.0823,
+     "dE2000_poseVerified": 17.34,
+     "allSpotMeanLum": 0.3432,
+     "allSpotDiffFromPhotographs": 0.018,
+     "dE2000_allSpot": 18.57,
+     "set": "t4-kings-court-fixed-bloomOff-e0.577"
+    },
+    {
+     "exposure": 0.8,
+     "renderMeanLum": 0.4382,
+     "diffFromPhotographs": 0.0903,
+     "renderP5Lum": 0.1276,
+     "dE2000_poseVerified": 18.17,
+     "allSpotMeanLum": 0.4345,
+     "allSpotDiffFromPhotographs": 0.1093,
+     "dE2000_allSpot": 19.8,
+     "set": "t4-kings-court-fixed-bloomOff-e0.8"
+    },
+    {
+     "exposure": 1.05,
+     "renderMeanLum": 0.5109,
+     "diffFromPhotographs": 0.163,
+     "renderP5Lum": 0.1768,
+     "dE2000_poseVerified": 19.32,
+     "allSpotMeanLum": 0.5088,
+     "allSpotDiffFromPhotographs": 0.1836,
+     "dE2000_allSpot": 21.29,
+     "set": "t4-kings-court-fixed-bloomOff-e1.05"
+    }
+   ]
+  },
+  {
+   "batch": "refine 2 (independent page load)",
+   "note": "repeat of the bracket",
+   "points": [
+    {
+     "exposure": 0.574,
+     "renderMeanLum": 0.3465,
+     "diffFromPhotographs": -0.0014,
+     "renderP5Lum": 0.0776,
+     "dE2000_poseVerified": 17.25,
+     "allSpotMeanLum": 0.3407,
+     "allSpotDiffFromPhotographs": 0.0155,
+     "dE2000_allSpot": 18.57,
+     "set": "t4r2-kings-court-fixed-bloomOff-e0.574"
+    },
+    {
+     "exposure": 0.575,
+     "renderMeanLum": 0.347,
+     "diffFromPhotographs": -0.0009,
+     "renderP5Lum": 0.0779,
+     "dE2000_poseVerified": 17.25,
+     "allSpotMeanLum": 0.3412,
+     "allSpotDiffFromPhotographs": 0.016,
+     "dE2000_allSpot": 18.57,
+     "set": "t4r2-kings-court-fixed-bloomOff-e0.575"
+    },
+    {
+     "exposure": 0.576,
+     "renderMeanLum": 0.3474,
+     "diffFromPhotographs": -0.0004,
+     "renderP5Lum": 0.0782,
+     "dE2000_poseVerified": 17.26,
+     "allSpotMeanLum": 0.3417,
+     "allSpotDiffFromPhotographs": 0.0164,
+     "dE2000_allSpot": 18.57,
+     "set": "t4r2-kings-court-fixed-bloomOff-e0.576"
+    }
+   ]
+  },
+  {
+   "batch": "refine 3 (independent page load)",
+   "note": "run because refine 1 and 2 disagreed about 0.575 vs 0.576 by 0.0007, inside the load-to-load noise; a third load breaks the tie by pooling",
+   "points": [
+    {
+     "exposure": 0.575,
+     "renderMeanLum": 0.3487,
+     "diffFromPhotographs": 0.0009,
+     "renderP5Lum": 0.0837,
+     "dE2000_poseVerified": 17.23,
+     "allSpotMeanLum": 0.3434,
+     "allSpotDiffFromPhotographs": 0.0182,
+     "dE2000_allSpot": 18.53,
+     "set": "t4r3-kings-court-fixed-bloomOff-e0.575"
+    },
+    {
+     "exposure": 0.576,
+     "renderMeanLum": 0.3492,
+     "diffFromPhotographs": 0.0013,
+     "renderP5Lum": 0.0838,
+     "dE2000_poseVerified": 17.23,
+     "allSpotMeanLum": 0.3439,
+     "allSpotDiffFromPhotographs": 0.0187,
+     "dE2000_allSpot": 18.53,
+     "set": "t4r3-kings-court-fixed-bloomOff-e0.576"
+    },
+    {
+     "exposure": 0.577,
+     "renderMeanLum": 0.3497,
+     "diffFromPhotographs": 0.0018,
+     "renderP5Lum": 0.0842,
+     "dE2000_poseVerified": 17.23,
+     "allSpotMeanLum": 0.3444,
+     "allSpotDiffFromPhotographs": 0.0191,
+     "dE2000_allSpot": 18.53,
+     "set": "t4r3-kings-court-fixed-bloomOff-e0.577"
+    }
+   ]
+  },
+  {
+   "batch": "same-load diagnostic, GATE MODE (legacy fov, bloom ON, shipped chain)",
+   "note": "not part of the fit -- run after the choice was made",
+   "points": [
+    {
+     "exposure": 0.56,
+     "renderMeanLum": 0.3359,
+     "diffFromPhotographs": -0.012,
+     "renderP5Lum": 0.1063,
+     "dE2000_poseVerified": 17.56,
+     "allSpotMeanLum": 0.336,
+     "allSpotDiffFromPhotographs": 0.0108,
+     "dE2000_allSpot": 18.78,
+     "set": "t4diag-kings-court-legacy-bloomOn-e0.56"
+    },
+    {
+     "exposure": 0.575,
+     "renderMeanLum": 0.343,
+     "diffFromPhotographs": -0.0049,
+     "renderP5Lum": 0.1098,
+     "dE2000_poseVerified": 17.57,
+     "allSpotMeanLum": 0.3434,
+     "allSpotDiffFromPhotographs": 0.0182,
+     "dE2000_allSpot": 18.84,
+     "set": "t4diag-kings-court-legacy-bloomOn-e0.575"
+    }
+   ]
+  }
+ ]
+}

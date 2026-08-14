@@ -1,0 +1,314 @@
+{
+ "apartment": "serenity",
+ "metric": "exposure fit -- linear-light mean luminance vs the photographs",
+ "task": "phase B3 plan 3 task 4",
+ "fitTarget": "the photographs' own mean linear-light relative luminance (Rec.709) over tools/luminance.py's population, minimising |render mean - photograph mean|. dE2000 is recorded on every row and was NOT used to choose any value.",
+ "population": "tools/luminance.py hard-codes delta_e.py's poseVerified filter, so the fit target is the poseVerified population (serenity 2 of 11, kings-court 8 of 14). That is a fitting instrument, never a gate; the merge gate is read all-spot from tools/delta_e.py --all-spots. The all-spot luminance is recorded on every row as a diagnostic -- at serenity the two populations disagree by -0.010 (all-spot wants a brighter exposure, ~0.341), at kings-court by +0.016 the other way (all-spot wants ~0.535). The poseVerified population was used because a spot that fails pose verification photographs one subject and renders another, so its luminance difference is partly a framing error, and exposure fitted to it would compensate for that framing.",
+ "harnessMode": "fixed-fov (\"new zero\"): ?apt=<id>&measure=1 with NO &fov=legacy, the camera that matches each photograph's own field of view, i.e. the one where render and photograph frame the same subject. Same mode plan 2 task 7 fitted in, so these rows are directly comparable to its table. The legacy 72-degree camera exists only to keep the gate number comparable with a historical threshold; fitting in it would have chased a known framing mismatch (measured: at 0.329 the legacy camera reads 0.0174 below the photographs where the fixed camera reads 0.0001 below).",
+ "bloom": "DISABLED for every sweep row (bloom pass .enabled = false), per the phase's rule that exposure is fitted first with bloom off and bloom is then fitted with exposure fixed.",
+ "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (the default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain at all). GPU reported by the runs: ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11). photoSpot and spawn yaw were cross-checked against the raw JSON degrees on every page load (main.js converts once; a second conversion is ruled out by construction, not by inspection).",
+ "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code differ slightly. Measured here: linear mean luminance +-0.0004 (serenity) / +-0.0009 (kings-court) between loads, all-spot dE2000 +-0.01 to +-0.04. Rows captured in the same batch share one page load and one set of textures, so within-batch ordering is clean; across batches it is not.",
+ "windingDefect": "This fit is against a render carrying a known, deliberately deferred defect: grid() in bake.js emits a fixed triangle order, so 8 of 12 wall faces are wound backwards and those walls present their far face, shaded from a point on the other side of the wall. Invisible today only because walls are flat-shaded MeshBasicMaterial. The human partner deferred the fix to a later plan with the accepted consequence that these constants will have to be re-fitted once the winding is fixed. Nothing here compensates for it and no measurement excludes walls.",
+ "photographs": {
+  "poseVerified": {
+   "n": 2,
+   "meanLum": 0.2993,
+   "p5Lum": 0.0483
+  },
+  "allSpot": {
+   "n": 11,
+   "meanLum": 0.2945,
+   "p5Lum": 0.0386
+  }
+ },
+ "previousValue": 0.326,
+ "chosen": {
+  "exposure": 0.329,
+  "why": "closest tested value to the photographs' mean: pooled diff -0.00025 (-0.0004 refine 1, -0.0001 refine 2) against 0.328 -0.0011, 0.330 +0.0009, 0.331 +0.0014. dE2000 is flat at 16.19-16.24 (poseVerified) / 16.86-16.90 (all-spot) across the whole 0.327-0.332 bracket, so the two criteria did not disagree here and nothing was traded away."
+ },
+ "batches": [
+  {
+   "batch": "coarse (one page load)",
+   "note": "bloom disabled, fixed-fov",
+   "points": [
+    {
+     "exposure": 0.3,
+     "renderMeanLum": 0.2747,
+     "diffFromPhotographs": -0.0246,
+     "renderP5Lum": 0.078,
+     "dE2000_poseVerified": 16.23,
+     "allSpotMeanLum": 0.2605,
+     "allSpotDiffFromPhotographs": -0.034,
+     "dE2000_allSpot": 16.9,
+     "set": "t4-serenity-fixed-bloomOff-e0.3"
+    },
+    {
+     "exposure": 0.32,
+     "renderMeanLum": 0.2919,
+     "diffFromPhotographs": -0.0074,
+     "renderP5Lum": 0.086,
+     "dE2000_poseVerified": 16.19,
+     "allSpotMeanLum": 0.2773,
+     "allSpotDiffFromPhotographs": -0.0172,
+     "dE2000_allSpot": 16.88,
+     "set": "t4-serenity-fixed-bloomOff-e0.32"
+    },
+    {
+     "exposure": 0.326,
+     "renderMeanLum": 0.297,
+     "diffFromPhotographs": -0.0023,
+     "renderP5Lum": 0.0888,
+     "dE2000_poseVerified": 16.19,
+     "allSpotMeanLum": 0.2822,
+     "allSpotDiffFromPhotographs": -0.0123,
+     "dE2000_allSpot": 16.89,
+     "set": "t4-serenity-fixed-bloomOff-e0.326"
+    },
+    {
+     "exposure": 0.33,
+     "renderMeanLum": 0.3003,
+     "diffFromPhotographs": 0.001,
+     "renderP5Lum": 0.0903,
+     "dE2000_poseVerified": 16.2,
+     "allSpotMeanLum": 0.2853,
+     "allSpotDiffFromPhotographs": -0.0091,
+     "dE2000_allSpot": 16.9,
+     "set": "t4-serenity-fixed-bloomOff-e0.33"
+    },
+    {
+     "exposure": 0.335,
+     "renderMeanLum": 0.3044,
+     "diffFromPhotographs": 0.0051,
+     "renderP5Lum": 0.0925,
+     "dE2000_poseVerified": 16.21,
+     "allSpotMeanLum": 0.2894,
+     "allSpotDiffFromPhotographs": -0.0051,
+     "dE2000_allSpot": 16.91,
+     "set": "t4-serenity-fixed-bloomOff-e0.335"
+    },
+    {
+     "exposure": 0.34,
+     "renderMeanLum": 0.3084,
+     "diffFromPhotographs": 0.0091,
+     "renderP5Lum": 0.0945,
+     "dE2000_poseVerified": 16.22,
+     "allSpotMeanLum": 0.2934,
+     "allSpotDiffFromPhotographs": -0.0011,
+     "dE2000_allSpot": 16.93,
+     "set": "t4-serenity-fixed-bloomOff-e0.34"
+    },
+    {
+     "exposure": 0.35,
+     "renderMeanLum": 0.3164,
+     "diffFromPhotographs": 0.0171,
+     "renderP5Lum": 0.0981,
+     "dE2000_poseVerified": 16.26,
+     "allSpotMeanLum": 0.3011,
+     "allSpotDiffFromPhotographs": 0.0067,
+     "dE2000_allSpot": 16.97,
+     "set": "t4-serenity-fixed-bloomOff-e0.35"
+    },
+    {
+     "exposure": 0.36,
+     "renderMeanLum": 0.3242,
+     "diffFromPhotographs": 0.0249,
+     "renderP5Lum": 0.1025,
+     "dE2000_poseVerified": 16.31,
+     "allSpotMeanLum": 0.3088,
+     "allSpotDiffFromPhotographs": 0.0143,
+     "dE2000_allSpot": 17.02,
+     "set": "t4-serenity-fixed-bloomOff-e0.36"
+    },
+    {
+     "exposure": 0.4,
+     "renderMeanLum": 0.3539,
+     "diffFromPhotographs": 0.0546,
+     "renderP5Lum": 0.1191,
+     "dE2000_poseVerified": 16.6,
+     "allSpotMeanLum": 0.3378,
+     "allSpotDiffFromPhotographs": 0.0433,
+     "dE2000_allSpot": 17.29,
+     "set": "t4-serenity-fixed-bloomOff-e0.4"
+    },
+    {
+     "exposure": 0.6,
+     "renderMeanLum": 0.4703,
+     "diffFromPhotographs": 0.171,
+     "renderP5Lum": 0.2028,
+     "dE2000_poseVerified": 18.98,
+     "allSpotMeanLum": 0.4531,
+     "allSpotDiffFromPhotographs": 0.1586,
+     "dE2000_allSpot": 19.17,
+     "set": "t4-serenity-fixed-bloomOff-e0.6"
+    },
+    {
+     "exposure": 1.0,
+     "renderMeanLum": 0.6056,
+     "diffFromPhotographs": 0.3063,
+     "renderP5Lum": 0.3504,
+     "dE2000_poseVerified": 23.05,
+     "allSpotMeanLum": 0.5883,
+     "allSpotDiffFromPhotographs": 0.2938,
+     "dE2000_allSpot": 22.58,
+     "set": "t4-serenity-fixed-bloomOff-e1"
+    }
+   ]
+  },
+  {
+   "batch": "refine 1 (one page load)",
+   "note": "0.001 steps across the crossing",
+   "points": [
+    {
+     "exposure": 0.327,
+     "renderMeanLum": 0.2972,
+     "diffFromPhotographs": -0.0021,
+     "renderP5Lum": 0.0888,
+     "dE2000_poseVerified": 16.23,
+     "allSpotMeanLum": 0.2824,
+     "allSpotDiffFromPhotographs": -0.0121,
+     "dE2000_allSpot": 16.86,
+     "set": "t4-serenity-fixed-bloomOff-e0.327"
+    },
+    {
+     "exposure": 0.328,
+     "renderMeanLum": 0.298,
+     "diffFromPhotographs": -0.0013,
+     "renderP5Lum": 0.0889,
+     "dE2000_poseVerified": 16.23,
+     "allSpotMeanLum": 0.2832,
+     "allSpotDiffFromPhotographs": -0.0113,
+     "dE2000_allSpot": 16.87,
+     "set": "t4-serenity-fixed-bloomOff-e0.328"
+    },
+    {
+     "exposure": 0.329,
+     "renderMeanLum": 0.2989,
+     "diffFromPhotographs": -0.0004,
+     "renderP5Lum": 0.0893,
+     "dE2000_poseVerified": 16.23,
+     "allSpotMeanLum": 0.284,
+     "allSpotDiffFromPhotographs": -0.0105,
+     "dE2000_allSpot": 16.87,
+     "set": "t4-serenity-fixed-bloomOff-e0.329"
+    },
+    {
+     "exposure": 0.331,
+     "renderMeanLum": 0.3005,
+     "diffFromPhotographs": 0.0012,
+     "renderP5Lum": 0.0908,
+     "dE2000_poseVerified": 16.24,
+     "allSpotMeanLum": 0.2856,
+     "allSpotDiffFromPhotographs": -0.0089,
+     "dE2000_allSpot": 16.87,
+     "set": "t4-serenity-fixed-bloomOff-e0.331"
+    },
+    {
+     "exposure": 0.332,
+     "renderMeanLum": 0.3013,
+     "diffFromPhotographs": 0.002,
+     "renderP5Lum": 0.091,
+     "dE2000_poseVerified": 16.24,
+     "allSpotMeanLum": 0.2864,
+     "allSpotDiffFromPhotographs": -0.0081,
+     "dE2000_allSpot": 16.88,
+     "set": "t4-serenity-fixed-bloomOff-e0.332"
+    }
+   ]
+  },
+  {
+   "batch": "refine 2 (independent page load, repeat of refine 1 plus 0.330)",
+   "note": "gives every candidate two independent measurements",
+   "points": [
+    {
+     "exposure": 0.328,
+     "renderMeanLum": 0.2984,
+     "diffFromPhotographs": -0.0009,
+     "renderP5Lum": 0.0889,
+     "dE2000_poseVerified": 16.19,
+     "allSpotMeanLum": 0.2835,
+     "allSpotDiffFromPhotographs": -0.011,
+     "dE2000_allSpot": 16.89,
+     "set": "t4r2-serenity-fixed-bloomOff-e0.328"
+    },
+    {
+     "exposure": 0.329,
+     "renderMeanLum": 0.2992,
+     "diffFromPhotographs": -0.0001,
+     "renderP5Lum": 0.0889,
+     "dE2000_poseVerified": 16.2,
+     "allSpotMeanLum": 0.2843,
+     "allSpotDiffFromPhotographs": -0.0102,
+     "dE2000_allSpot": 16.9,
+     "set": "t4r2-serenity-fixed-bloomOff-e0.329"
+    },
+    {
+     "exposure": 0.33,
+     "renderMeanLum": 0.3001,
+     "diffFromPhotographs": 0.0008,
+     "renderP5Lum": 0.0893,
+     "dE2000_poseVerified": 16.2,
+     "allSpotMeanLum": 0.2851,
+     "allSpotDiffFromPhotographs": -0.0094,
+     "dE2000_allSpot": 16.9,
+     "set": "t4r2-serenity-fixed-bloomOff-e0.33"
+    },
+    {
+     "exposure": 0.331,
+     "renderMeanLum": 0.3009,
+     "diffFromPhotographs": 0.0016,
+     "renderP5Lum": 0.0898,
+     "dE2000_poseVerified": 16.2,
+     "allSpotMeanLum": 0.2859,
+     "allSpotDiffFromPhotographs": -0.0086,
+     "dE2000_allSpot": 16.9,
+     "set": "t4r2-serenity-fixed-bloomOff-e0.331"
+    }
+   ]
+  },
+  {
+   "batch": "harness smoke run",
+   "note": "first capture of the session, current shipped value, kept as a repeat point",
+   "points": [
+    {
+     "exposure": 0.326,
+     "renderMeanLum": 0.2966,
+     "diffFromPhotographs": -0.0027,
+     "renderP5Lum": 0.0881,
+     "dE2000_poseVerified": 16.21,
+     "allSpotMeanLum": 0.2819,
+     "allSpotDiffFromPhotographs": -0.0126,
+     "dE2000_allSpot": 16.88,
+     "set": "smoke-serenity-fixed-bloomOff-e0.326"
+    }
+   ]
+  },
+  {
+   "batch": "same-load diagnostic, GATE MODE (legacy fov, bloom ON, shipped chain)",
+   "note": "not part of the fit -- run after the choice was made, to quantify what the exposure change does to the gate metric with everything else held constant",
+   "points": [
+    {
+     "exposure": 0.326,
+     "renderMeanLum": 0.2795,
+     "diffFromPhotographs": -0.0198,
+     "renderP5Lum": 0.083,
+     "dE2000_poseVerified": 16.02,
+     "allSpotMeanLum": 0.2773,
+     "allSpotDiffFromPhotographs": -0.0172,
+     "dE2000_allSpot": 16.6,
+     "set": "t4diag-serenity-legacy-bloomOn-e0.326"
+    },
+    {
+     "exposure": 0.329,
+     "renderMeanLum": 0.2819,
+     "diffFromPhotographs": -0.0174,
+     "renderP5Lum": 0.0833,
+     "dE2000_poseVerified": 16.01,
+     "allSpotMeanLum": 0.2797,
+     "allSpotDiffFromPhotographs": -0.0147,
+     "dE2000_allSpot": 16.6,
+     "set": "t4diag-serenity-legacy-bloomOn-e0.329"
+    }
+   ]
+  }
+ ]
+}

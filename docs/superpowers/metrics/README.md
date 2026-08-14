@@ -1083,3 +1083,66 @@ corrections were exhausted by exposure, down to the 0.11-point floor
 measured above. It is what real GLTF furniture, PBR texture sets and
 proper multi-bounce GI exist for, and that is the next phase (the engine
 migration), not this one.
+
+## Phase B3 plan 3 task 4: exposure and bloom re-fitted, and the gate does not close
+
+Everything above this section predates plan 3. Read it as history: **the
+merge condition it describes as reached ("Serenity: 16.55 ≤ 16.58 —
+reaches parity within noise") no longer holds.** Plan 3 task 2 changed
+`lightAt`'s indoor ambient and dropped `aoAt`'s occlusion floor on
+lightmapped surfaces, and task 4 re-fitted the two constants that act on
+the result. Full sweep data, method and frames:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-4-report.md`; committed
+numbers in `{serenity,kings-court}-b3-task4-exposure-sweep.json`,
+`bloom-b3-task4.json`, `horkyone-10-b3-task4-luminance.json` and the ten
+`*-b3-task4-final*.json` files `tools/delta_e.py` wrote.
+
+**Fitted values.** `serenity.exposure` 0.326 → **0.329**,
+`kings-court.exposure` 0.56 → **0.575**, `horkyone-10.exposure` 0.45 →
+**0.46** — all three up, because task 2's change darkened the render and
+exposure is what puts the mean back. Both bloom constants were
+re-measured from scratch (task 2 moved the radiances the threshold acts
+on) and **held at threshold 1.8 / strength 0.1**: the daylight wash still
+cliffs between 1.6 and 1.7, 1.7–3.0 is one flat plateau, and serenity's
+backlit bathroom mirror still keeps a real 0.19% crossing at 1.8.
+
+Fitted toward luminance, exactly as the rule requires: the quantity
+minimised was `|render mean − photograph mean|` on `tools/luminance.py`'s
+output, pooled over two or three independent page loads per candidate,
+with the bloom pass disabled and ΔE2000 recorded on every row but never
+aimed at. At kings-court the two criteria disagreed as they did last
+time — ΔE falls monotonically toward exposure 0.50 while luminance
+crosses at 0.575 — and the luminance value was taken, costing **+0.06**
+ΔE on the gate metric (measured same-load: 0.56 → 18.78, 0.575 → 18.84).
+
+**The merge condition, all-spot, `&fov=legacy`:**
+
+| Apartment | Ceiling | Now | Verdict |
+|---|---:|---:|---|
+| serenity | ≤16.58 | **16.61** (four runs: 16.60, 16.62, 16.61, 16.60) | **fails by 0.03** |
+| kings-court | ≤22.44 | **18.90** | passes by 3.54 |
+
+The 0.03 is the same size as this metric's own repeat-run noise floor,
+but it lands on the wrong side of the line in **every** run, where the
+pre-task-2 state landed under it in all four of its runs — so it is a
+consistent, reproducible miss whose magnitude merely equals the noise
+floor, not parity.
+
+**Exposure could not have fixed it, and this is measured, not argued.**
+On one page load, in the gate's own mode, through the shipped chain, with
+only exposure changing: 0.326 → 16.5989, 0.329 → 16.6028. The re-fit
+moved the gate metric by 0.004, a tenth of the noise floor, and ΔE is
+flat to ±0.05 across 0.32–0.34 and rises steeply outside it. Task 2
+darkened p5 — shadow *shape* — and exposure is a single scalar on the
+mean. Wrong lever; the decision about the residual 0.03 belongs to
+whoever owns the merge.
+
+**horkyone-10** (no `compare` spots, so no ΔE) passes its own criterion:
+spawn-pooled mean sRGB luminance **143.6** against serenity 138.7 and
+kings-court 149.0 — inside ±10 of both, and 0.25 off the siblings'
+midpoint.
+
+**This fit expires.** It was made against a render carrying the deferred
+`grid()` winding defect (8 of 12 wall faces backwards, `bake.js`),
+knowingly and by agreement; when that fix lands, exposure and bloom both
+have to be re-fitted.

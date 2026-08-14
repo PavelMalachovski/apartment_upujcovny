@@ -131,7 +131,10 @@ const Post = (() => {
       // WHY 1.293512 DOESN'T SURVIVE PLAN 2: that derivation solved for one
       // threshold at one shared exposure (1.05, the only value any apartment
       // ran at when it was written). Task 7 fits exposure *per apartment*
-      // instead -- serenity 0.326, kings-court 0.56, horkyone-10 0.45. All
+      // instead -- serenity 0.326, kings-court 0.56, horkyone-10 0.45 as task
+      // 7 left them; **0.329, 0.575 and 0.46 since phase B3 task 4 re-fitted
+      // all three** against the radiances plan 3 task 2 changed (see the
+      // re-measurement note at the end of this block). All
       // three are fitted, not two: horkyone-10 has no `compare` spots to fit
       // an exposure against by resemblance, so it is fitted on mean scene
       // luminance landing within ±10 of the other two instead (see the
@@ -178,10 +181,42 @@ const Post = (() => {
       // kings-court; frames in task-7-report.md.
       //
       // These are global constants, not per-apartment -- there is one bloom
-      // pass for all three flats, at three different fitted (or unfitted)
-      // exposures, so "fitted" here means "verified inert-or-glint-shaped at
-      // ordinary positions across all three," not tuned against any one
-      // apartment's photographs the way exposure itself is.
+      // pass for all three flats, at three different fitted exposures, so
+      // "fitted" here means "verified inert-or-glint-shaped at ordinary
+      // positions across all three," not tuned against any one apartment's
+      // photographs the way exposure itself is.
+      //
+      // RE-MEASURED AND HELD, PHASE B3 TASK 4. Plan 3 task 2 changed the
+      // radiances this threshold acts on (sampled hemisphere ambient on
+      // lightmapped surfaces, no occlusion floor), so both constants were
+      // measured again from scratch by the same method rather than assumed
+      // still right; both landed back on the same values, which is a result,
+      // not a skipped step. Fraction of frame area over threshold, all three
+      // apartments, every spawn and every `compare` photo spot, 1280x800:
+      // the daylight wash still has its cliff between 1.6 and 1.7 (serenity's
+      // entrance 4.04% -> 0.02%, kings-court's stairs 2.35% -> 0.00%) and
+      // 1.7-3.0 is one flat plateau, so 1.8 still sits just past the cliff
+      // with margin inside a wide indifference band; serenity's backlit
+      // bathroom mirror still keeps a real crossing there (0.19%, against
+      // 0.21% before task 2 and this project's own earlier r185 measurement
+      // of that same highlight, 0.17% -- an r185 number despite how the
+      // surrounding history reads, see metrics/README.md "Is bloom still
+      // doing anything?"), and horkyone-10's every spawn still measures
+      // 0.00%. Strength was re-judged at the newly fitted exposure by the
+      // same bloom-on-vs-off frame comparison: 0.22 still spreads a soft halo
+      // across the mirror, 0.1 still reads as a contained glint. Every
+      // per-position number is committed in
+      // docs/superpowers/metrics/bloom-b3-task4.json; the frames and the
+      // reasoning are in .superpowers/sdd/2026-08-13-phase-b3-light/
+      // task-4-report.md (agent scratch, not in the repo).
+      //
+      // Worth knowing before re-deriving anything here: on r185 this buffer is
+      // exposure-INDEPENDENT, and that was verified, not assumed -- probing it
+      // at exposure 0.326 and at 1.0 gives the same fractions to within the
+      // per-load texture noise (materials.js randomises its canvas textures on
+      // every load), because OutputPass is the only stage that reads
+      // toneMappingExposure and it runs after this. So a future exposure re-fit
+      // does not move the threshold; only a change to scene radiance does.
       const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);
       composer.addPass(bloom);
 

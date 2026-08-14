@@ -1,0 +1,90 @@
+{
+ "apartment": "horkyone-10",
+ "metric": "spawn-pooled sRGB luminance (0-255)",
+ "task": "phase B3 plan 3 task 4",
+ "method": "Every spawns[] entry rendered at 480x300 through the FULL post chain at pixelRatio 1, pixels of all spawns pooled, then mean and 5th percentile of sRGB-ENCODED luminance 0-255 (Rec.709 weights, no linearisation). Same domain as docs/PHASE-B-OBSERVATIONS.md and task 2, NOT comparable to tools/luminance.py's linear-light scale.",
+ "criterion": "horkyone-10 has zero compare-flagged photo spots, so delta_e.py, residual.py and luminance.py all refuse it cleanly. Its acceptance criterion, decided in plan 2 task 6, is mean sRGB luminance within +-10 of the two fitted flats -- a fit target, not a pass/fail on an untouched default.",
+ "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (the default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain at all). GPU reported by the runs: ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11). photoSpot and spawn yaw were cross-checked against the raw JSON degrees on every page load (main.js converts once; a second conversion is ruled out by construction, not by inspection).",
+ "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code differ slightly. Measured here: linear mean luminance +-0.0004 (serenity) / +-0.0009 (kings-court) between loads, all-spot dE2000 +-0.01 to +-0.04. Rows captured in the same batch share one page load and one set of textures, so within-batch ordering is clean; across batches it is not.",
+ "windingDefect": "This fit is against a render carrying a known, deliberately deferred defect: grid() in bake.js emits a fixed triangle order, so 8 of 12 wall faces are wound backwards and those walls present their far face, shaded from a point on the other side of the wall. Invisible today only because walls are flat-shaded MeshBasicMaterial. The human partner deferred the fix to a later plan with the accepted consequence that these constants will have to be re-fitted once the winding is fixed. Nothing here compensates for it and no measurement excludes walls.",
+ "siblingBand": {
+  "serenity": {
+   "exposure": 0.329,
+   "meanL": 138.7,
+   "p5L": 80
+  },
+  "kings-court": {
+   "exposure": 0.575,
+   "meanL": 149.0,
+   "p5L": 55
+  },
+  "acceptWindow": [
+   139.0,
+   148.7
+  ],
+  "midpoint": 143.85,
+  "note": "serenity and kings-court measured from their shipped JSON values on the committed code; the window is [max(sibling)-10, min(sibling)+10]."
+ },
+ "sweep": [
+  {
+   "exposure": 0.42,
+   "meanL": 137.9,
+   "p5L": 92,
+   "insideBand": false,
+   "note": "fails: 11.3 below kings-court"
+  },
+  {
+   "exposure": 0.44,
+   "meanL": 140.9,
+   "p5L": 95,
+   "insideBand": true
+  },
+  {
+   "exposure": 0.45,
+   "meanL": 142.4,
+   "p5L": 97,
+   "insideBand": true,
+   "note": "the value task 7 fitted; still passes, 1.45 below the sibling midpoint"
+  },
+  {
+   "exposure": 0.46,
+   "meanL": 143.8,
+   "p5L": 98,
+   "insideBand": true,
+   "chosen": true,
+   "note": "closest tested value to the sibling midpoint 143.85"
+  },
+  {
+   "exposure": 0.47,
+   "meanL": 145.2,
+   "p5L": 99,
+   "insideBand": true
+  },
+  {
+   "exposure": 0.48,
+   "meanL": 146.6,
+   "p5L": 101,
+   "insideBand": true
+  },
+  {
+   "exposure": 0.5,
+   "meanL": 149.2,
+   "p5L": 103,
+   "insideBand": false,
+   "note": "fails: 10.5 above serenity"
+  }
+ ],
+ "sweepNote": "One page load, exposure set in-page, full post chain at the final bloom constants (threshold 1.8, strength 0.1), so every row shares one set of procedural textures.",
+ "chosen": {
+  "exposure": 0.46,
+  "previousValue": 0.45,
+  "shippedConfigCheck": {
+   "meanL": 143.6,
+   "p5L": 98,
+   "diffFromSerenity": 4.9,
+   "diffFromKingsCourt": -5.4,
+   "passes": true,
+   "note": "re-measured from the shipped JSON with no in-page override, after the commit values were written; both margins inside +-10."
+  }
+ }
+}
