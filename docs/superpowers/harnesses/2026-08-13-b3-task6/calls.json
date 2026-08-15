@@ -1,0 +1,50 @@
+{
+  "protocol": "Six side-by-side pairs, left half = A, right half = B. For each pair, name the half carrying the offline lightmap pack. Forced binary choice; confidence recorded but not used to weight the score. Decision rule fixed BEFORE viewing: 'visible' is met only at 6/6 correct (P(6/6) under guessing = 1/64 = 0.016); 5/6 is P>=5 = 7/64 = 0.109 and does not clear it. Prior used for the calls: the pack adds bounce light, so the pack half should be the brighter one wherever the two differ.",
+  "aids": "Primary read is the full-size side-by-side. Two supplementary blind aids were built from the SAME composites without ever reading the mapping: a mirror-seam stack (t6ab/zoom/, judged unreadable against this geometry and not used) and 3-4x magnified flat-surface patches butted A|B (t6ab/patch/), restricted to floors and ceilings because walls carry no lightmap and cannot differ.",
+  "writtenBeforeReveal": true,
+  "calls": [
+    {
+      "pair": 1,
+      "pose": "entrance-spawn",
+      "call": "B",
+      "confidence": "moderate",
+      "basis": "patch1 (ceiling): B a shade lighter, weak. patch1b (floor, right of frame): B's wood reads lighter and warmer than A's, the clearest of the two reads."
+    },
+    {
+      "pair": 2,
+      "pose": "entrance-floor-down",
+      "call": "B",
+      "confidence": "low-moderate",
+      "basis": "patch2 (floor): B marginally lighter and warmer at the join. Full-frame impression agreed but was not independently convincing."
+    },
+    {
+      "pair": 3,
+      "pose": "bathroom-spawn",
+      "call": "A",
+      "confidence": "moderate",
+      "basis": "patch3b (ceiling at the wall junction): a distinct step, A clearly lighter, B darker with a stronger gradient. patch3 (ceiling, top of frame) agrees weakly. NOTE: my first full-frame impression was the OPPOSITE (B's ceiling read warmer) and I am overruling it with the patches, which are flat surface against a hard join. Recording the reversal because it is evidence about how unstable these reads are."
+    },
+    {
+      "pair": 4,
+      "pose": "bedroom-spawn",
+      "call": "B",
+      "confidence": "moderate",
+      "basis": "patch4 (floor at the doorway): B visibly lighter, with more legible detail in the shadowed floor. The full frame is dominated by a wall, which carries no lightmap and cannot differ, so the floor patch is the only real read here."
+    },
+    {
+      "pair": 5,
+      "pose": "living-room-spawn",
+      "call": "B",
+      "confidence": "low",
+      "basis": "patch5 (ceiling): B perhaps a hair brighter. Close to a coin flip."
+    },
+    {
+      "pair": 6,
+      "pose": "kitchen-hall-spot5",
+      "call": "A",
+      "confidence": "low",
+      "basis": "patch6 (ceiling): no join visible at all. patch6b (floor): A a hair lighter. Close to a coin flip; I also caught myself reading a difference into the WALL area of patch6b, which cannot differ, so this read is suspect."
+    }
+  ],
+  "selfAssessmentBeforeReveal": "At full viewing size I could not confidently separate any of the six. Every call above leans on a magnified flat-surface patch, which is not what 'visible' means for a product frame. I expect roughly chance performance, and I do not expect 6/6."
+}

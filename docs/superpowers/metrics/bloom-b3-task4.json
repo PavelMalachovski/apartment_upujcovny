@@ -1,0 +1,920 @@
+{
+ "metric": "bloom threshold and strength, re-measured after plan 3 task 2",
+ "task": "phase B3 plan 3 task 4",
+ "result": {
+  "threshold": 1.8,
+  "strength": 0.1,
+  "radius": 0.5,
+  "changedFromPrevious": false,
+  "note": "Both constants were re-measured from scratch because task 2 changed the radiances the threshold acts on; both landed back on the values plan 2 task 7 set. Held, not skipped."
+ },
+ "thresholdMethod": "Fraction of frame area over threshold in the exact pre-tonemap linear buffer UnrealBloomPass's LuminosityHighPassShader reads: RenderPass's own setRenderTarget/clear/render call pattern reproduced into an offscreen FloatType target, pixels read back, and the same luminance() the highpass compiles applied -- its weights read out of the live THREE.ColorManagement.getLuminanceCoefficients() (0.2126/0.7152/0.0722) rather than hardcoded. FRACTION, never the peak pixel: the peak is one specular sample whose magnitude moves with render-target size. 1280x800, every spawn and every compare photo spot of all three apartments, photo-spot markers hidden.",
+ "exposureIndependence": "Verified, not assumed: probing serenity at exposure 0.326 and at 1.0 gives the same fractions to within the per-load texture noise (entrance 11.04% vs 10.99% at threshold 1.294), because OutputPass is the only stage that reads toneMappingExposure and it runs after this buffer. So an exposure re-fit never moves the threshold; only a scene-radiance change does.",
+ "strengthMethod": "Rendered through the full composited, tonemapped chain with bloom on vs off at the newly fitted exposure, 800x500, counting pixels whose max channel differs by >=1, >=2 and >=8 of 255, and looking at the frames. Grain is deterministic across the two sides (post.render(0) on both feeds the grain shader the same time), so every differing pixel differs because of bloom. The percentages are NOT comparable to task 7's table, which used an undocumented tolerance.",
+ "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (the default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain at all). GPU reported by the runs: ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11). photoSpot and spawn yaw were cross-checked against the raw JSON degrees on every page load (main.js converts once; a second conversion is ruled out by construction, not by inspection).",
+ "windingDefect": "This fit is against a render carrying a known, deliberately deferred defect: grid() in bake.js emits a fixed triangle order, so 8 of 12 wall faces are wound backwards and those walls present their far face, shaded from a point on the other side of the wall. Invisible today only because walls are flat-shaded MeshBasicMaterial. The human partner deferred the fix to a later plan with the accepted consequence that these constants will have to be re-fitted once the winding is fixed. Nothing here compensates for it and no measurement excludes walls.",
+ "thresholds": [
+  1.294,
+  1.5,
+  1.6,
+  1.7,
+  1.8,
+  1.9,
+  2,
+  2.5,
+  3
+ ],
+ "perApartment": {
+  "serenity": {
+   "exposure": 0.329,
+   "size": [
+    1280,
+    800
+   ],
+   "rows": [
+    {
+     "kind": "spawn",
+     "name": "Entrance",
+     "fractionOverThresholdPct": [
+      11.072,
+      6.5972,
+      4.0435,
+      0.0241,
+      0.0241,
+      0.0241,
+      0.0241,
+      0.0241,
+      0.0241
+     ],
+     "maxLuminance": 6.174
+    },
+    {
+     "kind": "spawn",
+     "name": "Living Room",
+     "fractionOverThresholdPct": [
+      3.3116,
+      1.391,
+      0.1131,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.602
+    },
+    {
+     "kind": "spawn",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      0.7155,
+      0.1419,
+      0.0003,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.6
+    },
+    {
+     "kind": "spawn",
+     "name": "Bathroom",
+     "fractionOverThresholdPct": [
+      0.012,
+      0.009,
+      0.0087,
+      0.0084,
+      0.0082,
+      0.0078,
+      0.0076,
+      0.0063,
+      0.0054
+     ],
+     "maxLuminance": 58.887
+    },
+    {
+     "kind": "spawn",
+     "name": "Pool Terrace",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.132
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bathroom",
+     "fractionOverThresholdPct": [
+      3.9912,
+      1.3229,
+      0.3847,
+      0.2055,
+      0.1945,
+      0.1857,
+      0.1778,
+      0.1471,
+      0.1245
+     ],
+     "maxLuminance": 62.739
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Pool Terrace",
+     "fractionOverThresholdPct": [
+      0.0917,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.332
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Living Room",
+     "fractionOverThresholdPct": [
+      12.4183,
+      6.1761,
+      4.5398,
+      0.1104,
+      0.1104,
+      0.1104,
+      0.1104,
+      0.1104,
+      0.1104
+     ],
+     "maxLuminance": 6.171
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Living Room",
+     "fractionOverThresholdPct": [
+      12.6521,
+      6.2074,
+      4.5726,
+      0.1061,
+      0.1061,
+      0.1061,
+      0.1061,
+      0.1061,
+      0.1061
+     ],
+     "maxLuminance": 6.172
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Kitchen & Hall",
+     "fractionOverThresholdPct": [
+      5.6756,
+      2.3976,
+      1.1664,
+      0.5194,
+      0.4836,
+      0.4576,
+      0.4348,
+      0.3404,
+      0.2708
+     ],
+     "maxLuminance": 6.446
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      6.2585,
+      3.0404,
+      1.2607,
+      0.056,
+      0.056,
+      0.056,
+      0.056,
+      0.056,
+      0.056
+     ],
+     "maxLuminance": 5.923
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      4.1902,
+      2.6113,
+      1.4959,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.631
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      5.1272,
+      2.4055,
+      0.939,
+      0.0043,
+      0.0036,
+      0.0032,
+      0.0029,
+      0.0014,
+      0.0014
+     ],
+     "maxLuminance": 5.887
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Living Room",
+     "fractionOverThresholdPct": [
+      11.0268,
+      5.2206,
+      3.5315,
+      0.1536,
+      0.1536,
+      0.1536,
+      0.1536,
+      0.1536,
+      0.1536
+     ],
+     "maxLuminance": 6.17
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Pool Terrace",
+     "fractionOverThresholdPct": [
+      0.0003,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.456
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      4.313,
+      1.6559,
+      0.7209,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.613
+    }
+   ]
+  },
+  "kings-court": {
+   "exposure": 0.575,
+   "size": [
+    1280,
+    800
+   ],
+   "rows": [
+    {
+     "kind": "spawn",
+     "name": "Entry hall",
+     "fractionOverThresholdPct": [
+      0.2745,
+      0.1304,
+      0.0787,
+      0.028,
+      0.0246,
+      0.0219,
+      0.0199,
+      0.0124,
+      0.0096
+     ],
+     "maxLuminance": 52.255
+    },
+    {
+     "kind": "spawn",
+     "name": "Kitchen",
+     "fractionOverThresholdPct": [
+      0.1393,
+      0.0274,
+      0.0085,
+      0.0052,
+      0.0026,
+      0.0006,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.936
+    },
+    {
+     "kind": "spawn",
+     "name": "Dining room",
+     "fractionOverThresholdPct": [
+      0.3082,
+      0.1561,
+      0.073,
+      0.0077,
+      0.0075,
+      0.0074,
+      0.0073,
+      0.0068,
+      0.0065
+     ],
+     "maxLuminance": 42.769
+    },
+    {
+     "kind": "spawn",
+     "name": "Living room",
+     "fractionOverThresholdPct": [
+      4.9792,
+      2.9856,
+      1.3785,
+      0.0998,
+      0.0867,
+      0.0758,
+      0.0661,
+      0.064,
+      0.064
+     ],
+     "maxLuminance": 5.955
+    },
+    {
+     "kind": "spawn",
+     "name": "Bedroom 1",
+     "fractionOverThresholdPct": [
+      1.9757,
+      1.0308,
+      0.4682,
+      0.0322,
+      0.0322,
+      0.0322,
+      0.0322,
+      0.0322,
+      0.0322
+     ],
+     "maxLuminance": 5.955
+    },
+    {
+     "kind": "spawn",
+     "name": "Bedroom 3",
+     "fractionOverThresholdPct": [
+      3.986,
+      2.2522,
+      1.3854,
+      0.0492,
+      0.0492,
+      0.0492,
+      0.0492,
+      0.0492,
+      0.0492
+     ],
+     "maxLuminance": 5.952
+    },
+    {
+     "kind": "spawn",
+     "name": "Bedroom 2",
+     "fractionOverThresholdPct": [
+      0.2517,
+      0.1117,
+      0.0932,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.641
+    },
+    {
+     "kind": "spawn",
+     "name": "Hallway",
+     "fractionOverThresholdPct": [
+      0.2358,
+      0.1049,
+      0.0368,
+      0.0046,
+      0.0046,
+      0.0046,
+      0.0046,
+      0.0046,
+      0.0046
+     ],
+     "maxLuminance": 5.966
+    },
+    {
+     "kind": "spawn",
+     "name": "Bathroom 2",
+     "fractionOverThresholdPct": [
+      0.0016,
+      0.0001,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.508
+    },
+    {
+     "kind": "spawn",
+     "name": "Stairs",
+     "fractionOverThresholdPct": [
+      4.564,
+      3.5273,
+      2.3481,
+      0.0021,
+      0.0021,
+      0.0021,
+      0.0021,
+      0.0021,
+      0.0021
+     ],
+     "maxLuminance": 5.916
+    },
+    {
+     "kind": "spawn",
+     "name": "Upper hall",
+     "fractionOverThresholdPct": [
+      2.556,
+      0.8791,
+      0.0018,
+      0.0001,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.765
+    },
+    {
+     "kind": "spawn",
+     "name": "Upper living room",
+     "fractionOverThresholdPct": [
+      1.7377,
+      0.8848,
+      0.3833,
+      0.0411,
+      0.041,
+      0.0409,
+      0.0409,
+      0.0409,
+      0.0409
+     ],
+     "maxLuminance": 6.013
+    },
+    {
+     "kind": "spawn",
+     "name": "Upper bedroom",
+     "fractionOverThresholdPct": [
+      16.5408,
+      7.1448,
+      2.1055,
+      0.1982,
+      0.1982,
+      0.1982,
+      0.1982,
+      0.1982,
+      0.1982
+     ],
+     "maxLuminance": 6.048
+    },
+    {
+     "kind": "spawn",
+     "name": "Terrace",
+     "fractionOverThresholdPct": [
+      0.8781,
+      0.4451,
+      0.181,
+      0.0129,
+      0.0129,
+      0.0129,
+      0.0129,
+      0.0129,
+      0.0129
+     ],
+     "maxLuminance": 5.995
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Living room",
+     "fractionOverThresholdPct": [
+      0.0469,
+      0.0145,
+      0.0049,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.684
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Dining room",
+     "fractionOverThresholdPct": [
+      3.1367,
+      1.5127,
+      0.6403,
+      0.0614,
+      0.0605,
+      0.0603,
+      0.0597,
+      0.0582,
+      0.0574
+     ],
+     "maxLuminance": 138.136
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Kitchen",
+     "fractionOverThresholdPct": [
+      1.0165,
+      0.4512,
+      0.2507,
+      0.0944,
+      0.0857,
+      0.0771,
+      0.0711,
+      0.0484,
+      0.0404
+     ],
+     "maxLuminance": 35.915
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Coffee corner",
+     "fractionOverThresholdPct": [
+      0.0042,
+      0.0023,
+      0.0021,
+      0.0019,
+      0.0017,
+      0.0015,
+      0.0012,
+      0.0008,
+      0.0002
+     ],
+     "maxLuminance": 3.2
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom 1",
+     "fractionOverThresholdPct": [
+      0.1805,
+      0.1564,
+      0.1564,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.645
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom 1 \u00b7 desk",
+     "fractionOverThresholdPct": [
+      0.0021,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.346
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bedroom 2",
+     "fractionOverThresholdPct": [
+      0.0979,
+      0.0647,
+      0.0583,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.646
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Bathroom 2",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.117
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Guest WC",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 0.545
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Laundry",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.202
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Upper living room",
+     "fractionOverThresholdPct": [
+      9.4877,
+      4.9469,
+      2.7306,
+      0.7039,
+      0.7039,
+      0.7039,
+      0.7039,
+      0.7039,
+      0.7039
+     ],
+     "maxLuminance": 5.993
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Upper bedroom",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 0.744
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Upper bathroom",
+     "fractionOverThresholdPct": [
+      2.7521,
+      0.6229,
+      0.0059,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.6
+    },
+    {
+     "kind": "photoSpot",
+     "name": "Terrace",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.045
+    }
+   ]
+  },
+  "horkyone-10": {
+   "exposure": 0.46,
+   "size": [
+    1280,
+    800
+   ],
+   "rows": [
+    {
+     "kind": "spawn",
+     "name": "Living room",
+     "fractionOverThresholdPct": [
+      0.0062,
+      0.0041,
+      0.003,
+      0.0019,
+      0.0008,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.858
+    },
+    {
+     "kind": "spawn",
+     "name": "Bedroom",
+     "fractionOverThresholdPct": [
+      0.1402,
+      0.0206,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.59
+    },
+    {
+     "kind": "spawn",
+     "name": "Bathroom",
+     "fractionOverThresholdPct": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 0.981
+    },
+    {
+     "kind": "spawn",
+     "name": "Hall",
+     "fractionOverThresholdPct": [
+      0.025,
+      0.0031,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.553
+    },
+    {
+     "kind": "spawn",
+     "name": "Terrace",
+     "fractionOverThresholdPct": [
+      0.0344,
+      0.0203,
+      0.0142,
+      0.008,
+      0.0027,
+      0,
+      0,
+      0,
+      0
+     ],
+     "maxLuminance": 1.862
+    }
+   ]
+  }
+ },
+ "strengthSweeps": {
+  "serenity": {
+   "position": "photoSpot Bathroom (the backlit mirror, plan 1)",
+   "exposure": 0.329,
+   "threshold": 1.8,
+   "rows": [
+    {
+     "strength": 0.05,
+     "pctChanged_ge1": 28.89,
+     "pctChanged_ge2": 6.42,
+     "pctChanged_ge8": 0.95,
+     "maxDelta": 18
+    },
+    {
+     "strength": 0.1,
+     "pctChanged_ge1": 42.89,
+     "pctChanged_ge2": 13.35,
+     "pctChanged_ge8": 2.3,
+     "maxDelta": 32
+    },
+    {
+     "strength": 0.15,
+     "pctChanged_ge1": 52.66,
+     "pctChanged_ge2": 16.47,
+     "pctChanged_ge8": 3.55,
+     "maxDelta": 43
+    },
+    {
+     "strength": 0.22,
+     "pctChanged_ge1": 62.18,
+     "pctChanged_ge2": 19.16,
+     "pctChanged_ge8": 4.88,
+     "maxDelta": 56
+    },
+    {
+     "strength": 0.3,
+     "pctChanged_ge1": 69.61,
+     "pctChanged_ge2": 22.69,
+     "pctChanged_ge8": 6.42,
+     "maxDelta": 68
+    },
+    {
+     "strength": 0.4,
+     "pctChanged_ge1": 76.16,
+     "pctChanged_ge2": 28.58,
+     "pctChanged_ge8": 8.54,
+     "maxDelta": 79
+    }
+   ]
+  },
+  "kings-court": {
+   "position": "photoSpot Dining room (pendant-lamp speculars, max linear luminance 138)",
+   "exposure": 0.575,
+   "threshold": 1.8,
+   "rows": [
+    {
+     "strength": 0.05,
+     "pctChanged_ge1": 13.12,
+     "pctChanged_ge2": 0.5,
+     "pctChanged_ge8": 0.05,
+     "maxDelta": 80
+    },
+    {
+     "strength": 0.1,
+     "pctChanged_ge1": 24.8,
+     "pctChanged_ge2": 1.59,
+     "pctChanged_ge8": 0.08,
+     "maxDelta": 120
+    },
+    {
+     "strength": 0.22,
+     "pctChanged_ge1": 44.01,
+     "pctChanged_ge2": 5.08,
+     "pctChanged_ge8": 0.28,
+     "maxDelta": 159
+    }
+   ]
+  }
+ },
+ "looked": "Frames compared by eye at both apartments: at 0.22 the serenity mirror highlight spreads a soft halo across the mirror face and the kings-court pendant lamps grow a visible ring; at 0.1 both read as contained glints. Same judgement plan 2 task 7 made, re-made at the new exposures."
+}

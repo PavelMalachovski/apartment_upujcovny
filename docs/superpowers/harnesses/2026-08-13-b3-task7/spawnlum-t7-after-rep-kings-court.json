@@ -1,0 +1,102 @@
+{
+  "label": "t7-after-rep-kings-court",
+  "apt": "kings-court",
+  "yawOk": true,
+  "errors": [],
+  "pooled": {
+    "meanL": 149.2,
+    "p5L": 55.5,
+    "pctPixelsBelowLuma16": 0.2
+  },
+  "per": [
+    {
+      "spawn": "Entry hall",
+      "meanL": 164.3,
+      "p5L": 116.7,
+      "pctPixelsBelowLuma16": 0.3
+    },
+    {
+      "spawn": "Kitchen",
+      "meanL": 158,
+      "p5L": 90.1,
+      "pctPixelsBelowLuma16": 0.2
+    },
+    {
+      "spawn": "Dining room",
+      "meanL": 145.4,
+      "p5L": 69.5,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Living room",
+      "meanL": 140.2,
+      "p5L": 57.4,
+      "pctPixelsBelowLuma16": 1.7
+    },
+    {
+      "spawn": "Bedroom 1",
+      "meanL": 135.2,
+      "p5L": 53.8,
+      "pctPixelsBelowLuma16": 0.2
+    },
+    {
+      "spawn": "Bedroom 3",
+      "meanL": 152,
+      "p5L": 69.5,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Bedroom 2",
+      "meanL": 149.3,
+      "p5L": 74.7,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Hallway",
+      "meanL": 145.3,
+      "p5L": 106.4,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bathroom 2",
+      "meanL": 120.9,
+      "p5L": 35.9,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Stairs",
+      "meanL": 159,
+      "p5L": 83.6,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Upper hall",
+      "meanL": 160.1,
+      "p5L": 110.5,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Upper living room",
+      "meanL": 147.6,
+      "p5L": 88.7,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Upper bedroom",
+      "meanL": 162.3,
+      "p5L": 80.8,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Terrace",
+      "meanL": 149.3,
+      "p5L": 60.2,
+      "pctPixelsBelowLuma16": 0.3
+    }
+  ],
+  "ambSampled": true,
+  "issues": [],
+  "bakeMs": 39291,
+  "exposure": 0.575,
+  "contrast_mean_over_p5": 2.688
+}

@@ -1,0 +1,389 @@
+{
+  "base": "http://localhost:8742/",
+  "rows": [
+    {
+      "apt": "serenity",
+      "profile": "desktop",
+      "budget": 400,
+      "ok": true,
+      "errors": [],
+      "warns": [
+        "THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n\n\n\u0000"
+      ],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 57,
+        "chain": 72
+      },
+      "callsSpawn0": {
+        "naive": 56,
+        "chain": 71
+      },
+      "spawn0": "Entrance",
+      "dpr": 1,
+      "buffer": [
+        1280,
+        820
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 6072,
+      "exposure": 0.329,
+      "spotName": "desktop",
+      "sky": [
+        {
+          "spawn": "Entrance",
+          "hit": "Mesh",
+          "dist": 1
+        },
+        {
+          "spawn": "Living Room",
+          "hit": "Mesh",
+          "dist": 1
+        },
+        {
+          "spawn": "Bedroom",
+          "hit": "Mesh",
+          "dist": 1
+        },
+        {
+          "spawn": "Bathroom",
+          "hit": "Mesh",
+          "dist": 1
+        },
+        {
+          "spawn": "Pool Terrace",
+          "hit": "Mesh",
+          "dist": 1.05
+        }
+      ],
+      "walk": [
+        {
+          "route": "Start southbound",
+          "from": [
+            3.6,
+            0.75,
+            0
+          ],
+          "precedent": "x 3.24, z 2.13 (plan 2 task 9)",
+          "to": [
+            3.24,
+            2.13,
+            0
+          ],
+          "moved": 1.43,
+          "finite": true
+        }
+      ]
+    },
+    {
+      "apt": "serenity",
+      "profile": "mobile",
+      "budget": 250,
+      "ok": true,
+      "errors": [],
+      "warns": [],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 49,
+        "chain": 64
+      },
+      "callsSpawn0": {
+        "naive": 47,
+        "chain": 62
+      },
+      "spawn0": "Entrance",
+      "dpr": 1.6,
+      "buffer": [
+        624,
+        1350
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 2572,
+      "exposure": 0.329,
+      "spotName": "mobile"
+    },
+    {
+      "apt": "kings-court",
+      "profile": "desktop",
+      "budget": 400,
+      "ok": true,
+      "errors": [],
+      "warns": [],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 150,
+        "chain": 165
+      },
+      "callsSpawn0": {
+        "naive": 150,
+        "chain": 165
+      },
+      "spawn0": "Entry hall",
+      "dpr": 1,
+      "buffer": [
+        1280,
+        820
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 36339,
+      "exposure": 0.575,
+      "spotName": "desktop",
+      "sky": [
+        {
+          "spawn": "Entry hall",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Kitchen",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Dining room",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Living room",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Bedroom 1",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Bedroom 3",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Bedroom 2",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Hallway",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Bathroom 2",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Stairs",
+          "hit": "Mesh",
+          "dist": 1.2
+        },
+        {
+          "spawn": "Upper hall",
+          "hit": "Mesh",
+          "dist": 1.37
+        },
+        {
+          "spawn": "Upper living room",
+          "hit": "Mesh",
+          "dist": 0.41
+        },
+        {
+          "spawn": "Upper bedroom",
+          "hit": "Mesh",
+          "dist": 0.71
+        },
+        {
+          "spawn": "Terrace",
+          "hit": "NOTHING ABOVE",
+          "dist": null
+        }
+      ],
+      "walk": [
+        {
+          "route": "Entry hall westbound",
+          "from": [
+            22.6,
+            5,
+            0
+          ],
+          "precedent": "x 13.14, ground 0",
+          "to": [
+            13.14,
+            5,
+            0
+          ],
+          "moved": 9.46,
+          "finite": true
+        },
+        {
+          "route": "Upper hall westbound",
+          "from": [
+            13.6,
+            0.9,
+            3.1
+          ],
+          "precedent": "x 4.44, ground 3.1",
+          "to": [
+            4.44,
+            0.9,
+            3.1
+          ],
+          "moved": 9.16,
+          "finite": true
+        }
+      ]
+    },
+    {
+      "apt": "kings-court",
+      "profile": "mobile",
+      "budget": 250,
+      "ok": true,
+      "errors": [],
+      "warns": [],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 135,
+        "chain": 150
+      },
+      "callsSpawn0": {
+        "naive": 135,
+        "chain": 150
+      },
+      "spawn0": "Entry hall",
+      "dpr": 1.6,
+      "buffer": [
+        624,
+        1350
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 22001,
+      "exposure": 0.575,
+      "spotName": "mobile"
+    },
+    {
+      "apt": "horkyone-10",
+      "profile": "desktop",
+      "budget": 400,
+      "ok": true,
+      "errors": [],
+      "warns": [],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 68,
+        "chain": 83
+      },
+      "callsSpawn0": {
+        "naive": 41,
+        "chain": 56
+      },
+      "spawn0": "Living room",
+      "dpr": 1,
+      "buffer": [
+        1280,
+        820
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 6779,
+      "exposure": 0.46,
+      "spotName": "desktop",
+      "sky": [
+        {
+          "spawn": "Living room",
+          "hit": "Mesh",
+          "dist": 1.68
+        },
+        {
+          "spawn": "Bedroom",
+          "hit": "Mesh",
+          "dist": 1.73
+        },
+        {
+          "spawn": "Bathroom",
+          "hit": "Mesh",
+          "dist": 1.63
+        },
+        {
+          "spawn": "Hall",
+          "hit": "Mesh",
+          "dist": 1.22
+        },
+        {
+          "spawn": "Terrace",
+          "hit": "NOTHING ABOVE",
+          "dist": null
+        }
+      ],
+      "walk": [
+        {
+          "route": "Living room northbound",
+          "from": [
+            7.75,
+            5.85,
+            0
+          ],
+          "precedent": "x 7.75, z 1.26 (plan 2 task 9)",
+          "to": [
+            7.75,
+            1.26,
+            0
+          ],
+          "moved": 4.59,
+          "finite": true
+        }
+      ]
+    },
+    {
+      "apt": "horkyone-10",
+      "profile": "mobile",
+      "budget": 250,
+      "ok": true,
+      "errors": [],
+      "warns": [],
+      "selfTestLog": [
+        "[sampler] selfTest passed [Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3), Array(3)]"
+      ],
+      "callsStart": {
+        "naive": 49,
+        "chain": 64
+      },
+      "callsSpawn0": {
+        "naive": 39,
+        "chain": 54
+      },
+      "spawn0": "Living room",
+      "dpr": 1.6,
+      "buffer": [
+        624,
+        1350
+      ],
+      "selfTest": true,
+      "issues": [],
+      "ambSampled": true,
+      "bakeMs": 5798,
+      "exposure": 0.46,
+      "spotName": "mobile"
+    }
+  ]
+}

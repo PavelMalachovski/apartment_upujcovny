@@ -1,0 +1,152 @@
+{
+  "apartment": "horkyone-10",
+  "metric": "spawn-pooled luminance",
+  "task": "phase B plan 3, task 3 -- GTAO in the post chain",
+  "outcome": "GTAO was NOT adopted. Two independent reasons, either one sufficient: (1) as specified it blackens every wall that presents its far face -- see the gtao-on phase; (2) its depth/normal prepass is a second full scene pass, taking kings-court's mobile draw calls to 282 against a hard budget of 250. See .superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md.",
+  "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels pooled across all spawns before the mean and the interpolated 5th percentile of Rec.709 luma on the sRGB-encoded frame (0-255). Same method and same harness as <apt>-b3-task2-luminance.json, and the `gtao-off` phase below reproduces that file's `fix1` phase, which is what makes the three phases here comparable to it.",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (ANGLE / Intel UHD 630 / D3D11). The three phases are measured inside ONE page load by toggling the GTAO pass, so nothing but the pass differs between them: EffectComposer skips a pass with enabled=false, so `gtao-off` is bit-for-bit the chain this task started from.",
+  "phases": {
+    "gtao-off": {
+      "note": "GTAO pass present but disabled -- identical to BASE b06730e, and the before column for this task.",
+      "meanL": 141.7,
+      "p5L": 96.3,
+      "contrast_mean_over_p5": 1.471,
+      "pctPixelsBelowLuma16": 0.3,
+      "perSpawn": [
+        {
+          "spawn": "Living room",
+          "meanL": 140.8,
+          "p5L": 88.8,
+          "pctPixelsBelowLuma16": 0.7
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 153.7,
+          "p5L": 117.4,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 133,
+          "p5L": 110.3,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Hall",
+          "meanL": 131.6,
+          "p5L": 92.9,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 149.5,
+          "p5L": 68.5,
+          "pctPixelsBelowLuma16": 0.5
+        }
+      ]
+    },
+    "gtao-on": {
+      "note": "GTAO exactly as the brief specifies it, reading scene normals from its own MeshNormalMaterial G-buffer. NOT SHIPPED. The walls of all three apartments present their far face to the camera (the deferred winding defect in bake.js grid()), so their vertex normals point away from the viewer, GTAO finds the hemisphere fully closed and multiplies those pixels to black. p5 collapsing to ~0 and darkPct jumping to 11-21% is that, not occlusion.",
+      "meanL": 126.2,
+      "p5L": 0.4,
+      "contrast_mean_over_p5": null,
+      "pctPixelsBelowLuma16": 11.1,
+      "perSpawn": [
+        {
+          "spawn": "Living room",
+          "meanL": 112,
+          "p5L": 0.2,
+          "pctPixelsBelowLuma16": 15.3
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 150.3,
+          "p5L": 101.3,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 131.5,
+          "p5L": 108.3,
+          "pctPixelsBelowLuma16": 0.4
+        },
+        {
+          "spawn": "Hall",
+          "meanL": 88.3,
+          "p5L": -0.3,
+          "pctPixelsBelowLuma16": 38.9
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 148.9,
+          "p5L": 64.3,
+          "pctPixelsBelowLuma16": 0.6
+        }
+      ]
+    },
+    "gtao-depthnormals": {
+      "note": "DIAGNOSTIC ONLY, never shipped and never proposed: GTAO with NORMAL_VECTOR_TYPE forced to 0, so normals are reconstructed from the depth buffer and are therefore always camera-facing, immune to the winding defect. Recorded to answer \"what would this pass be worth if the winding were fixed\" without waiting for that fix. It still costs the same full G-buffer scene pass, so it does not rescue the draw-call budget.",
+      "meanL": 137.1,
+      "p5L": 76.9,
+      "contrast_mean_over_p5": 1.783,
+      "pctPixelsBelowLuma16": 0.3,
+      "perSpawn": [
+        {
+          "spawn": "Living room",
+          "meanL": 130.2,
+          "p5L": 59,
+          "pctPixelsBelowLuma16": 0.9
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 150.5,
+          "p5L": 101.9,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 131.8,
+          "p5L": 108.4,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Hall",
+          "meanL": 124.2,
+          "p5L": 73.4,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 148.9,
+          "p5L": 64.2,
+          "pctPixelsBelowLuma16": 0.5
+        }
+      ]
+    }
+  },
+  "cost": {
+    "note": "Draw calls through the post chain per CLAUDE.md (info.autoReset off, reset by hand, post.render(0), read, restore); frame time is the median of three runs of 60 composed frames with gl.finish() around each, on ANGLE/Intel UHD 630. Values are [gtao-off, gtao-on]. desktop = 1280x820 @ DPR 1; mobile = 390x844 @ DPR 1.6 (624x1350 buffer, isMobile+hasTouch). Budget: <=400 desktop, <=250 mobile.",
+    "frameMsCaveat": "The frameMs figures in this block DID NOT REPRODUCE. Fix round 1 re-ran the same measurement and all 6 of 6 draw-call figures reproduced exactly -- including the load-bearing kings-court mobile 150->282 -- while frame time disagreed by up to 3x (the same desktop pair came back 23.8 -> 94.1 ms against the 15.4 -> 65.3 ms recorded here). Read frameMs for direction and rough size only, never as an absolute. The re-run, its ranges and its method are in <apt>-b3-task3-cost.json, which supersedes this block for cost; the calls are unaffected and agree across both runs. Note added 2026-08-15 by the whole-branch fix wave: no value in this file was changed.",
+    "spot": "Living room (spawns[0])",
+    "desktop": {
+      "calls": [
+        56,
+        98
+      ],
+      "frameMs": [
+        1.1,
+        24.5
+      ]
+    },
+    "mobile": {
+      "calls": [
+        54,
+        94
+      ],
+      "frameMs": [
+        1.0,
+        19.2
+      ]
+    }
+  }
+}

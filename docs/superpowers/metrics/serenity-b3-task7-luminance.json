@@ -1,0 +1,413 @@
+{
+  "apartment": "serenity",
+  "metric": "plan 3's own claim: shadow (5th-percentile luminance) and contrast, before plan 3 (c2bb0bd) and after (736a867)",
+  "task": "phase B plan 3, task 7 -- the gate",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist. Without them the default headless GPU is SwiftShader, which post.js's capable() rejects, and every measurement silently has no post chain. Both trees served simultaneously: HEAD from tools/serve.py on :8742, a detached c2bb0bd worktree from this directory's serve_base.py on :8743.",
+  "spawnPooledSrgb": {
+    "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels of all spawns pooled, then mean and interpolated 5th percentile of sRGB-ENCODED luminance 0-255 (Rec.709 weights, no linearisation). Script: docs/superpowers/harnesses/2026-08-13-b3-task5/spawnlum.mjs, unchanged since task 2, run against BOTH trees over TOUR_BASE -- HEAD on :8742, the c2bb0bd worktree on :8743. NOT comparable to tools/luminance.py, which is linear-light over a different population.",
+    "caveat": "afterAtBeforeExposure is a DIAGNOSTIC, not a shipped state: the HEAD tree with renderer.toneMappingExposure overridden at runtime to the BASE tree's value, so task 2's geometric effect can be read at constant exposure. No apartment's `exposure` key was touched -- task 4 fitted those and is closed.",
+    "before_c2bb0bd": [
+      {
+        "label": "before-serenity",
+        "exposure": 0.326,
+        "yawSingleConversion": true,
+        "ambSampled": null,
+        "issues": [],
+        "meanL": 138.3,
+        "p5L": 80,
+        "pctPixelsBelowLuma16": 0,
+        "contrast_mean_over_p5": 1.729,
+        "perSpawn": [
+          {
+            "spawn": "Entrance",
+            "meanL": 139.4,
+            "p5L": 68.1,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living Room",
+            "meanL": 135,
+            "p5L": 81.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom",
+            "meanL": 148.3,
+            "p5L": 94.4,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom",
+            "meanL": 139.6,
+            "p5L": 100.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Pool Terrace",
+            "meanL": 129.1,
+            "p5L": 75.4,
+            "pctPixelsBelowLuma16": 0
+          }
+        ]
+      },
+      {
+        "label": "before-rep-serenity",
+        "exposure": 0.326,
+        "yawSingleConversion": true,
+        "ambSampled": null,
+        "issues": [],
+        "meanL": 138.3,
+        "p5L": 80,
+        "pctPixelsBelowLuma16": 0,
+        "contrast_mean_over_p5": 1.729,
+        "perSpawn": [
+          {
+            "spawn": "Entrance",
+            "meanL": 139.5,
+            "p5L": 69.2,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living Room",
+            "meanL": 135.1,
+            "p5L": 81.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom",
+            "meanL": 148.4,
+            "p5L": 95.1,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom",
+            "meanL": 139.6,
+            "p5L": 100.3,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Pool Terrace",
+            "meanL": 129.1,
+            "p5L": 75.4,
+            "pctPixelsBelowLuma16": 0
+          }
+        ]
+      }
+    ],
+    "after_736a867": [
+      {
+        "label": "after-serenity",
+        "exposure": 0.329,
+        "yawSingleConversion": true,
+        "ambSampled": true,
+        "issues": [],
+        "meanL": 138.6,
+        "p5L": 80,
+        "pctPixelsBelowLuma16": 0.1,
+        "contrast_mean_over_p5": 1.733,
+        "perSpawn": [
+          {
+            "spawn": "Entrance",
+            "meanL": 140.3,
+            "p5L": 65.4,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living Room",
+            "meanL": 136.1,
+            "p5L": 81.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom",
+            "meanL": 147.4,
+            "p5L": 88.9,
+            "pctPixelsBelowLuma16": 0.3
+          },
+          {
+            "spawn": "Bathroom",
+            "meanL": 139.7,
+            "p5L": 98.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Pool Terrace",
+            "meanL": 129.6,
+            "p5L": 75.9,
+            "pctPixelsBelowLuma16": 0
+          }
+        ]
+      },
+      {
+        "label": "after-rep-serenity",
+        "exposure": 0.329,
+        "yawSingleConversion": true,
+        "ambSampled": true,
+        "issues": [],
+        "meanL": 138.7,
+        "p5L": 80,
+        "pctPixelsBelowLuma16": 0.1,
+        "contrast_mean_over_p5": 1.734,
+        "perSpawn": [
+          {
+            "spawn": "Entrance",
+            "meanL": 140.3,
+            "p5L": 65.8,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living Room",
+            "meanL": 136.2,
+            "p5L": 81.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom",
+            "meanL": 147.4,
+            "p5L": 88.7,
+            "pctPixelsBelowLuma16": 0.5
+          },
+          {
+            "spawn": "Bathroom",
+            "meanL": 139.9,
+            "p5L": 98.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Pool Terrace",
+            "meanL": 129.7,
+            "p5L": 75.9,
+            "pctPixelsBelowLuma16": 0
+          }
+        ]
+      }
+    ],
+    "afterAtBeforeExposure": {
+      "label": "after-iso-serenity",
+      "exposure": 0.326,
+      "yawSingleConversion": true,
+      "ambSampled": true,
+      "issues": [],
+      "meanL": 138,
+      "p5L": 79.5,
+      "pctPixelsBelowLuma16": 0.1,
+      "contrast_mean_over_p5": 1.736,
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 139.5,
+          "p5L": 65.2,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 135.5,
+          "p5L": 81.2,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 146.8,
+          "p5L": 88.3,
+          "pctPixelsBelowLuma16": 0.3
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 139.1,
+          "p5L": 97.5,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129,
+          "p5L": 75.4,
+          "pctPixelsBelowLuma16": 0
+        }
+      ]
+    }
+  },
+  "structural": [
+    {
+      "profile": "desktop",
+      "budget": 400,
+      "pass": true,
+      "callsStart": {
+        "naive": 57,
+        "chain": 72
+      },
+      "callsSpawn0": {
+        "naive": 56,
+        "chain": 71
+      },
+      "selfTest": true,
+      "ambSampled": true,
+      "issues": [],
+      "consoleErrors": 0,
+      "dpr": 1,
+      "buffer": [
+        1280,
+        820
+      ]
+    },
+    {
+      "profile": "mobile",
+      "budget": 250,
+      "pass": true,
+      "callsStart": {
+        "naive": 49,
+        "chain": 64
+      },
+      "callsSpawn0": {
+        "naive": 47,
+        "chain": 62
+      },
+      "selfTest": true,
+      "ambSampled": true,
+      "issues": [],
+      "consoleErrors": 0,
+      "dpr": 1.6,
+      "buffer": [
+        624,
+        1350
+      ]
+    }
+  ],
+  "structural_skyLeak": [
+    {
+      "spawn": "Entrance",
+      "hit": "Mesh",
+      "dist": 1
+    },
+    {
+      "spawn": "Living Room",
+      "hit": "Mesh",
+      "dist": 1
+    },
+    {
+      "spawn": "Bedroom",
+      "hit": "Mesh",
+      "dist": 1
+    },
+    {
+      "spawn": "Bathroom",
+      "hit": "Mesh",
+      "dist": 1
+    },
+    {
+      "spawn": "Pool Terrace",
+      "hit": "Mesh",
+      "dist": 1.05
+    }
+  ],
+  "structural_walk": [
+    {
+      "route": "Start southbound",
+      "from": [
+        3.6,
+        0.75,
+        0
+      ],
+      "precedent": "x 3.24, z 2.13 (plan 2 task 9)",
+      "to": [
+        3.24,
+        2.13,
+        0
+      ],
+      "moved": 1.43,
+      "finite": true
+    }
+  ],
+  "linearLight": {
+    "method": "Linear-light Rec.709 relative luminance via tools/luminance.py's own luminance_stats, over the population that tool hard-codes: compare spots passing delta_e.scorable, i.e. poseVerified. Captured with ?measure=1&fov=legacy (measure.js is byte-identical between the two trees). Contrast is the ratio of the UNROUNDED aggregates. Script: linear7.py.",
+    "population": "2 of 11 compare-flagged spots (poseVerified filter, hard-coded in tools/luminance.py)",
+    "sets": {
+      "t7-base-serenity": {
+        "mean": 0.28546405225630755,
+        "p5": 0.08996159588595158,
+        "contrast": 3.173176836682659
+      },
+      "t7-base-serenity-rep": {
+        "mean": 0.2853517291390015,
+        "p5": 0.08991528540275788,
+        "contrast": 3.17356195735602
+      },
+      "t7-gate-serenity": {
+        "mean": 0.2817162945742925,
+        "p5": 0.08328283545955067,
+        "contrast": 3.382645331655623
+      },
+      "t7-gate-serenity-rep": {
+        "mean": 0.28176224046664866,
+        "p5": 0.08328283545955067,
+        "contrast": 3.3831970166709406
+      },
+      "photographs": {
+        "mean": 0.2992888405852368,
+        "p5": 0.04827363047525604,
+        "contrast": 6.199841148028952
+      }
+    },
+    "perSpot": {
+      "t7-base-serenity": [
+        {
+          "file": "1.webp",
+          "mean": 0.2678376755519486,
+          "p5": 0.09275894908846659
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.3030904289606665,
+          "p5": 0.08716424268343657
+        }
+      ],
+      "t7-base-serenity-rep": [
+        {
+          "file": "1.webp",
+          "mean": 0.2677305776932004,
+          "p5": 0.09275894908846659
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.30297288058480254,
+          "p5": 0.08707162171704917
+        }
+      ],
+      "t7-gate-serenity": [
+        {
+          "file": "1.webp",
+          "mean": 0.26711481148885147,
+          "p5": 0.0885112941358819
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.2963177776597335,
+          "p5": 0.07805437678321944
+        }
+      ],
+      "t7-gate-serenity-rep": [
+        {
+          "file": "1.webp",
+          "mean": 0.2669335298880282,
+          "p5": 0.0885112941358819
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.29659095104526906,
+          "p5": 0.07805437678321944
+        }
+      ],
+      "photographs": [
+        {
+          "file": "1.webp",
+          "mean": 0.22814458605885382,
+          "p5": 0.017722786484303605
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.3704330951116198,
+          "p5": 0.07882447446620848
+        }
+      ]
+    }
+  }
+}

@@ -310,6 +310,13 @@ the same caveat this section just applied to plan 1's numbers.
 
 ## Exposure and bloom fitted together, and the merge condition re-read (task 7)
 
+> **Superseded in part — see "Phase B3 plan 3 task 4" at the end of this
+> file.** The three fitted exposures below (serenity 0.326, kings-court
+> 0.56, horkyone-10 0.45) were re-fitted after plan 3 task 2 changed the
+> radiances, and ship today as 0.329 / 0.575 / 0.46. Both bloom constants
+> were re-measured and held. The method described here is unchanged and
+> still current; only the values and the gate reading moved.
+
 The task the whole plan exists for. Three things happened in order, per the
 phase's own rule that exposure and bloom are coupled through the same buffer
 and must not be fitted in isolation: **(1)** `serenity.exposure`'s old
@@ -644,6 +651,15 @@ adding a third paragraph of disclosure on top of this one.
 
 ## Task 9: the gate, and the merge decision
 
+> **Superseded — see "Phase B3 plan 3 task 4" at the end of this file.**
+> This section's decision ("I consider the merge condition met", below)
+> was correct for the code it measured and is kept as the record of that
+> moment. It is no longer the current state: plan 3 task 2 changed the
+> bake, and serenity now reads **16.61 all-spot legacy against the same
+> ≤16.58 ceiling**, over six independent readings spanning three tasks
+> and two exposure values. Do not quote this section as the live gate
+> status.
+
 Everything above this section was recorded by tasks 4–7. This section is the
 gate itself — re-measured independently rather than trusted from the last
 commit, because the merge decision is the one place in this plan where
@@ -754,7 +770,10 @@ ceiling are not distinguishable from each other with the precision this
 metric has — a fifth measurement landing at 16.59 would not be a surprise
 and would not by itself prove a regression either.
 
-**I consider the merge condition met**, for three reasons rather than the
+**I consider the merge condition met** — *true of the code this section
+measured, and no longer true today: plan 3 task 2 changed the bake and
+serenity now reads 16.61 against the same ceiling. See "Phase B3 plan 3
+task 4" at the end of this file* — for three reasons rather than the
 arithmetic alone: (1) the arithmetic does hold, consistently, across every
 independent attempt to break it (repeat run, full-precision recompute, a
 separate session roughly two hours after task 7's, with task 8's UI work
@@ -882,11 +901,20 @@ it. Both are cheap to keep and this is the only task in the table that
 raised the score; every one after it (AO, post, exposure) brought it
 back down and past baseline.
 
-## Every file in this directory
+## Every phase-A file in this directory
 
-Every one of the 14 `*.json` files in this directory is legended below —
-the trend table cites one canonical file per stage, and this section
-covers that file plus every intermediate and exploratory run behind it.
+Every one of the **14 phase-A files** — `serenity-baseline.json` plus the
+thirteen `serenity-a*.json` — is legended below: the trend table cites one
+canonical file per stage, and this section covers that file plus every
+intermediate and exploratory run behind it.
+
+**Scope corrected 2026-08-15.** This heading and sentence read "every file in
+this directory" and "every one of the 14 `*.json` files in this directory"
+when phase A's fourteen were all there was. The directory now holds **152**
+`*.json` files — phase B's plans 1–3 added the rest — and this section has
+never covered them. Phase B's files are legended in their own sections
+further down, named for the plan and task that produced them
+(`<apt>-b<plan>-task<n>-*.json`).
 Kept deliberately, not clutter: several of the non-canonical files are
 the actual evidence for findings stated elsewhere in this document.
 Canonical files (the ones the trend table's numbers come from) are marked
@@ -1083,3 +1111,771 @@ corrections were exhausted by exposure, down to the 0.11-point floor
 measured above. It is what real GLTF furniture, PBR texture sets and
 proper multi-bounce GI exist for, and that is the next phase (the engine
 migration), not this one.
+
+## Phase B3 plan 3 task 4: exposure and bloom re-fitted, and the gate does not close
+
+Everything above this section predates plan 3. Read it as history: **the
+merge condition it describes as reached ("Serenity: 16.55 ≤ 16.58 —
+reaches parity within noise") no longer holds.** Plan 3 task 2 changed
+`lightAt`'s indoor ambient and dropped `aoAt`'s occlusion floor on
+lightmapped surfaces, and task 4 re-fitted the two constants that act on
+the result. Full sweep data, method and frames:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-4-report.md`; committed
+numbers in `{serenity,kings-court}-b3-task4-exposure-sweep.json`,
+`bloom-b3-task4.json`, `horkyone-10-b3-task4-luminance.json` and the ten
+`*-b3-task4-final*.json` files `tools/delta_e.py` wrote.
+
+**Fitted values.** `serenity.exposure` 0.326 → **0.329**,
+`kings-court.exposure` 0.56 → **0.575**, `horkyone-10.exposure` 0.45 →
+**0.46** — all three up, because task 2's change darkened the render and
+exposure is what puts the mean back. Both bloom constants were
+re-measured from scratch (task 2 moved the radiances the threshold acts
+on) and **held at threshold 1.8 / strength 0.1**: the daylight wash still
+cliffs between 1.6 and 1.7, 1.7–3.0 is one flat plateau, and serenity's
+backlit bathroom mirror still keeps a real 0.19% crossing at 1.8.
+
+Fitted toward luminance, exactly as the rule requires: the quantity
+minimised was `|render mean − photograph mean|` on `tools/luminance.py`'s
+output, pooled over two or three independent page loads per candidate,
+with the bloom pass disabled and ΔE2000 recorded on every row but never
+aimed at. At kings-court the two criteria disagreed as they did last
+time — ΔE falls monotonically toward exposure 0.50 while luminance
+crosses at 0.575 — and the luminance value was taken, costing **+0.06**
+ΔE on the gate metric (measured same-load: 0.56 → 18.78, 0.575 → 18.84).
+
+**The merge condition, all-spot, `&fov=legacy`:**
+
+| Apartment | Ceiling | Now | Verdict |
+|---|---:|---:|---|
+| serenity | ≤16.58 | **16.61** (four runs: 16.60, 16.62, 16.61, 16.60) | **fails by 0.03** |
+| kings-court | ≤22.44 | **18.90** | passes by 3.54 |
+
+The 0.03 is the same size as this metric's own repeat-run noise floor,
+but it lands on the wrong side of the line in **every** run, where the
+pre-task-2 state landed under it in all four of its runs — so it is a
+consistent, reproducible miss whose magnitude merely equals the noise
+floor, not parity.
+
+**It is not this task's fit, and it is not noise: six independent
+readings above the ceiling, across three tasks and two exposure values.**
+`serenity-b3-task2-fix1-allspots.json` 16.60 and
+`serenity-b3-task3-off-allspots.json` 16.61 both predate this task and
+were taken at the old 0.326; the four task-4 runs read 16.60, 16.62,
+16.61, 16.60 at 0.329. A miss that reproduces six times, on two
+different exposures, in three different tasks' harness runs, is a real
+miss.
+
+**Exposure cannot reach it, measured in the gate's own camera.** One page
+load, `&fov=legacy`, shipped chain, only exposure changing, all-spot
+11/11. Each point is its own `tools/delta_e.py` file — `…-reach-e0.30`
+through `…-reach-e0.34`, indexed by
+`serenity-b3-task4-exposure-reach.json` — so every mean re-derives from
+its own per-spot list, like the gate files:
+
+| exposure | 0.30 | 0.31 | **0.32** | 0.326 | **0.329 (ships)** | 0.34 |
+|---|---:|---:|---:|---:|---:|---:|
+| ΔE2000 (`delta_e.py`) | 16.64 | 16.62 | **16.61** | 16.61 | 16.61 | 16.65 |
+| full precision, same frames | 16.6433 | 16.6161 | **16.6104** | 16.6133 | 16.6160 | 16.6454 |
+| an earlier independent load | 16.6424 | 16.6147 | 16.6085 | 16.6121 | 16.6142 | 16.6437 |
+
+The curve is a shallow U whose **minimum over the whole neighbourhood is
+16.61**, at exposure 0.32 — still above the 16.58 ceiling, and worth only
+0.0056 against the shipped value, a sixth of the shortfall and a seventh
+of the noise floor. It rises on both sides, and two independent page
+loads agree on every point to within 0.002. **There is no exposure that
+passes this gate**, so the trade-off between the luminance fit and a
+passing score does not exist to be made — the question of whether it
+would have been allowed never arises. The residual is a redistribution
+across the 8×8 cell means, and a single scalar on the mean cannot undo
+one; the decision about it belongs to whoever owns the merge.
+
+**horkyone-10** (no `compare` spots, so no ΔE) passes its own criterion:
+spawn-pooled mean sRGB luminance **143.6** against serenity 138.7 and
+kings-court 149.0 — inside ±10 of both, and 0.25 off the siblings'
+midpoint.
+
+**This fit expires.** It was made against a render carrying the deferred
+`grid()` winding defect (8 of 12 wall faces backwards, `bake.js`),
+knowingly and by agreement; when that fix lands, exposure and bloom both
+have to be re-fitted.
+
+## Phase B3 plan 3 task 5: the offline lightmap baker, and it is flat
+
+`tools/bake_lightmaps.mjs` drives headless Chrome through Playwright and
+bakes serenity's floor/ceiling lightmaps offline at 2048 cosine-weighted
+paths per texel with 2 bounces, against the runtime bake's 16 single-hop
+rays. `tour/lightmaps.js` loads the result, but only while a SHA-256 of
+the config's geometry keys still matches the manifest — otherwise it
+warns, pushes into `window.__issues` and bakes at runtime. Only serenity
+ships a pack (13.3 KB, 0.16% of the task's 8 MB ceiling). Full method,
+guard proof and per-surface data:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-5-report.md`; committed
+numbers in `serenity-b3-task5-luminance.json` and the two
+`serenity-b3-task5-*-legacy-allspots.json` files.
+
+**Linear contrast, the quantity task 6 gates on, did not move.** The
+population is **2 of serenity's 11 `compare` spots** (`tools/luminance.py`
+filters through `delta_e.scorable`, which requires `poseVerified`) — and
+those two, Bathroom and Bedroom, are the two rooms with the *highest* p5
+in the flat. Repeats are independent captures of the same state:
+
+| set | n | mean | p5 | contrast |
+|---|---:|---:|---:|---:|
+| runtime bake | 4 | 0.2820 | 0.0833 | **3.385** (3.383–3.387) |
+| offline pack, bounces 0 — identity | 2 | 0.2821 | 0.0836 | **3.374** (3.370–3.378) |
+| offline pack, as shipped | 4 | 0.2890 | 0.0854 | **3.386** (3.384–3.387) |
+| photographs | — | 0.2993 | 0.0483 | **6.197** |
+
+**The identity row is the one to read first.** A pack baked at
+`bounces = 0` is the runtime's own estimator and should reproduce it. It
+reproduces the mean and not p5, so **the pipeline's own identity residual
+on contrast is −0.011 — an order of magnitude larger than the shipped
+pack's +0.001.** No contrast claim of that size is available from this
+harness at all.
+
+Why p5 moves under a nominal identity is **not settled**. Denoising fits
+(2048 paths per texel remove the 4.8/255 per-texel noise `bake.js:186-193`
+records at 16 rays, and p5 is a tail statistic) but does not obviously
+explain the sign: the same identity moves per-spawn p5 *down* in the sRGB
+population (Entrance −0.9 = −1.4%), four times the relative size and the
+opposite way. The identity set is also n=2 with a contrast spread of
+0.008. **The conclusion holds either way** — denoising or uncharacterised
+variance, −0.011 dominates +0.001, and an unexplained residual widens the
+harness's uncertainty rather than rescuing the result.
+
+What the shipped pack does on this population is a **near-uniform gain of
+~2.5%**: mean ×1.02482, p5 ×1.02461, differing by 0.022 pp against the
+±0.06 pp that four-decimal rounding alone puts on the p5 ratio. A
+mean/p5 ratio is blind to a uniform gain by construction. That is also
+the same order as what the exposure re-fit absorbs (task 2 cost −2.0% of
+linear mean; 0.326→0.329 put it back), and exposure scales mean and p5
+together — so on this population the effect is entirely of a kind a
+re-fit would undo.
+
+The effect is not uniform everywhere: in the 5-spawn sRGB population the
+**Entrance**, the darkest spawn and outside the gated two, is the one
+place p5 outruns the mean (+3.31% against +1.43%). Where a frame's
+darkest 5% is wall rather than floor or ceiling this pack cannot reach it
+at all — walls have no lightmap and cannot get one until the `grid()`
+winding defect is fixed.
+
+All-spot legacy ΔE2000 moved **16.59 → 16.75**, away from the 16.58
+ceiling. Spawn-pooled sRGB luminance moved 138.7 / 80.1 to **140.2 /
+80.3** (contrast 1.732 → 1.746) against a run-to-run noise floor of 0.1.
+
+**Two things worth carrying forward.** The pack does not make the page
+load faster and on the dev server makes it slower: the texel loop it
+skips costs 233 ms for all ten surfaces, while its eleven HTTP requests
+cost 4.5–6.8 s of wall time — `Baker.run`'s cost is the BVH build, the
+wall pass and the furniture AO pass, none of which a pack touches. And
+lightmaps cannot currently be baked at a finer texel grid than the config
+asks for: `bakeSurface`'s edge dilation replaces exactly one boundary
+ring from a neighbour that may itself be spoiled, so at 3× density
+serenity's ceilings came back with a black band 13/255 against an
+interior of 185. The obvious generalisation was written, measured and
+reverted — at the *shipped* densities the spoiled run already exceeds one
+texel on 254 / 454 / 122 edge scans, so it changes every apartment's
+bake.
+
+## Phase B3 plan 3 task 6: the exit criterion — NO-GO
+
+The pilot pack was measured against the criterion agreed before the work:
+**Go if the linear-domain contrast reaches ≥ 4.9 AND the blind A/B is
+visible.** It fails both halves, and it fails the conjunction on the
+contrast half alone. Committed record:
+`serenity-b3-task6-verdict.json`, rebuilt from its inputs by
+`docs/superpowers/harnesses/2026-08-13-b3-task6/write_verdict.py`
+(`--check` reports MATCH). The A/B protocol, the sealed mapping and the
+calls-before-reveal live in that harness directory.
+
+**Two corrections to the plan's own wording, both stale rather than
+wrong-at-the-time.** The comparison is the **offline pack against the
+runtime bake**, not "against GTAO-only" — task 3 rejected GTAO and no
+`tour/` file adopted it. And 4.9 is derived in the plan as a third of a
+3.6 → 7.6 gap, which are phase A numbers from the series plan 2 closed
+outright; a third of the live gap would be 4.32. **The human partner was
+asked and ruled: hold 4.9 literally**, knowing that makes the bar harder
+than its own derivation. 4.9 is what was applied.
+
+### The contrast half
+
+Re-measured on both sides rather than inherited — same build, `?v=104`,
+exposure 0.329, `?fov=legacy`, two independent captures per side, the
+only difference being whether `tour/lightmaps/serenity/` is on disk:
+
+| set | n | mean | p5 | contrast |
+|---|---:|---:|---:|---:|
+| runtime bake | 2 | 0.282078 | 0.083283 | **3.3870** |
+| offline pack, as shipped | 2 | 0.288891 | 0.085369 | **3.3840** |
+| photographs | — | 0.299289 | 0.048274 | **6.1998** |
+
+Every figure lands inside the range task 5 committed for the same state,
+so its numbers are inherited **with a check** rather than on trust.
+(Task 5's `photographs` contrast reads 6.197 because it divides a stored
+4-dp capture pair; 6.1998 is the same quantity at full precision. Nothing
+turns on it — both are far above 4.9 and far above the render.)
+
+**Contrast would have to rise 44.8% to reach 4.9 — and the mechanism is
+worth more than the shortfall.** Contrast here is mean ÷ p5, so at the
+with-pack mean of 0.288891 reaching 4.9 requires p5 to **fall** to
+**0.0590**: a **31% darkening of the shadows**. The pack **raised** p5 by
+**2.5%** (0.083283 → 0.085369). Bounce light fills shadows — that is what
+it is for — so **the pack moved the gated quantity in the direction
+opposite to the gate, by construction.** Not a wrong setting, and not an
+amount a better bake recovers.
+
+**Nor does a friendlier population rescue it.** On task 5's spawn-pooled
+set — which *includes* the Entrance that this gate's poseVerified
+population excludes, and where task 5 located the one genuine fill
+signature — the pack's contrast gain is **+0.83%** (1.7316 → 1.7460,
+`serenity-b3-task5-luminance.json`). Scale the gated 3.3870 by that, the
+most favourable relative figure anywhere in the committed record, and it
+lands at **~3.415** against 4.9, a 30% shortfall. (The two are different
+estimators — spawn-pooled sRGB luma vs. linear-light Rec.709 over the
+compare spots — so this is a scaling argument about the relative move, not
+a claim that 1.746 and 3.384 are the same quantity.) **The criterion fails
+on every population in the committed record, not only the gated one.**
+
+Note the sign: task 5 measured the pack at **+0.001** on contrast
+and this run measures it at **−0.003**. Both sit inside the same-state
+repeat spread of ±0.002–0.004, which *is* the finding — the change is not
+resolvable by either run, in either direction. On this population the
+pack is a near-uniform gain (mean ×1.02415, p5 ×1.02505, differing by
+0.090 pp), and a mean/p5 ratio is blind to a uniform gain by
+construction. That reproduces task 5 down to the detail that the mean/p5
+*ordering* is not resolvable either.
+
+### The visible half
+
+Six side-by-side pairs, poses fixed before any frame was looked at and
+deliberately weighted toward where the pack can act (the outdoor terrace
+spawn was excluded because it bakes with no gather and could not differ).
+An unseeded `SystemRandom` coin chose which half of each composite got
+the pack; the mapping was sealed and the six calls written to
+`calls.json` before it was opened. The bar was fixed before viewing:
+visible only at **6/6**, since P(6/6) under guessing is 1/64 = 0.016
+while P(≥5/6) is 7/64 = 0.109.
+
+**Result: 5 of 6** — above the 3 expected from guessing, short of the
+pre-registered bar, and at n = 6 not distinguishable from chance. The
+observation that matters more than the hit rate: **at full viewing size
+none of the six pairs could be separated**, and every call leans on a
+3–4× magnified patch of a flat floor or ceiling. On pair 3 the full-frame
+impression was the *opposite* of the patch reading, and the patch was
+right — recorded rather than quietly dropped.
+
+### What the pack does do, measured after the reveal
+
+**It is not a no-op, and the difference is not a flat offset.** Per pose
+the sRGB mean rises 0.8–1.7%, 24–58% of pixels move at all, 3–8% move by
+≥ 10 of 255, and the largest single-pixel move is ~100. The difference
+maps (`…/harnesses/2026-08-13-b3-task6/diff/`) show where: a band along
+the **ceiling/wall perimeter** and the **floor beside obstructions** —
+the near-field crevice fill a 0.65 m gather on lightmapped surfaces
+predicts, landing exactly where it should.
+
+Hold that next to the verdict rather than against it, and do not flatten
+the tension: on these six *full frames* the effect is concentrated, while
+on the two gated spots it measures near-uniform. Both were measured. The
+criterion is applied to the second.
+
+The honest sentence is about what was measured, on which population, with
+which caveats — **not** "bounce light cannot raise contrast on these
+surfaces", which is an inference this evidence does not support.
+
+All-spot legacy ΔE2000 was re-run as a second check on an inherited
+number, not as a gate: **16.61 → 16.71** here against task 5's 16.59 →
+16.75. Direction reproduces, magnitude is smaller, and the before reading
+sits inside the 16.60–16.62 this file already records for that state.
+
+### The decision, and the revert
+
+**Whether serenity keeps its pilot pack was the one thing task 6 did not
+decide.** The plan says a failure means "do not carry lightmaps to the
+other two apartments" and is silent on the pilot; task 6 left the shipped
+state as task 5 committed it, recorded the costs both ways in the verdict
+JSON, and recommended reverting. **The human partner has now decided:
+serenity reverts to the runtime bake.**
+
+Done in two commits on `phaseB-plan3-light`. `"lightmaps": true` removed
+from `tour/apartments/serenity.json`, `tour/lightmaps/serenity/` (11 files,
+13,626 bytes) deleted, and — in the fix round — `tour/lightmaps.js`, the
+runtime loader, removed too, one line out of `main.js`'s `CLASSIC` array.
+`?v=` bumped **104 → 105 → 106**, each time after the last edit.
+
+**The loader was kept in the first round and that was reversed on
+corrected facts.** Keeping rested on removal costing "edits to `bake.js`
+and `main.js` to delete a reviewed staleness guard". It does not:
+`bake.js:681` already reads
+`(typeof Lightmaps === 'undefined') ? Promise.resolve(null) : …` and
+`grep -rl Lightmaps tour/` returns only `bake.js` and the loader, so
+removal is one line and `bake.js` is untouched — the guard is what makes
+removal *safe*, not what removal destroys. On the corrected facts one
+principle covers both artefacts: **anything inside the deploy root that
+drives nothing comes out; anything outside it that costs nothing stays.**
+The loader shipped ~10 KB and one request on every page load of every
+apartment for no effect, and restores more cheaply than the pack it
+served. **`tools/bake_lightmaps.mjs` stays** — `vercel.json` sets
+`outputDirectory: "tour"`, so it never reaches a visitor.
+
+**Verified rather than assumed:** **zero requests mentioning "lightmap" at
+all** on all three apartments — not just zero pack probes but zero for the
+loader script, which is no longer asked for — no HTTP failure of any
+status, no `[lightmaps]` warning, no console error, `APT.lightmaps` absent
+and `typeof Lightmaps === 'undefined'` everywhere. Removing a classic
+script is precisely the failure `main.js`'s error handling exists for, so
+that it did **not** fire is asserted: `__tourEntryRan` true, `__app`
+present, the overlay still reading "Click to enter". Plus `__issues`
+empty, `__ambSampled` true, `Sampler.selfTest()` 8/8, draw calls unchanged
+at 72/64, 165/150, 83/64, `exposure` (0.329 / 0.575 / 0.46) and bloom
+(1.8 / 0.1) untouched.
+
+**The number that proves it took:** serenity's all-spot legacy ΔE2000
+returned to **16.59** with the loader still present
+(`serenity-b3-task6-revert-legacy-allspots.json`) and **16.60** after
+removing it (`serenity-b3-task6-revert-noloader-legacy-allspots.json`).
+Read against every committed reading of this quantity:
+
+| state | task 4 | task 5 | task 6 | revert | loader removed |
+|---|---:|---:|---:|---:|---:|
+| runtime bake | 16.60 | 16.59 | 16.61 | **16.59** | **16.60** |
+| offline pack | — | 16.75 | 16.71 | — | — |
+
+A 16.59–16.61 band for the runtime bake against 16.71–16.75 with the pack:
+both post-revert readings sit inside the first and ≥0.11 clear of the
+second, and are 0.01 apart — this metric's documented repeat noise.
+Structurally the second could not have moved: the loader already returned
+before any I/O, so every surface was baking at runtime either way. (This
+table supersedes the "16.60–16.62" range quoted a few paragraphs above,
+which omitted task 5's own 16.59.)
+
+**Nothing is lost.** The baker, the loader, the pack, the staleness guard
+and every measurement remain in git history at **`6a607fa`** — the task 6
+verdict commit. Re-adopting is `git checkout 6a607fa -- tour/lightmaps.js
+tour/lightmaps/serenity`, re-adding `lightmaps.js` to `main.js`'s
+`CLASSIC` list and the config key: a checkout and one line, not another
+551 s bake, with `bake.js` untouched in either direction. **The standing
+warning is unchanged — do not extend the pilot to another apartment**, and
+re-adopting it on serenity would still owe the exposure and bloom re-fit
+that keeping it would have owed.
+
+## Phase B3 plan 3 task 7: the gate, and what plan 3 actually did
+
+Every number below was taken fresh in one session with **both trees served at
+once** — HEAD (`736a867`) from `tools/serve.py` on `:8742`, a detached
+`c2bb0bd` worktree from
+`docs/superpowers/harnesses/2026-08-13-b3-task7/serve_base.py` on `:8743` —
+and **the same script pointed at each side**. `measure.js` is byte-identical
+between the two trees (`git diff c2bb0bd..HEAD -- tour/measure.js` is empty)
+and the only apartment-config difference is the `exposure` value, so the
+capture path and the scored population are the same on both sides by
+construction. No earlier task's number is cited as a result here; older
+readings appear only as corroboration.
+
+### Structural gate: clean, on both budgets
+
+`node structural.mjs`, six rows (three apartments x desktop/mobile). Draw
+calls through the post chain per `CLAUDE.md`'s recipe — `info.autoReset` off,
+reset by hand, `post.render(0)`, read, restore — taken at **both** established
+spots, because the repo has a precedent for each and they are different
+numbers.
+
+| | serenity | kings-court | horkyone-10 | requirement |
+|---|---:|---:|---:|---|
+| `window.__issues` | `[]` | `[]` | `[]` | must be `[]` |
+| `window.__ambSampled` | `true` | `true` | `true` | must be `true` |
+| `Sampler.selfTest()` | 8/8 | 8/8 | 8/8 | must pass |
+| Console errors / page errors | 0 | 0 | 0 | must be 0 |
+| Desktop chain, `APT.start` | **72** | **165** | **83** | <=400 |
+| Desktop chain, `spawns[0]` | 71 | 165 | 56 | <=400 |
+| Mobile chain, `APT.start` | **64** | **150** | **64** | <=250 |
+| Mobile chain, `spawns[0]` | 62 | 150 | 54 | <=250 |
+| Desktop naive, `APT.start` | 57 | 150 | 68 | — (the "144"-style figure) |
+
+**All eight draw-call figures that have a precedent reproduce it exactly**:
+the desktop `APT.start` row against `r128-reference.md`'s "Structural gate
+after the fix wave" table (72 / 165 / 83), and both `spawns[0]` rows against
+plan 3 task 3's cost table (desktop 71 / 165 / 56, mobile 62 / 150 / 54, in
+`<apt>-b3-task3-cost.json`). Draw calls in this project are deterministic and
+they behaved that way again. Mobile is measured at 390x844 @ dSF 2 with
+`isMobile`+`hasTouch`, which the renderer clamps to pixelRatio 1.6 — a
+624x1350 buffer, asserted in the run rather than assumed.
+
+Sky-leak raycasts, straight up from every `spawns[]` entry, **markers hidden
+first** — an unhidden `THREE.Points` marker sits ~0.3 m above a spawn and
+returns a false hit before the ray reaches the ceiling, which is the bug plan
+2 task 9 caught in its own first draft. serenity 5/5 hit a `Mesh` (Pool
+Terrace at 1.05 m, the canopy, matching every prior measurement of that spot);
+kings-court 13/14, `Terrace` reporting `NOTHING ABOVE`; horkyone-10 4/5,
+`Terrace` likewise. Both terraces are open to the sky by design and both match
+`r128-reference.md`.
+
+Walk simulations, the standing routes, all four exact against precedent:
+
+| Route | End | Precedent |
+|---|---|---|
+| kings-court entry hall westbound | x 13.14, ground 0 | x 13.14 |
+| kings-court upper hall westbound | x 4.44, ground 3.1 | x 4.44 |
+| serenity start southbound | (3.24, 2.13) | (3.24, 2.13) |
+| horkyone-10 living room northbound | (7.75, 1.26) | (7.75, 1.26) |
+
+One console **warning** on one of the six rows (serenity desktop): an
+ANGLE/HLSL shader-compiler precision notice (`X4122: sum of 1 and -1.49e-017
+cannot be represented accurately in double precision`). A compiler diagnostic
+from the D3D backend — not a page error, not in `window.__issues`, not a gate
+condition. Recorded because "zero console errors" and "zero console messages"
+are not the same claim.
+
+### The merge condition: serenity fails, and plan 3 is what moved it
+
+Population stated first, because it is the whole point. The merge condition
+was set over the **all-spot** population — every `compare`-flagged spot
+regardless of `poseVerified` — captured at `?measure=1&fov=legacy`. Every ΔE
+file committed for this task is `tools/delta_e.py`'s native output with
+`--all-spots`, so `scored == compareTotal` and `skippedPoseVerification: 0` in
+all twelve, and each file's `mean` recomputes from its own `spots[]`.
+
+| Apartment | Tree | Runs (native mean-of-rounded) | Full precision | Ceiling | Verdict |
+|---|---|---|---|---:|---|
+| serenity | BASE `c2bb0bd` | 16.54, 16.56 | 16.5409, 16.5648 | <=16.58 | passes |
+| serenity | **HEAD `736a867`** | **16.61, 16.60** | 16.6089, 16.6000 | <=16.58 | **FAILS by 0.03 / 0.02** |
+| kings-court | BASE `c2bb0bd` | 18.74, 18.73, 18.74, 18.73 | 18.7452, 18.7279 | <=22.44 | passes |
+| kings-court | **HEAD `736a867`** | **18.86, 18.88, 18.86, 18.84** | 18.8565, 18.8750 | <=22.44 | **passes by ~3.57** |
+
+**serenity fails, by 0.03 and 0.02 rounded — 0.0289 and 0.0200 at full
+precision.** That shortfall is itself the size of this metric's documented
+repeat-run noise floor (+-0.03 rounded, +-0.039 full precision). The
+established phrasing for landing *inside* that floor on the passing side is
+"parity within noise, not a clean pass"; the same standard applies here in the
+failing direction, and it does not rescue the result. What makes this a real
+failure rather than a coin flip is the population of readings rather than any
+single one: **eight independent all-spot readings of the HEAD-side render sit
+between 16.59 and 16.62** — task 2's fix1 (16.60), task 3 GTAO-off (16.61),
+task 4's four (16.60 / 16.62 / 16.61 / 16.60), task 6's two post-revert
+(16.59, 16.60) — plus this task's two. **Not one has reached 16.58.** (The
+band is 16.59–16.62; an earlier version of this section wrote 16.59–16.61 and
+contradicted its own list, where task 4's repeat is 16.6155. The wider band is
+the honest one and it weakens rather than strengthens the headline.)
+
+**And plan 3 is what moved it across the line.** BASE reads 16.54 / 16.56 and
+HEAD reads 16.61 / 16.60: **+0.0516** on the mean of two runs per side
+recomputed unrounded from the images, **+0.0518** on the committed
+mean-of-rounded values — either way larger than the ±0.039 full-precision
+floor. Every pair delta below uses the mean-of-rounded form, because that is
+the only precision task 2's files carry.
+
+**It is task 2's change, not task 4's exposure, and the evidence is a paired
+exposure-held A/B.** The direct measurement is plan 3 task 2's own:
+`serenity-b3-task2-before-allspots.json` **16.5427** (repeat **16.5464**) →
+`serenity-b3-task2-fix1-allspots.json` **16.6027**, both captured in a single
+session and both **before commit `6372939` changed `exposure` from 0.326 to
+0.329**. That is **+0.0582 with exposure held constant**. This task's pair is
+the endpoint measurement, one session, 0.326 → 0.329: **+0.0518**. The two
+agree to 0.006.
+
+Exposure cannot account for either. Task 4's sweep measured this metric
+against exposure directly and reads **16.6133 at 0.326 against 16.6160 at
+0.329** — the whole interval is worth **0.0027**, and the best exposure
+anywhere in 0.30–0.34 is worth 0.0056
+(`serenity-b3-task4-exposure-reach.json`). That file was captured on **task
+4's own tree** (`preconditionsAsserted.cacheVersion` `"102"`, not HEAD's
+`106`); an earlier version of this section said "on the HEAD tree", which was
+wrong. What it establishes is the *slope* of ΔE against exposure in this
+neighbourhood — a property of the metric, not of which tree measured it — and
+tasks 5 and 6 net to zero on serenity's render in any case
+(`serenity-b3-task4-final-legacy[-repeat*]` 16.6018 / 16.6155 / 16.6064
+against task 7's 16.6082 / 16.6009).
+
+**Paired first, pooled as support.** The ten BASE-lineage and eleven
+HEAD-lineage all-spot legacy readings in this directory separate without
+overlap — max BASE 16.5700 against min HEAD 16.5882 — and the ten BASE
+readings, all of byte-identical render code across **five separate sessions**,
+span only **0.0291**, inside the ±0.039 same-session floor. That is a real
+supporting leg.
+
+**No probability is quoted for it, and none should be.** Repeat runs inside
+one page session are not independent draws — `materials.js` re-randomises per
+load but everything upstream of it is shared — so the 21 readings are not 21
+independent samples and any exchangeability arithmetic over them would
+overstate its own confidence. The load-bearing evidence stays the two
+same-session paired A/Bs above, which need no distributional assumption at
+all: both arms of each pair share a session, a machine and a build.
+
+Task 7's own reading is anchored the same way. It did not compare a naked HEAD
+number against a historical threshold — it measured **its own BASE arm**, at
+16.5409 / 16.5645, in family with five prior sessions, in the same session and
+on the same machine as the failing HEAD reading. The gate verdict rests on a
+same-session control, not on a remembered baseline.
+
+kings-court moved the same way and it does not matter there: **18.7346 →
+18.8557** on the four-run mean-of-rounded, +0.1211, against a ceiling 3.57
+away. (An earlier version wrote "18.7366 → 18.8658 on the four-run means";
+those were means of the **two** full-precision values quoted in the table
+above, not four-run means.)
+
+#### The lineage table, recorded so it is not re-derived and misread
+
+Every all-spot legacy reading of serenity's *runtime-bake* render in this
+directory, by lineage. Values are the mean of each file's own rounded
+`spots[]`, so each row recomputes from the file it names.
+
+| Lineage | n | range | files |
+|---|---:|---|---|
+| BASE (pre-task-2 render) | 10 | **16.5409 – 16.5700** | `b2-final-legacy[-repeat]`, `b2-fixwave-final-legacy[-repeat]`, `b2-task9-legacy[-repeat]`, `b3-task2-before[-repeat]`, `b3-task7-BASE-c2bb0bd-legacy[-repeat]` |
+| HEAD (post-task-2 render) | 11 | **16.5882 – 16.6155** | `b3-task2-fix1`, `b3-task3-off`, `b3-task4-final-legacy[-repeat,-repeat2]`, `b3-task5-before-legacy`, `b3-task6-spotcheck-before-legacy`, `b3-task6-revert-legacy`, `b3-task6-revert-noloader-legacy`, `b3-task7-gate-legacy[-repeat]` |
+
+They do not overlap; the gap is 0.0182. **Do not convert that into a
+significance figure** — the readings are not independent draws (see "Paired
+first, pooled as support" above).
+
+Excluded from both rows for the reasons they have always been excluded:
+**fixed-FOV captures** (`b2-final`, `b2-fixwave-final`, `b2-task9-newzero`,
+`b3-task4-final`, and **both task-1 files** — see the note below),
+pre-fix-wave states (`b2-legacy` 17.14), and states that are neither lineage —
+GTAO on (`b3-task3-on` 21.68) and depth-normals (`b3-task3-depthnormals`),
+lightmap pack on (`b3-task5-after`, `b3-task6-spotcheck-after`), and
+`b3-task2-after` (16.6409), which is task 2 *before* its own review fix round
+and so is a third render, not either lineage.
+
+#### The task-1 pair is a fixed-FOV capture, not a session outlier
+
+`serenity-b3-task1-baseline-allspots.json` (16.8667) and
+`serenity-b3-task1-legacy-allspots.json` (16.8616) sit ~0.3 above every legacy
+reading. **Both files' own notes, and task 1's report, attribute that gap to
+"this session's own environment (GPU/driver/browser)". That attribution is
+wrong**, and an earlier version of this section repeated it. The gap is the
+**camera**, not the session:
+
+| spot | task1-baseline | fixed (`b2-task9-newzero`) | legacy (`b2-task9-legacy`) |
+|---|---:|---:|---:|
+| 3.webp | 17.45 | 17.46 | **15.29** |
+| 9.webp | 19.67 | 19.65 | **18.66** |
+| 10.webp | 22.01 | 22.04 | **25.29** |
+| 1.webp | 19.33 | 19.37 | **18.48** |
+
+All eleven spots track the **fixed-FOV** capture to within 0.11 (mean |Δ|
+**0.045**) while diverging from the legacy capture by −3.28 to +2.16 — **in
+both directions**. No GPU or driver term moves one spot down 3.3 and another
+up 2.2 while simultaneously reproducing a *different session's* fixed-FOV
+capture to 0.03.
+
+The mechanism is in the source: at task 1's own commit `d32f263`,
+`tour/measure.js` has **no `?fov=` check at all** — it applies
+`window.__spotFov(spot, W/H)` unconditionally, so every task-1 capture is
+necessarily per-photograph FOV. The `?fov=legacy` branch was restored later
+(`f56295d`). "All-spot" is a *population* and "legacy" is a *camera*; task 1's
+filename conflated them.
+
+Four same-session, same-code fixed-minus-legacy pairs in this directory give
+**+0.3227, +0.3427, +0.3118, +0.2845**. Task 1's 0.2967 sits inside that
+family. And the decisive check is the BASE row above: ten legacy readings of
+byte-identical code across five sessions spanning **0.0291**. A 0.297 session
+offset and a 0.029 five-session span cannot both be true.
+
+**No cross-session floor is documented anywhere** — `r128-reference.md`
+defines the ±0.03 / ±0.039 floor from same-session, same-page-session repeats.
+The BASE row is the best available estimate of a cross-session one and puts it
+at **≈0.03, comparable to the same-session floor**, not at 0.3.
+
+**Read this the right way round.** ΔE2000 against these photographs is
+dominated by pose and content mismatch, not by shading — 9 of serenity's 11
+compare spots and 6 of kings-court's 14 are not pose-verified, serenity's
+living-room geometry is wrong (observation B1), kings-court's Bathroom 2 has
+no shower, and two of serenity's worst spots (10.webp at 25.21, 2.webp at
+18.08) are a real swimming pool photographed against a flat abstraction of
+one. A lighting change moving this metric by 0.05 is not evidence that the
+lighting got worse; it is evidence that this metric cannot arbitrate lighting.
+But the merge condition is the merge condition, and against it serenity is now
+on the wrong side of it.
+
+### The plan's own claim: blacks, before and after
+
+Plan 3 exists to "make shadow actually reach the frame". Task 3 contributed
+nothing by design and task 5's lightmaps were measured, failed and reverted,
+so the whole of plan 3's effect is task 2's, plus whatever task 4's exposure
+re-fit did on top of it.
+
+**Domain discipline, since two are in play.** The first block is
+**spawn-pooled sRGB-encoded** luminance 0-255 over **every** `spawns[]` entry
+(480x300, full post chain, pixels pooled before the mean and the interpolated
+5th percentile — task 2's measure, script unchanged and run against both
+trees). The second is **linear-light** Rec.709 over the **poseVerified
+`compare` spots only**. Different transfer functions, different populations,
+different cameras. They are never tabulated together.
+
+Two runs per side. The harness is deterministic on this machine — serenity's
+two BASE runs agree to every printed digit.
+
+| Apartment | mean L | p5 L | contrast (mean/p5) |
+|---|---|---|---|
+| serenity BASE | 138.3, 138.3 | **80.0, 80.0** | 1.729, 1.729 |
+| serenity HEAD | 138.6, 138.7 | **80.0, 80.0** | 1.733, 1.734 |
+| serenity HEAD at BASE's exposure | 138.0 | **79.5** | 1.736 |
+| kings-court BASE | 149.4, 149.3 | **58.4, 58.9** | 2.558, 2.535 |
+| kings-court HEAD | 149.1, 149.2 | **55.5, 55.5** | 2.686, 2.688 |
+| kings-court HEAD at BASE's exposure | 147.6 | **55.1** | 2.679 |
+| horkyone-10 BASE | 143.6, 143.5 | **98.7, 98.8** | 1.455, 1.452 |
+| horkyone-10 HEAD | 143.6, 143.7 | **97.6, 97.6** | 1.471, 1.472 |
+| horkyone-10 HEAD at BASE's exposure | 142.2 | **96.4** | 1.475 |
+
+Endpoint to endpoint — what a visitor actually gets — the darkest 5% moved
+**0.0%** on serenity, **-5.4%** on kings-court, **-1.2%** on horkyone-10.
+
+**serenity's zero is not a null result; it is two effects cancelling.** Task 2
+lowered p5 and task 4's exposure re-fit (0.326 → 0.329) raised it back.
+Holding exposure at the BASE value isolates task 2: 80.0 → 79.5, **-0.6%**.
+That is smaller than task 2's own reported -1.1% (80.1 → 79.2), measured in a
+different session on different hardware; the direction agrees, the magnitude
+does not, and this session's is the one taken against a real `c2bb0bd`
+checkout. At constant exposure the three apartments read -0.6%, -6.1%, -2.4%.
+The "at BASE's exposure" rows are a runtime `renderer.toneMappingExposure`
+override in the harness only — **no apartment's `exposure` key was touched**,
+task 4 fitted those and is closed.
+
+**The direction is right on all three, and that is a genuine if small
+result.** On every apartment, in both readings, p5 falls further than the
+mean: endpoint to endpoint, serenity mean +0.25% against p5 0.0%, kings-court
+mean -0.13% against p5 -5.4%, horkyone-10 mean +0.07% against p5 -1.2%. The
+change is concentrated in shadow rather than being a global dim, which is
+exactly what the plan set out to do. It is simply very small.
+
+Linear domain, `tools/luminance.py`'s own estimator at full precision via
+`linear7.py`, which agrees with `tools/luminance.py` to four decimals on both
+apartments. **Population on every row, because that tool hard-codes the
+`poseVerified` filter:**
+
+| Apartment (population) | linear mean | linear p5 | contrast |
+|---|---|---|---|
+| serenity BASE (2 of 11) | 0.285408 | 0.089938 | 3.1734 |
+| serenity HEAD (2 of 11) | 0.281739 | 0.083283 | **3.3829** |
+| *serenity photographs (2 of 11)* | *0.299289* | *0.048274* | *6.1998* |
+| kings-court BASE (8 of 14) | 0.341176 | 0.113214 | 3.0142 |
+| kings-court HEAD (8 of 14) | 0.342882 | 0.107727 | **3.1844** |
+| *kings-court photographs (8 of 14)* | *0.347877* | *0.024653* | *14.1109* |
+| horkyone-10 | — | — | — |
+
+serenity n=2 per side, kings-court n=4 per side (its per-run spread is an
+order of magnitude larger than serenity's). **On both apartments the BASE and
+HEAD contrast ranges are disjoint** — serenity 3.1732-3.1736 against
+3.3826-3.3832, kings-court 2.9544-3.0747 against 3.0888-3.2705 — so the rise
+is resolved rather than inferred: **+6.6% on serenity, +5.7% on
+kings-court.**
+
+**horkyone-10 has no `compare`-flagged photo spots at all**, so
+`tools/luminance.py` exits before scoring anything: the linear domain does not
+exist for that apartment. That is "undefined", not "scored zero".
+
+Against the photographs, plan 3 closed **6.9%** of serenity's linear contrast
+gap (3.1734 → 3.3829 against a target of 6.1998) and **1.5%** of
+kings-court's (3.0142 → 3.1844 against 14.1109). For scale: task 6's exit
+criterion for the lightmap pack was a linear contrast of **>= 4.9** on
+serenity. Plan 3 ends at 3.38.
+
+### Where the change lands, and why there is so little of it
+
+`framediff-t7.json` — per-frame BASE-vs-HEAD difference on every spawn,
+**against a HEAD-vs-HEAD control**, because `materials.js` randomises its
+procedural textures on every page load and a bare two-load diff would fold
+that in. Signal-over-noise across all 27 frames runs **serenity 3.89–11.80,
+kings-court 1.35–12.56, horkyone-10 1.31–8.07**. It collapses to 1.3–1.4 on
+the three frames whose walls carry a busy procedural pattern (kings-court
+Bedroom 1 at 1.35, Bathroom 2 at 1.44, horkyone-10 Hall at 1.31); those three
+are texture noise and nothing can be read off them. kings-court's top-down
+cutaway is a fourth low value (**1.77**) for an unrelated reason: it is a raw
+render of a plan mostly filled with background sky, so there is little
+lightmapped surface in frame to differ.
+
+The amplified difference maps put the change on **floors, ceilings, attic
+slopes and furniture contact points**, with ceiling-to-wall junctions
+darkening and open ceiling centres brightening — the signature of a real
+hemisphere-visibility term arriving. **Flat wall faces are black in every map:
+unchanged.**
+
+That is not only an observation about the maps; it is what the code says.
+`bake.js`'s `bakeWalls()` calls
+
+```js
+lightAt(P, N, occ, data, false, false)
+```
+
+— `sampled` false and no `ambFn` — so walls take the flat `AMB_RGB` with
+visibility pinned to 1 on both trees. Task 2 could not touch them, and **walls
+carry most of a first-person frame's darkest 5%.** That single fact is the
+whole explanation for why a change that is correct in direction on all three
+apartments is worth 0.6-6% instead of the several-fold move the plan aimed at.
+
+The reason walls were excluded is the deferred `grid()` winding defect — 8 of
+12 wall faces wound backwards, written up in `docs/PHASE-B-RESUME.md` under
+"The wall-winding defect, deferred deliberately". It blocked task 2's wall
+atlas, it is why task 3's GTAO blackened walls, and it will expire task 4's
+exposure fit when it is fixed. **Plan 3's small effect and that deferral are
+the same fact**, and any future attempt to enlarge the effect starts by fixing
+the winding.
+
+### Bake time: one supportable claim, and a warning about the rest
+
+`baketime-t7.json`, two batches of four loads per side per apartment, **both
+of them idle-machine batches** taken about five minutes apart. `CLAUDE.md`
+rule 4a sets no bake-time budget, but the sampled ambient fires 16 BVH rays
+per lightmap texel and recording no cost at all would be dishonest.
+
+The measurement is fragile. The first load of a batch pays cold shader compile
+and JIT, and the within-side spread is large enough to be visible in the
+committed data itself: serenity's HEAD warm median is 1077 ms in batch 1 and
+3163 ms in batch 2, a 3x swing with no code change between them. Warm medians
+(first load of each batch dropped):
+
+| Apartment | BASE b1 / b2 | HEAD b1 / b2 |
+|---|---:|---:|
+| serenity | 639 / 623 ms | 1077 / 3163 ms |
+| kings-court | 3133 / 3136 ms | 9858 / 11554 ms |
+| horkyone-10 | 2190 / 1042 ms | 1918 / 1937 ms |
+
+**kings-court is the one claim this data supports: about 3x slower to bake,
+with the two sides' raw load times disjoint in both batches** (BASE
+3006-5548 ms against HEAD 8031-23431 ms). serenity rose in both batches but
+its ranges overlap and the two batches disagree by 3x on the same figure;
+horkyone-10 is up in one batch and flat in the other. **No claim is made for
+those two.** `baketime-t7.json`'s own `reading` field states this same
+per-apartment verdict; an earlier version of that field said no claim at all
+was supportable, written before the second batch existed, and contradicted
+this section. `baketime7.mjs` now writes the corrected text on every run so
+the file and this section cannot drift apart again.
+
+Nothing here changes rule 4a's standing conclusion — the fix for kings-court's
+bake is architectural, move it into a Worker, deferred to the engine
+migration. But plan 3 made the apartment that was already slowest slower
+still, and the start overlay's progress readout is now carrying more weight
+than it used to.
+
+### The tours, looked at
+
+All three walked (one frame per spawn plus the raw top-down cutaway) and the
+`?compare=1` render-versus-photograph divider stepped through on all 11
+serenity spots and all 14 kings-court spots — 25 panes, each asserted to have
+actually laid out (non-zero photo and canvas rects) before it was
+screenshotted, because a pane that failed to lay out screenshots as a plausible
+black rectangle and proves nothing.
+
+Nothing is broken: no black walls, no missing geometry, no floating furniture,
+no blocked passage in any of the three cutaways, both terraces open to the sky
+as designed. BASE against HEAD is not distinguishable by eye at contact-sheet
+scale on any of the three apartments — the honest visual counterpart to a
+0.6-6% move in p5. The divider panes show what the ΔE section says they show:
+the residual is pose and content, not shading.
+
+### Files
+
+Twelve `tools/delta_e.py` native all-spot files,
+`{serenity,kings-court}-b3-task7-{gate,BASE-c2bb0bd}-legacy[-repeatN]-allspots.json`.
+Three luminance files, `<apt>-b3-task7-luminance.json`, rebuilt from their own
+inputs by `write_metrics7.py --check` rather than transcribed. The harness and
+the two-tree setup it needs:
+`docs/superpowers/harnesses/2026-08-13-b3-task7/`.
+
+The poseVerified population was also read during this task (serenity 16.02 on
+2 of 11, kings-court 17.55 on 8 of 14) and is **deliberately not committed**:
+this task's own rule is that every committed ΔE file be all-spot, and a
+pose-verified file sitting next to the gate files is precisely the invitation
+to misread that the "What this means for the merge condition" section above
+exists to prevent.

@@ -1,0 +1,215 @@
+{
+  "batches": [
+    {
+      "takenAt": "2026-08-15T07:24:22.862Z",
+      "loadsPerSide": 4,
+      "rows": [
+        {
+          "apt": "serenity",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.326,
+          "loads": [
+            1691,
+            532,
+            639,
+            1624
+          ],
+          "median": 1624,
+          "warmMedian": 639,
+          "min": 532,
+          "max": 1691
+        },
+        {
+          "apt": "serenity",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.329,
+          "loads": [
+            3631,
+            3379,
+            1063,
+            1077
+          ],
+          "median": 3379,
+          "warmMedian": 1077,
+          "min": 1063,
+          "max": 3631
+        },
+        {
+          "apt": "kings-court",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.56,
+          "loads": [
+            5469,
+            3079,
+            3133,
+            3237
+          ],
+          "median": 3237,
+          "warmMedian": 3133,
+          "min": 3079,
+          "max": 5469
+        },
+        {
+          "apt": "kings-court",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.575,
+          "loads": [
+            17740,
+            13103,
+            9132,
+            9858
+          ],
+          "median": 13103,
+          "warmMedian": 9858,
+          "min": 9132,
+          "max": 17740
+        },
+        {
+          "apt": "horkyone-10",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.45,
+          "loads": [
+            1164,
+            1601,
+            2190,
+            3389
+          ],
+          "median": 2190,
+          "warmMedian": 2190,
+          "min": 1164,
+          "max": 3389
+        },
+        {
+          "apt": "horkyone-10",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.46,
+          "loads": [
+            5980,
+            1918,
+            1969,
+            1896
+          ],
+          "median": 1969,
+          "warmMedian": 1918,
+          "min": 1896,
+          "max": 5980
+        }
+      ]
+    },
+    {
+      "takenAt": "2026-08-15T07:29:00.069Z",
+      "loadsPerSide": 4,
+      "rows": [
+        {
+          "apt": "serenity",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.326,
+          "loads": [
+            1732,
+            623,
+            530,
+            695
+          ],
+          "median": 695,
+          "warmMedian": 623,
+          "min": 530,
+          "max": 1732
+        },
+        {
+          "apt": "serenity",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.329,
+          "loads": [
+            1127,
+            1829,
+            3163,
+            3511
+          ],
+          "median": 3163,
+          "warmMedian": 3163,
+          "min": 1127,
+          "max": 3511
+        },
+        {
+          "apt": "kings-court",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.56,
+          "loads": [
+            5548,
+            3187,
+            3006,
+            3136
+          ],
+          "median": 3187,
+          "warmMedian": 3136,
+          "min": 3006,
+          "max": 5548
+        },
+        {
+          "apt": "kings-court",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.575,
+          "loads": [
+            8493,
+            11554,
+            23431,
+            8031
+          ],
+          "median": 11554,
+          "warmMedian": 11554,
+          "min": 8031,
+          "max": 23431
+        },
+        {
+          "apt": "horkyone-10",
+          "side": "BASE",
+          "url": "http://localhost:8743/",
+          "exposure": 0.45,
+          "loads": [
+            1031,
+            1042,
+            1026,
+            1055
+          ],
+          "median": 1042,
+          "warmMedian": 1042,
+          "min": 1026,
+          "max": 1055
+        },
+        {
+          "apt": "horkyone-10",
+          "side": "HEAD",
+          "url": "http://localhost:8742/",
+          "ambSampled": true,
+          "exposure": 0.46,
+          "loads": [
+            1810,
+            1833,
+            1937,
+            5710
+          ],
+          "median": 1937,
+          "warmMedian": 1937,
+          "min": 1810,
+          "max": 5710
+        }
+      ]
+    }
+  ],
+  "reading": "Read this per apartment, not as one verdict. KINGS-COURT: a claim IS supportable -- its raw loads are disjoint between the two sides in every batch here (BASE 3006-5548 ms against HEAD 8031-23431 ms), about 3x. SERENITY and HORKYONE-10: no claim. Their ranges overlap and the batches disagree with each other by up to 3x on the same figure (serenity HEAD warmMedian 1077 then 3163, no code change between), because the first load of a batch pays cold shader compile and JIT and the host is not a controlled environment. Compare batches[i].rows against batches[j].rows for the same apt/side before quoting anything."
+}

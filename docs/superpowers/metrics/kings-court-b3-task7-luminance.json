@@ -1,0 +1,1082 @@
+{
+  "apartment": "kings-court",
+  "metric": "plan 3's own claim: shadow (5th-percentile luminance) and contrast, before plan 3 (c2bb0bd) and after (736a867)",
+  "task": "phase B plan 3, task 7 -- the gate",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist. Without them the default headless GPU is SwiftShader, which post.js's capable() rejects, and every measurement silently has no post chain. Both trees served simultaneously: HEAD from tools/serve.py on :8742, a detached c2bb0bd worktree from this directory's serve_base.py on :8743.",
+  "spawnPooledSrgb": {
+    "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels of all spawns pooled, then mean and interpolated 5th percentile of sRGB-ENCODED luminance 0-255 (Rec.709 weights, no linearisation). Script: docs/superpowers/harnesses/2026-08-13-b3-task5/spawnlum.mjs, unchanged since task 2, run against BOTH trees over TOUR_BASE -- HEAD on :8742, the c2bb0bd worktree on :8743. NOT comparable to tools/luminance.py, which is linear-light over a different population.",
+    "caveat": "afterAtBeforeExposure is a DIAGNOSTIC, not a shipped state: the HEAD tree with renderer.toneMappingExposure overridden at runtime to the BASE tree's value, so task 2's geometric effect can be read at constant exposure. No apartment's `exposure` key was touched -- task 4 fitted those and is closed.",
+    "before_c2bb0bd": [
+      {
+        "label": "before-kings-court",
+        "exposure": 0.56,
+        "yawSingleConversion": true,
+        "ambSampled": null,
+        "issues": [],
+        "meanL": 149.4,
+        "p5L": 58.4,
+        "pctPixelsBelowLuma16": 0.1,
+        "contrast_mean_over_p5": 2.558,
+        "perSpawn": [
+          {
+            "spawn": "Entry hall",
+            "meanL": 163.2,
+            "p5L": 116.6,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Kitchen",
+            "meanL": 159,
+            "p5L": 104.4,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Dining room",
+            "meanL": 145.6,
+            "p5L": 73.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Living room",
+            "meanL": 144.1,
+            "p5L": 75.7,
+            "pctPixelsBelowLuma16": 1.4
+          },
+          {
+            "spawn": "Bedroom 1",
+            "meanL": 135.9,
+            "p5L": 54.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom 3",
+            "meanL": 151.6,
+            "p5L": 71.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom 2",
+            "meanL": 149.3,
+            "p5L": 77.3,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Hallway",
+            "meanL": 144.3,
+            "p5L": 104.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom 2",
+            "meanL": 120.4,
+            "p5L": 34.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Stairs",
+            "meanL": 157.9,
+            "p5L": 86.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper hall",
+            "meanL": 159.8,
+            "p5L": 113.3,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper living room",
+            "meanL": 146.9,
+            "p5L": 94.1,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper bedroom",
+            "meanL": 161.7,
+            "p5L": 81,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Terrace",
+            "meanL": 152.6,
+            "p5L": 90.2,
+            "pctPixelsBelowLuma16": 0.1
+          }
+        ]
+      },
+      {
+        "label": "before-rep-kings-court",
+        "exposure": 0.56,
+        "yawSingleConversion": true,
+        "ambSampled": null,
+        "issues": [],
+        "meanL": 149.3,
+        "p5L": 58.9,
+        "pctPixelsBelowLuma16": 0.1,
+        "contrast_mean_over_p5": 2.535,
+        "perSpawn": [
+          {
+            "spawn": "Entry hall",
+            "meanL": 162.8,
+            "p5L": 117.6,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Kitchen",
+            "meanL": 158.7,
+            "p5L": 103.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Dining room",
+            "meanL": 145.2,
+            "p5L": 73.1,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Living room",
+            "meanL": 144,
+            "p5L": 75.6,
+            "pctPixelsBelowLuma16": 1.4
+          },
+          {
+            "spawn": "Bedroom 1",
+            "meanL": 136.1,
+            "p5L": 55,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom 3",
+            "meanL": 151.5,
+            "p5L": 71.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bedroom 2",
+            "meanL": 149.2,
+            "p5L": 76.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Hallway",
+            "meanL": 144.3,
+            "p5L": 104.5,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom 2",
+            "meanL": 120.4,
+            "p5L": 35.1,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Stairs",
+            "meanL": 157.4,
+            "p5L": 84.2,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper hall",
+            "meanL": 159.5,
+            "p5L": 112.1,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper living room",
+            "meanL": 146.7,
+            "p5L": 90.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper bedroom",
+            "meanL": 161.6,
+            "p5L": 80.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Terrace",
+            "meanL": 152.6,
+            "p5L": 90,
+            "pctPixelsBelowLuma16": 0.1
+          }
+        ]
+      }
+    ],
+    "after_736a867": [
+      {
+        "label": "after-kings-court",
+        "exposure": 0.575,
+        "yawSingleConversion": true,
+        "ambSampled": true,
+        "issues": [],
+        "meanL": 149.1,
+        "p5L": 55.5,
+        "pctPixelsBelowLuma16": 0.2,
+        "contrast_mean_over_p5": 2.686,
+        "perSpawn": [
+          {
+            "spawn": "Entry hall",
+            "meanL": 164,
+            "p5L": 116.2,
+            "pctPixelsBelowLuma16": 0.3
+          },
+          {
+            "spawn": "Kitchen",
+            "meanL": 157.8,
+            "p5L": 89.7,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Dining room",
+            "meanL": 145.2,
+            "p5L": 69.3,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living room",
+            "meanL": 140.1,
+            "p5L": 57.2,
+            "pctPixelsBelowLuma16": 1.7
+          },
+          {
+            "spawn": "Bedroom 1",
+            "meanL": 135.6,
+            "p5L": 53.8,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Bedroom 3",
+            "meanL": 152,
+            "p5L": 69.5,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Bedroom 2",
+            "meanL": 149.3,
+            "p5L": 74.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Hallway",
+            "meanL": 145.2,
+            "p5L": 105.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom 2",
+            "meanL": 120.6,
+            "p5L": 35.8,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Stairs",
+            "meanL": 158.6,
+            "p5L": 82.1,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Upper hall",
+            "meanL": 160,
+            "p5L": 111.4,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Upper living room",
+            "meanL": 147.6,
+            "p5L": 88.3,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper bedroom",
+            "meanL": 162.4,
+            "p5L": 80.8,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Terrace",
+            "meanL": 149.6,
+            "p5L": 61.8,
+            "pctPixelsBelowLuma16": 0.4
+          }
+        ]
+      },
+      {
+        "label": "after-rep-kings-court",
+        "exposure": 0.575,
+        "yawSingleConversion": true,
+        "ambSampled": true,
+        "issues": [],
+        "meanL": 149.2,
+        "p5L": 55.5,
+        "pctPixelsBelowLuma16": 0.2,
+        "contrast_mean_over_p5": 2.688,
+        "perSpawn": [
+          {
+            "spawn": "Entry hall",
+            "meanL": 164.3,
+            "p5L": 116.7,
+            "pctPixelsBelowLuma16": 0.3
+          },
+          {
+            "spawn": "Kitchen",
+            "meanL": 158,
+            "p5L": 90.1,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Dining room",
+            "meanL": 145.4,
+            "p5L": 69.5,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Living room",
+            "meanL": 140.2,
+            "p5L": 57.4,
+            "pctPixelsBelowLuma16": 1.7
+          },
+          {
+            "spawn": "Bedroom 1",
+            "meanL": 135.2,
+            "p5L": 53.8,
+            "pctPixelsBelowLuma16": 0.2
+          },
+          {
+            "spawn": "Bedroom 3",
+            "meanL": 152,
+            "p5L": 69.5,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Bedroom 2",
+            "meanL": 149.3,
+            "p5L": 74.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Hallway",
+            "meanL": 145.3,
+            "p5L": 106.4,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Bathroom 2",
+            "meanL": 120.9,
+            "p5L": 35.9,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Stairs",
+            "meanL": 159,
+            "p5L": 83.6,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Upper hall",
+            "meanL": 160.1,
+            "p5L": 110.5,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Upper living room",
+            "meanL": 147.6,
+            "p5L": 88.7,
+            "pctPixelsBelowLuma16": 0
+          },
+          {
+            "spawn": "Upper bedroom",
+            "meanL": 162.3,
+            "p5L": 80.8,
+            "pctPixelsBelowLuma16": 0.1
+          },
+          {
+            "spawn": "Terrace",
+            "meanL": 149.3,
+            "p5L": 60.2,
+            "pctPixelsBelowLuma16": 0.3
+          }
+        ]
+      }
+    ],
+    "afterAtBeforeExposure": {
+      "label": "after-iso-kings-court",
+      "exposure": 0.56,
+      "yawSingleConversion": true,
+      "ambSampled": true,
+      "issues": [],
+      "meanL": 147.6,
+      "p5L": 55.1,
+      "pctPixelsBelowLuma16": 0.2,
+      "contrast_mean_over_p5": 2.679,
+      "perSpawn": [
+        {
+          "spawn": "Entry hall",
+          "meanL": 162.1,
+          "p5L": 114.2,
+          "pctPixelsBelowLuma16": 0.3
+        },
+        {
+          "spawn": "Kitchen",
+          "meanL": 156.3,
+          "p5L": 88.1,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Dining room",
+          "meanL": 143.7,
+          "p5L": 67.7,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Living room",
+          "meanL": 138.6,
+          "p5L": 56.2,
+          "pctPixelsBelowLuma16": 1.8
+        },
+        {
+          "spawn": "Bedroom 1",
+          "meanL": 134.2,
+          "p5L": 52.9,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Bedroom 3",
+          "meanL": 150.4,
+          "p5L": 67.7,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Bedroom 2",
+          "meanL": 147.6,
+          "p5L": 73,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Hallway",
+          "meanL": 143.4,
+          "p5L": 103.7,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Bathroom 2",
+          "meanL": 120.6,
+          "p5L": 36.5,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Stairs",
+          "meanL": 157.3,
+          "p5L": 80.9,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Upper hall",
+          "meanL": 158.2,
+          "p5L": 108,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Upper living room",
+          "meanL": 146,
+          "p5L": 87.3,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Upper bedroom",
+          "meanL": 160.9,
+          "p5L": 79.3,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 147.7,
+          "p5L": 58.3,
+          "pctPixelsBelowLuma16": 0.4
+        }
+      ]
+    }
+  },
+  "structural": [
+    {
+      "profile": "desktop",
+      "budget": 400,
+      "pass": true,
+      "callsStart": {
+        "naive": 150,
+        "chain": 165
+      },
+      "callsSpawn0": {
+        "naive": 150,
+        "chain": 165
+      },
+      "selfTest": true,
+      "ambSampled": true,
+      "issues": [],
+      "consoleErrors": 0,
+      "dpr": 1,
+      "buffer": [
+        1280,
+        820
+      ]
+    },
+    {
+      "profile": "mobile",
+      "budget": 250,
+      "pass": true,
+      "callsStart": {
+        "naive": 135,
+        "chain": 150
+      },
+      "callsSpawn0": {
+        "naive": 135,
+        "chain": 150
+      },
+      "selfTest": true,
+      "ambSampled": true,
+      "issues": [],
+      "consoleErrors": 0,
+      "dpr": 1.6,
+      "buffer": [
+        624,
+        1350
+      ]
+    }
+  ],
+  "structural_skyLeak": [
+    {
+      "spawn": "Entry hall",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Kitchen",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Dining room",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Living room",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Bedroom 1",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Bedroom 3",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Bedroom 2",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Hallway",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Bathroom 2",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Stairs",
+      "hit": "Mesh",
+      "dist": 1.2
+    },
+    {
+      "spawn": "Upper hall",
+      "hit": "Mesh",
+      "dist": 1.37
+    },
+    {
+      "spawn": "Upper living room",
+      "hit": "Mesh",
+      "dist": 0.41
+    },
+    {
+      "spawn": "Upper bedroom",
+      "hit": "Mesh",
+      "dist": 0.71
+    },
+    {
+      "spawn": "Terrace",
+      "hit": "NOTHING ABOVE",
+      "dist": null
+    }
+  ],
+  "structural_walk": [
+    {
+      "route": "Entry hall westbound",
+      "from": [
+        22.6,
+        5,
+        0
+      ],
+      "precedent": "x 13.14, ground 0",
+      "to": [
+        13.14,
+        5,
+        0
+      ],
+      "moved": 9.46,
+      "finite": true
+    },
+    {
+      "route": "Upper hall westbound",
+      "from": [
+        13.6,
+        0.9,
+        3.1
+      ],
+      "precedent": "x 4.44, ground 3.1",
+      "to": [
+        4.44,
+        0.9,
+        3.1
+      ],
+      "moved": 9.16,
+      "finite": true
+    }
+  ],
+  "linearLight": {
+    "method": "Linear-light Rec.709 relative luminance via tools/luminance.py's own luminance_stats, over the population that tool hard-codes: compare spots passing delta_e.scorable, i.e. poseVerified. Captured with ?measure=1&fov=legacy (measure.js is byte-identical between the two trees). Contrast is the ratio of the UNROUNDED aggregates. Script: linear7.py.",
+    "population": "8 of 14 compare-flagged spots (poseVerified filter, hard-coded in tools/luminance.py)",
+    "sets": {
+      "t7-base-kings-court": {
+        "mean": 0.3412692415592117,
+        "p5": 0.11374172540763916,
+        "contrast": 3.0003874157538606
+      },
+      "t7-base-kings-court-rep": {
+        "mean": 0.3410607394049779,
+        "p5": 0.1126577344319027,
+        "contrast": 3.0274063394301267
+      },
+      "t7-base-kings-court-rep2": {
+        "mean": 0.34165716193394297,
+        "p5": 0.11564444536100497,
+        "contrast": 2.9543758964591733
+      },
+      "t7-base-kings-court-rep3": {
+        "mean": 0.3407183156034554,
+        "p5": 0.11081266721125022,
+        "contrast": 3.0747235327701246
+      },
+      "t7-gate-kings-court": {
+        "mean": 0.3425694007691128,
+        "p5": 0.10474639741027679,
+        "contrast": 3.2704647533348283
+      },
+      "t7-gate-kings-court-rep": {
+        "mean": 0.3433782947225628,
+        "p5": 0.11116794096038002,
+        "contrast": 3.088824815464937
+      },
+      "t7-gate-kings-court-rep2": {
+        "mean": 0.3432108598147773,
+        "p5": 0.10866361424339605,
+        "contrast": 3.1584708663013727
+      },
+      "t7-gate-kings-court-rep3": {
+        "mean": 0.34236956965510873,
+        "p5": 0.1063286838802053,
+        "contrast": 3.219917308868769
+      },
+      "photographs": {
+        "mean": 0.34787717029372833,
+        "p5": 0.024653000077441273,
+        "contrast": 14.110946708350248
+      }
+    },
+    "perSpot": {
+      "t7-base-kings-court": [
+        {
+          "file": "7.webp",
+          "mean": 0.44210586197828683,
+          "p5": 0.1532042497922977
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.3819085781092795,
+          "p5": 0.11865299067080039
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.3815670581502599,
+          "p5": 0.16413695030191056
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22389986199548684,
+          "p5": 0.029398173473024092
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3589290540753865,
+          "p5": 0.10392738362065602
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23015628714997843,
+          "p5": 0.14498863588910876
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.4030797528998626,
+          "p5": 0.1624307368967709
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30850747811515356,
+          "p5": 0.03319468261654496
+        }
+      ],
+      "t7-base-kings-court-rep": [
+        {
+          "file": "7.webp",
+          "mean": 0.4421254957237779,
+          "p5": 0.16413695030191056
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.3804375277086638,
+          "p5": 0.10506896020281159
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.38014452291882955,
+          "p5": 0.15551288999810892
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22429280155454254,
+          "p5": 0.029398173473024092
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3590044758904848,
+          "p5": 0.10544896386383512
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23013122180488882,
+          "p5": 0.14498863588910876
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.40348902501405526,
+          "p5": 0.16227573876655232
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30886084462458047,
+          "p5": 0.034431562959870245
+        }
+      ],
+      "t7-base-kings-court-rep2": [
+        {
+          "file": "7.webp",
+          "mean": 0.44186089961621844,
+          "p5": 0.1532042497922977
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.3840153835464323,
+          "p5": 0.12675746584503303
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.3817191285075289,
+          "p5": 0.17357631662555148
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22458151476108298,
+          "p5": 0.02975386708195306
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3590906610536442,
+          "p5": 0.10518382729551816
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23017780755284928,
+          "p5": 0.14498863588910876
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.4023465055681854,
+          "p5": 0.15758952831803869
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30946539486560226,
+          "p5": 0.034101672040539086
+        }
+      ],
+      "t7-base-kings-court-rep3": [
+        {
+          "file": "7.webp",
+          "mean": 0.44126796153715225,
+          "p5": 0.15664285205583323
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.38080495019019084,
+          "p5": 0.10989624499442002
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.38052256390131334,
+          "p5": 0.15937411435486243
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22325387820666381,
+          "p5": 0.029911463835882512
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3590381766224335,
+          "p5": 0.10447606842968604
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23011300709887178,
+          "p5": 0.14498863588910876
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.40229772829971855,
+          "p5": 0.14748725548469552
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30844825897129907,
+          "p5": 0.033724702645513166
+        }
+      ],
+      "t7-gate-kings-court": [
+        {
+          "file": "7.webp",
+          "mean": 0.4478054832172195,
+          "p5": 0.1452541155395285
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.3832989764079479,
+          "p5": 0.10100382406009781
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.38315438263745427,
+          "p5": 0.1461802296339097
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.2239363348399065,
+          "p5": 0.016896789034476622
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.36119571382175747,
+          "p5": 0.0958994507393904
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23245814790753166,
+          "p5": 0.14789695999954966
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.4053962611845266,
+          "p5": 0.15040824731539137
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.3033099061365589,
+          "p5": 0.034431562959870245
+        }
+      ],
+      "t7-gate-kings-court-rep": [
+        {
+          "file": "7.webp",
+          "mean": 0.4484042913003979,
+          "p5": 0.17279698888732384
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.385069157744692,
+          "p5": 0.10867082383345308
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.38383295694822606,
+          "p5": 0.15336298019281555
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22483682962185245,
+          "p5": 0.016896789034476622
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.36156528362008894,
+          "p5": 0.09839447824452252
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23247954917271021,
+          "p5": 0.14789695999954966
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.4073947824270898,
+          "p5": 0.15635156557207905
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.3034435069454454,
+          "p5": 0.034972941918819826
+        }
+      ],
+      "t7-gate-kings-court-rep2": [
+        {
+          "file": "7.webp",
+          "mean": 0.4484026541896024,
+          "p5": 0.15220756220029075
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.3848432514617034,
+          "p5": 0.10758153912410676
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.3840210527399174,
+          "p5": 0.15203023629390938
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22476313705623305,
+          "p5": 0.016896789034476622
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3620390279858139,
+          "p5": 0.09923342228835062
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23254743039909162,
+          "p5": 0.14789695999954966
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.40568331727997986,
+          "p5": 0.16026772238993953
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30338700740587676,
+          "p5": 0.03319468261654496
+        }
+      ],
+      "t7-gate-kings-court-rep3": [
+        {
+          "file": "7.webp",
+          "mean": 0.4478888479898351,
+          "p5": 0.15456552316898417
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.38362341628801594,
+          "p5": 0.09920013431236015
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.3829825123519013,
+          "p5": 0.14908837974542197
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.22282083013450363,
+          "p5": 0.016896789034476622
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.36121461116752185,
+          "p5": 0.09814187450558823
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.23246730201408955,
+          "p5": 0.14789695999954966
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.4040342453838411,
+          "p5": 0.15040824731539137
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.30392479191116156,
+          "p5": 0.034431562959870245
+        }
+      ],
+      "photographs": [
+        {
+          "file": "7.webp",
+          "mean": 0.3792275185312724,
+          "p5": 0.07917065480825915
+        },
+        {
+          "file": "20.webp",
+          "mean": 0.328924725664552,
+          "p5": 0.050206928093870874
+        },
+        {
+          "file": "8.webp",
+          "mean": 0.3449635350644507,
+          "p5": 0.021430061345779253
+        },
+        {
+          "file": "11.webp",
+          "mean": 0.4272667023321982,
+          "p5": 0.01864331684852513
+        },
+        {
+          "file": "12.webp",
+          "mean": 0.3202561504628359,
+          "p5": 0.014316666271749958
+        },
+        {
+          "file": "19.webp",
+          "mean": 0.5213552327114543,
+          "p5": 0.007347719640261332
+        },
+        {
+          "file": "3.webp",
+          "mean": 0.2889429590527511,
+          "p5": 0.0033191069499691125
+        },
+        {
+          "file": "13.webp",
+          "mean": 0.17208053853031272,
+          "p5": 0.002789546661115378
+        }
+      ]
+    }
+  }
+}

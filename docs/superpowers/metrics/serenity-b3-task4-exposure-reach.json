@@ -1,0 +1,100 @@
+{
+ "apartment": "serenity",
+ "metric": "reach of exposure on the merge-gate metric, in the gate's own camera",
+ "task": "phase B3 plan 3 task 4, review fix round 2",
+ "thisFileIsAnIndex": "The primary record is the six per-point files listed under points[], each of which is tools/delta_e.py's own native output and carries spots[], scored, compareTotal, skippedPoseVerification and population, exactly like the gate files this experiment is cited beside. Every mean below is read from those files, not hand-entered, and each one re-derives from its own per-spot list. Round 1 of this review shipped a hand-assembled file instead; it could not be audited from the repo alone and is superseded by this one.",
+ "question": "Can ANY exposure bring serenity under the <=16.58 all-spot legacy ceiling? Round 0 inferred it across cameras; round 1 measured it but recorded it unauditably; this is the same measurement re-run so each point is self-verifying.",
+ "method": "ONE page load, ?apt=serenity&measure=1&fov=legacy, full shipped post chain (bloom ENABLED, threshold 1.8, strength 0.1, radius 0.5), only renderer.toneMappingExposure changing between captures. delta_e.py is invoked as a child process between captures with the page held open, because separate loads would confound the comparison: materials.js randomises its procedural textures per load and the load-to-load spread (+-0.01 to +-0.04 dE) is larger than the whole 0.006 spread this experiment measures. Stale flat frames deleted before every capture and the count (11) asserted after.",
+ "preconditionsAsserted": {
+  "postChain": [
+   "RenderPass",
+   "UnrealBloomPass",
+   "OutputPass",
+   "ShaderPass"
+  ],
+  "bloom": {
+   "enabled": true,
+   "threshold": 1.8,
+   "strength": 0.1,
+   "radius": 0.5
+  },
+  "legacyFov": "legacy",
+  "cacheVersion": "102",
+  "APT.exposure": 0.329,
+  "issues": 0,
+  "ambSampled": true,
+  "compareSpots": 11,
+  "photoSpotYawSingleConversion": true,
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "consoleErrors": 0
+ },
+ "notAFit": "DIAGNOSTIC ONLY, run after 0.329 was chosen, committed and verified. The shipped value is the luminance fit and does not move; choosing an exposure because it scored better on dE2000 is the rule violation this phase exists to prevent. This file exists so the merge owner knows whether a passing exposure exists at all. It does not.",
+ "ceiling": 16.58,
+ "shippedExposure": 0.329,
+ "points": [
+  {
+   "exposure": 0.3,
+   "file": "serenity-b3-task4-reach-e0.3.json",
+   "mean_dE2000": 16.64,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.6433,
+   "fullPrecisionMean_priorIndependentRun": 16.6424
+  },
+  {
+   "exposure": 0.31,
+   "file": "serenity-b3-task4-reach-e0.31.json",
+   "mean_dE2000": 16.62,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.6161,
+   "fullPrecisionMean_priorIndependentRun": 16.6147
+  },
+  {
+   "exposure": 0.32,
+   "file": "serenity-b3-task4-reach-e0.32.json",
+   "mean_dE2000": 16.61,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.6104,
+   "fullPrecisionMean_priorIndependentRun": 16.6085
+  },
+  {
+   "exposure": 0.326,
+   "file": "serenity-b3-task4-reach-e0.326.json",
+   "mean_dE2000": 16.61,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.6133,
+   "fullPrecisionMean_priorIndependentRun": 16.6121
+  },
+  {
+   "exposure": 0.329,
+   "file": "serenity-b3-task4-reach-e0.329.json",
+   "mean_dE2000": 16.61,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.616,
+   "fullPrecisionMean_priorIndependentRun": 16.6142
+  },
+  {
+   "exposure": 0.34,
+   "file": "serenity-b3-task4-reach-e0.34.json",
+   "mean_dE2000": 16.65,
+   "population": "all-spot",
+   "scored": 11,
+   "compareTotal": 11,
+   "fullPrecisionMean_thisRun": 16.6454,
+   "fullPrecisionMean_priorIndependentRun": 16.6437
+  }
+ ],
+ "result": "Every point is above the ceiling. The curve is a shallow U with its minimum at exposure 0.32 -- native mean 16.61, full precision 16.6104 -- against the shipped 0.329 at 16.6160 full precision. The best exposure anywhere in the neighbourhood is worth 0.0056: a sixth of the 0.03 shortfall and a seventh of this metric's repeat-run noise floor. Both ends rise. NO EXPOSURE PASSES THIS GATE.",
+ "reproducibility": "Two independent page loads now agree across all six points to within 0.002 full precision (fullPrecisionMean_thisRun vs fullPrecisionMean_priorIndependentRun above): same U, same minimum location, same verdict. The prior run is the round-1 capture; its per-point numbers are kept here as corroboration, not as the record.",
+ "corroboration": "Independently of this experiment, six committed readings sit above the ceiling across three tasks and two exposure values: serenity-b3-task2-fix1-allspots.json 16.60 and serenity-b3-task3-off-allspots.json 16.61 at the old 0.326, plus task 4's four runs at 0.329 (16.60, 16.62, 16.61, 16.60). Those are all native delta_e.py files too.",
+ "windingDefect": "Measured against a render carrying the deferred grid() winding defect (8 of 12 wall faces backwards, bake.js). Re-run this when that fix lands."
+}

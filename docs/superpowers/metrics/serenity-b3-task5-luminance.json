@@ -1,0 +1,447 @@
+{
+  "apartment": "serenity",
+  "metric": "spawn-pooled luminance",
+  "task": "phase B plan 3, task 5 -- the offline lightmap baker",
+  "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.197 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict.",
+  "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels pooled across all spawns before the mean and the INTERPOLATED 5th percentile of Rec.709 luma on the sRGB-encoded frame (0-255). Same method and same harness as <apt>-b3-task2-luminance.json and <apt>-b3-task3-luminance.json. NOT comparable to tools/luminance.py, which reports linear-light values over a different population.",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist. The default headless GPU is SwiftShader, which post.js's capable() rejects -- a run without these flags silently measures with no post chain. Spawn yaw is asserted against the raw JSON degrees on every run. Each phase is a separate page load; the run-to-run spread measured on an identical build is 0.1 of meanL and 0.0 of p5L (BASE-fef2d07 measured twice: 138.7/80.0 and 138.6/80.0).",
+  "exposure": 0.329,
+  "cacheVersion": 104,
+  "pack": {
+    "files": 11,
+    "imageBytes": 10438,
+    "totalBytes": 13626,
+    "totalKB": 13.3,
+    "ceilingMB": 8,
+    "pctOfCeiling": 0.162,
+    "bakeSeconds": 550.9,
+    "bakeTool": "tools/bake_lightmaps.mjs",
+    "bakeMachine": "ANGLE/D3D11 headless Chromium, Playwright",
+    "settings": {
+      "rays": 2048,
+      "bounces": 2,
+      "albedo": 0.6,
+      "resScale": 1,
+      "maxDist": 0.65,
+      "webpQuality": 1
+    },
+    "roundTrip": {
+      "worstMaxAbsError": 0,
+      "worstMeanAbsError": 0,
+      "note": "every surface decoded back from the WebP it ships as and compared with the canvas it came from; Chrome toDataURL(image/webp, 1) is lossless here"
+    },
+    "hash": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
+    "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.197 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict."
+  },
+  "phases": {
+    "runtime-bake": {
+      "note": "The runtime bake, this branch, with tour/lightmaps/serenity/ moved aside so Lightmaps.load() reports \"missing\" and every surface falls through to bakeSurface(). The before column.",
+      "meanL": 138.7,
+      "p5L": 80.1,
+      "contrast_mean_over_p5": 1.732,
+      "pctPixelsBelowLuma16": 0.1,
+      "lightmapsStatus": "missing",
+      "issues": [
+        "lightmaps: no readable manifest at lightmaps/serenity/ (HTTP 404)"
+      ],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 140.3,
+          "p5L": 66.4
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 136.1,
+          "p5L": 81.7
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 147.5,
+          "p5L": 89.3
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 139.7,
+          "p5L": 98.1
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129.6,
+          "p5L": 75.9
+        }
+      ]
+    },
+    "offline-pack": {
+      "note": "The committed offline pack loaded instead: 10 of 10 surfaces, window.__lightmaps.status \"ok\".",
+      "meanL": 140.2,
+      "p5L": 80.3,
+      "contrast_mean_over_p5": 1.746,
+      "pctPixelsBelowLuma16": 0.1,
+      "lightmapsStatus": "ok",
+      "issues": [],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 142.3,
+          "p5L": 68.6
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 137.6,
+          "p5L": 81.8
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 149.2,
+          "p5L": 89.3
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 141.3,
+          "p5L": 98.5
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 130.8,
+          "p5L": 76
+        }
+      ]
+    },
+    "offline-pack-bounces0": {
+      "note": "PIPELINE IDENTITY CHECK, never committed: the same pack re-baked with bounces = 0, at which the integrator reduces exactly to bake.js own AMB_RGB x escaped-fraction estimator. It reproduces the runtime bake to the reported precision, which is what proves the texel mapping, the WebP encoding, the loading, the colour space and the lightMapIntensity are all neutral -- so the shipped pack row differs by the integrator and nothing else. LIMIT, measured in fix round 1: this identity is established for the pooled MEAN and not for p5. Per spawn the p5 residual under this nominal identity reaches -0.9 (Entrance) and -1.2 (Bedroom), which is the same size as or larger than the shipped pack effect on those same spawns (+2.2 and 0.0); the pooled p5 agrees (80.0 vs 80.1) only because pooling averages the residuals away. p5 is half of the ratio being gated. NOTE THE SIGN, recorded in fix round 2: these per-spawn residuals are NEGATIVE, while the same identity lifts p5 in tools/luminance.py. See linearLuminance.identityCaveat.",
+      "meanL": 138.6,
+      "p5L": 80,
+      "contrast_mean_over_p5": 1.733,
+      "pctPixelsBelowLuma16": 0.1,
+      "lightmapsStatus": "ok",
+      "issues": [],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 140.2,
+          "p5L": 65.5
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 136.2,
+          "p5L": 81.7
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 147.4,
+          "p5L": 88.1
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 139.8,
+          "p5L": 98.2
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129.7,
+          "p5L": 75.9
+        }
+      ]
+    },
+    "withdrawn-3x-bounces0": {
+      "note": "WITHDRAWN, not shipped: 3x texel density, bounces = 0. Recorded because it is the evidence for why resScale stayed at 1 -- at 3x the texels are finer than the 0.14 m wall is thick, bake.js edge dilation replaces exactly one ring and takes its replacement from a neighbour that is itself spoiled, and the ceilings come back with a hard black band (13/255 against an interior of 185).",
+      "meanL": 137.8,
+      "p5L": 79.1,
+      "contrast_mean_over_p5": 1.742,
+      "pctPixelsBelowLuma16": 0.3,
+      "lightmapsStatus": "ok",
+      "issues": [],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 139.1,
+          "p5L": 57.7
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 135.3,
+          "p5L": 81.1
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 146.7,
+          "p5L": 86.7
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 138.9,
+          "p5L": 96.7
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129.3,
+          "p5L": 75.9
+        }
+      ]
+    },
+    "withdrawn-3x-bounces2-128rays": {
+      "note": "WITHDRAWN, not shipped: 3x texel density, 2 bounces, at the 128-ray pipeline-validation bake rather than the shipped 2048. Carries the same black-band artefact as the row above, so its apparent contrast gain (1.757) is partly the artefact and must not be read as the offline bake working. The 2048-ray 3x run measured the same 139.7 / 79.5 / 1.757 but its harness file was overwritten by the re-run at resScale 1, so this file is the one that survives.",
+      "meanL": 139.7,
+      "p5L": 79.5,
+      "contrast_mean_over_p5": 1.757,
+      "pctPixelsBelowLuma16": 0.2,
+      "lightmapsStatus": "ok",
+      "issues": [],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 141.7,
+          "p5L": 62.4
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 136.9,
+          "p5L": 81.3
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 148.8,
+          "p5L": 88.9
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 140.4,
+          "p5L": 97.4
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 130.7,
+          "p5L": 76
+        }
+      ]
+    },
+    "BASE-fef2d07": {
+      "note": "The branch tip this task started from, served from a separate git worktree on port 8743. Present to show that the bake.js and sampler.js refactors are behaviour-neutral when no pack is loaded, not to be compared with the pack.",
+      "meanL": 138.7,
+      "p5L": 80,
+      "contrast_mean_over_p5": 1.734,
+      "pctPixelsBelowLuma16": 0.1,
+      "lightmapsStatus": null,
+      "issues": [],
+      "perSpawn": [
+        {
+          "spawn": "Entrance",
+          "meanL": 140.4,
+          "p5L": 65.6
+        },
+        {
+          "spawn": "Living Room",
+          "meanL": 136.1,
+          "p5L": 81.7
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 147.5,
+          "p5L": 89.3
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 139.7,
+          "p5L": 98.1
+        },
+        {
+          "spawn": "Pool Terrace",
+          "meanL": 129.6,
+          "p5L": 75.9
+        }
+      ]
+    }
+  },
+  "linearLuminance": {
+    "tool": "tools/luminance.py",
+    "population": "2 of 11. tools/luminance.py:60 filters through delta_e.scorable, which requires poseVerified; serenity has exactly two that pass, 1.webp (Bathroom) and 11.webp (Bedroom). Both are among the highest-p5 rooms in the flat, i.e. the least shadow available to change; the darkest spawn (Entrance, spawn-pooled p5 66.4) is NOT in this population.",
+    "note": "Linear-light Rec.709 relative luminance over the poseVerified compare spots, captured at ?fov=legacy. This is the number task 6 applies its >= 4.9 criterion to. READ THE IDENTITY ROW FIRST: a pack baked at bounces = 0 is the runtime bake own estimator and should reproduce it; it reproduces the mean (x1.00044) and not p5 (x1.00360), because 2048 paths per texel remove the per-texel Monte Carlo noise the runtime 16 rays carry and p5 is a tail statistic. The resulting identity residual on contrast is -0.011, an order of magnitude larger than the shipped pack contrast change of +0.001. What the shipped pack does here is a near-uniform gain of ~2.5% (mean x1.02482, p5 x1.02461, differing by 0.022 pp against the +-0.06 pp that four-decimal rounding alone puts on the p5 ratio), and a mean/p5 ratio is blind to a uniform gain by construction.",
+    "identityCaveat": "The denoising ATTRIBUTION for the identity residual is not settled, and the conclusion does not depend on it. In this population the bounces-0 identity lifts p5 (+0.36%); in the spawn-pooled population the same identity moves per-spawn p5 DOWN (Entrance -0.9 = -1.4%, Bedroom -1.2), four times the relative size and the opposite sign. This set is also n=2 with a contrast spread of 0.008 against a residual of 0.011. So the residual may be denoising, uncharacterised harness variance, or both. EITHER READING SUPPORTS THE SAME CONCLUSION: -0.011 dominates the shipped +0.001, so no contrast claim of that size is available from this harness, and an unexplained residual strengthens the No-Go rather than softening it. Only the derived \"~15% of the p5 move is denoising\" inherits the attribution risk, and nothing rests on it.",
+    "sets": {
+      "runtime-bake": {
+        "mean": 0.282,
+        "p5": 0.0833,
+        "contrast": 3.385,
+        "n": 4
+      },
+      "offline-pack-bounces0-identity": {
+        "mean": 0.2821,
+        "p5": 0.0836,
+        "contrast": 3.374,
+        "n": 2
+      },
+      "offline-pack": {
+        "mean": 0.289,
+        "p5": 0.0854,
+        "contrast": 3.386,
+        "n": 4
+      },
+      "photographs": {
+        "mean": 0.2993,
+        "p5": 0.0483,
+        "contrast": 6.197
+      }
+    },
+    "captures": {
+      "note": "independent captures of each state, frames re-captured every time; (mean, p5) pairs",
+      "runtime-bake": [
+        [
+          0.2821,
+          0.0833
+        ],
+        [
+          0.2818,
+          0.0833
+        ],
+        [
+          0.2821,
+          0.0833
+        ],
+        [
+          0.2819,
+          0.0833
+        ]
+      ],
+      "offline-pack-bounces0-identity": [
+        [
+          0.2821,
+          0.0837
+        ],
+        [
+          0.2821,
+          0.0835
+        ]
+      ],
+      "offline-pack": [
+        [
+          0.289,
+          0.0854
+        ],
+        [
+          0.2889,
+          0.0853
+        ],
+        [
+          0.2889,
+          0.0853
+        ],
+        [
+          0.2891,
+          0.0854
+        ]
+      ],
+      "photographs": [
+        [
+          0.2993,
+          0.0483
+        ]
+      ]
+    },
+    "repeatability": {
+      "runtime-bake": {
+        "meanRange": [
+          0.2818,
+          0.2821
+        ],
+        "p5Range": [
+          0.0833,
+          0.0833
+        ],
+        "contrastRange": [
+          3.383,
+          3.387
+        ]
+      },
+      "offline-pack-bounces0-identity": {
+        "meanRange": [
+          0.2821,
+          0.2821
+        ],
+        "p5Range": [
+          0.0835,
+          0.0837
+        ],
+        "contrastRange": [
+          3.37,
+          3.378
+        ]
+      },
+      "offline-pack": {
+        "meanRange": [
+          0.2889,
+          0.2891
+        ],
+        "p5Range": [
+          0.0853,
+          0.0854
+        ],
+        "contrastRange": [
+          3.384,
+          3.387
+        ]
+      },
+      "note": "measured in fix round 1; the first draft quoted single shots against an uncharacterised harness"
+    }
+  },
+  "bakeMs": {
+    "note": "window.__bakeMs, five fresh page loads per side, twice. With a pack it covers the manifest fetch, the SHA-256, the ten texture loads and the wall/furniture passes, which still run unchanged. THE TWO PAIRED RUNS DISAGREE IN SIGN -- the no-pack side alone moved from a median of 1237 ms to 2680 ms between them on identical code -- so no net load-time claim is supportable from them. The usable measurement is packCost below, taken inside single page loads: the texel loop a pack skips costs 215-294 ms for all ten surfaces, and the eleven /lightmaps/ requests cost 4.5-6.8 s of wall time against tools/serve.py. The pack does not buy load time.",
+    "phases": {
+      "note": "window.__bakeMs, five fresh page loads per side; see the report -- the two paired runs disagree in sign and no net claim is supportable from them. The decomposition in packCost is the usable measurement.",
+      "runA_3x_pack": {
+        "withPack": [
+          2813,
+          1723,
+          2380,
+          2403,
+          2097
+        ],
+        "medianWithPack": 2380,
+        "noPack": [
+          2742,
+          1315,
+          1157,
+          1237,
+          1228
+        ],
+        "medianNoPack": 1237
+      },
+      "runB_shipped_pack": {
+        "withPack": [
+          5305,
+          1917,
+          1843,
+          1964,
+          2144
+        ],
+        "medianWithPack": 1964,
+        "noPack": [
+          9183,
+          2601,
+          2585,
+          2680,
+          2756
+        ],
+        "medianNoPack": 2680
+      },
+      "packCost": {
+        "note": "measured inside one page load each, three loads: texelLoopMs is Baker.bakeSurface re-run at runtime settings over all 10 surfaces (exactly what a pack skips); packFetchMs is the wall time of the 11 /lightmaps/ requests against tools/serve.py",
+        "texelLoopMs": [
+          233,
+          294,
+          215
+        ],
+        "packFetchMs": [
+          4522,
+          4668,
+          6760
+        ],
+        "bakeMsSameLoads": [
+          4843,
+          4976,
+          7284
+        ]
+      }
+    }
+  }
+}

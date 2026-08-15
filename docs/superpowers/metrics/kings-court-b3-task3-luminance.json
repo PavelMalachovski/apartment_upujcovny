@@ -1,0 +1,351 @@
+{
+  "apartment": "kings-court",
+  "metric": "spawn-pooled luminance",
+  "task": "phase B plan 3, task 3 -- GTAO in the post chain",
+  "outcome": "GTAO was NOT adopted. Two independent reasons, either one sufficient: (1) as specified it blackens every wall that presents its far face -- see the gtao-on phase; (2) its depth/normal prepass is a second full scene pass, taking kings-court's mobile draw calls to 282 against a hard budget of 250. See .superpowers/sdd/2026-08-13-phase-b3-light/task-3-report.md.",
+  "method": "Every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, pixels pooled across all spawns before the mean and the interpolated 5th percentile of Rec.709 luma on the sRGB-encoded frame (0-255). Same method and same harness as <apt>-b3-task2-luminance.json, and the `gtao-off` phase below reproduces that file's `fix1` phase, which is what makes the three phases here comparable to it.",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (ANGLE / Intel UHD 630 / D3D11). The three phases are measured inside ONE page load by toggling the GTAO pass, so nothing but the pass differs between them: EffectComposer skips a pass with enabled=false, so `gtao-off` is bit-for-bit the chain this task started from.",
+  "phases": {
+    "gtao-off": {
+      "note": "GTAO pass present but disabled -- identical to BASE b06730e, and the before column for this task.",
+      "meanL": 147.5,
+      "p5L": 53.6,
+      "contrast_mean_over_p5": 2.752,
+      "pctPixelsBelowLuma16": 0.2,
+      "perSpawn": [
+        {
+          "spawn": "Entry hall",
+          "meanL": 162.3,
+          "p5L": 115.7,
+          "pctPixelsBelowLuma16": 0.3
+        },
+        {
+          "spawn": "Kitchen",
+          "meanL": 156.4,
+          "p5L": 87.6,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Dining room",
+          "meanL": 143.9,
+          "p5L": 68,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Living room",
+          "meanL": 138.5,
+          "p5L": 55.8,
+          "pctPixelsBelowLuma16": 1.8
+        },
+        {
+          "spawn": "Bedroom 1",
+          "meanL": 133.9,
+          "p5L": 52.7,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        {
+          "spawn": "Bedroom 3",
+          "meanL": 150.4,
+          "p5L": 67.8,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Bedroom 2",
+          "meanL": 147.8,
+          "p5L": 73.1,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Hallway",
+          "meanL": 143.5,
+          "p5L": 103.3,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Bathroom 2",
+          "meanL": 118.5,
+          "p5L": 34.7,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Stairs",
+          "meanL": 157.4,
+          "p5L": 81.5,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Upper hall",
+          "meanL": 158.3,
+          "p5L": 108.5,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Upper living room",
+          "meanL": 145.8,
+          "p5L": 87.3,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Upper bedroom",
+          "meanL": 160.9,
+          "p5L": 79.1,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 147.7,
+          "p5L": 57.5,
+          "pctPixelsBelowLuma16": 0.4
+        }
+      ]
+    },
+    "gtao-on": {
+      "note": "GTAO exactly as the brief specifies it, reading scene normals from its own MeshNormalMaterial G-buffer. NOT SHIPPED. The walls of all three apartments present their far face to the camera (the deferred winding defect in bake.js grid()), so their vertex normals point away from the viewer, GTAO finds the hemisphere fully closed and multiplies those pixels to black. p5 collapsing to ~0 and darkPct jumping to 11-21% is that, not occlusion.",
+      "meanL": 127.5,
+      "p5L": 0.3,
+      "contrast_mean_over_p5": null,
+      "pctPixelsBelowLuma16": 11.9,
+      "perSpawn": [
+        {
+          "spawn": "Entry hall",
+          "meanL": 155.6,
+          "p5L": 71.1,
+          "pctPixelsBelowLuma16": 2.7
+        },
+        {
+          "spawn": "Kitchen",
+          "meanL": 150.6,
+          "p5L": 50.7,
+          "pctPixelsBelowLuma16": 0.9
+        },
+        {
+          "spawn": "Dining room",
+          "meanL": 113.6,
+          "p5L": 0,
+          "pctPixelsBelowLuma16": 17.7
+        },
+        {
+          "spawn": "Living room",
+          "meanL": 119.4,
+          "p5L": 1.9,
+          "pctPixelsBelowLuma16": 9.6
+        },
+        {
+          "spawn": "Bedroom 1",
+          "meanL": 122.3,
+          "p5L": 4.1,
+          "pctPixelsBelowLuma16": 6.5
+        },
+        {
+          "spawn": "Bedroom 3",
+          "meanL": 140.1,
+          "p5L": 5.2,
+          "pctPixelsBelowLuma16": 7.2
+        },
+        {
+          "spawn": "Bedroom 2",
+          "meanL": 80.3,
+          "p5L": -0.3,
+          "pctPixelsBelowLuma16": 40.3
+        },
+        {
+          "spawn": "Hallway",
+          "meanL": 105.1,
+          "p5L": -0.1,
+          "pctPixelsBelowLuma16": 24.1
+        },
+        {
+          "spawn": "Bathroom 2",
+          "meanL": 114.4,
+          "p5L": 33.6,
+          "pctPixelsBelowLuma16": 1.5
+        },
+        {
+          "spawn": "Stairs",
+          "meanL": 145.9,
+          "p5L": 13.1,
+          "pctPixelsBelowLuma16": 5.2
+        },
+        {
+          "spawn": "Upper hall",
+          "meanL": 144.4,
+          "p5L": 0.6,
+          "pctPixelsBelowLuma16": 9.6
+        },
+        {
+          "spawn": "Upper living room",
+          "meanL": 134.1,
+          "p5L": 1.9,
+          "pctPixelsBelowLuma16": 8
+        },
+        {
+          "spawn": "Upper bedroom",
+          "meanL": 141.1,
+          "p5L": 0.1,
+          "pctPixelsBelowLuma16": 15.2
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 118.7,
+          "p5L": 0,
+          "pctPixelsBelowLuma16": 18.5
+        }
+      ]
+    },
+    "gtao-depthnormals": {
+      "note": "DIAGNOSTIC ONLY, never shipped and never proposed: GTAO with NORMAL_VECTOR_TYPE forced to 0, so normals are reconstructed from the depth buffer and are therefore always camera-facing, immune to the winding defect. Recorded to answer \"what would this pass be worth if the winding were fixed\" without waiting for that fix. It still costs the same full G-buffer scene pass, so it does not rescue the draw-call budget.",
+      "meanL": 144.1,
+      "p5L": 47.1,
+      "contrast_mean_over_p5": 3.059,
+      "pctPixelsBelowLuma16": 0.5,
+      "perSpawn": [
+        {
+          "spawn": "Entry hall",
+          "meanL": 160.7,
+          "p5L": 112,
+          "pctPixelsBelowLuma16": 0.3
+        },
+        {
+          "spawn": "Kitchen",
+          "meanL": 151.6,
+          "p5L": 56.7,
+          "pctPixelsBelowLuma16": 0.7
+        },
+        {
+          "spawn": "Dining room",
+          "meanL": 142.1,
+          "p5L": 65.2,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Living room",
+          "meanL": 131.2,
+          "p5L": 39.7,
+          "pctPixelsBelowLuma16": 2.2
+        },
+        {
+          "spawn": "Bedroom 1",
+          "meanL": 130.4,
+          "p5L": 42.3,
+          "pctPixelsBelowLuma16": 0.8
+        },
+        {
+          "spawn": "Bedroom 3",
+          "meanL": 146,
+          "p5L": 38.5,
+          "pctPixelsBelowLuma16": 1.8
+        },
+        {
+          "spawn": "Bedroom 2",
+          "meanL": 143.9,
+          "p5L": 68.8,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Hallway",
+          "meanL": 140.4,
+          "p5L": 87.7,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Bathroom 2",
+          "meanL": 116.4,
+          "p5L": 34.6,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Stairs",
+          "meanL": 152.5,
+          "p5L": 53,
+          "pctPixelsBelowLuma16": 0.5
+        },
+        {
+          "spawn": "Upper hall",
+          "meanL": 156.5,
+          "p5L": 100.9,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Upper living room",
+          "meanL": 143.2,
+          "p5L": 78.4,
+          "pctPixelsBelowLuma16": 0
+        },
+        {
+          "spawn": "Upper bedroom",
+          "meanL": 158.7,
+          "p5L": 75.9,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 144,
+          "p5L": 49.2,
+          "pctPixelsBelowLuma16": 0.5
+        }
+      ]
+    }
+  },
+  "linearLuminance": {
+    "tool": "tools/luminance.py",
+    "population": "8 of 14 (poseVerified filter, hard-coded in tools/luminance.py)",
+    "note": "Linear-light Rec.709 relative luminance over the compare spots, captured at ?fov=legacy. Diagnostic only -- the poseVerified filter is hard-coded in the tool and no gate is taken from this row. Note that gtao-on scores the BEST contrast of the three, which is exactly why an aggregate contrast number must not be used to choose a configuration: it is rewarding black walls.",
+    "sets": {
+      "gtao-off": {
+        "mean": 0.336,
+        "p5": 0.1041,
+        "contrast": 3.23
+      },
+      "gtao-on": {
+        "mean": 0.3031,
+        "p5": 0.0437,
+        "contrast": 6.94
+      },
+      "gtao-depthnormals": {
+        "mean": 0.3258,
+        "p5": 0.0869,
+        "contrast": 3.75
+      },
+      "photographs": {
+        "mean": 0.3479,
+        "p5": 0.0247,
+        "contrast": 14.08
+      }
+    }
+  },
+  "deltaE2000": {
+    "tool": "tools/delta_e.py --all-spots, ?fov=legacy",
+    "note": "All-spot legacy population -- the one the merge gate (serenity <=16.58, kings-court <=22.44) was set on. Frames re-captured fresh for every scoring pass, stale frames deleted first and the file count on disk asserted. gtao-off reproduces task 2's committed value, which validates the rig.",
+    "meanByPhase": {
+      "gtao-off": 18.78,
+      "gtao-on": 20.47,
+      "gtao-depthnormals": 19.03,
+      "task2Reference": 18.81
+    }
+  },
+  "cost": {
+    "note": "Draw calls through the post chain per CLAUDE.md (info.autoReset off, reset by hand, post.render(0), read, restore); frame time is the median of three runs of 60 composed frames with gl.finish() around each, on ANGLE/Intel UHD 630. Values are [gtao-off, gtao-on]. desktop = 1280x820 @ DPR 1; mobile = 390x844 @ DPR 1.6 (624x1350 buffer, isMobile+hasTouch). Budget: <=400 desktop, <=250 mobile.",
+    "frameMsCaveat": "The frameMs figures in this block DID NOT REPRODUCE. Fix round 1 re-ran the same measurement and all 6 of 6 draw-call figures reproduced exactly -- including the load-bearing kings-court mobile 150->282 -- while frame time disagreed by up to 3x (the same desktop pair came back 23.8 -> 94.1 ms against the 15.4 -> 65.3 ms recorded here). Read frameMs for direction and rough size only, never as an absolute. The re-run, its ranges and its method are in <apt>-b3-task3-cost.json, which supersedes this block for cost; the calls are unaffected and agree across both runs. Note added 2026-08-15 by the whole-branch fix wave: no value in this file was changed.",
+    "spot": "Entry hall (spawns[0])",
+    "desktop": {
+      "calls": [
+        165,
+        311
+      ],
+      "frameMs": [
+        15.4,
+        65.3
+      ]
+    },
+    "mobile": {
+      "calls": [
+        150,
+        282
+      ],
+      "frameMs": [
+        19.1,
+        105.0
+      ]
+    }
+  }
+}

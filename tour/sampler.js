@@ -4,11 +4,17 @@
 // in bake.js with the actual scene geometry.
 //
 // Pure geometry in, numbers out: build() takes THREE.Mesh objects and
-// returns an opaque handle; visibility() and rayHit() query it. This file
-// knows nothing about apartments, bake passes, materials or lightmaps --
-// three consumers (the runtime bake at 8 rays, an offline baker at
-// thousands, furniture vertex AO) each bring their own geometry and ray
-// count. Not wired into bake.js by this task -- see task-1-brief.md.
+// returns an opaque handle; visibility(), rayHit() and rayFirst() query it.
+// This file knows nothing about apartments, bake passes, materials or
+// lightmaps -- each consumer brings its own geometry and ray count. Two of
+// them exist: bake.js's runtime ambient (16 rays, AMB_DIST), and
+// tools/bake_lightmaps.mjs's offline path integrator (thousands of rays,
+// bounces). The integrator itself lives in that tool, not here: it needs
+// albedo, lamps and occluders, and this file deliberately knows about none
+// of those. What it needs from here is rayFirst -- the hit point and normal
+// a bounce continues from -- and one shared cosine-weighted direction
+// sampler, so the offline paths and the runtime hemisphere draw from the
+// same distribution rather than two copies of it.
 // ============================================================
 
 const Sampler = (() => {
@@ -53,14 +59,46 @@ const Sampler = (() => {
   const _T1 = new T.Vector3(), _T2 = new T.Vector3(), _dir = new T.Vector3();
   const _ray = new T.Ray();
 
-  // Orthonormal tangent basis (_T1, _T2) perpendicular to N. Same
+  // Orthonormal tangent basis (T1, T2) perpendicular to N. Same
   // pick-an-axis-not-parallel-to-N trick bake.js's own aoAt() already uses:
   // N close to world Y (a floor/ceiling normal) would make a Y reference
   // degenerate, so swap to X there; anywhere else Y is safe.
-  function tangentBasis(N) {
+  //
+  // The basis vectors are the caller's, not module scratch, because a
+  // recursive caller (a bounce integrator) needs one basis per path depth
+  // and shared scratch would be overwritten by the deeper call. visibility()
+  // still passes the module pair and still builds the basis once per call,
+  // not once per ray.
+  function tangentBasis(N, T1, T2) {
     const nearY = Math.abs(N.y) > 0.9;
-    _T1.set(nearY ? 1 : 0, nearY ? 0 : 1, 0).cross(N).normalize();
-    _T2.crossVectors(N, _T1);
+    T1.set(nearY ? 1 : 0, nearY ? 0 : 1, 0).cross(N).normalize();
+    T2.crossVectors(N, T1);
+  }
+
+  // One cosine-weighted direction about N, written into `out`, given a
+  // tangent basis already built for that N.
+  //
+  // Malley's method: a uniform point on the unit disk, lifted onto the
+  // hemisphere. (lx, ly, lz) is unit length by construction --
+  // lx^2+ly^2+lz^2 = r^2*cos^2 + r^2*sin^2 + (1-r^2) = 1 -- so the
+  // world-space direction below needs no further normalize(), which matters
+  // at the ray counts the offline baker runs.
+  //
+  // One implementation, two callers: visibility() below and the offline
+  // baker's path integrator. The distribution is what selfTest's 90-degree
+  // corner case measures (0.7071 cosine-weighted against 0.48-0.51 for a
+  // uniform-z sampler), so a second copy of this would be a second copy that
+  // nothing tests.
+  function cosineDir(N, T1, T2, out) {
+    const u1 = Math.random(), u2 = Math.random();
+    const r = Math.sqrt(u1), theta = 2 * Math.PI * u2;
+    const lx = r * Math.cos(theta), ly = r * Math.sin(theta), lz = Math.sqrt(Math.max(0, 1 - u1));
+    out.set(
+      T1.x * lx + T2.x * ly + N.x * lz,
+      T1.y * lx + T2.y * ly + N.y * lz,
+      T1.z * lx + T2.z * ly + N.z * lz
+    );
+    return out;
   }
 
   // Occluders are tested double-sided: a surface should block a hemisphere
@@ -79,22 +117,10 @@ const Sampler = (() => {
   // Fraction of a cosine-weighted hemisphere about `normal`, sampled from
   // `point`, that escapes to `maxDist` without hitting handle's geometry.
   function visibility(point, normal, rays, maxDist, handle) {
-    tangentBasis(normal);
+    tangentBasis(normal, _T1, _T2);
     let open = 0;
     for (let i = 0; i < rays; i++) {
-      // Malley's method: a uniform point on the unit disk, lifted onto the
-      // hemisphere. (lx, ly, lz) is unit length by construction --
-      // lx^2+ly^2+lz^2 = r^2*cos^2 + r^2*sin^2 + (1-r^2) = 1 -- so the
-      // world-space direction below needs no further normalize(), which
-      // matters at the ray counts the offline baker runs.
-      const u1 = Math.random(), u2 = Math.random();
-      const r = Math.sqrt(u1), theta = 2 * Math.PI * u2;
-      const lx = r * Math.cos(theta), ly = r * Math.sin(theta), lz = Math.sqrt(Math.max(0, 1 - u1));
-      _dir.set(
-        _T1.x * lx + _T2.x * ly + normal.x * lz,
-        _T1.y * lx + _T2.y * ly + normal.y * lz,
-        _T1.z * lx + _T2.z * ly + normal.z * lz
-      );
+      cosineDir(normal, _T1, _T2, _dir);
       _ray.set(point, _dir);
       const hit = handle.bvh.raycastFirst(_ray, SIDE, SELF_HIT_EPS, maxDist);
       if (!hit) open++;
@@ -110,6 +136,36 @@ const Sampler = (() => {
   function rayHit(origin, dir, maxDist, handle) {
     _ray.set(origin, _dir.copy(dir).normalize());
     return !!handle.bvh.raycastFirst(_ray, SIDE, 0, maxDist);
+  }
+
+  // The same cast as rayHit, but reporting WHERE it landed:
+  //   { point, normal, distance } or null.
+  //
+  // This is the primitive a bounce integrator needs and rayHit cannot give
+  // it -- to continue a light path you have to stand on the surface you hit
+  // and know which way it faces. The BVH is a merged triangle soup with no
+  // normal attribute (build() copies positions only), so `normal` is the
+  // triangle's GEOMETRIC normal, and it is flipped to oppose `dir` -- i.e.
+  // it always faces back toward where the ray came from. That is the only
+  // defensible convention here: occluders are tested DoubleSide, and the
+  // wall meshes in this project are known to be wound backwards on 8 of
+  // their 12 faces (see bake.js's bakeWalls), so triangle winding cannot be
+  // trusted to say which side a ray arrived on. Where the ray came from can.
+  //
+  // `point` and `normal` are freshly allocated by the BVH on every hit, not
+  // module scratch, so a recursive caller can hold one hit while tracing the
+  // next -- shared scratch would be overwritten by the deeper call.
+  //
+  // `near` defaults to SELF_HIT_EPS rather than rayHit's 0, because every
+  // caller of this function is by construction standing on a surface it has
+  // just hit and would otherwise re-hit that same triangle immediately.
+  function rayFirst(origin, dir, maxDist, handle, near) {
+    _ray.set(origin, _dir.copy(dir).normalize());
+    const hit = handle.bvh.raycastFirst(_ray, SIDE, near === undefined ? SELF_HIT_EPS : near, maxDist);
+    if (!hit) return null;
+    const n = hit.face.normal;
+    if (n.dot(_ray.direction) > 0) n.multiplyScalar(-1);
+    return { point: hit.point, normal: n, distance: hit.distance };
   }
 
   // ---- Case group 1: a single floor, analytic either-or answers ----
@@ -195,18 +251,48 @@ const Sampler = (() => {
     const CORNER_TOL = 0.06;                    // see "Tolerance" above
     const cornerVis = Sampler.visibility(cornerP, cornerN, 1024, 300, hCorner);
 
+    // ---- Case group 3: rayFirst, exact hit geometry both ways round ----
+    // The same 20x20 floor at y=0. From P=(0,0.5,3) straight down and from
+    // Pu=(0,-0.5,3) straight up the hit distance is exactly 0.5 in both
+    // cases -- no sampling, no tolerance beyond float noise. The pair exists
+    // for the NORMAL, not the distance: the plane's geometric normal is +y
+    // for both casts (one set of triangles, one winding), so the downward
+    // cast needs no flip and the upward cast needs one. A rayFirst that
+    // returned the raw triangle normal would pass the first and fail the
+    // second, which is exactly the bug that would send a bounce ray onward
+    // THROUGH the surface it just hit instead of back into the room.
+    const hitDown = Sampler.rayFirst(P, down, 50, hFloor);
+    const hitUp = Sampler.rayFirst(new T.Vector3(0, -0.5, 3), up, 50, hFloor);
+
     const results = [
       ['open hemisphere sees sky', openSky > 0.95, openSky],
       ['hemisphere into the floor is blocked', intoFloor < 0.05, intoFloor],
       ['a downward ray hits the floor', Sampler.rayHit(P, down, 50, hFloor) === true, null],
       ['an upward ray escapes', Sampler.rayHit(P, up, 50, hFloor) === false, null],
       ['a 90-degree corner matches the cosine-weighted derivation',
-        Math.abs(cornerVis - CORNER_EXPECTED) < CORNER_TOL, cornerVis]
+        Math.abs(cornerVis - CORNER_EXPECTED) < CORNER_TOL, cornerVis],
+      ['rayFirst lands on the floor at the derived distance, from both sides',
+        !!hitDown && !!hitUp && Math.abs(hitDown.distance - 0.5) < 1e-6 &&
+        Math.abs(hitUp.distance - 0.5) < 1e-6,
+        hitDown && hitUp ? [hitDown.distance, hitUp.distance] : null],
+      ['rayFirst turns the hit normal back toward the ray it came from',
+        !!hitDown && !!hitUp && hitDown.normal.y > 0.999 && hitUp.normal.y < -0.999,
+        hitDown && hitUp ? [hitDown.normal.y, hitUp.normal.y] : null],
+      // Named for what it asserts and no more. An earlier name --
+      // "rayFirst reports nothing where rayHit reports nothing" -- claimed
+      // an equivalence between the two functions that the code does NOT
+      // provide: rayFirst defaults `near` to SELF_HIT_EPS while rayHit
+      // passes 0, so on a ray that starts exactly on a surface they can
+      // legitimately disagree. On THIS geometry (P is 0.5 m clear of the
+      // floor, pointing away from it) both report nothing and the assertion
+      // is true either way -- but the old name generalised it.
+      ['rayFirst returns null on the escaping ray, not a phantom hit',
+        Sampler.rayFirst(P, up, 50, hFloor) === null, null]
     ];
     const failed = results.filter((r) => !r[1]);
     console.log('[sampler] selfTest', failed.length ? 'FAILED' : 'passed', results);
     return failed.length === 0;
   };
 
-  return { build, visibility, rayHit, selfTest };
+  return { build, visibility, rayHit, rayFirst, tangentBasis, cosineDir, selfTest };
 })();

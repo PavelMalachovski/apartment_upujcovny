@@ -1,0 +1,26 @@
+{
+ "files": 11,
+ "imageBytes": 10438,
+ "totalBytes": 13626,
+ "totalKB": 13.3,
+ "ceilingMB": 8,
+ "pctOfCeiling": 0.162,
+ "bakeSeconds": 550.9,
+ "bakeTool": "tools/bake_lightmaps.mjs",
+ "bakeMachine": "ANGLE/D3D11 headless Chromium, Playwright",
+ "settings": {
+  "rays": 2048,
+  "bounces": 2,
+  "albedo": 0.6,
+  "resScale": 1,
+  "maxDist": 0.65,
+  "webpQuality": 1
+ },
+ "roundTrip": {
+  "worstMaxAbsError": 0,
+  "worstMeanAbsError": 0,
+  "note": "every surface decoded back from the WebP it ships as and compared with the canvas it came from; Chrome toDataURL(image/webp, 1) is lossless here"
+ },
+ "hash": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
+ "outcome": "The pack ships on serenity only. Linear contrast, the quantity task 6 gates on, moved 3.385 -> 3.386 against a criterion of >= 4.9 and photographs at 6.197 -- a change of +0.001 against a harness whose own identity residual on that quantity is -0.011 and whose repeat spread is +-0.002. On that population the pack is a near-uniform ~2.5% gain, which a mean/p5 ratio cannot see, and which is the same order as what the exposure re-fit absorbs. All-spot legacy dE2000 moved 16.59 -> 16.75, away from the 16.58 gate. Task 6 owns the verdict."
+}

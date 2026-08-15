@@ -1,0 +1,115 @@
+{
+  "apartment": "horkyone-10",
+  "metric": "post-chain cost: draw calls and frame time, GTAO off vs on",
+  "task": "phase B plan 3, task 3 -- GTAO in the post chain (raw output added in fix round 1)",
+  "spot": "Living room (spawns[0])",
+  "outcome": "GTAO was NOT adopted. It is rejected today because it blackens walls on every device (the deferred winding defect in bake.js grid() -- see the gtao-on phase of horkyone-10-b3-task3-luminance.json). This file records the second ground, which is what would still be standing if the winding were fixed: the pass's G-buffer prepass is a whole extra scene pass, taking kings-court's mobile draw calls to 282 against a hard budget of 250. Desktop stays inside <=400. Full write-up: the OUTCOME block under task 3 in docs/superpowers/plans/2026-08-13-phase-b3-light.md.",
+  "whyThisFileExists": "Fix round 1 of task 3. Every other measurement in this task has a committed raw output; the cost table alone was hand-transcribed into the report and into <apt>-b3-task3-luminance.json from a stdout that nothing captured -- and the mobile draw-call breach is the load-bearing number of one of the two rejection grounds, with a margin of only 32 calls. cost.mjs was therefore re-run on a restored tree with the GTAO wiring from docs/superpowers/rejected/2026-08-13-b3-task3-gtao/gtao-implementation.diff temporarily re-applied, and `raw` below is that run verbatim. The tree was restored afterwards: `git status --porcelain -- tour/` empty, tour/post.js back to blob 09688cd.",
+  "method": "Draw calls through the post chain per CLAUDE.md (info.autoReset off, reset by hand, post.render(0), read, restore). Frame time is the median of three runs of 60 composed frames with gl.finish() around each, after 40 warm-up frames; msOffRange/msOnRange are the min and max of those three runs. GTAO off and on are measured inside ONE page load by toggling pass.enabled, so nothing but the pass differs: EffectComposer skips a disabled pass, making `off` bit-for-bit the chain this task started from. The harness asserts a live post chain and throws if there is none. Script and its verbatim stdout, both preserved: docs/superpowers/rejected/2026-08-13-b3-task3-gtao/{cost.mjs, lib.mjs, cost-rerun.jsonl}.",
+  "harness": "Playwright headless Chromium with --use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist (without them the default GPU is SwiftShader, which post.js's capable() rejects, and the run silently measures no post chain at all). desktop = 1280x820 viewport @ deviceScaleFactor 1; mobile = 390x844 @ deviceScaleFactor 2 with isMobile+hasTouch, which the renderer clamps to pixelRatio 1.6 for a 624x1350 buffer. await window.__bakeReady before every measurement.",
+  "budgetCalls": {
+    "desktop": 400,
+    "mobile": 250
+  },
+  "raw": [
+    {
+      "apt": "horkyone-10",
+      "profile": "desktop",
+      "dpr": 1,
+      "spawn": "Living room",
+      "buffer": [
+        1280,
+        820
+      ],
+      "callsOff": 56,
+      "callsOn": 98,
+      "dCalls": 42,
+      "msOff": 1.675,
+      "msOn": 41.152,
+      "msOffRange": [
+        1.51,
+        1.96
+      ],
+      "msOnRange": [
+        32.23,
+        87.85
+      ]
+    },
+    {
+      "apt": "horkyone-10",
+      "profile": "mobile",
+      "dpr": 1.6,
+      "spawn": "Living room",
+      "buffer": [
+        624,
+        1350
+      ],
+      "callsOff": 54,
+      "callsOn": 94,
+      "dCalls": 40,
+      "msOff": 1.39,
+      "msOn": 25.053,
+      "msOffRange": [
+        1.32,
+        1.5
+      ],
+      "msOnRange": [
+        23.05,
+        64.53
+      ]
+    }
+  ],
+  "reproducesOriginalTable": {
+    "desktop": {
+      "calls": {
+        "originalTable": [
+          56,
+          98
+        ],
+        "rerun": [
+          56,
+          98
+        ],
+        "identical": true
+      },
+      "frameMs": {
+        "originalTable": [
+          1.1,
+          24.5
+        ],
+        "rerun": [
+          1.675,
+          41.152
+        ],
+        "ratioOriginal": 22.3,
+        "ratioRerun": 24.6
+      }
+    },
+    "mobile": {
+      "calls": {
+        "originalTable": [
+          54,
+          94
+        ],
+        "rerun": [
+          54,
+          94
+        ],
+        "identical": true
+      },
+      "frameMs": {
+        "originalTable": [
+          1.0,
+          19.2
+        ],
+        "rerun": [
+          1.39,
+          25.053
+        ],
+        "ratioOriginal": 19.2,
+        "ratioRerun": 18.0
+      }
+    }
+  },
+  "readingIt": "Draw calls reproduce the original table EXACTLY, 6 of 6 figures across three apartments and two profiles -- they are deterministic. Frame time does not and should not be read as if it did: this is a shared integrated GPU, the two runs disagree by up to 3x on the same figure (serenity desktop off: 6.5 ms then 2.1 ms), and the on/off ratio moves with it. What reproduces about frame time is only its direction and rough size -- every apartment, both profiles, both runs, a large multi-fold slowdown. The report already flagged frame time as its weakest number; this run confirms that judgement rather than overturning it."
+}

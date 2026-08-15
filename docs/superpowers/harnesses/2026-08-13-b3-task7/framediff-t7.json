@@ -1,0 +1,443 @@
+{
+  "apartments": {
+    "serenity": [
+      {
+        "frame": "00_Entrance",
+        "baseVsHead": {
+          "meanAbs": 2.589,
+          "p99Abs": 31.33,
+          "maxAbs": 96
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.666,
+          "p99Abs": 12.67,
+          "maxAbs": 81
+        },
+        "signalOverNoise": 3.89,
+        "meanY_base": 139.57,
+        "meanY_head": 140.25
+      },
+      {
+        "frame": "01_Living-Room",
+        "baseVsHead": {
+          "meanAbs": 1.572,
+          "p99Abs": 24.33,
+          "maxAbs": 57
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.258,
+          "p99Abs": 5.67,
+          "maxAbs": 19
+        },
+        "signalOverNoise": 6.09,
+        "meanY_base": 135.17,
+        "meanY_head": 136.32
+      },
+      {
+        "frame": "02_Bedroom",
+        "baseVsHead": {
+          "meanAbs": 3.139,
+          "p99Abs": 32.67,
+          "maxAbs": 67
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.432,
+          "p99Abs": 9.33,
+          "maxAbs": 38
+        },
+        "signalOverNoise": 7.27,
+        "meanY_base": 148.34,
+        "meanY_head": 147.38
+      },
+      {
+        "frame": "03_Bathroom",
+        "baseVsHead": {
+          "meanAbs": 1.531,
+          "p99Abs": 18.67,
+          "maxAbs": 45
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.233,
+          "p99Abs": 5.67,
+          "maxAbs": 12
+        },
+        "signalOverNoise": 6.57,
+        "meanY_base": 139.72,
+        "meanY_head": 139.96
+      },
+      {
+        "frame": "04_Pool-Terrace",
+        "baseVsHead": {
+          "meanAbs": 1.121,
+          "p99Abs": 4.67,
+          "maxAbs": 11
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.095,
+          "p99Abs": 1.67,
+          "maxAbs": 16
+        },
+        "signalOverNoise": 11.8,
+        "meanY_base": 128.95,
+        "meanY_head": 129.49
+      },
+      {
+        "frame": "top",
+        "baseVsHead": {
+          "meanAbs": 0.213,
+          "p99Abs": 3.33,
+          "maxAbs": 61
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.045,
+          "p99Abs": 0.33,
+          "maxAbs": 34
+        },
+        "signalOverNoise": 4.73,
+        "meanY_base": 204.63,
+        "meanY_head": 204.74
+      }
+    ],
+    "kings-court": [
+      {
+        "frame": "00_Entry-hall",
+        "baseVsHead": {
+          "meanAbs": 3.19,
+          "p99Abs": 25.67,
+          "maxAbs": 108
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.351,
+          "p99Abs": 17.67,
+          "maxAbs": 40
+        },
+        "signalOverNoise": 2.36,
+        "meanY_base": 163.38,
+        "meanY_head": 164.6
+      },
+      {
+        "frame": "01_Kitchen",
+        "baseVsHead": {
+          "meanAbs": 3.806,
+          "p99Abs": 33.0,
+          "maxAbs": 91
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.744,
+          "p99Abs": 13.0,
+          "maxAbs": 35
+        },
+        "signalOverNoise": 5.12,
+        "meanY_base": 158.85,
+        "meanY_head": 158.72
+      },
+      {
+        "frame": "02_Dining-room",
+        "baseVsHead": {
+          "meanAbs": 3.504,
+          "p99Abs": 28.0,
+          "maxAbs": 95
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.383,
+          "p99Abs": 17.67,
+          "maxAbs": 42
+        },
+        "signalOverNoise": 2.53,
+        "meanY_base": 145.68,
+        "meanY_head": 146.49
+      },
+      {
+        "frame": "03_Living-room",
+        "baseVsHead": {
+          "meanAbs": 5.212,
+          "p99Abs": 28.0,
+          "maxAbs": 103
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.415,
+          "p99Abs": 7.67,
+          "maxAbs": 36
+        },
+        "signalOverNoise": 12.56,
+        "meanY_base": 144.2,
+        "meanY_head": 139.91
+      },
+      {
+        "frame": "04_Bedroom-1",
+        "baseVsHead": {
+          "meanAbs": 6.615,
+          "p99Abs": 52.67,
+          "maxAbs": 85
+        },
+        "headVsHead_control": {
+          "meanAbs": 4.887,
+          "p99Abs": 55.0,
+          "maxAbs": 69
+        },
+        "signalOverNoise": 1.35,
+        "meanY_base": 136.17,
+        "meanY_head": 135.66
+      },
+      {
+        "frame": "05_Bedroom-3",
+        "baseVsHead": {
+          "meanAbs": 2.368,
+          "p99Abs": 16.0,
+          "maxAbs": 102
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.772,
+          "p99Abs": 8.33,
+          "maxAbs": 51
+        },
+        "signalOverNoise": 3.07,
+        "meanY_base": 151.8,
+        "meanY_head": 152.13
+      },
+      {
+        "frame": "06_Bedroom-2",
+        "baseVsHead": {
+          "meanAbs": 3.059,
+          "p99Abs": 29.0,
+          "maxAbs": 145
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.144,
+          "p99Abs": 18.0,
+          "maxAbs": 146
+        },
+        "signalOverNoise": 2.67,
+        "meanY_base": 149.51,
+        "meanY_head": 149.62
+      },
+      {
+        "frame": "07_Hallway",
+        "baseVsHead": {
+          "meanAbs": 2.924,
+          "p99Abs": 20.0,
+          "maxAbs": 54
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.279,
+          "p99Abs": 14.67,
+          "maxAbs": 44
+        },
+        "signalOverNoise": 2.29,
+        "meanY_base": 144.79,
+        "meanY_head": 145.84
+      },
+      {
+        "frame": "08_Bathroom-2",
+        "baseVsHead": {
+          "meanAbs": 4.968,
+          "p99Abs": 58.0,
+          "maxAbs": 100
+        },
+        "headVsHead_control": {
+          "meanAbs": 3.456,
+          "p99Abs": 54.0,
+          "maxAbs": 94
+        },
+        "signalOverNoise": 1.44,
+        "meanY_base": 120.82,
+        "meanY_head": 120.6
+      },
+      {
+        "frame": "09_Stairs",
+        "baseVsHead": {
+          "meanAbs": 3.25,
+          "p99Abs": 20.0,
+          "maxAbs": 130
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.592,
+          "p99Abs": 16.33,
+          "maxAbs": 39
+        },
+        "signalOverNoise": 2.04,
+        "meanY_base": 158.4,
+        "meanY_head": 159.73
+      },
+      {
+        "frame": "10_Upper-hall",
+        "baseVsHead": {
+          "meanAbs": 3.778,
+          "p99Abs": 26.0,
+          "maxAbs": 127
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.745,
+          "p99Abs": 19.0,
+          "maxAbs": 87
+        },
+        "signalOverNoise": 2.17,
+        "meanY_base": 159.92,
+        "meanY_head": 160.47
+      },
+      {
+        "frame": "11_Upper-living-room",
+        "baseVsHead": {
+          "meanAbs": 2.329,
+          "p99Abs": 16.67,
+          "maxAbs": 132
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.556,
+          "p99Abs": 13.33,
+          "maxAbs": 46
+        },
+        "signalOverNoise": 4.19,
+        "meanY_base": 147.13,
+        "meanY_head": 147.96
+      },
+      {
+        "frame": "12_Upper-bedroom",
+        "baseVsHead": {
+          "meanAbs": 1.86,
+          "p99Abs": 14.0,
+          "maxAbs": 127
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.473,
+          "p99Abs": 10.33,
+          "maxAbs": 125
+        },
+        "signalOverNoise": 3.93,
+        "meanY_base": 161.74,
+        "meanY_head": 162.35
+      },
+      {
+        "frame": "13_Terrace",
+        "baseVsHead": {
+          "meanAbs": 5.713,
+          "p99Abs": 86.33,
+          "maxAbs": 136
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.057,
+          "p99Abs": 19.33,
+          "maxAbs": 54
+        },
+        "signalOverNoise": 5.4,
+        "meanY_base": 152.99,
+        "meanY_head": 149.66
+      },
+      {
+        "frame": "top",
+        "baseVsHead": {
+          "meanAbs": 0.627,
+          "p99Abs": 18.0,
+          "maxAbs": 112
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.354,
+          "p99Abs": 12.0,
+          "maxAbs": 56
+        },
+        "signalOverNoise": 1.77,
+        "meanY_base": 203.28,
+        "meanY_head": 203.3
+      }
+    ],
+    "horkyone-10": [
+      {
+        "frame": "00_Living-room",
+        "baseVsHead": {
+          "meanAbs": 3.463,
+          "p99Abs": 36.0,
+          "maxAbs": 73
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.429,
+          "p99Abs": 11.67,
+          "maxAbs": 29
+        },
+        "signalOverNoise": 8.07,
+        "meanY_base": 144.4,
+        "meanY_head": 142.62
+      },
+      {
+        "frame": "01_Bedroom",
+        "baseVsHead": {
+          "meanAbs": 2.605,
+          "p99Abs": 23.67,
+          "maxAbs": 62
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.961,
+          "p99Abs": 9.33,
+          "maxAbs": 35
+        },
+        "signalOverNoise": 2.71,
+        "meanY_base": 154.13,
+        "meanY_head": 155.17
+      },
+      {
+        "frame": "02_Bathroom",
+        "baseVsHead": {
+          "meanAbs": 4.539,
+          "p99Abs": 10.67,
+          "maxAbs": 79
+        },
+        "headVsHead_control": {
+          "meanAbs": 1.583,
+          "p99Abs": 3.67,
+          "maxAbs": 6
+        },
+        "signalOverNoise": 2.87,
+        "meanY_base": 137.66,
+        "meanY_head": 135.51
+      },
+      {
+        "frame": "03_Hall",
+        "baseVsHead": {
+          "meanAbs": 3.36,
+          "p99Abs": 53.67,
+          "maxAbs": 85
+        },
+        "headVsHead_control": {
+          "meanAbs": 2.559,
+          "p99Abs": 57.67,
+          "maxAbs": 63
+        },
+        "signalOverNoise": 1.31,
+        "meanY_base": 131.42,
+        "meanY_head": 133.12
+      },
+      {
+        "frame": "04_Terrace",
+        "baseVsHead": {
+          "meanAbs": 1.776,
+          "p99Abs": 11.33,
+          "maxAbs": 103
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.271,
+          "p99Abs": 1.33,
+          "maxAbs": 104
+        },
+        "signalOverNoise": 6.55,
+        "meanY_base": 149.88,
+        "meanY_head": 150.92
+      },
+      {
+        "frame": "top",
+        "baseVsHead": {
+          "meanAbs": 0.27,
+          "p99Abs": 3.33,
+          "maxAbs": 59
+        },
+        "headVsHead_control": {
+          "meanAbs": 0.069,
+          "p99Abs": 0.67,
+          "maxAbs": 36
+        },
+        "signalOverNoise": 3.91,
+        "meanY_base": 202.85,
+        "meanY_head": 203.0
+      }
+    ]
+  },
+  "method": "900x560, full post chain, one frame per spawns[] entry plus the raw top-down cutaway. meanAbs is the mean per-pixel |dRGB| over 0-255. signalOverNoise = BASE-vs-HEAD meanAbs / HEAD-vs-HEAD meanAbs; a value near 1 means the frame is dominated by materials.js texture randomisation and nothing can be read from it."
+}

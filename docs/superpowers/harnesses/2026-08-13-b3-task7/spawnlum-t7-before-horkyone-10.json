@@ -1,0 +1,47 @@
+{
+  "label": "t7-before-horkyone-10",
+  "apt": "horkyone-10",
+  "yawOk": true,
+  "errors": [],
+  "pooled": {
+    "meanL": 143.6,
+    "p5L": 98.7,
+    "pctPixelsBelowLuma16": 0.1
+  },
+  "per": [
+    {
+      "spawn": "Living room",
+      "meanL": 144.3,
+      "p5L": 100.4,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Bedroom",
+      "meanL": 154.2,
+      "p5L": 119.4,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bathroom",
+      "meanL": 138,
+      "p5L": 115.4,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Hall",
+      "meanL": 131.5,
+      "p5L": 93,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Terrace",
+      "meanL": 150,
+      "p5L": 72,
+      "pctPixelsBelowLuma16": 0.5
+    }
+  ],
+  "issues": [],
+  "bakeMs": 6625,
+  "exposure": 0.45,
+  "contrast_mean_over_p5": 1.455
+}

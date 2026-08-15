@@ -1,0 +1,321 @@
+{
+  "apartment": "serenity",
+  "task": "phase B plan 3, task 6 -- does the offline lightmap pack earn its cost",
+  "verdict": "NO-GO",
+  "verdictSummary": "The offline lightmap pack fails its exit criterion. Linear-domain contrast measures 3.3840 with the pack against a threshold of >= 4.9: it would have to rise by 44.8% to pass, and it does not move at all -- 3.3870 without the pack, 3.3840 with it, a change of -0.0030 against a same-state repeat spread of +-0.002 whose sign is not even stable between this run and task 5. The blind A/B returned 5 of 6, short of the 6/6 fixed before viewing (P(>=5 of 6) = 0.109 under guessing), and every call leaned on a magnified flat-surface patch rather than on the frames at viewing size. Both halves of the criterion fail; the conjunction fails on the contrast half alone, whatever the A/B had returned. THE PACK IS NOT A NO-OP -- it lifts the ceiling/wall perimeter and the floor near obstructions by up to ~100 of 255 locally -- but the gated statistic cannot see that, and the criterion is applied to the gated statistic.",
+  "criterion": {
+    "threshold": 4.9,
+    "text": "Go if the linear-domain contrast reaches >= 4.9 AND the blind A/B is visible.",
+    "derivationNote": "The plan derives 4.9 as a third of a 3.6 -> 7.6 gap. Those anchors are STALE -- they belong to the phase A series plan 2 closed, measured through the broken fixed-72-degree camera, which the metrics README says \"cannot be converted into the corrected one; it can only be ended\". The live numbers are render 3.38 and photographs 6.197-6.200, and a third of THAT gap is 4.32. The human partner was asked and ruled HOLD 4.9 LITERALLY, the strictest reading of \"not renegotiable\", knowing it makes the bar harder than its own stated derivation. 4.9 is what is applied here and 4.32 is not.",
+    "comparison": "Offline lightmap pack vs. the runtime bake -- pack on against pack off. The brief says \"against GTAO-only\"; there is no GTAO. Task 3 vendored GTAOPass, measured it and rejected it, and no tour/ file adopted it (docs/superpowers/rejected/2026-08-13-b3-task3-gtao/).",
+    "contrastHalf": {
+      "measured": 3.384,
+      "required": 4.9,
+      "met": false,
+      "shortfallPct": 44.8
+    },
+    "visibleHalf": {
+      "hits": 5,
+      "of": 6,
+      "requiredForVisible": 6,
+      "met": false,
+      "pValueUnderGuessing": 0.1094
+    },
+    "conjunction": false
+  },
+  "linearLuminance": {
+    "tool": "tools/luminance.py estimator, at full precision, via linear.py",
+    "population": "2 of 11. tools/luminance.py:60 filters through delta_e.scorable, which requires poseVerified; serenity has exactly two that pass, 1.webp (Bathroom) and 11.webp (Bedroom). Both are among the highest-p5 rooms in the flat, i.e. the least shadow available to change; the darkest spawn (Entrance) is NOT in this population, and it is the one place task 5 measured a genuine fill signature.",
+    "capture": "?fov=legacy, full post chain, exposure 0.329, ?v=104, frames re-captured for every set. The two sides are the same build; the only difference is whether tour/lightmaps/serenity/ is on disk.",
+    "contrastDerivation": "ratio of the UNROUNDED aggregates, not of the rounded mean and p5 quoted beside them",
+    "remeasured": {
+      "runtime-bake": {
+        "mean": 0.282078,
+        "p5": 0.083283,
+        "contrast": 3.387,
+        "n": 2,
+        "captures": [
+          [
+            0.28202,
+            0.083283
+          ],
+          [
+            0.282136,
+            0.083283
+          ]
+        ],
+        "contrastPerCapture": [
+          3.3863,
+          3.3877
+        ]
+      },
+      "offline-pack": {
+        "mean": 0.288891,
+        "p5": 0.085369,
+        "contrast": 3.384,
+        "n": 2,
+        "captures": [
+          [
+            0.288839,
+            0.085348
+          ],
+          [
+            0.288942,
+            0.08539
+          ]
+        ],
+        "contrastPerCapture": [
+          3.3843,
+          3.3838
+        ]
+      },
+      "photographs": {
+        "mean": 0.299289,
+        "p5": 0.048274,
+        "contrast": 6.1998
+      }
+    },
+    "inherited": {
+      "source": "docs/superpowers/metrics/serenity-b3-task5-luminance.json",
+      "runtime-bake": {
+        "mean": 0.282,
+        "p5": 0.0833,
+        "contrast": 3.385,
+        "n": 4,
+        "contrastRange": [
+          3.383,
+          3.387
+        ]
+      },
+      "offline-pack": {
+        "mean": 0.289,
+        "p5": 0.0854,
+        "contrast": 3.386,
+        "n": 4,
+        "contrastRange": [
+          3.384,
+          3.387
+        ]
+      },
+      "photographs": {
+        "mean": 0.2993,
+        "p5": 0.0483,
+        "contrast": 6.197
+      },
+      "deltaE_allspot_legacy": {
+        "before": 16.59,
+        "after": 16.75
+      }
+    },
+    "inheritanceCheck": "Every re-measured figure lands inside the range task 5 committed for the same state, so its numbers are inherited with a check rather than on trust. Re-measured contrast: runtime bake 3.3870 (task 5: 3.385, range 3.383-3.387), offline pack 3.3840 (task 5: 3.386, range 3.384-3.387). NOTE THE SIGN: task 5 measured the pack +0.001 on contrast and this run measures it -0.0030. Both are inside the same-state spread, which is the finding -- the change is not resolvable by either run, in either direction.",
+    "gainShape": {
+      "meanRatio": 1.02415,
+      "p5Ratio": 1.02505,
+      "differencePp": 0.089,
+      "note": "On THIS population the pack is a near-uniform gain of ~2.4-2.5%, and a mean/p5 ratio is blind to a uniform gain by construction. This reproduces task 5 (mean x1.02482, p5 x1.02461) including that the mean/p5 ordering is not resolvable: task 5 had mean marginally ahead, this run has p5 marginally ahead, both by less than a tenth of a percentage point."
+    }
+  },
+  "blindAB": {
+    "method": "Six side-by-side pairs, left half = A, right half = B. For each pair, name the half carrying the offline lightmap pack. Forced binary choice; confidence recorded but not used to weight the score. Decision rule fixed BEFORE viewing: 'visible' is met only at 6/6 correct (P(6/6) under guessing = 1/64 = 0.016); 5/6 is P>=5 = 7/64 = 0.109 and does not clear it. Prior used for the calls: the pack adds bounce light, so the pack half should be the brighter one wherever the two differ.",
+    "aids": "Primary read is the full-size side-by-side. Two supplementary blind aids were built from the SAME composites without ever reading the mapping: a mirror-seam stack (t6ab/zoom/, judged unreadable against this geometry and not used) and 3-4x magnified flat-surface patches butted A|B (t6ab/patch/), restricted to floors and ceilings because walls carry no lightmap and cannot differ.",
+    "poses": [
+      "entrance-spawn",
+      "entrance-floor-down",
+      "bathroom-spawn",
+      "bedroom-spawn",
+      "living-room-spawn",
+      "kitchen-hall-spot5"
+    ],
+    "poseSelection": "Six poses fixed before any frame was looked at, weighted TOWARD where the pack can act: it lightmaps floors, ceilings and attic slopes only. The outdoor Pool Terrace spawn was excluded because it bakes with no gather and could not differ. The deck is stacked in favour of visibility on purpose.",
+    "callsWrittenBeforeReveal": true,
+    "graded": [
+      {
+        "pair": 1,
+        "pose": "entrance-spawn",
+        "call": "B",
+        "confidence": "moderate",
+        "packWasOn": "B",
+        "correct": true
+      },
+      {
+        "pair": 2,
+        "pose": "entrance-floor-down",
+        "call": "B",
+        "confidence": "low-moderate",
+        "packWasOn": "A",
+        "correct": false
+      },
+      {
+        "pair": 3,
+        "pose": "bathroom-spawn",
+        "call": "A",
+        "confidence": "moderate",
+        "packWasOn": "A",
+        "correct": true
+      },
+      {
+        "pair": 4,
+        "pose": "bedroom-spawn",
+        "call": "B",
+        "confidence": "moderate",
+        "packWasOn": "B",
+        "correct": true
+      },
+      {
+        "pair": 5,
+        "pose": "living-room-spawn",
+        "call": "B",
+        "confidence": "low",
+        "packWasOn": "B",
+        "correct": true
+      },
+      {
+        "pair": 6,
+        "pose": "kitchen-hall-spot5",
+        "call": "A",
+        "confidence": "low",
+        "packWasOn": "A",
+        "correct": true
+      }
+    ],
+    "hits": 5,
+    "of": 6,
+    "pValueUnderGuessing": 0.1094,
+    "preRegisteredBar": "visible only at 6/6, because P(6/6) = 1/64 = 0.016 while P(>=5/6) = 7/64 = 0.109 does not clear 0.05 at n = 6",
+    "result": "5 of 6. Above the 3 expected from guessing and short of the pre-registered 6/6; at n = 6 this is not distinguishable from chance. The load-bearing observation is not the hit rate: at full viewing size none of the six pairs could be separated, and every call leans on a 3-4x magnified patch of a flat floor or ceiling. On pair 3 the full-frame impression was the OPPOSITE of the patch reading and the patch was right, which is recorded in calls.json rather than quietly dropped.",
+    "perPoseObjectiveDelta": [
+      {
+        "pose": "entrance-spawn",
+        "meanLumaOff": 140.28,
+        "meanLumaOn": 142.4,
+        "meanDelta": 2.115,
+        "meanRatio": 1.01508,
+        "p5Off": 64.0,
+        "p5On": 67.26,
+        "p5Delta": 3.256,
+        "pctPixelsUnchanged": 55.7,
+        "pctPixelsOver10": 8.15,
+        "pctPixelsOver25": 1.08,
+        "maxAbsDelta": 101.7,
+        "p99AbsDelta": 25.2
+      },
+      {
+        "pose": "entrance-floor-down",
+        "meanLumaOff": 135.61,
+        "meanLumaOn": 136.67,
+        "meanDelta": 1.061,
+        "meanRatio": 1.00783,
+        "p5Off": 69.19,
+        "p5On": 71.14,
+        "p5Delta": 1.944,
+        "pctPixelsUnchanged": 41.6,
+        "pctPixelsOver10": 5.27,
+        "pctPixelsOver25": 0.42,
+        "maxAbsDelta": 102.6,
+        "p99AbsDelta": 21.57
+      },
+      {
+        "pose": "bathroom-spawn",
+        "meanLumaOff": 139.84,
+        "meanLumaOn": 141.46,
+        "meanDelta": 1.623,
+        "meanRatio": 1.0116,
+        "p5Off": 97.85,
+        "p5On": 98.78,
+        "p5Delta": 0.932,
+        "pctPixelsUnchanged": 76.3,
+        "pctPixelsOver10": 5.96,
+        "pctPixelsOver25": 2.17,
+        "maxAbsDelta": 50.0,
+        "p99AbsDelta": 33.0
+      },
+      {
+        "pose": "bedroom-spawn",
+        "meanLumaOff": 147.41,
+        "meanLumaOn": 149.33,
+        "meanDelta": 1.922,
+        "meanRatio": 1.01304,
+        "p5Off": 87.76,
+        "p5On": 89.83,
+        "p5Delta": 2.072,
+        "pctPixelsUnchanged": 66.2,
+        "pctPixelsOver10": 6.99,
+        "pctPixelsOver25": 1.24,
+        "maxAbsDelta": 52.9,
+        "p99AbsDelta": 25.86
+      },
+      {
+        "pose": "living-room-spawn",
+        "meanLumaOff": 136.23,
+        "meanLumaOn": 137.79,
+        "meanDelta": 1.559,
+        "meanRatio": 1.01145,
+        "p5Off": 82.14,
+        "p5On": 82.14,
+        "p5Delta": 0.0,
+        "pctPixelsUnchanged": 51.6,
+        "pctPixelsOver10": 3.24,
+        "pctPixelsOver25": 0.02,
+        "maxAbsDelta": 29.8,
+        "p99AbsDelta": 17.07
+      },
+      {
+        "pose": "kitchen-hall-spot5",
+        "meanLumaOff": 143.97,
+        "meanLumaOn": 146.46,
+        "meanDelta": 2.484,
+        "meanRatio": 1.01725,
+        "p5Off": 88.0,
+        "p5On": 92.28,
+        "p5Delta": 4.281,
+        "pctPixelsUnchanged": 41.6,
+        "pctPixelsOver10": 7.0,
+        "pctPixelsOver25": 2.0,
+        "maxAbsDelta": 45.9,
+        "p99AbsDelta": 30.28
+      }
+    ],
+    "objectiveNote": "Measured AFTER the calls were written and the mapping opened. The pack is not a no-op: per pose the sRGB mean rises 0.8-1.7%, 24-58% of pixels move at all, 3-8% move by >= 10 of 255 and the largest single-pixel move is ~100. diff/diff1.png and diff/diff6.png show WHERE -- a band along the ceiling/wall perimeter and the floor beside obstructions, which is the near-field crevice fill a 0.65 m gather on lightmapped surfaces predicts. Note the tension with gainShape above and do not flatten it: on these six full frames the effect is CONCENTRATED, while on the two gated spots it measures near-uniform. Both were measured; the gate is applied to the second."
+  },
+  "deltaESpotCheck": {
+    "note": "All-spot legacy dE2000, tools/delta_e.py native output, run as a second check on an inherited number rather than as a gate. Task 6 gates on contrast and the A/B, not on this.",
+    "before": 16.61,
+    "after": 16.71,
+    "delta": 0.1,
+    "population": "all-spot",
+    "scored": 11,
+    "compareTotal": 11,
+    "inherited": {
+      "before": 16.59,
+      "after": 16.75
+    },
+    "agreement": "Direction reproduces -- the pack moves this metric the wrong way, away from the 16.58 ceiling. Magnitude is smaller than task 5 recorded (+0.10 here vs +0.16 there). The before reading of 16.61 sits inside the 16.60-16.62 the metrics README records for that state."
+  },
+  "shipOrRevert": {
+    "decided": false,
+    "owner": "the human partner",
+    "why": "The plan says a failure means \"do not carry lightmaps to the other two apartments\". It does NOT say whether serenity keeps its pilot pack or reverts to the runtime bake, and those differ by 13,626 bytes of shipped assets, eleven extra HTTP requests, and by whether the product ships a feature that failed its own exit criterion. Task 6 records the verdict and the costs and recommends; it does not decide, and it left the shipped state exactly as task 5 committed it.",
+    "recommendation": "revert serenity to the runtime bake",
+    "recommendationReasons": [
+      "It failed the exit criterion the plan set for it, and the point of an exit criterion is that failing it means not shipping.",
+      "It moves the merge gate the wrong way: all-spot legacy dE 16.61 -> 16.71 here, 16.59 -> 16.75 in task 5, against a ceiling of 16.58 that serenity already misses by 0.03.",
+      "It costs eleven extra HTTP requests and does not buy load time -- the texel loop it skips is 233 ms of a ~2.6 s Baker.run, while the requests measured 4.5-6.8 s of wall time against the dev server.",
+      "Shipping it obliges an exposure and bloom re-fit under the phase's own standing rule, which reopens task 4, and task 5 measured the pack's whole effect on the gated population to be of a kind that re-fit would undo.",
+      "Nothing is lost by reverting: tools/bake_lightmaps.mjs, tour/lightmaps.js, the guard and the pack itself all stay in git history, so reconsidering costs a checkout rather than a redo."
+    ],
+    "againstReverting": [
+      "The pack is real and structured -- the difference maps show genuine crevice fill on ceilings and floors -- and 13.6 KB is 0.16% of the 8 MB ceiling, so the cost of keeping it is small.",
+      "Keeping it is the only way the loader, the manifest hash and the per-surface geometry guard stay exercised by a real pack in production.",
+      "Reverting and later re-adopting costs another 551 s bake plus the exposure re-fit either way."
+    ]
+  },
+  "shippedStateAtVerdict": {
+    "note": "Unchanged by this task. No tour/ or tools/ file was modified.",
+    "lightmapsFlag": true,
+    "packFiles": 11,
+    "packBytes": 13626,
+    "manifestHash": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
+    "cacheVersion": 104,
+    "exposure": 0.329
+  }
+}

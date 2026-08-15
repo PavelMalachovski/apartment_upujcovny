@@ -1,0 +1,47 @@
+{
+  "label": "t7-before-serenity",
+  "apt": "serenity",
+  "yawOk": true,
+  "errors": [],
+  "pooled": {
+    "meanL": 138.3,
+    "p5L": 80,
+    "pctPixelsBelowLuma16": 0
+  },
+  "per": [
+    {
+      "spawn": "Entrance",
+      "meanL": 139.4,
+      "p5L": 68.1,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Living Room",
+      "meanL": 135,
+      "p5L": 81.2,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bedroom",
+      "meanL": 148.3,
+      "p5L": 94.4,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bathroom",
+      "meanL": 139.6,
+      "p5L": 100.2,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Pool Terrace",
+      "meanL": 129.1,
+      "p5L": 75.4,
+      "pctPixelsBelowLuma16": 0
+    }
+  ],
+  "issues": [],
+  "bakeMs": 5189,
+  "exposure": 0.326,
+  "contrast_mean_over_p5": 1.729
+}

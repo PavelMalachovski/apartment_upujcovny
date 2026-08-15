@@ -1,0 +1,56 @@
+{
+  "label": "identity-res1-b0",
+  "apt": "serenity",
+  "yawOk": true,
+  "errors": [],
+  "pooled": {
+    "meanL": 138.6,
+    "p5L": 80,
+    "pctPixelsBelowLuma16": 0.1
+  },
+  "per": [
+    {
+      "spawn": "Entrance",
+      "meanL": 140.2,
+      "p5L": 65.5,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Living Room",
+      "meanL": 136.2,
+      "p5L": 81.7,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bedroom",
+      "meanL": 147.4,
+      "p5L": 88.1,
+      "pctPixelsBelowLuma16": 0.4
+    },
+    {
+      "spawn": "Bathroom",
+      "meanL": 139.8,
+      "p5L": 98.2,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Pool Terrace",
+      "meanL": 129.7,
+      "p5L": 75.9,
+      "pctPixelsBelowLuma16": 0
+    }
+  ],
+  "lightmaps": {
+    "status": "ok",
+    "dir": "lightmaps/serenity/",
+    "hash": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
+    "want": "53377a0816c2bd63f9f8bdd07ed4ccfd3d702f654fe0264b5e633303c54951bf",
+    "loaded": 10,
+    "total": 10
+  },
+  "ambSampled": true,
+  "issues": [],
+  "bakeMs": 4987,
+  "exposure": 0.329,
+  "contrast_mean_over_p5": 1.733
+}

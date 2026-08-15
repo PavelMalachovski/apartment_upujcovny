@@ -1,0 +1,67 @@
+{
+  "apartment": "serenity",
+  "phase": "b3-task5-after-legacy-allspots",
+  "population": "all-spot",
+  "mean": 16.75,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "deltaE": 19.05
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "deltaE": 18.11
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "deltaE": 15.36
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "deltaE": 14.54
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "deltaE": 11.49
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "deltaE": 16.78
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "deltaE": 19.41
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom",
+      "deltaE": 12.03
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "deltaE": 19.31
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "deltaE": 25.09
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "deltaE": 13.13
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "skippedPoseVerification": 0,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}
