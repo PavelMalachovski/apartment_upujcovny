@@ -1,0 +1,247 @@
+{
+  "task": "phase B plan 4a task 4 - closing gate, two trees at once",
+  "date": "2026-08-15",
+  "method": "HEAD f0315ea served on :8742 and a detached worktree at the branch merge-base b39a99a served on :8743, from one Playwright session on one machine. Three interleaved rounds per arm (HEAD then BASE within each round). tools/ is byte-identical between the two commits, so both arms ran the same delta_e.py and the same measure.js; each arm was scored by its own tree's copy.",
+  "merge_base_confirmed": "git merge-base HEAD main -> b39a99a1f41fbe3a9a88c8e932363f5f6c0a23f0",
+  "camera": "?fov=legacy (fixed 72 deg vertical, aspect only)",
+  "population": "all-spot (--all-spots), serenity 11 of 11, kings-court 14 of 14",
+  "gate_halves_verified": {
+    "measure.js ?fov=legacy": "present (HEAD and BASE)",
+    "delta_e.py --all-spots": "present (HEAD and BASE)"
+  },
+  "save_endpoint_probe": "POST /save/__probe.txt wrote a real 4-byte file on BOTH ports before any capture",
+  "environment": {
+    "gpu": "ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "ua": "Chrome/152.0.0.0 Windows NT 10.0 Win64 x64",
+    "note": "same machine class as plan 4a tasks 2 and 3"
+  },
+  "arms": {
+    "HEAD": {
+      "commit": "f0315ea",
+      "v": 110,
+      "exposure": {
+        "serenity": 0.295,
+        "kings-court": 0.52,
+        "horkyone-10": 0.42
+      }
+    },
+    "BASE": {
+      "commit": "b39a99a",
+      "v": 107,
+      "exposure": {
+        "serenity": 0.329,
+        "kings-court": 0.575,
+        "horkyone-10": 0.46
+      }
+    }
+  },
+  "readings": {
+    "serenity": {
+      "BASE": {
+        "rounds": [
+          {
+            "file": "serenity-b4a-task4-BASE-legacy-allspots.json",
+            "mean_field": 16.62,
+            "mean_of_spots": 16.6173,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "serenity-b4a-task4-run2-BASE-b39a99a-legacy-allspots.json",
+            "mean_field": 16.62,
+            "mean_of_spots": 16.6182,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "serenity-b4a-task4-run3-BASE-b39a99a-legacy-allspots.json",
+            "mean_field": 16.6,
+            "mean_of_spots": 16.5973,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          }
+        ],
+        "values": [
+          16.6173,
+          16.6182,
+          16.5973
+        ],
+        "mean3": 16.6109,
+        "median3": 16.6173,
+        "spread": 0.0209
+      },
+      "HEAD": {
+        "rounds": [
+          {
+            "file": "serenity-b4a-task4-gate-legacy-allspots.json",
+            "mean_field": 15.99,
+            "mean_of_spots": 15.9891,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "serenity-b4a-task4-run2-HEAD-f0315ea-legacy-allspots.json",
+            "mean_field": 16.01,
+            "mean_of_spots": 16.0055,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "serenity-b4a-task4-run3-HEAD-f0315ea-legacy-allspots.json",
+            "mean_field": 16.0,
+            "mean_of_spots": 15.9973,
+            "scored": 11,
+            "compareTotal": 11,
+            "skippedPoseVerification": 0
+          }
+        ],
+        "values": [
+          15.9891,
+          16.0055,
+          15.9973
+        ],
+        "mean3": 15.9973,
+        "median3": 15.9973,
+        "spread": 0.0164
+      },
+      "movement_HEAD_minus_BASE": -0.6136
+    },
+    "kings-court": {
+      "BASE": {
+        "rounds": [
+          {
+            "file": "kings-court-b4a-task4-BASE-legacy-allspots.json",
+            "mean_field": 18.84,
+            "mean_of_spots": 18.8443,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "kings-court-b4a-task4-run2-BASE-b39a99a-legacy-allspots.json",
+            "mean_field": 18.89,
+            "mean_of_spots": 18.8921,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "kings-court-b4a-task4-run3-BASE-b39a99a-legacy-allspots.json",
+            "mean_field": 18.9,
+            "mean_of_spots": 18.9,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          }
+        ],
+        "values": [
+          18.8443,
+          18.8921,
+          18.9
+        ],
+        "mean3": 18.8788,
+        "median3": 18.8921,
+        "spread": 0.0557
+      },
+      "HEAD": {
+        "rounds": [
+          {
+            "file": "kings-court-b4a-task4-gate-legacy-allspots.json",
+            "mean_field": 18.59,
+            "mean_of_spots": 18.5864,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "kings-court-b4a-task4-run2-HEAD-f0315ea-legacy-allspots.json",
+            "mean_field": 18.56,
+            "mean_of_spots": 18.5643,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          },
+          {
+            "file": "kings-court-b4a-task4-run3-HEAD-f0315ea-legacy-allspots.json",
+            "mean_field": 18.58,
+            "mean_of_spots": 18.5764,
+            "scored": 14,
+            "compareTotal": 14,
+            "skippedPoseVerification": 0
+          }
+        ],
+        "values": [
+          18.5864,
+          18.5643,
+          18.5764
+        ],
+        "mean3": 18.5757,
+        "median3": 18.5764,
+        "spread": 0.0221
+      },
+      "movement_HEAD_minus_BASE": -0.3031
+    }
+  },
+  "probes": {
+    "purpose": "Counterfactual exposures: what each apartment's fit would have chosen on the poseVerified population instead of the mandated all-spot one, per task 3's own luminance-slope decomposition (kings-court ~0.56, serenity ~0.306). Applied as a runtime renderer.toneMappingExposure override on the HEAD tree only; NO apartment JSON was touched. These split the measured movement into a render part and a fit-population-convention part directly, instead of propagating task 3's ratio.",
+    "caveat": "0.56 and 0.306 are task 3's estimates of the counterfactual fit, not re-fitted here. The split is exact conditional on those two numbers.",
+    "serenity": {
+      "counterfactual_exposure": 0.306,
+      "reading": {
+        "file": "serenity-b4a-task4-probe-HEAD-f0315ea-e0.306-legacy-allspots.json",
+        "mean_field": 16.08,
+        "mean_of_spots": 16.0836,
+        "scored": 11,
+        "compareTotal": 11,
+        "skippedPoseVerification": 0
+      },
+      "render_part": -0.5273,
+      "convention_part": -0.0863,
+      "total": -0.6136,
+      "convention_share": 0.141
+    },
+    "kings-court": {
+      "counterfactual_exposure": 0.56,
+      "reading": {
+        "file": "kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots.json",
+        "mean_field": 18.76,
+        "mean_of_spots": 18.7579,
+        "scored": 14,
+        "compareTotal": 14,
+        "skippedPoseVerification": 0
+      },
+      "render_part": -0.1209,
+      "convention_part": -0.1822,
+      "total": -0.3031,
+      "convention_share": 0.601
+    }
+  },
+  "structural": {
+    "window.__issues": {
+      "serenity": [],
+      "kings-court": [],
+      "horkyone-10": []
+    },
+    "draw_calls_post_chain_autoReset_disabled": {
+      "serenity": {
+        "desktop_1280x800": 72,
+        "mobile_390x844": 64
+      },
+      "kings-court": {
+        "desktop_1280x800": 165,
+        "mobile_390x844": 150
+      },
+      "horkyone-10": {
+        "desktop_1280x800": 83,
+        "mobile_390x844": 64
+      }
+    },
+    "budget": "<=400 desktop, <=250 mobile -- all inside",
+    "console_errors_from_this_session": 0
+  }
+}

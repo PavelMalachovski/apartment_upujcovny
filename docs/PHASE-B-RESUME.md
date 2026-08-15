@@ -46,9 +46,13 @@ rejected alternatives and the new rules are recorded below.
 
 | Apartment | pre-migration (r128) | end of plan 2 | now, after plan 3 | note |
 |---|---:|---:|---:|---|
-| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | now the recorded baseline; the 0.03 was accepted |
-| kings-court | 22.44 | 18.73–18.75 | **~18.87–18.90** | now the recorded baseline, replacing 22.44 |
+| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | superseded — plan 4a task 4 rebaselined to 16.00 |
+| kings-court | 22.44 | 18.73–18.75 | **~18.87–18.90** | superseded — plan 4a task 4 rebaselined to 18.58 |
 | horkyone-10 | — | — | — | no photographs; accepted on luminance proximity |
+
+The "after plan 3" column is the record as of `b39a99a` and is left as measured.
+The **live** baselines are plan 4a task 4's, in the table under "The gate,
+restated 2026-08-15" below; read that one before quoting a number.
 
 Plan 2 closed serenity to parity and PR #27 merged on that basis. **Plan 3
 then pushed it back out**, by +0.0516 at full precision — larger than the
@@ -58,12 +62,19 @@ decided on 2026-08-15 is that it is **accepted** and that the gate it
 tripped was the wrong instrument for the question — see "The gate, restated
 2026-08-15" above and "How the 0.03 was resolved" below.
 
-Shipped config: serenity `exposure` **0.329**, kings-court **0.575**,
-horkyone-10 **0.46**; bloom threshold **1.8**, strength **0.1**; `?v=107`.
+Shipped config **on `main` (`c2bb0bd`, and at `b39a99a`)**: serenity `exposure`
+**0.329**, kings-court **0.575**, horkyone-10 **0.46**; bloom threshold **1.8**,
+strength **0.1**; `?v=107`.
 (This line said `?v=106` until 2026-08-15; plan 3's final fix wave `7f90820`
 bumped it to 107 and the resume doc was not updated with it. Verified against
 `tour/index.html:254`, which is the single module tag that versions
 everything.)
+
+**On branch `phaseB-plan4a-winding` (`f0315ea`, unmerged)** plan 4a task 3
+re-fitted every exposure against the post-winding render: serenity **0.295**,
+kings-court **0.52**, horkyone-10 **0.42**; bloom unchanged at threshold
+**1.8** / strength **0.1**; `?v=110`. The baseline table below is measured
+against that tip.
 
 ## The gate, restated 2026-08-15
 
@@ -105,13 +116,50 @@ Three rules replace the two thresholds:
    more than **0.5** stops the branch and is reported, attributed or not.
    That is the breakage catch the absolute ceilings used to provide.
 
-Baselines as of `b39a99a`, `?v=107`:
+Baselines as of `f0315ea` (branch `phaseB-plan4a-winding`, plan 4a tasks 1–3
+applied), `?v=110`:
 
 | Apartment | Baseline | Recorded at |
 |---|---:|---|
-| serenity | **16.61** | plan 3 task 7; eight readings spanning 16.59–16.62 |
-| kings-court | **18.90** | plan 3 tasks 4 and 7 |
+| serenity | **16.00** | plan 4a task 4; three-round mean 15.9973, readings 15.9891 / 16.0055 / 15.9973 |
+| kings-court | **18.58** | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
 | horkyone-10 | — | no photographs; accepted on luminance proximity only |
+
+**These replace serenity 16.61 and kings-court 18.90**, which were the
+baselines as of `b39a99a` (`?v=107`) recorded by plan 3 tasks 4 and 7. Both
+movements are improvements and both are attributed, per rule 2: plan 4a task 4
+re-measured `b39a99a` in the same session as `f0315ea` — a detached worktree on
+`:8743` against the tip on `:8742`, three interleaved rounds each — and read
+the old tree at **16.6109** and **18.8788**, reproducing the outgoing baselines
+to 0.000 and 0.021, i.e. inside the noise floor. The movement is therefore the
+branch's and not the session's.
+
+| Apartment | old → new | movement | attribution |
+|---|---|---:|---|
+| serenity | 16.61 → **16.00** | −0.614 | task 1 winding fix −0.201, task 1 paintings −0.080, task 2 **0.000** (reverted in full), task 3 exposure 0.329→0.295 −0.357; sum −0.638 against −0.614 measured, residual +0.025 inside the floor |
+| kings-court | 18.90 → **18.58** | −0.303 | task 1 winding fix −0.081, task 2 **0.000**, task 3 exposure 0.575→0.52 −0.228; sum −0.309 against −0.303 measured, residual +0.006 |
+
+**Do not read either movement as entirely a better render.** Task 3's exposure
+re-fit was made on the mandated **all-spot** population where plan 3 task 4 had
+fitted on `poseVerified`, and that convention change moved the fitted exposure
+in its own right. Task 4 measured the split directly, by re-reading the tip at
+the exposure each apartment's `poseVerified` fit would have chosen: **60% of
+kings-court's −0.30 is the fit-population convention, not the render**
+(−0.121 render, −0.182 convention). serenity splits the other way (−0.527
+render, −0.086 convention). Details and the caveat on the two counterfactual
+exposures are in `docs/superpowers/harnesses/2026-08-15-b4a-task4/`.
+
+**Hard stop (rule 3): not tripped.** No task on this branch made either
+apartment's reading worse at all, let alone by more than 0.5. The one figure on
+the branch that looks like a breach is
+`kings-court-b4a-task2-seg045-legacy-allspots.json` at 19.4636 against a before
+of 18.8079, **+0.656** — that is plan 4a task 2's trial state, which failed its
+exit criterion and was **reverted in full**; `tour/` carries none of it, and
+the hard stop is about what a task leaves in the tree.
+
+**These baselines are recorded from an unmerged branch tip.** `main` is still
+at `c2bb0bd` and the `b39a99a` values above are what a checkout of `main`
+measures. If plan 4a is not merged, the outgoing baselines stand.
 
 **This loosens serenity by 0.03 and tightens kings-court by about 3.5.** The
 old 22.44 was kings-court's pre-migration score and the apartment has since
@@ -276,10 +324,18 @@ eight readings before the decision was put.
 | `serve.py`: `%00` in a path raises instead of returning 400; realpath check is TOCTOU-racy in principle | deferred, dev-only, fails closed |
 | `CLAUDE.md` beyond the two rows already corrected | plan 5 |
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
-| **`grid()` winds 8 of 12 wall faces backwards** — see below | **plan 4 or 5**, decided 2026-08-14 |
+| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **fixed** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
 
-### The wall-winding defect, deferred deliberately
+### The wall-winding defect, deferred deliberately — and since fixed
+
+> **Status, 2026-08-15:** fixed on branch `phaseB-plan4a-winding` by plan 4a
+> task 1 (`b767b4b`), with the sign test this section prescribes rather than
+> the `else`-branch reversal it warns against. Still present on `main`. The
+> third consequence below — that the fix expires plan 3 task 4's exposure fit —
+> came true and was discharged by plan 4a task 3; plan 4a task 4 then
+> re-measured the gate and rebaselined both apartments. Everything below is
+> the original diagnosis, kept because it is what the fix was built from.
 
 Found by plan 3 task 2, confirmed independently by two reviewers reading the
 code. **This is a shipped rendering bug that predates phase B**, and the

@@ -38,6 +38,12 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
 METRICS = os.path.join(ROOT, 'docs', 'superpowers', 'metrics')
 CHECKER = os.path.join(HERE, 'check_metrics_readme.py')
 BAKE = os.path.join(ROOT, 'tour', 'bake.js')
+# Plan 4a task 4 put its rounds 2-3 and its two counterfactual-exposure probes
+# in a harness dir rather than in metrics/, and the checker reads both. Copied
+# and mutated here for the same reason metrics/ is: a data source the checker
+# reads but the self-test never perturbs is a source whose comparison has never
+# been shown to bite.
+HARNESS = os.path.join(ROOT, 'docs', 'superpowers', 'harnesses', '2026-08-15-b4a-task4')
 
 
 def sub_once(text, old, new, label):
@@ -62,14 +68,38 @@ MUTATIONS = [
      lambda t: sub_once(t, '**16.19 – 16.40**', '**16.19 – 16.34**', 'lineage row')),
     ('count "eight of those ten" reverted to "nine"', 'readme',
      lambda t: sub_once(t, 'eight of those ten', 'nine of those ten', 'trial count')),
-    ('count "nineteen" changed to "eighteen"', 'readme',
-     lambda t: sub_once(t, 'adds **nineteen**', 'adds **eighteen**', 'total count')),
+    ('count "twenty-three" changed to "eighteen"', 'readme',
+     lambda t: sub_once(t, 'adds **twenty-three**', 'adds **eighteen**', 'total count')),
+    # Added in plan 4a task 4, when the count first needed a hyphen and the
+    # checker's `\w+` became `[\w-]+`. A hyphenated word must still be COMPARED,
+    # not merely matched: "twenty-two" is one off and must fail. Without this
+    # case, relaxing the pattern could have been mistaken for widening what
+    # passes.
+    ('count "twenty-three" changed to the adjacent "twenty-two"', 'readme',
+     lambda t: sub_once(t, 'adds **twenty-three**', 'adds **twenty-two**', 'total count off-by-one')),
     # Added in plan 4a task 3, when relaxing a hard-coded "fifteen" in the
     # checker's own pattern: prove the SECOND half of that sentence is still
-    # checked, i.e. that "Ten of the nineteen" going stale is still caught.
-    ('count "of the nineteen" changed to "of the fifteen"', 'readme',
-     lambda t: sub_once(t, 'of the nineteen are `b4a-task2`',
+    # checked, i.e. that "Ten of the twenty-three" going stale is still caught.
+    ('count "of the twenty-three" changed to "of the fifteen"', 'readme',
+     lambda t: sub_once(t, 'of the twenty-three are `b4a-task2`',
                         'of the fifteen are `b4a-task2`', 'inner total')),
+    # ---- plan 4a task 4's own figure classes ----------------------------
+    ('task4 table: gate row serenity corrupted', 'readme',
+     lambda t: sub_once(t, '| 15.9891 | 18.5864 |', '| 15.9899 | 18.5864 |', 'task4 gate row')),
+    ('task4 table: BASE row deleted', 'readme',
+     lambda t: re.subn(r'^\|\s*`\*-b4a-task4-BASE-legacy-allspots`.*\n', '', t, 1, re.M)[0]),
+    ('task4 one of the twelve round readings edited', 'readme',
+     lambda t: sub_once(t, '18.8443/18.8921/18.9000', '18.8443/18.8021/18.9000', 'task4 rounds')),
+    ('task4 headline movement -0.30 -> -0.20', 'readme',
+     lambda t: sub_once(t, '−0.30 on kings-court', '−0.20 on kings-court', 'task4 movement')),
+    ('task4 split: the render/convention parts swapped', 'readme',
+     lambda t: sub_once(t, '**−0.12 render** and\n**−0.18 fit-population',
+                        '**−0.18 render** and\n**−0.12 fit-population', 'task4 split')),
+    ('task4 split: probe reading edited', 'readme',
+     lambda t: sub_once(t, 'the arm reads 18.7579', 'the arm reads 18.7599', 'task4 probe')),
+    ('HARNESS FILE moves under fixed prose (a probe spot dE +1.0)', 'harness',
+     ('kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots.json',
+      lambda t: sub_once(t, '"deltaE": 18.83', '"deltaE": 19.83', 'kc probe spot'))),
     ('cross-session kings-court after 18.79 -> 18.99', 'readme',
      lambda t: sub_once(t, 'against **18.79**), Δ0.02', 'against **18.99**), Δ0.02', 'cross-session')),
     ('4-dp parenthetical 16.4027 -> 16.4028', 'readme',
@@ -94,9 +124,9 @@ MUTATIONS = [
 ]
 
 
-def run(readme, metrics):
+def run(readme, metrics, harness):
     p = subprocess.run([sys.executable, CHECKER, '--readme', readme,
-                        '--metrics', metrics, '--bake', BAKE],
+                        '--metrics', metrics, '--harness', harness, '--bake', BAKE],
                        capture_output=True, text=True)
     tail = [l for l in p.stdout.strip().splitlines() if l.strip()]
     return p.returncode, (tail[-1] if tail else '(no output)'), p.stdout
@@ -106,7 +136,9 @@ def main():
     work = tempfile.mkdtemp(prefix='b4a-task2-selftest-')
     try:
         mdir = os.path.join(work, 'metrics')
+        hdir = os.path.join(work, 'harness')
         shutil.copytree(METRICS, mdir)
+        shutil.copytree(HARNESS, hdir)
         pristine = open(os.path.join(METRICS, 'README.md'), encoding='utf-8').read()
         readme = os.path.join(work, 'README.md')
 
@@ -116,7 +148,7 @@ def main():
         open(readme, 'w', encoding='utf-8').write(pristine)
         # the checker reads BASE/HEAD out of the same README, so it needs the
         # whole file, not only the section -- copied verbatim above.
-        code, last, _ = run(readme, mdir)
+        code, last, _ = run(readme, mdir, hdir)
         print('  exit %d   %s' % (code, last))
         bad = 0
         if code != 0:
@@ -132,11 +164,13 @@ def main():
             open(readme, 'w', encoding='utf-8').write(pristine)
             shutil.rmtree(mdir)
             shutil.copytree(METRICS, mdir)
+            shutil.rmtree(hdir)
+            shutil.copytree(HARNESS, hdir)
             if kind == 'readme':
                 open(readme, 'w', encoding='utf-8').write(fn(pristine))
             else:
                 fname, jfn = fn
-                p = os.path.join(mdir, fname)
+                p = os.path.join(mdir if kind == 'json' else hdir, fname)
                 # Read fully into a variable FIRST. `open(p,'w').write(f(open(p).read()))`
                 # truncates the file when the outer open() is evaluated, before the
                 # argument expression runs, so the inner read returns '' and the
@@ -146,7 +180,7 @@ def main():
                 before = open(p, encoding='utf-8').read()
                 after = jfn(before)
                 open(p, 'w', encoding='utf-8').write(after)
-            code, last, _ = run(readme, mdir)
+            code, last, _ = run(readme, mdir, hdir)
             ok = code != 0
             if not ok:
                 bad += 1

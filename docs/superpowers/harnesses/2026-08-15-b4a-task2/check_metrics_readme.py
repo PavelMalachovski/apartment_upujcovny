@@ -53,10 +53,19 @@ WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
          'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11,
          'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
          'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19,
-         'twenty': 20, 'twentyone': 21}
+         'twenty': 20, 'twentyone': 21, 'twenty-one': 21, 'twenty-two': 22,
+         'twenty-three': 23, 'twenty-four': 24, 'twenty-five': 25,
+         'twenty-six': 26, 'twenty-seven': 27, 'twenty-eight': 28,
+         'twenty-nine': 29, 'thirty': 30}
 # A word this map does not know resolves to None, which never equals an int, so
 # an unknown number word FAILS rather than passing quietly. Extended in plan 4a
-# task 3, when the b4a reading count reached nineteen.
+# task 3, when the b4a reading count reached nineteen; extended again in plan 4a
+# task 4, when it reached twenty-three and the counts first needed a HYPHEN.
+# That is why the count patterns below capture `WORD` rather than `\w+`: `\w`
+# excludes '-', so "twenty-three" would have matched only its first component
+# and compared 20 against 23 -- a pattern that half-matches is worse than one
+# that does not match at all, because only the second fails loudly.
+WORD = r'[\w-]+'
 
 NUM = r'\d+\.\d+'
 DASH = r'\s*[–—-]\s*'      # en dash, em dash or hyphen, spaced or not
@@ -117,11 +126,19 @@ def main():
                                                      'metrics', 'README.md'))
     ap.add_argument('--metrics', default=os.path.join(ROOT, 'docs', 'superpowers', 'metrics'))
     ap.add_argument('--bake', default=os.path.join(ROOT, 'tour', 'bake.js'))
+    # Plan 4a task 4's rounds 2-3 and its two counterfactual-exposure probes are
+    # raw probe dumps and live in the harness, not in metrics/ -- the same
+    # split task 3 used for `thresh-*.json`. The README quotes them, so the
+    # checker has to be able to read them; a quoted figure nothing verifies is
+    # the exact hole this script exists to close.
+    ap.add_argument('--harness', default=os.path.join(ROOT, 'docs', 'superpowers',
+                                                      'harnesses', '2026-08-15-b4a-task4'))
     args = ap.parse_args()
 
     c = Checks()
     readme = open(args.readme, encoding='utf-8').read()
     M = lambda n: mean_of_rounded(args.metrics, n)                       # noqa: E731
+    Hf = lambda n: mean_of_rounded(args.harness, n)                      # noqa: E731
 
     # ---- locate the section; everything below is read out of it ----------
     try:
@@ -139,7 +156,7 @@ def main():
 
     # ---- 1. the three counts, as the README words them -------------------
     for label, pattern, actual in [
-        ('count: total b4a readings', r'adds \*\*(\w+)\*\* all-spot legacy readings', len(files)),
+        ('count: total b4a readings', r'adds \*\*(' + WORD + r')\*\* all-spot legacy readings', len(files)),
         # The total is a literal `\w+` here, not the word "fifteen": hard-coding
         # it made this pattern stop MATCHING the moment plan 4a task 3 added
         # four more readings and the total became "nineteen", and a
@@ -147,7 +164,8 @@ def main():
         # asserts is group(1) against len(t2); the total in the same sentence
         # is asserted separately, against len(files), by the
         # 'count: "of the fifteen" agrees' check below. Nothing is weakened.
-        ('count: how many are task 2', r'\*\*(\w+) of the \w+ are `b4a-task2`', len(t2)),
+        ('count: how many are task 2',
+         r'\*\*(' + WORD + r') of the ' + WORD + r' are `b4a-task2`', len(t2)),
         ('count: how many are trial state', r'and (\w+) of those ten measure code', len(t2_trial)),
         ('count: how many are shipped state',
          r'the (\w+) `-before-` files are the shipped state', len(t2) - len(t2_trial)),
@@ -161,7 +179,8 @@ def main():
     # The "of the fifteen" and "of those ten" phrasings hard-code numbers in
     # words elsewhere in the same sentences; check they agree with the files too,
     # or a half-edit leaves the sentence self-contradictory.
-    m = grab(sec, r'\*\*\w+ of the (\w+) are `b4a-task2`', c, 'count: "of the fifteen" agrees')
+    m = grab(sec, r'\*\*' + WORD + r' of the (' + WORD + r') are `b4a-task2`', c,
+             'count: "of the fifteen" agrees')
     if m:
         c.ok('count: "of the fifteen" agrees', WORDS.get(m.group(1).lower()) == len(files),
              'README "%s" vs files %d' % (m.group(1), len(files)))
@@ -317,6 +336,79 @@ def main():
         c.ok('grid() disagreeing count is a subset of the sites',
              WORDS.get(m.group(1).lower(), 0) <= sites,
              'README "%s" of %d' % (m.group(1), sites))
+
+    # ---- 8a. plan 4a task 4: the two-tree gate pair ----------------------
+    # Added in task 4. Everything here is compared against a spots[] array;
+    # rounds 1 come from metrics/, rounds 2-3 and the probes from the harness.
+    T4 = {}
+    for apt in ['serenity', 'kings-court']:
+        T4[apt] = {
+            'BASE': [M('%s-b4a-task4-BASE-legacy-allspots' % apt),
+                     Hf('%s-b4a-task4-run2-BASE-b39a99a-legacy-allspots' % apt),
+                     Hf('%s-b4a-task4-run3-BASE-b39a99a-legacy-allspots' % apt)],
+            'HEAD': [M('%s-b4a-task4-gate-legacy-allspots' % apt),
+                     Hf('%s-b4a-task4-run2-HEAD-f0315ea-legacy-allspots' % apt),
+                     Hf('%s-b4a-task4-run3-HEAD-f0315ea-legacy-allspots' % apt)],
+        }
+    T4['serenity']['probe'] = Hf('serenity-b4a-task4-probe-HEAD-f0315ea-e0.306-legacy-allspots')
+    T4['kings-court']['probe'] = Hf('kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots')
+    avg = lambda v: sum(v) / len(v)                                      # noqa: E731
+
+    # the two-row table: round 1 of each arm, both apartments
+    for label, tag, arm in [('task4 table: BASE row', 'BASE', 'BASE'),
+                            ('task4 table: gate row', 'gate', 'HEAD')]:
+        m = grab(sec, r'\|\s*`\*-b4a-task4-' + tag + r'-legacy-allspots`\s*\|\s*(' + NUM +
+                 r')\s*\|\s*(' + NUM + r')\s*\|', c, label)
+        if m:
+            c.near(label + ' [serenity]', float(m.group(1)), T4['serenity'][arm][0], 4)
+            c.near(label + ' [kings-court]', float(m.group(2)), T4['kings-court'][arm][0], 4)
+
+    # the twelve individual round readings, in the order the sentence lists them
+    m = grab(sec, r'serenity BASE\s+(' + NUM + r')/(' + NUM + r')/(' + NUM + r')\s+against tip\s+'
+             r'(' + NUM + r')/(' + NUM + r')/(' + NUM + r')[^|]*?kings-court BASE\s+'
+             r'(' + NUM + r')/(' + NUM + r')/(' + NUM + r')\s+against tip\s+'
+             r'(' + NUM + r')/(' + NUM + r')/(' + NUM + r')', c, 'task4 rounds sentence', re.S)
+    if m:
+        want = (T4['serenity']['BASE'] + T4['serenity']['HEAD']
+                + T4['kings-court']['BASE'] + T4['kings-court']['HEAD'])
+        for i, w in enumerate(want):
+            c.near('task4 round %d of 12' % (i + 1), float(m.group(i + 1)), w, 4)
+        lo = min(abs(v[0] - v[1]) for v in
+                 [(max(x), min(x)) for x in [T4[a][k] for a in T4 for k in ('BASE', 'HEAD')]])
+        hi = max(abs(v[0] - v[1]) for v in
+                 [(max(x), min(x)) for x in [T4[a][k] for a in T4 for k in ('BASE', 'HEAD')]])
+        s = grab(sec, r'within-arm spread of (' + NUM + r')' + DASH + r'(' + NUM + r')', c,
+                 'task4 spread')
+        if s:
+            c.near('task4 spread low', float(s.group(1)), lo, 3)
+            c.near('task4 spread high', float(s.group(2)), hi, 3)
+
+    # the headline movements, and the render/convention split from the probes
+    MINUS = r'[-−]'
+    m = grab(sec, r'movement of \*\*' + MINUS + r'(' + NUM + r') on serenity and\s*\n?' +
+             MINUS + r'(' + NUM + r') on kings-court\*\*', c, 'task4 headline movements')
+    if m:
+        c.near('task4 movement serenity', -float(m.group(1)),
+               avg(T4['serenity']['HEAD']) - avg(T4['serenity']['BASE']), 2)
+        c.near('task4 movement kings-court', -float(m.group(2)),
+               avg(T4['kings-court']['HEAD']) - avg(T4['kings-court']['BASE']), 2)
+
+    for apt, pat in [
+        # \s+ everywhere a space could be a hard wrap: the README wraps at ~79
+        # columns and a literal ' ' in a prose pattern is a latent failure that
+        # appears only when the sentence happens to reflow. Section 8's comment
+        # records the same trap being sprung once already.
+        ('kings-court', r'0\.52,\s+the\s+arm\s+reads\s+(' + NUM + r')\..*?\*\*' + MINUS +
+         r'(' + NUM + r')\s+render\*\*\s+and\s+\*\*' + MINUS + r'(' + NUM + r')\s+fit-population'),
+        ('serenity', r'counterfactual\s+0\.306\s+the\s+tip\s+reads\s+(' + NUM + r'),\s+so\s+'
+         r'\*\*' + MINUS + r'(' + NUM + r')\s+render,\s+' + MINUS + r'(' + NUM + r')\s+convention'),
+    ]:
+        m = grab(sec, pat, c, 'task4 split: ' + apt, re.S)
+        if m:
+            probe, base, head = T4[apt]['probe'], avg(T4[apt]['BASE']), avg(T4[apt]['HEAD'])
+            c.near('task4 split %s: probe reading' % apt, float(m.group(1)), probe, 4)
+            c.near('task4 split %s: render part' % apt, -float(m.group(2)), probe - base, 2)
+            c.near('task4 split %s: convention part' % apt, -float(m.group(3)), head - probe, 2)
 
     # ---- 9. the exclusion note higher up the file ------------------------
     excl = grab(readme, r'\*\*Also excluded: every `b4a-\*` file\.\*\*.*?below\.',

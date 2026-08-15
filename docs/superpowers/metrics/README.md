@@ -1712,8 +1712,8 @@ on the wrong side of it.
 
 #### Plan 4a's readings are a third render, and one of them is a reverted trial
 
-Plan 4a (`b4a-task1`, `b4a-task2`, `b4a-task3`)
-adds **nineteen** all-spot legacy readings to this directory. **None of them belongs in either lineage row above, and none
+Plan 4a (`b4a-task1`, `b4a-task2`, `b4a-task3`, `b4a-task4`)
+adds **twenty-three** all-spot legacy readings to this directory. **None of them belongs in either lineage row above, and none
 of them may be compared to the 16.58 merge ceiling.** Two independent reasons,
 either of which is sufficient:
 
@@ -1756,7 +1756,7 @@ those two and not the row's full span. `b4a-task1-before` (16.6036) is
 deliberately **not** in the row: it is the pre-fix render, which is the thing
 this row exists to be distinguished from.
 
-**Ten of the nineteen are `b4a-task2`, and eight of those ten measure code that
+**Ten of the twenty-three are `b4a-task2`, and eight of those ten measure code that
 is not in the tree** — the two `-before-` files are the shipped state, one per
 apartment. Task 2 switched walls to the visibility-scaled ambient
 and swept `SEG` over 0.45 / 0.30 / 0.22 / 0.15; it **failed its exit criterion
@@ -1781,7 +1781,7 @@ that produced the No-Go, and nothing survived the revert. Following the
 (`"shipped": "NOTHING…"`), not in the all-spot files themselves — so read the
 two together.
 
-**Four of the nineteen are `b4a-task3`, and they are a FOURTH render again —
+**Four of the twenty-three are `b4a-task3`, and they are a FOURTH render again —
 do not fold them into the plan-4a row above.** Task 3 re-fitted every
 apartment's `exposure` against the post-winding render (serenity 0.329 →
 **0.295**, kings-court 0.575 → **0.52**, horkyone-10 0.46 → **0.42**), because
@@ -1813,6 +1813,45 @@ change rather than by the session.
 Task 2's own verdict, threshold arithmetic and the artefact finding that
 underwrites it are in those three luminance files and in
 `docs/superpowers/harnesses/2026-08-15-b4a-task2/`.
+
+**The remaining four of the twenty-three are `b4a-task4`, and they are the only
+pair in this directory measured on two trees at once.** Task 4 is plan 4a's
+closing gate. It ran `b39a99a` (the branch's merge-base, `?v=107`) on port 8743
+and the branch tip `f0315ea` (`?v=110`) on port 8742 from one browser session on
+one machine, three interleaved rounds per arm, so no reading in the pair can
+differ by machine, session or harness. `tools/` is byte-identical between the
+two commits, so both arms ran the same scorer and the same `measure.js`; the
+`compare` populations are identical too (serenity 11, kings-court 14, same
+files).
+
+| file | serenity | kings-court | what it is |
+|---|---:|---:|---|
+| `*-b4a-task4-BASE-legacy-allspots` | 16.6173 | 18.8443 | merge-base `b39a99a`, round 1 |
+| `*-b4a-task4-gate-legacy-allspots` | 15.9891 | 18.5864 | branch tip `f0315ea`, round 1 |
+
+Rounds 2 and 3 of both arms, and the two counterfactual-exposure probes that
+decompose the movement, are in
+`docs/superpowers/harnesses/2026-08-15-b4a-task4/` rather than here, following
+task 3's precedent for raw probe dumps. Over three rounds the arms read
+serenity BASE 16.6173/16.6182/16.5973 against tip 15.9891/16.0055/15.9973, and
+kings-court BASE 18.8443/18.8921/18.9000 against tip 18.5864/18.5643/18.5764 —
+a within-arm spread of 0.016–0.056, and a movement of **−0.61 on serenity and
+−0.30 on kings-court**, both improvements and both far outside it. The BASE arm
+reproduces the recorded baselines it was measured against (serenity 16.61
+exactly, kings-court 18.88 against a recorded 18.90), which is the check that
+licenses reading the movement as the branch's rather than the session's.
+
+**Do not read the whole of kings-court's −0.30 as the render getting better.**
+Measured directly this session on the tip, at the exposure kings-court's
+*poseVerified* fit would have chosen (0.56) instead of the shipped all-spot
+0.52, the arm reads 18.7579. So the movement splits into **−0.12 render** and
+**−0.18 fit-population convention** — about 60% of kings-court's improvement is
+downstream of plan 4a task 3's mandated switch of the exposure fit's population
+from `poseVerified` to all-spot, not of anything a visitor would see. serenity
+splits the other way: at its own counterfactual 0.306 the tip reads 16.0836, so
+**−0.53 render, −0.09 convention**. Both splits confirm task 3's own prediction
+from luminance slopes (kings-court ~0.032 of 0.052 exposure-worth attributable
+to the population switch, i.e. ~62%) by an independent route.
 
 ### The plan's own claim: blacks, before and after
 
