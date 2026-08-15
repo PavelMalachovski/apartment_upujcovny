@@ -1267,3 +1267,103 @@ interior of 185. The obvious generalisation was written, measured and
 reverted — at the *shipped* densities the spoiled run already exceeds one
 texel on 254 / 454 / 122 edge scans, so it changes every apartment's
 bake.
+
+## Phase B3 plan 3 task 6: the exit criterion — NO-GO
+
+The pilot pack was measured against the criterion agreed before the work:
+**Go if the linear-domain contrast reaches ≥ 4.9 AND the blind A/B is
+visible.** It fails both halves, and it fails the conjunction on the
+contrast half alone. Committed record:
+`serenity-b3-task6-verdict.json`, rebuilt from its inputs by
+`docs/superpowers/harnesses/2026-08-13-b3-task6/write_verdict.py`
+(`--check` reports MATCH). The A/B protocol, the sealed mapping and the
+calls-before-reveal live in that harness directory.
+
+**Two corrections to the plan's own wording, both stale rather than
+wrong-at-the-time.** The comparison is the **offline pack against the
+runtime bake**, not "against GTAO-only" — task 3 rejected GTAO and no
+`tour/` file adopted it. And 4.9 is derived in the plan as a third of a
+3.6 → 7.6 gap, which are phase A numbers from the series plan 2 closed
+outright; a third of the live gap would be 4.32. **The human partner was
+asked and ruled: hold 4.9 literally**, knowing that makes the bar harder
+than its own derivation. 4.9 is what was applied.
+
+### The contrast half
+
+Re-measured on both sides rather than inherited — same build, `?v=104`,
+exposure 0.329, `?fov=legacy`, two independent captures per side, the
+only difference being whether `tour/lightmaps/serenity/` is on disk:
+
+| set | n | mean | p5 | contrast |
+|---|---:|---:|---:|---:|
+| runtime bake | 2 | 0.282078 | 0.083283 | **3.3870** |
+| offline pack, as shipped | 2 | 0.288891 | 0.085369 | **3.3840** |
+| photographs | — | 0.299289 | 0.048274 | **6.1998** |
+
+Every figure lands inside the range task 5 committed for the same state,
+so its numbers are inherited **with a check** rather than on trust.
+(Task 5's `photographs` contrast reads 6.197 because it divides a stored
+4-dp capture pair; 6.1998 is the same quantity at full precision. Nothing
+turns on it — both are far above 4.9 and far above the render.)
+
+**Contrast would have to rise 44.8% to reach 4.9, and it does not move at
+all.** Note the sign: task 5 measured the pack at **+0.001** on contrast
+and this run measures it at **−0.003**. Both sit inside the same-state
+repeat spread of ±0.002–0.004, which *is* the finding — the change is not
+resolvable by either run, in either direction. On this population the
+pack is a near-uniform gain (mean ×1.02415, p5 ×1.02505, differing by
+0.090 pp), and a mean/p5 ratio is blind to a uniform gain by
+construction. That reproduces task 5 down to the detail that the mean/p5
+*ordering* is not resolvable either.
+
+### The visible half
+
+Six side-by-side pairs, poses fixed before any frame was looked at and
+deliberately weighted toward where the pack can act (the outdoor terrace
+spawn was excluded because it bakes with no gather and could not differ).
+An unseeded `SystemRandom` coin chose which half of each composite got
+the pack; the mapping was sealed and the six calls written to
+`calls.json` before it was opened. The bar was fixed before viewing:
+visible only at **6/6**, since P(6/6) under guessing is 1/64 = 0.016
+while P(≥5/6) is 7/64 = 0.109.
+
+**Result: 5 of 6** — above the 3 expected from guessing, short of the
+pre-registered bar, and at n = 6 not distinguishable from chance. The
+observation that matters more than the hit rate: **at full viewing size
+none of the six pairs could be separated**, and every call leans on a
+3–4× magnified patch of a flat floor or ceiling. On pair 3 the full-frame
+impression was the *opposite* of the patch reading, and the patch was
+right — recorded rather than quietly dropped.
+
+### What the pack does do, measured after the reveal
+
+**It is not a no-op, and the difference is not a flat offset.** Per pose
+the sRGB mean rises 0.8–1.7%, 24–58% of pixels move at all, 3–8% move by
+≥ 10 of 255, and the largest single-pixel move is ~100. The difference
+maps (`…/harnesses/2026-08-13-b3-task6/diff/`) show where: a band along
+the **ceiling/wall perimeter** and the **floor beside obstructions** —
+the near-field crevice fill a 0.65 m gather on lightmapped surfaces
+predicts, landing exactly where it should.
+
+Hold that next to the verdict rather than against it, and do not flatten
+the tension: on these six *full frames* the effect is concentrated, while
+on the two gated spots it measures near-uniform. Both were measured. The
+criterion is applied to the second.
+
+The honest sentence is about what was measured, on which population, with
+which caveats — **not** "bounce light cannot raise contrast on these
+surfaces", which is an inference this evidence does not support.
+
+All-spot legacy ΔE2000 was re-run as a second check on an inherited
+number, not as a gate: **16.61 → 16.71** here against task 5's 16.59 →
+16.75. Direction reproduces, magnitude is smaller, and the before reading
+sits inside the 16.60–16.62 this file already records for that state.
+
+### What was NOT decided
+
+**Whether serenity keeps its pilot pack or reverts to the runtime bake.**
+The plan says a failure means "do not carry lightmaps to the other two
+apartments" and is silent on the pilot. Task 6 left the shipped state
+exactly as task 5 committed it — `lightmaps: true`, 11 files, 13,626
+bytes, `?v=104` — recorded the costs both ways in the verdict JSON, and
+recommends reverting. That call belongs to the human partner.

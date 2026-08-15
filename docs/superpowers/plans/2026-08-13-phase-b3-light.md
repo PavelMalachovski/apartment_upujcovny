@@ -506,17 +506,34 @@ Weight ceiling: 8 MB of lightmaps for the apartment.
 
 The exit criterion, agreed before the work and not renegotiable after it.
 
-- [ ] **Step 1: Measure lightmaps against GTAO-only on serenity**
+- [ ] **Step 1: Measure lightmaps against ~~GTAO-only~~ *the runtime bake* on
+  serenity**
+
+*Corrected when task 6 ran: there is no GTAO. Task 3 vendored `GTAOPass`,
+measured it and rejected it, and no `tour/` file adopted it (see task 3's
+OUTCOME above). The comparison that exists is pack-on against pack-off.*
 
 Two measures: the **linear-domain** contrast from `tools/luminance.py` — the
-domain matters, phase A measured render 3.6 against photographs 7.6, and the
-sRGB figures elsewhere are a different scale — and a blind A/B of six
+domain matters, ~~phase A measured render 3.6 against photographs 7.6~~, and
+the sRGB figures elsewhere are a different scale — and a blind A/B of six
 screenshot pairs.
+
+*Corrected when task 6 ran: 3.6 and 7.6 belong to the phase A series plan 2
+closed outright, measured through the broken fixed-72° camera, about which
+`docs/superpowers/metrics/README.md` says the series "cannot be converted
+into the corrected one; it can only be ended". The live committed numbers are
+render **3.38** and photographs **6.197–6.200**.*
 
 - [ ] **Step 2: Apply the criterion**
 
-**Go if the lightmaps reach a linear-domain contrast of ≥ 4.9** — a third of
-the 3.6 → 7.6 gap — **and** the blind A/B is visible.
+**Go if the lightmaps reach a linear-domain contrast of ≥ 4.9** — ~~a third of
+the 3.6 → 7.6 gap~~ — **and** the blind A/B is visible.
+
+*A third of the **live** gap would be 4.32. The human partner was asked before
+task 6 ran and ruled **hold 4.9 literally** — the strictest reading of "agreed
+before the work and not renegotiable after it", taken knowing it makes the bar
+harder than its own stated derivation. 4.9 is what task 6 applied; 4.32 was
+not used.*
 
 - [ ] **Step 3: If it fails, stop and commit the null result with its
   measurement.** Do not carry lightmaps to the other two apartments. A null
@@ -525,6 +542,68 @@ the 3.6 → 7.6 gap — **and** the blind A/B is visible.
   more than a flattering number.
 
 - [ ] **Step 4: Commit the decision either way**
+
+#### OUTCOME: the pack failed its exit criterion — NO-GO
+
+Both halves fail, and the conjunction fails on the contrast half alone
+whatever the A/B had returned. No `tour/` or `tools/` file changed as a
+result of this task, and `?v=` is correctly still 104.
+
+**Contrast: 3.3840 against ≥ 4.9 — it would have to rise 44.8%, and it does
+not move.** Re-measured on both sides rather than inherited: runtime bake
+**3.3870**, offline pack **3.3840**, photographs **6.1998**, two independent
+captures per side on the same build. Every figure lands inside the range task
+5 committed for the same state. Note the sign — task 5 measured the pack at
+**+0.001** on contrast and this run at **−0.003**, both inside the ±0.002–0.004
+same-state spread. That is the finding: *the change is not resolvable by
+either run, in either direction*. On this population the pack is a
+near-uniform gain (mean ×1.02415, p5 ×1.02505, 0.090 pp apart) and a mean/p5
+ratio is blind to a uniform gain by construction.
+
+**Blind A/B: 5 of 6, against a bar of 6/6 fixed before viewing.** Six pairs,
+poses chosen before any frame was seen and weighted *toward* where the pack
+can act; an unseeded `SystemRandom` coin chose the sides; the mapping was
+sealed and the calls written before it was opened. P(≥5 of 6) under guessing
+is 7/64 = 0.109, so at n = 6 this is not distinguishable from chance. **The
+observation that matters more than the hit rate: at full viewing size none of
+the six pairs could be separated, and every call leans on a 3–4× magnified
+patch of flat floor or ceiling.** On one pair the full-frame impression was
+the *opposite* of the patch reading and the patch was right.
+
+**And the pack is not a no-op — say this next to the verdict, not against
+it.** Per pose the sRGB mean rises 0.8–1.7%, 24–58% of pixels move, 3–8% move
+by ≥ 10 of 255, and the largest single-pixel move is ~100. The difference maps
+show it landing as a band along the ceiling/wall perimeter and on the floor
+beside obstructions — exactly the near-field crevice fill a 0.65 m gather on
+lightmapped surfaces predicts. So on six *full frames* the effect is
+concentrated, while on the two gated spots it measures near-uniform. Both were
+measured; the criterion is applied to the second. What this record must **not**
+be read as is "bounce light cannot raise contrast on these surfaces" — that
+inference is not supported by this evidence.
+
+All-spot legacy ΔE was re-run as a check on an inherited number, not as a
+gate: **16.61 → 16.71** here against task 5's 16.59 → 16.75. The pack moves it
+the wrong way, away from the 16.58 ceiling serenity already misses by 0.03.
+
+Per step 3, **lightmaps are not carried to kings-court or horkyone-10.**
+
+**Left open, deliberately: whether serenity keeps its pilot pack.** The plan
+does not say, and it decides what ships — 13,626 bytes and eleven HTTP
+requests, and whether the product carries a feature that failed its own exit
+criterion. Task 6 left the shipped state exactly as task 5 committed it,
+recorded the costs both ways, and **recommends reverting to the runtime
+bake**; the human partner owns the call. Nothing is lost by reverting —
+`tools/bake_lightmaps.mjs`, `tour/lightmaps.js`, the guard and the pack all
+remain in git history, so reconsidering costs a checkout rather than a redo.
+
+Evidence: `docs/superpowers/metrics/serenity-b3-task6-verdict.json` (rebuilt
+from its inputs by `write_verdict.py --check`), the two
+`serenity-b3-task6-spotcheck-*-legacy-allspots.json` files in
+`tools/delta_e.py`'s native shape, and the harness with the sealed mapping and
+the calls-before-reveal at
+`docs/superpowers/harnesses/2026-08-13-b3-task6/`. Full account:
+`.superpowers/sdd/2026-08-13-phase-b3-light/task-6-report.md` (workspace-only,
+deleted when this plan finishes).
 
 ---
 

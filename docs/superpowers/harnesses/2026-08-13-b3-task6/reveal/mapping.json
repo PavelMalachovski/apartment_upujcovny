@@ -1,0 +1,32 @@
+{
+  "pair1": {
+    "pose": "entrance-spawn",
+    "A": "pack-off",
+    "B": "pack-on"
+  },
+  "pair2": {
+    "pose": "entrance-floor-down",
+    "A": "pack-on",
+    "B": "pack-off"
+  },
+  "pair3": {
+    "pose": "bathroom-spawn",
+    "A": "pack-on",
+    "B": "pack-off"
+  },
+  "pair4": {
+    "pose": "bedroom-spawn",
+    "A": "pack-off",
+    "B": "pack-on"
+  },
+  "pair5": {
+    "pose": "living-room-spawn",
+    "A": "pack-off",
+    "B": "pack-on"
+  },
+  "pair6": {
+    "pose": "kitchen-hall-spot5",
+    "A": "pack-on",
+    "B": "pack-off"
+  }
+}
