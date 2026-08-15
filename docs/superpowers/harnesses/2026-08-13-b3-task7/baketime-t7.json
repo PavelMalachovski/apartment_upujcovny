@@ -211,5 +211,5 @@
       ]
     }
   ],
-  "reading": "No bake-time claim is supportable from this data: within one side the spread reaches 3-5x (cold first load, and a machine running two servers plus the harness), and batches disagree in sign. Compare batches[i].rows against batches[j].rows for the same apt/side."
+  "reading": "Read this per apartment, not as one verdict. KINGS-COURT: a claim IS supportable -- its raw loads are disjoint between the two sides in every batch here (BASE 3006-5548 ms against HEAD 8031-23431 ms), about 3x. SERENITY and HORKYONE-10: no claim. Their ranges overlap and the batches disagree with each other by up to 3x on the same figure (serenity HEAD warmMedian 1077 then 3163, no code change between), because the first load of a batch pays cold shader compile and JIT and the host is not a controlled environment. Compare batches[i].rows against batches[j].rows for the same apt/side before quoting anything."
 }

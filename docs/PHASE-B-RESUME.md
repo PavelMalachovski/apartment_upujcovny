@@ -119,9 +119,11 @@ reached 16.58**. kings-court still passes by ~3.57.
 
 **Plan 3 is what moved it, and the cause is identified.** The base tree reads
 16.54/16.56 and passes; the shift is +0.0516 at full precision, larger than
-the ±0.039 floor. It is **task 2's source fix**, not task 4's exposure — task
-4's own sweep reads 16.6133 at exposure 0.326 on HEAD against 16.541/16.565 at
-that same exposure on base.
+the ±0.039 floor. It is **task 2's source fix**, not task 4's exposure — task 2's
+own before/after pair was captured in one session with exposure held at 0.326
+on both sides (before `6372939` moved it to 0.329) and reads 16.5427/16.5464 →
+16.6027, **+0.058 at constant exposure**; task 4's sweep bounds the whole
+0.326→0.329 interval at 0.0027.
 
 **And the plan's own claim did not land either.** Endpoint to endpoint,
 spawn-pooled 5th-percentile luminance moved **0.0% on serenity**, −5.4% on

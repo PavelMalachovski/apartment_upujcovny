@@ -4,8 +4,14 @@ RUN(), unchanged apart from the exposure override.
 The isolation number in task 7's report only means anything if the pixels are
 gathered exactly the way the before/after pair gathered them.  Rather than
 assert that in prose, diff the two RUN bodies here: the only permitted
-differences are the three lines marked `// ADDED` / `// CHANGED` in
-spawnlum_exp.mjs and the function's own signature line.
+differences are lines marked `// ADDED` / `// CHANGED` in spawnlum_exp.mjs
+(currently two, both `// ADDED`) plus the function's own signature line, which
+is normalised separately because the injected argument necessarily changes it.
+
+The markers are stripped from the task-7 copy only. That is safe precisely
+because the task-5 original carries none — `grep -c '// ADDED\|// CHANGED'
+../2026-08-13-b3-task5/spawnlum.mjs` returns 0 — so no marker can hide a real
+difference on the original's side.
 
     python check_run_identical.py        # prints OK, or the offending diff
 """

@@ -1540,30 +1540,96 @@ established phrasing for landing *inside* that floor on the passing side is
 "parity within noise, not a clean pass"; the same standard applies here in the
 failing direction, and it does not rescue the result. What makes this a real
 failure rather than a coin flip is the population of readings rather than any
-single one: **eight independent all-spot readings of the HEAD-side render now
-sit between 16.59 and 16.61** — task 2's fix1 (16.60), task 3 GTAO-off
-(16.61), task 4's four (16.60 / 16.62 / 16.61 / 16.60), task 6's two
-post-revert (16.59, 16.60) — plus this task's two. Not one has reached 16.58.
+single one: **eight independent all-spot readings of the HEAD-side render sit
+between 16.59 and 16.62** — task 2's fix1 (16.60), task 3 GTAO-off (16.61),
+task 4's four (16.60 / 16.62 / 16.61 / 16.60), task 6's two post-revert
+(16.59, 16.60) — plus this task's two. **Not one has reached 16.58.** (The
+band is 16.59–16.62; an earlier version of this section wrote 16.59–16.61 and
+contradicted its own list, where task 4's repeat is 16.6155. The wider band is
+the honest one and it weakens rather than strengthens the headline.)
 
 **And plan 3 is what moved it across the line.** BASE reads 16.54 / 16.56 and
-HEAD reads 16.61 / 16.60: a rise of **0.0516 at full precision** on the mean
-of two runs per side, larger than the +-0.039 full-precision floor. That
-independently reproduces plan 3 task 2's own before/after on this exact metric
-(`serenity-b3-task2-before-allspots.json` 16.54, its repeat 16.55, →
-`serenity-b3-task2-fix1-allspots.json` 16.60), this time against a real
-`c2bb0bd` checkout rather than a patched tree.
+HEAD reads 16.61 / 16.60: **+0.0516** on the mean of two runs per side
+recomputed unrounded from the images, **+0.0518** on the committed
+mean-of-rounded values — either way larger than the ±0.039 full-precision
+floor. Every pair delta below uses the mean-of-rounded form, because that is
+the only precision task 2's files carry.
 
-**It is task 2's change, not task 4's exposure.** Task 4's exposure sweep was
-run in the gate's own camera on the HEAD tree, and at exposure **0.326** — the
-BASE tree's value — it reads **16.6133** full precision
-(`serenity-b3-task4-exposure-reach.json`). BASE at that same exposure reads
-16.5409 / 16.5648. Holding exposure fixed, the render itself got ~0.07 worse.
-Task 4 chose its exposure on luminance grounds, and its own sweep already
-recorded that **no** exposure in the neighbourhood passes this gate; that
-finding stands and this task does not disturb it.
+**It is task 2's change, not task 4's exposure, and the evidence is a paired
+exposure-held A/B.** The direct measurement is plan 3 task 2's own:
+`serenity-b3-task2-before-allspots.json` **16.5427** (repeat **16.5464**) →
+`serenity-b3-task2-fix1-allspots.json` **16.6027**, both captured in a single
+session and both **before commit `6372939` changed `exposure` from 0.326 to
+0.329**. That is **+0.0582 with exposure held constant**. This task's pair is
+the endpoint measurement, one session, 0.326 → 0.329: **+0.0518**. The two
+agree to 0.006.
 
-kings-court moved the same way and it does not matter there: 18.7366 →
-18.8658 on the four-run means, against a ceiling 3.57 away.
+Exposure cannot account for either. Task 4's sweep measured this metric
+against exposure directly and reads **16.6133 at 0.326 against 16.6160 at
+0.329** — the whole interval is worth **0.0027**, and the best exposure
+anywhere in 0.30–0.34 is worth 0.0056
+(`serenity-b3-task4-exposure-reach.json`). That file was captured on **task
+4's own tree** (`preconditionsAsserted.cacheVersion` `"102"`, not HEAD's
+`106`); an earlier version of this section said "on the HEAD tree", which was
+wrong. What it establishes is the *slope* of ΔE against exposure in this
+neighbourhood — a property of the metric, not of which tree measured it — and
+tasks 5 and 6 net to zero on serenity's render in any case
+(`serenity-b3-task4-final-legacy[-repeat*]` 16.6018 / 16.6155 / 16.6064
+against task 7's 16.6082 / 16.6009).
+
+**Why paired and not pooled.** The ten BASE-lineage and eleven HEAD-lineage
+all-spot readings in this directory do separate without overlap — max BASE
+16.5700 against min HEAD 16.5882 — and that is worth recording as a
+description. **It is not worth a probability, and none is quoted here.** Task
+1 measured this metric on *unmodified pre-task code* and got **16.8667**
+(`serenity-b3-task1-baseline-allspots.json`) against 16.5700 for the same code
+in plan 2 task 9's session: a **0.297 cross-session offset on identical
+code**, roughly 6× the effect under test, documented in that file's own note
+and the whole reason task 1 captured a same-session control. Those two task-1
+readings are BASE-lineage and sit *above* the entire HEAD band; a pooled
+comparison separates cleanly only by omitting them. Exchangeability across
+sessions is known false here. Pairing within a session is what neutralises
+that offset, and there are two independent paired measurements agreeing to
+0.006.
+
+kings-court moved the same way and it does not matter there: **18.7346 →
+18.8557** on the four-run mean-of-rounded, +0.1211, against a ceiling 3.57
+away. (An earlier version wrote "18.7366 → 18.8658 on the four-run means";
+those were means of the **two** full-precision values quoted in the table
+above, not four-run means.)
+
+#### The lineage table, recorded so it is not re-derived and misread
+
+Every all-spot legacy reading of serenity's *runtime-bake* render in this
+directory, by lineage. Values are the mean of each file's own rounded
+`spots[]`, so each row recomputes from the file it names.
+
+| Lineage | n | range | files |
+|---|---:|---|---|
+| BASE (pre-task-2 render) | 10 | **16.5409 – 16.5700** | `b2-final-legacy[-repeat]`, `b2-fixwave-final-legacy[-repeat]`, `b2-task9-legacy[-repeat]`, `b3-task2-before[-repeat]`, `b3-task7-BASE-c2bb0bd-legacy[-repeat]` |
+| HEAD (post-task-2 render) | 11 | **16.5882 – 16.6155** | `b3-task2-fix1`, `b3-task3-off`, `b3-task4-final-legacy[-repeat,-repeat2]`, `b3-task5-before-legacy`, `b3-task6-spotcheck-before-legacy`, `b3-task6-revert-legacy`, `b3-task6-revert-noloader-legacy`, `b3-task7-gate-legacy[-repeat]` |
+
+They do not overlap; the gap is 0.0182. **Do not convert that into a
+significance figure.** Two BASE-lineage readings are deliberately absent from
+the table above and would destroy the separation if pooled in:
+`serenity-b3-task1-baseline-allspots.json` (**16.8667**, captured on
+*unmodified pre-task code*) and `serenity-b3-task1-legacy-allspots.json`
+(**16.8616**). Both sit above the entire HEAD range. The reason is in task 1's
+own note: that session read ~0.297 high on identical code relative to plan 2
+task 9's, which is why task 1 captured a same-session control at all. A
+cross-session offset ~6× the effect under test means readings from different
+sessions are not exchangeable, so a pooled comparison is descriptive only.
+**The load-bearing evidence is the two same-session paired A/Bs above**, which
+are unaffected by that offset because both arms of each pair share a session.
+
+Excluded from both rows for the same reason they have always been excluded
+elsewhere: fixed-FOV captures (`b2-final`, `b2-task9-newzero`,
+`b3-task4-final`), pre-fix-wave states (`b2-legacy` 17.14), and states that
+are neither lineage — GTAO on (`b3-task3-on` 21.68) and depth-normals
+(`b3-task3-depthnormals`), lightmap pack on (`b3-task5-after`,
+`b3-task6-spotcheck-after`), and `b3-task2-after` (16.6409), which is task 2
+*before* its own review fix round and so is a third render, not either
+lineage.
 
 **Read this the right way round.** ΔE2000 against these photographs is
 dominated by pose and content mismatch, not by shading — 9 of serenity's 11
@@ -1698,9 +1764,10 @@ the winding.
 
 ### Bake time: one supportable claim, and a warning about the rest
 
-`baketime-t7.json`, two batches of four loads per side per apartment.
-`CLAUDE.md` rule 4a sets no bake-time budget, but the sampled ambient fires 16
-BVH rays per lightmap texel and recording no cost at all would be dishonest.
+`baketime-t7.json`, two batches of four loads per side per apartment, **both
+of them idle-machine batches** taken about five minutes apart. `CLAUDE.md`
+rule 4a sets no bake-time budget, but the sampled ambient fires 16 BVH rays
+per lightmap texel and recording no cost at all would be dishonest.
 
 The measurement is fragile. The first load of a batch pays cold shader compile
 and JIT, and the within-side spread is large enough to be visible in the
@@ -1719,7 +1786,11 @@ with the two sides' raw load times disjoint in both batches** (BASE
 3006-5548 ms against HEAD 8031-23431 ms). serenity rose in both batches but
 its ranges overlap and the two batches disagree by 3x on the same figure;
 horkyone-10 is up in one batch and flat in the other. **No claim is made for
-those two.**
+those two.** `baketime-t7.json`'s own `reading` field states this same
+per-apartment verdict; an earlier version of that field said no claim at all
+was supportable, written before the second batch existed, and contradicted
+this section. `baketime7.mjs` now writes the corrected text on every run so
+the file and this section cannot drift apart again.
 
 Nothing here changes rule 4a's standing conclusion — the fix for kings-court's
 bake is architectural, move it into a Worker, deferred to the engine
