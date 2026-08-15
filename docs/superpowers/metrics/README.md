@@ -1653,9 +1653,11 @@ lightmap pack on (`b3-task5-after`, `b3-task6-spotcheck-after`), and
 and so is a third render, not either lineage.
 
 **Also excluded: every `b4a-*` file.** Plan 4a's task 1 changed which wall face
-is drawn, so its readings are a further render again — 16.19–16.34, below both
-rows — and its task 2's are mostly a reverted trial. See "Plan 4a's readings
-are a third render, and one of them is a reverted trial" below.
+is drawn, so its post-fix readings are a further render again — 16.19–16.40,
+below both rows — and its task 2's are mostly a reverted trial. (Its
+`b4a-task1-before`, 16.6036, is the pre-fix render and belongs to no row
+either.) See "Plan 4a's readings are a third render, and one of them is a
+reverted trial" below.
 
 #### The task-1 pair is a fixed-FOV capture, not a session outlier
 
@@ -1734,18 +1736,29 @@ they also give the one cross-session check worth recording: task 2's
 independently measured before is **16.34** against task 1's committed after of
 **16.32** (kings-court **18.81** against **18.79**), Δ0.02 on both — so the
 post-winding-fix render reproduces across two sessions and two machines at
-**≈16.33**, about **0.21–0.23 below** the BASE row's 16.5409–16.5700 and
-0.25–0.28 below HEAD's. That is a third lineage, not a stray reading in either
-existing one.
+**≈16.33** (16.3227 and 16.3391, mean 16.3309), about **0.21–0.24 below** the
+BASE row's 16.5409–16.5700 and **0.26–0.28** below HEAD's. That is a third
+lineage, not a stray reading in either existing one.
 
 | lineage | serenity all-spot legacy | files |
 |---|---|---|
 | BASE (pre-b3-task-2 render) | 16.5409 – 16.5700 | see the lineage table above |
 | HEAD (post-b3-task-2 render) | 16.5882 – 16.6155 | see the lineage table above |
-| **plan 4a, post-winding-fix** | **16.19 – 16.34** | `b4a-task1-after[-paintings]`, all five `b4a-task2-*` |
+| **plan 4a, post-winding-fix** | **16.19 – 16.40** | `b4a-task1-after[-paintings]`, all five `b4a-task2-*` |
 
-**Ten of the fifteen are `b4a-task2`, and nine of those ten measure code that
-is not in the tree.** Task 2 switched walls to the visibility-scaled ambient
+Values are the mean of each file's own rounded `spots[]`, the same computation
+as the lineage table above, quoted here at 2 dp. The plan-4a row's **upper end
+is `b4a-task1-after` (16.4027), which is an intermediate state** — winding
+fixed, paintings still buried in the wall slab — and it is the only reading in
+the row above 16.34. Task 1's *tip* is `-after-paintings` (16.3227), and that
+is the state task 2's before (16.3391) reproduces; the ≈16.33 figure above is
+those two and not the row's full span. `b4a-task1-before` (16.6036) is
+deliberately **not** in the row: it is the pre-fix render, which is the thing
+this row exists to be distinguished from.
+
+**Ten of the fifteen are `b4a-task2`, and eight of those ten measure code that
+is not in the tree** — the two `-before-` files are the shipped state, one per
+apartment. Task 2 switched walls to the visibility-scaled ambient
 and swept `SEG` over 0.45 / 0.30 / 0.22 / 0.15; it **failed its exit criterion
 (linear contrast 3.9347 against ≥ 4.32) and was reverted in full**, so `tour/`
 is byte-identical to task 1's tip. Only the two `-before-` files describe

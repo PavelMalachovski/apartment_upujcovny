@@ -22,6 +22,7 @@ No-Go, and the change was reverted.
 |---|---|
 | `sweep.json` | every raw reading, verbatim: the two before runs per apartment, all four SEG rows on all three apartments, the same-state repeats, the sampler-liveness proof, and the post-revert verification |
 | `write_metrics.py` | builds the three committed metrics files FROM `sweep.json`. `python write_metrics.py --check` rebuilds them in memory and diffs against disk — that is how "derived, not typed" is verified rather than asserted |
+| `check_metrics_readme.py` | asserts every figure in `docs/superpowers/metrics/README.md`'s plan-4a section against the metrics files it describes — 30 checks, exit 1 on any failure. Added in fix round 2, after that section shipped with a wrong range **and** a wrong file count |
 | `contrast.py` | the criterion's own instrument: linear-domain mean, p5 and contrast on serenity's poseVerified `compare` spots, at full precision. Phase B3 task 6's `linear.py`, unchanged in method |
 | `contrast.json` | its output for all six captured sets plus the photographs |
 | `meas.js` | the three browser-side functions every reading came from, with the reasons the awkward parts are the way they are |
