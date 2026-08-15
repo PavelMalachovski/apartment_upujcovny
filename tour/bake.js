@@ -509,10 +509,12 @@ const Baker = (() => {
   // that the flat constant had been hiding, neither of them in the ambient
   // term itself:
   //
-  //   1. WINDING. `pts` below emits one fixed triangle order, so a quad's
-  //      geometric winding follows uVec x vVec whatever `n` says, and the
-  //      renderer (MeshBasicMaterial, FrontSide) obeys the winding. Working
-  //      through all twelve grid() calls:
+  //   1. WINDING -- FIXED, plan 4a task 1. Kept here because the reasoning
+  //      is what stops the wrong fix being re-derived. `pts` below emits one
+  //      fixed triangle order, so a quad's geometric winding follows
+  //      uVec x vVec whatever `n` says, and the renderer (MeshBasicMaterial,
+  //      FrontSide) obeys the winding. Working through all twelve grid()
+  //      calls:
   //        else branch (walls along z): ALL SIX faces are reversed -- both
   //          large faces, both end reveals, top and bottom.
   //        alongX branch: the four vertical faces agree, but TOP AND BOTTOM
@@ -520,11 +522,16 @@ const Baker = (() => {
   //      So the fix is not "reverse the else branch": that would leave top
   //      and bottom broken on every wall in every apartment. Reverse the
   //      quad when (uVec x vVec) . n < 0, which covers all eight cases and
-  //      leaves the four correct ones alone.
+  //      leaves the four correct ones alone -- that is the `flip` test in
+  //      grid() below.
   //      Measured on the unmodified tip, standing 1 m off each wall's
-  //      centreline and raycasting at it: along-x walls show the near face
-  //      6/6 (serenity) and 14/16 (kings-court); along-z walls show the far
-  //      face 8/8 and 17/18. So the surface a visitor looks at is shaded
+  //      centreline and raycasting at it: EVERY along-x wall showed the near
+  //      face and no far face, and EVERY along-z wall the far face and no
+  //      near face -- serenity 4/4 and 5/5, kings-court 19/19 and 23/23,
+  //      horkyone-10 6/6 and 9/9. (The older 6/6, 14/16, 8/8, 17/18 figures
+  //      counted a different population and are superseded; the probe that
+  //      produced these is docs/superpowers/harnesses/2026-08-15-b4a-task1.)
+  //      So the surface a visitor looked at was shaded
   //      from a sample point 14 cm away on the OTHER side of that wall --
   //      outside the building, for a shell wall. Under a flat ambient the
   //      two sides differ only in the direct terms and it never showed.
@@ -539,12 +546,14 @@ const Baker = (() => {
   //      that zero is smeared 0.45 m across wall a visitor is looking
   //      straight at. 14% of serenity's wall vertices went to a true zero.
   //
-  // Defect 1 has to be fixed before walls can take any position-sensitive
+  // Defect 1 had to be fixed before walls could take any position-sensitive
   // shading at all, including the plan's task 4 atlas -- an atlas baked onto
-  // inside-out walls records the wrong side. Defect 2 is precisely what that
-  // atlas replaces. Until both are done the honest state is the one
-  // CLAUDE.md already records: floors and furniture carry occlusion, walls
-  // do not, and a floor-to-wall corner darkens on the floor side only.
+  // inside-out walls records the wrong side. It is now fixed; defect 2 is
+  // still open, and is precisely what that atlas replaces. Walls therefore
+  // still pass sampled=false here, and until defect 2 is closed the honest
+  // state is the one CLAUDE.md already records: floors and furniture carry
+  // occlusion, walls do not, and a floor-to-wall corner darkens on the floor
+  // side only.
   function bakeWalls(scene, data) {
     // two buckets: lower- and upper-level walls — for the dollhouse cutaway
     const buckets = { low: { pos: [], nrm: [], col: [] }, high: { pos: [], nrm: [], col: [] } };
@@ -572,9 +581,23 @@ const Baker = (() => {
           c[j].push(L);
         }
       }
+      // WINDING. `pts` below emits a fixed triangle order, so a quad's
+      // geometric front face follows uVec x vVec whatever `n` says, and
+      // MeshBasicMaterial is FrontSide, so culling is live. Eight of the
+      // twelve grid() calls per wall piece disagree with their own normal:
+      // all six of an along-z piece, plus top and bottom of an along-x one.
+      // The test below covers all eight and leaves the four correct ones
+      // alone. It is NOT a reversal of the else branch -- that would leave
+      // top and bottom broken on every wall in every apartment.
+      const flip =
+        (uVec[1] * vVec[2] - uVec[2] * vVec[1]) * n[0] +
+        (uVec[2] * vVec[0] - uVec[0] * vVec[2]) * n[1] +
+        (uVec[0] * vVec[1] - uVec[1] * vVec[0]) * n[2] < 0;
       for (let j = 0; j < sv; j++) {
         for (let i = 0; i < su; i++) {
-          const pts = [[i, j], [i + 1, j], [i + 1, j + 1], [i, j], [i + 1, j + 1], [i, j + 1]];
+          const pts = flip
+            ? [[i, j], [i + 1, j + 1], [i + 1, j], [i, j], [i, j + 1], [i + 1, j + 1]]
+            : [[i, j], [i + 1, j], [i + 1, j + 1], [i, j], [i + 1, j + 1], [i, j + 1]];
           for (const [ii, jj] of pts) {
             pos.push(
               o[0] + uVec[0] * ii / su + vVec[0] * jj / sv,
