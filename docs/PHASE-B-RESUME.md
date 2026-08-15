@@ -32,14 +32,19 @@ premium property.
 
 ## The numbers that matter
 
-| Apartment | pre-migration (r128) | now | note |
-|---|---:|---:|---|
-| serenity | 16.58 | **16.56–16.57** | parity within noise, **not** a clean pass |
-| kings-court | 22.44 | **18.73–18.75** | a real improvement, −3.7 |
-| horkyone-10 | — | — | no photographs; accepted on luminance proximity |
+| Apartment | pre-migration (r128) | end of plan 2 | now, after plan 3 | note |
+|---|---:|---:|---:|---|
+| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | **FAILS the gate** by 0.02–0.03 |
+| kings-court | 22.44 | 18.73–18.75 | **~18.87** | passes by ~3.57 |
+| horkyone-10 | — | — | — | no photographs; accepted on luminance proximity |
 
-Shipped config: serenity `exposure` **0.326**, kings-court **0.56**,
-horkyone-10 **0.45**; bloom threshold **1.8**, strength **0.1**; `?v=97`.
+Plan 2 closed serenity to parity and PR #27 merged on that basis. **Plan 3
+then pushed it back out**, by +0.0516 at full precision — larger than the
+±0.039 noise floor, reproduced across two trees and eight readings. See
+"Immediately next" below; this is the open decision.
+
+Shipped config: serenity `exposure` **0.329**, kings-court **0.575**,
+horkyone-10 **0.46**; bloom threshold **1.8**, strength **0.1**; `?v=106`.
 
 **The gate is `serenity ≤ 16.58` and `kings-court ≤ 22.44`, measured
 all-spot in legacy mode.** Those thresholds are each apartment's own final
@@ -57,10 +62,12 @@ restored** — `--all-spots` on `delta_e.py` and the `?fov=legacy` branch in
 
 ## The five constraints that govern everything left
 
-1. **serenity's margin is 0.01–0.02 against a ±0.03–0.039 noise floor.** Any
-   change upstream of its render invalidates it. Plan 3 touches `lightAt`,
-   `aoAt` and the post chain, so it re-runs the gate **after each light task**,
-   not once at the end.
+1. **serenity's gate margin never had room, and plan 3 has now spent it.** It
+   passed by 0.01–0.02 against a ±0.03–0.039 noise floor; it now *fails* by
+   0.02–0.03. Any change upstream of serenity's render moves it, so re-run the
+   gate **after each such task**, not once at the end — that discipline is
+   exactly what made plan 3's regression attributable to task 2 rather than a
+   mystery.
 2. **Never fit toward ΔE.** Fit toward the photographs' luminance from
    `tools/luminance.py` and report ΔE as a consequence. Plan 2 caught this
    substitution once: an exposure was chosen as the ΔE minimum and labelled a
@@ -94,33 +101,58 @@ Those defects are plan 4's work:
   on luminance proximity to two flats, one of which sits at its own noise-floor
   margin.
 
-## Immediately next: plan 3, task 1's open question
+## Immediately next: plan 3 closed, and it did not do what it set out to do
 
-Task 1 vendored `three-mesh-bvh` 0.9.14 and built `tour/sampler.js` — a
-hemisphere sampler over a real BVH, replacing visibility tests against 47
-axis-aligned boxes. It is wired to nothing yet, deliberately, so task 2's
-measurement is interpretable. Commit `d32f263`.
+Plan 3's task 7 ran the closing gate (`aab562d`), measuring both trees at once
+— HEAD on :8742 and a detached `c2bb0bd` worktree on :8743, the same scripts
+pointed at each — so before and after cannot differ by method.
 
-**The open question, which needs a decision before task 2:** the plan's own
-`selfTest` has four analytic cases and **three pass**. The failing one is
-`'open hemisphere sees sky'`, expected `> 0.95`, measured 0.70–0.85.
+**Structural: clean.** `__issues` empty, `Sampler.selfTest()` 8/8, zero console
+errors, all four walk routes and the sky-leak raycasts matching precedent.
+Draw calls through the post chain 72/165/83 desktop and 64/150/64 mobile,
+inside both budgets.
 
-The implementer investigated rather than adjusting the expectation, and the
-evidence says **the test's geometry is wrong, not the sampler**: the test
-scene includes a wall that genuinely occludes ~28–30% of the hemisphere from
-the sample point. Isolated, floor-only measures exactly 1.0; a hand-derived
-corner case predicts 0.7071 against 0.7139 measured.
+**The merge condition now FAILS on serenity.** All-spot legacy reads **16.61
+and 16.60** against ≤16.58 — a shortfall of 0.029/0.020 at full precision.
+Eight independent readings of this render sit in 16.59–16.61 and **not one has
+reached 16.58**. kings-court still passes by ~3.57.
 
-It also caught a real sampler bug on the way — an inverted tangent-basis axis
-selection, degenerate for floors, ceilings and east–west walls — which the
-symmetric test geometry had been hiding.
+**Plan 3 is what moved it, and the cause is identified.** The base tree reads
+16.54/16.56 and passes; the shift is +0.0516 at full precision, larger than
+the ±0.039 floor. It is **task 2's source fix**, not task 4's exposure — task
+4's own sweep reads 16.6133 at exposure 0.326 on HEAD against 16.541/16.565 at
+that same exposure on base.
 
-**Recommended resolution:** fix the test, not the sampler. Give the
-open-hemisphere case floor-only geometry (measured exactly 1.0), and add the
-wall case as its own assertion against the derived 0.7071. Then re-run and
-require 4/4. Do not relax the threshold to make the current geometry pass —
-that would remove the only case that distinguishes a real hemisphere from a
-repeated ray.
+**And the plan's own claim did not land either.** Endpoint to endpoint,
+spawn-pooled 5th-percentile luminance moved **0.0% on serenity**, −5.4% on
+kings-court, −1.2% on horkyone-10. Reachable blacks were this plan's entire
+subject, and on the apartment the gate is judged by, nothing moved.
+
+Two of plan 3's three bets were also measured and rejected on their own
+criteria, which is the process working rather than failing:
+
+- **GTAO: rejected** (task 3), measured and removed.
+- **Offline path-traced lightmaps: NO-GO** (task 6). The pilot missed its
+  pre-agreed exit criterion, serenity was reverted to the runtime bake, and
+  the loader was removed with it (`3c622d4`, `736a867`).
+
+**So the decision waiting for a human is what to do about serenity's 0.03.**
+The honest options, none of them free:
+
+1. **Revert task 2's source fix.** It costs the only mechanism plan 3 shipped,
+   and it did buy −5.4% p5 on kings-court.
+2. **Re-fit serenity's exposure against the new render** and see whether the
+   gate closes. Task 4 already fitted toward luminance; a fit that chases the
+   0.03 would be fitting toward ΔE, which this phase forbids.
+3. **Accept the 0.03 and restate the gate**, on the argument that the
+   threshold is itself one noisy historical reading. That is a real argument —
+   but it is also exactly the shape of "move the goalposts", and it should be
+   made deliberately by a person, not folded into a task.
+4. **Fix the winding defect first** (below) and re-measure. It changes the
+   render, so every number above would need retaking anyway.
+
+Do not resolve this by tuning. Every number in this section was reproduced
+across two trees and eight readings.
 
 ## How to work in this repo
 
