@@ -611,30 +611,57 @@ commit on this branch** — `"lightmaps": true` removed from
 13,626 bytes) deleted from the working tree, `?v=` bumped **104 → 105**
 because shipped config changed.
 
-**Kept, deliberately: `tour/lightmaps.js` and `tools/bake_lightmaps.mjs`.**
-The loader's dormant path is already what kings-court and horkyone-10 run in
-production — `Lightmaps.load()` returns null on its first line when the config
-does not set `lightmaps`, before any I/O — so serenity now runs the same code
-path as the other two rather than a new one, and removing it would mean
-editing `bake.js` and `main.js` to delete a reviewed staleness guard that is
-exactly what makes any future re-adoption safe. `tools/bake_lightmaps.mjs` is
-not shipped at all (site root is `tour/`), so it costs the product nothing and
-is the expensive artifact — ~551 s of bake logic — to rebuild from scratch.
+**Also removed: `tour/lightmaps.js`, the runtime loader.** This reversed a
+first-round decision to keep it, which had rested on a wrong cost estimate —
+that removal "would mean editing `bake.js` and `main.js` to delete a reviewed
+staleness guard". **It would not.** `bake.js:681` already reads
+`(typeof Lightmaps === 'undefined') ? Promise.resolve(null) : …`, and
+`grep -rl Lightmaps tour/` returns only `bake.js` and the loader itself, so
+removal is **one line out of `main.js`'s `CLASSIC` array and `bake.js`
+untouched**. The guard is not what removal destroys — it is what makes
+removal safe.
 
-**Verified after the revert, not assumed:** zero requests to `/lightmaps/` on
-all three apartments, no HTTP failure of any status, no `[lightmaps]` console
-warning, `window.__lightmaps.status = "off"` and `APT.lightmaps` absent
-everywhere. serenity's all-spot legacy ΔE returned to **16.59** — task 5's
-pack-off reading exactly, inside the 16.59–16.61 band of the four runtime-bake
-readings across tasks 4/5/6, and clearly out of the 16.71–16.75 pack-on band.
-`exposure` (0.329 / 0.575 / 0.46) and bloom (1.8 / 0.1) untouched; six
-`verify.mjs` rows still pass with draw calls unchanged at 72/64, 165/150,
-83/64.
+On the corrected facts the same principle that removed the pack removes the
+loader: **anything inside the deploy root that drives nothing comes out;
+anything outside it that costs nothing stays.** The loader shipped ~10 KB and
+one HTTP request on every page load of *every* apartment, forever, driving
+nothing on any of them, and "history is the archive, restore is a checkout"
+applies to it even more cleanly than to the pack — a pure-text file restores
+with no re-bake and no binary blobs. Keeping it would have been the same
+argument used to delete 13.6 KB of pack, applied inconsistently to 10 KB of
+loader.
+
+**Kept: `tools/bake_lightmaps.mjs`.** The distinction is deploy cost, not
+sentiment: `vercel.json` sets `outputDirectory: "tour"`, so the offline baker
+never reaches a visitor and costs the product exactly nothing, while being the
+expensive artifact — ~551 s of bake logic, the hash handshake and the
+Playwright driver — to rebuild from scratch.
+
+**Verified after the revert, not assumed:** **zero requests mentioning
+"lightmap" at all** on all three apartments — not merely zero `/lightmaps/`
+pack probes but zero for the loader script too, since it is out of `CLASSIC`
+— no HTTP failure of any status, no `[lightmaps]` console warning, no console
+error, `APT.lightmaps` absent and `typeof Lightmaps === 'undefined'`
+everywhere. Removing a classic script is exactly the failure `main.js`'s
+error handling exists for, so that it did **not** fire is asserted rather than
+assumed: `__tourEntryRan` true, `__app` present, the overlay still reading
+"Click to enter" rather than either "Could not load" message, on all three.
+serenity's all-spot legacy ΔE reads **16.59** with the loader still present
+and **16.60** after removing it — both inside the 16.59–16.61 band of the four
+runtime-bake readings across tasks 4/5/6, clearly out of the 16.71–16.75
+pack-on band, and 0.01 apart, which is this metric's documented repeat noise.
+(Structurally it could not have moved: the loader already returned before any
+I/O, so every surface was baking at runtime either way.) `exposure`
+(0.329 / 0.575 / 0.46) and bloom (1.8 / 0.1) untouched; six `verify.mjs` rows
+pass with draw calls unchanged at 72/64, 165/150, 83/64, `__issues` empty,
+`__ambSampled` true, `Sampler.selfTest()` 8/8.
 
 **Nothing is lost.** The baker, the loader, the pack, the guard and every
-measurement remain in git history at **`6a607fa`**; re-running the pilot is
-`git checkout 6a607fa -- tour/lightmaps/serenity` plus restoring the one
-config key — a checkout, not a redo, and not another 551 s bake.
+measurement remain in git history at **`6a607fa`**. Re-adopting is
+`git checkout 6a607fa -- tour/lightmaps.js tour/lightmaps/serenity`, re-adding
+`lightmaps.js` to `main.js`'s `CLASSIC` list and the config key — a checkout
+and one line, not a redo, and not another 551 s bake. `bake.js` needs no edit
+in either direction.
 
 Evidence: `docs/superpowers/metrics/serenity-b3-task6-verdict.json` (rebuilt
 from its inputs by `write_verdict.py --check`), the two

@@ -1388,44 +1388,64 @@ state as task 5 committed it, recorded the costs both ways in the verdict
 JSON, and recommended reverting. **The human partner has now decided:
 serenity reverts to the runtime bake.**
 
-Done in a follow-up commit on `phaseB-plan3-light`: `"lightmaps": true`
-removed from `tour/apartments/serenity.json`, `tour/lightmaps/serenity/`
-(11 files, 13,626 bytes) deleted, `?v=` bumped **104 → 105** because
-shipped config changed. **`tour/lightmaps.js` and
-`tools/bake_lightmaps.mjs` were kept** — the loader's dormant path is
-already what kings-court and horkyone-10 run (`Lightmaps.load()` returns
-null before any I/O when the config does not set `lightmaps`), so serenity
-now runs the same path as the other two rather than a new one; and the
-offline baker is not shipped at all, so it costs the product nothing while
-being the expensive thing to rebuild.
+Done in two commits on `phaseB-plan3-light`. `"lightmaps": true` removed
+from `tour/apartments/serenity.json`, `tour/lightmaps/serenity/` (11 files,
+13,626 bytes) deleted, and — in the fix round — `tour/lightmaps.js`, the
+runtime loader, removed too, one line out of `main.js`'s `CLASSIC` array.
+`?v=` bumped **104 → 105 → 106**, each time after the last edit.
 
-**Verified rather than assumed:** zero requests to `/lightmaps/` on all
-three apartments, no HTTP failure of any status, no `[lightmaps]` console
-warning, `__lightmaps.status = "off"` and `APT.lightmaps` absent
-everywhere; `__issues` empty, `__ambSampled` true, `Sampler.selfTest()`
-8/8, draw calls unchanged at 72/64, 165/150, 83/64; `exposure`
-(0.329 / 0.575 / 0.46) and bloom (1.8 / 0.1) untouched.
+**The loader was kept in the first round and that was reversed on
+corrected facts.** Keeping rested on removal costing "edits to `bake.js`
+and `main.js` to delete a reviewed staleness guard". It does not:
+`bake.js:681` already reads
+`(typeof Lightmaps === 'undefined') ? Promise.resolve(null) : …` and
+`grep -rl Lightmaps tour/` returns only `bake.js` and the loader, so
+removal is one line and `bake.js` is untouched — the guard is what makes
+removal *safe*, not what removal destroys. On the corrected facts one
+principle covers both artefacts: **anything inside the deploy root that
+drives nothing comes out; anything outside it that costs nothing stays.**
+The loader shipped ~10 KB and one request on every page load of every
+apartment for no effect, and restores more cheaply than the pack it
+served. **`tools/bake_lightmaps.mjs` stays** — `vercel.json` sets
+`outputDirectory: "tour"`, so it never reaches a visitor.
+
+**Verified rather than assumed:** **zero requests mentioning "lightmap" at
+all** on all three apartments — not just zero pack probes but zero for the
+loader script, which is no longer asked for — no HTTP failure of any
+status, no `[lightmaps]` warning, no console error, `APT.lightmaps` absent
+and `typeof Lightmaps === 'undefined'` everywhere. Removing a classic
+script is precisely the failure `main.js`'s error handling exists for, so
+that it did **not** fire is asserted: `__tourEntryRan` true, `__app`
+present, the overlay still reading "Click to enter". Plus `__issues`
+empty, `__ambSampled` true, `Sampler.selfTest()` 8/8, draw calls unchanged
+at 72/64, 165/150, 83/64, `exposure` (0.329 / 0.575 / 0.46) and bloom
+(1.8 / 0.1) untouched.
 
 **The number that proves it took:** serenity's all-spot legacy ΔE2000
-returned to **16.59** (`serenity-b3-task6-revert-legacy-allspots.json`) —
-task 5's pack-off reading exactly. Read the four runtime-bake readings and
-the two pack-on readings side by side:
+returned to **16.59** with the loader still present
+(`serenity-b3-task6-revert-legacy-allspots.json`) and **16.60** after
+removing it (`serenity-b3-task6-revert-noloader-legacy-allspots.json`).
+Read against every committed reading of this quantity:
 
-| state | task 4 | task 5 | task 6 | after the revert |
-|---|---:|---:|---:|---:|
-| runtime bake | 16.60 | 16.59 | 16.61 | **16.59** |
-| offline pack | — | 16.75 | 16.71 | — |
+| state | task 4 | task 5 | task 6 | revert | loader removed |
+|---|---:|---:|---:|---:|---:|
+| runtime bake | 16.60 | 16.59 | 16.61 | **16.59** | **16.60** |
+| offline pack | — | 16.75 | 16.71 | — | — |
 
 A 16.59–16.61 band for the runtime bake against 16.71–16.75 with the pack:
-the post-revert reading is inside the first and 0.12 clear of the second.
-(This supersedes the "16.60–16.62" range quoted a few paragraphs above,
+both post-revert readings sit inside the first and ≥0.11 clear of the
+second, and are 0.01 apart — this metric's documented repeat noise.
+Structurally the second could not have moved: the loader already returned
+before any I/O, so every surface was baking at runtime either way. (This
+table supersedes the "16.60–16.62" range quoted a few paragraphs above,
 which omitted task 5's own 16.59.)
 
 **Nothing is lost.** The baker, the loader, the pack, the staleness guard
 and every measurement remain in git history at **`6a607fa`** — the task 6
-verdict commit. Re-running the pilot is `git checkout 6a607fa --
-tour/lightmaps/serenity` plus restoring the one config key: a checkout,
-not another 551 s bake. **The standing warning is unchanged — do not
-extend the pilot to another apartment**, and re-adopting it on serenity
-would still owe the exposure and bloom re-fit that keeping it would have
-owed.
+verdict commit. Re-adopting is `git checkout 6a607fa -- tour/lightmaps.js
+tour/lightmaps/serenity`, re-adding `lightmaps.js` to `main.js`'s
+`CLASSIC` list and the config key: a checkout and one line, not another
+551 s bake, with `bake.js` untouched in either direction. **The standing
+warning is unchanged — do not extend the pilot to another apartment**, and
+re-adopting it on serenity would still owe the exposure and bloom re-fit
+that keeping it would have owed.

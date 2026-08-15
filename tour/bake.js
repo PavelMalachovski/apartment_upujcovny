@@ -671,12 +671,22 @@ const Baker = (() => {
 
   // Async pass so the page keeps painting.
   //
-  // Before the first texel: ask lightmaps.js whether this apartment ships an
-  // offline pack that still matches its config. A verified pack replaces
-  // bakeSurface() per surface; anything else — no pack, a stale one, an
-  // image that would not load — falls through to baking that surface here,
+  // Before the first texel: ask the offline-lightmap loader whether this
+  // apartment ships a pack that still matches its config. A verified pack
+  // replaces bakeSurface() per surface; anything else — no pack, a stale one,
+  // an image that would not load — falls through to baking that surface here,
   // which is why the whole sampler/occluder path below is set up
   // unconditionally rather than skipped when a pack is present.
+  //
+  // THAT LOADER IS NOT IN THE TREE TODAY. `tour/lightmaps.js` shipped with
+  // the serenity pilot, the pilot failed its exit criterion, and both the
+  // pack and the loader were reverted — so `Lightmaps` is always undefined
+  // here and every surface bakes at runtime. The branch below is kept
+  // deliberately, not left by accident: it is the entire cost of re-adopting
+  // a pack later (restore lightmaps.js from git and re-add it to main.js's
+  // CLASSIC list — this file needs no edit), and it is what makes the
+  // loader's absence safe rather than a ReferenceError. See CLAUDE.md's
+  // `lightmaps` config-key row for the verdict and the restore commit.
   function run(scene, data, onProgress) {
     const packReady = (typeof Lightmaps === 'undefined')
       ? Promise.resolve(null)
