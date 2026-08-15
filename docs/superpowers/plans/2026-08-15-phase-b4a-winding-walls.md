@@ -52,7 +52,9 @@
 
 **Interfaces:**
 - Produces: a corrected `grid()`. No signature change — `grid(o, uVec, vVec, n, su, sv, occ, shade)` stays exactly as it is. Task 2 calls it unchanged.
-- Produces: `faces.mjs`'s console function `__faces()` returning `{apt, walls:[{i, alongX, near, far, none}], totals:{near, far, none}}`. Task 2 re-runs it to prove the winding fix survived its edits.
+- Produces: `faces.mjs` with **two** console functions, both returning `{apt, walls:[{i, alongX, near, far, none}], totals:{near, far, none}}` (`__facesLvl` adds `lvl` per wall). Task 2 re-runs it to prove the winding fix survived its edits — **using `__facesLvl()`, not `__faces()`**.
+  - `__faces()` is the probe as originally specified here, kept verbatim. It probes at **world** y 0.4/1.5/2.2 and therefore cannot reach a `lvl:"upper"` wall at all: on kings-court it is blind to 4 of 19 along-x and 7 of 23 along-z walls, in **both** arms. Do not assert on it.
+  - `__facesLvl()` lifts each ray onto the wall's own storey and is the reading of record. Expected on the fixed tree: every wall `near`, none `far` — serenity 9/9, kings-court 42/42, horkyone-10 15/15.
 
 - [ ] **Step 1: Read the spec and the defect's own comment**
 
@@ -228,7 +230,7 @@ git commit -m "Task 1: fix the wall winding with a sign test, not an else-branch
 - Modify: `tour/index.html:254` — `?v=` bump
 
 **Interfaces:**
-- Consumes: task 1's corrected `grid()` and its `__faces()` harness.
+- Consumes: task 1's corrected `grid()` and its `faces.mjs` harness. **Assert on `__facesLvl()`, never on `__faces()`** — the latter cannot see an upper-storey wall, so on kings-court it reports 15/19 and 16/23 even with the fix in place and correct.
 - Consumes: `lightAt(P, N, occ, data, outdoor, sampled, ambFn)` at `tour/bake.js:258`. The sixth positional argument is `sampled`; `grid()` currently passes `false` at `:571`.
 - Consumes: `window.__ambSampled` (boolean, set in `run()` at `:732`) and the `__issues` entry pushed beside it at `:743`.
 - Produces: either a shipped `SEG` value and `sampled=true` for walls, or a full revert plus a committed null result.
@@ -303,7 +305,7 @@ await window.__bakeReady; console.log(window.__ambSampled, window.__issues);
 
 - [ ] **Step 8: On GO — ship it**
 
-Keep the chosen `SEG` and `sampled=true`. Bump `?v=108` → `?v=109`. Re-run `__faces()` from task 1 and confirm the winding fix survived: every wall still `near`. Commit the sweep, the metrics and the screenshots.
+Keep the chosen `SEG` and `sampled=true`. Bump `?v=` on the single module tag in `tour/index.html` (task 1 left it at `?v=109`, so `?v=110`). Re-run **`__facesLvl()`** from task 1 and confirm the winding fix survived — every wall `near` and **none `far`**: serenity 9/9, kings-court 42/42, horkyone-10 15/15, with `far == 0` on all three. Do **not** assert "every wall near" on `__faces()`: it cannot reach an upper-storey wall, so kings-court legitimately reads 15/19 and 16/23 there with the fix in place. The `far == 0` half of the assertion does hold under both probes and is the one that actually detects a winding regression. Commit the sweep, the metrics and the screenshots.
 
 - [ ] **Step 9: On NO-GO — revert in full and commit the null result**
 

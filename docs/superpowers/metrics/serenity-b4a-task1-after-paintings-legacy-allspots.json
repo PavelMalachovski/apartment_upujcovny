@@ -1,8 +1,8 @@
 {
   "apartment": "serenity",
-  "phase": "b4a-task1-after",
+  "phase": "b4a-task1-after-paintings-legacy-allspots",
   "population": "all-spot",
-  "mean": 16.4,
+  "mean": 16.32,
   "spots": [
     {
       "file": "1.webp",
@@ -12,22 +12,22 @@
     {
       "file": "2.webp",
       "name": "Pool Terrace",
-      "deltaE": 18.18
+      "deltaE": 18.2
     },
     {
       "file": "3.webp",
       "name": "Living Room",
-      "deltaE": 17.33
+      "deltaE": 16.94
     },
     {
       "file": "4.webp",
       "name": "Living Room",
-      "deltaE": 17.97
+      "deltaE": 17.85
     },
     {
       "file": "5.webp",
       "name": "Kitchen & Hall",
-      "deltaE": 11.12
+      "deltaE": 11.09
     },
     {
       "file": "6.webp",
@@ -37,27 +37,27 @@
     {
       "file": "7.webp",
       "name": "Bedroom",
-      "deltaE": 14.17
+      "deltaE": 13.99
     },
     {
       "file": "8.webp",
       "name": "Bedroom",
-      "deltaE": 11.92
+      "deltaE": 11.75
     },
     {
       "file": "9.webp",
       "name": "Living Room",
-      "deltaE": 18.73
+      "deltaE": 18.7
     },
     {
       "file": "10.webp",
       "name": "Pool Terrace",
-      "deltaE": 25.03
+      "deltaE": 25.04
     },
     {
       "file": "11.webp",
       "name": "Bedroom",
-      "deltaE": 12.73
+      "deltaE": 12.74
     }
   ],
   "scored": 11,

@@ -76,9 +76,14 @@ window.__facesLvl = function () {
           const h = rc.intersectObjects(a.scene.children, true)
                       .find(h => h.object.visible && isWall(h.object));
           if (!h) { none++; continue; }
-          // the hit must lie on THIS wall's centreline plane, not merely at
-          // the right range from some unrelated wall
-          const onLine = Math.abs((alongX ? h.point.z - cz : h.point.x - cx)) < 0.09;
+          // The hit must lie on THIS wall's own slab, not merely at the right
+          // range from some unrelated wall. Its two faces are at exactly
+          // centreline +/- TH (0.07), so the window is TH plus a hair for
+          // float error -- NOT a loose 0.09. horkyone-10 is why: walls 3 and 7
+          // sit 0.15 apart at x 4.86 and 5.01, so wall 3's face at 4.93 is
+          // 0.08 off wall 7's centreline and a 0.09 window waves it through,
+          // which is exactly the miscount this test exists to stop.
+          const onLine = Math.abs((alongX ? h.point.z - cz : h.point.x - cx)) < TH + 0.005;
           if (!onLine) { none++; continue; }
           if (Math.abs(h.distance - (1 - TH)) < 0.02) near++;
           else if (Math.abs(h.distance - (1 + TH)) < 0.02) far++;

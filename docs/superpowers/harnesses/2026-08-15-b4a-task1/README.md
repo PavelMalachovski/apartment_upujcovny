@@ -37,21 +37,59 @@ of the count.
 
 ## Result
 
-Both probes, all three apartments — no wall is mixed, the split is total:
+**The two probes do not read the same, and the figures below are stated per
+probe.** `__facesLvl` is the reading of record; `__faces` cannot reach an
+upper-storey wall at all (next section), so on kings-court it is blind to 4 of
+19 along-x and 7 of 23 along-z walls. Read down the column that names your
+probe.
+
+Counts are *walls*, not probes: a wall counts as "showing near" if any of its
+probes returned `near`.
+
+**`__facesLvl` — the reading of record**
 
 | | serenity | kings-court | horkyone-10 |
 |---|---|---|---|
-| **before** — along-x walls showing near / showing far | 4/4 · 0/4 | 19/19 · 0/19 | 6/6 · 0/6 |
-| **before** — along-z walls showing far / showing near | 5/5 · 0/5 | 23/23 · 0/23 | 9/9 · 0/9 |
-| **after** — every wall showing near / any showing far | 9/9 · 0 | 42/42 · 0 | 15/15 · 0 |
+| **before** — along-x showing near / showing far | 4/4 · **0**/4 | 19/19 · **0**/19 | 6/6 · **0**/6 |
+| **before** — along-z showing far / showing near | 5/5 · **0**/5 | 23/23 · **0**/23 | 9/9 · **1**/9 ‡ |
+| **after** — showing near / showing far | 9/9 · **0** | 42/42 · **0** | 15/15 · **0** |
+
+**`__faces` — the plan's probe, blind to the upper storey**
+
+| | serenity | kings-court | horkyone-10 |
+|---|---|---|---|
+| **before** — along-x showing near / showing far | 4/4 · **0**/4 | 15/19 · **0**/19 | 6/6 · **0**/6 |
+| **before** — along-z showing far / showing near | 5/5 · **0**/5 | 16/23 · **0**/23 | 9/9 · **2**/9 ‡ |
+| **after** — showing near / showing far | 9/9 · **0** | 15/19, 16/23 · **0** | 15/15 · **0** |
+
+The load-bearing cell is the same under both probes and on all three
+apartments: **no along-x wall ever showed a far face, and after the fix no
+wall of any orientation does.** That is the defect and its removal.
+
+‡ **horkyone-10's along-z walls that also show near, before the fix.** Not a
+counter-example — both are geometric coincidences in a flat whose walls are
+0.15 m apart, and each was traced to the triangle that produced it:
+
+- **wall 3** (x 4.86), 3 probes of 30, under *both* probes. The hit is a
+  triangle at x 4.93 spanning z 3.14–3.28, normal +x — the **east end reveal
+  of wall 2**, the along-x wall at z 3.21 that ends at x 4.93. Walls join at
+  centrelines, so that reveal is exactly coplanar with wall 3's east face, and
+  along-x reveals are among the four faces that were never reversed. The probe
+  is right: there *is* wall material at the near-face distance. It simply
+  belongs to the neighbour's end cap rather than to wall 3's own culled face.
+- **wall 7** (x 5.01), 15 probes, under `__faces` only. Wall 3's far face at
+  4.93 is 0.01 from wall 7's near face at 4.94 — inside the ±0.02 range
+  tolerance — so wall 7 was reading wall 3's surface. `__facesLvl`'s
+  centreline test rejects it and the wall reads a clean far 15 / none 15. This
+  is the case that set the tolerance; see "Known limitation".
 
 **The older figures on record — along-x near 6/6 and 14/16, along-z far 8/8
 and 17/18 — are superseded.** They count a population this probe does not
 reproduce: serenity has 9 config walls (4 along-x, 5 along-z), not 14, and
 kings-court has 42, not 34. The *direction* they record is exactly right and
-is reproduced here without a single counter-example; only the denominators
-differ. The "two kings-court walls unexplained" that plan 3 left open do not
-exist in this population — see below, where all 42 are accounted for.
+is reproduced here; only the denominators differ. The "two kings-court walls
+unexplained" that plan 3 left open do not exist in this population — see
+below, where all 42 are accounted for.
 
 ## Two probes, because the plan's one cannot see the upper storey
 
@@ -118,9 +156,25 @@ buffer and is unambiguously wall, so the classification does not depend on it.
 
 The 1 m standoff is a fixed constant and several walls in these flats are
 closer together than that. That inflates `none` (see cause 1) but cannot
-produce a false `far`, so it does not weaken the result. `__facesLvl`'s
-centreline-plane test is what stops a neighbouring wall being *miscounted* as
-the probed wall's face.
+produce a false `far`, so it does not weaken the result.
+
+`__facesLvl`'s centreline test narrows the miscount but **does not eliminate
+it, and its window is deliberately tight**. A wall's two faces are at exactly
+centreline ± `TH` (0.07), so the window is `TH + 0.005` — not a round 0.09.
+horkyone-10 is why: walls 3 and 7 sit 0.15 apart at x 4.86 and 5.01, so
+wall 3's face at 4.93 is 0.08 off wall 7's centreline and a 0.09 window waves
+it straight through. That was the first version of this test and it let wall 7
+report near 15 / far 15 / none 0 off its neighbour's surface — precisely the
+miscount the test exists to stop. At `TH + 0.005` it is rejected and wall 7
+reads far 15 / none 15.
+
+What the test still cannot separate is a neighbouring surface that is
+*genuinely coplanar* with the probed wall's own face — horkyone-10 wall 3's
+reading off wall 2's end reveal, above. No range or plane tolerance can
+exclude that one, because the surface really is where the probed wall's face
+should be. It is a true positive about the geometry and a false attribution
+about which wall owns it; the `‡` note in the Result section names every
+instance.
 
 ## Before/after frames
 
@@ -134,12 +188,14 @@ before and correctly light after**: that is the defect's whole visual
 signature — before the fix the visitor was looking at the face shaded from a
 sample point on the *outside* of the building.
 
-The same frame also shows two paintings present before and **missing after**.
-That is not a rendering fault. They sit at x 5.71 against wall 2, whose
-centreline is x 5.75, i.e. 0.04 from the centreline and so *inside* the 0.14
-slab. They were only ever visible because the wall was inside-out and
-presenting its far face at 5.82. This is a pre-existing config error of exactly
-the class CLAUDE.md rule 2h describes, newly exposed — not introduced — by the
-fix. Enumerated across all three apartments, it is these two paintings and
-nothing else (kings-court 0 of 25 wall-mounted items, horkyone-10 0 of 6).
-Left for plan 4b, which owns config geometry; the correction is x 5.71 → 5.65.
+**The paintings on that wall are in both frames, and that took a second fix.**
+On the winding fix alone they vanished: they sat at x 5.71 against wall 2,
+whose centreline is x 5.75, i.e. 0.04 from the centreline and so *inside* the
+0.14 slab. They had only ever been visible because the wall was inside-out and
+presenting its far face at 5.82. A pre-existing config error of exactly the
+class CLAUDE.md rule 2h describes — newly exposed, not introduced. Enumerated
+across all three apartments it was these two and nothing else (kings-court 0 of
+25 wall-mounted items, horkyone-10 0 of 6). Corrected here to **x 5.65**,
+placed against a *raycast* face measurement (5.6800, not computed from the
+centreline) and confirmed by a second cast that hits the painting at 5.628
+before the wall at 5.680. The after frame is the post-correction one.

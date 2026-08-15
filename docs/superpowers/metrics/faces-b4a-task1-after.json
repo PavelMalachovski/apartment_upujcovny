@@ -2,18 +2,26 @@
  "phase": "b4a-task1-after",
  "what": "Wall face winding probe. Stand 1 m off each config wall centreline and raycast at it; the near face is at 0.93, the far face at 1.07. Under the winding defect an along-z wall presents only its far face. Produced by docs/superpowers/harnesses/2026-08-15-b4a-task1/faces.mjs.",
  "probes": {
-  "faces": "the plan harness verbatim -- probe heights are WORLD y 0.4/1.5/2.2, so it cannot reach a lvl:\"upper\" wall",
-  "facesLvl": "same probe lifted onto each wall's own storey (mainFloorY/upperFloorY) and requiring the hit to lie on the probed wall's own centreline plane; this is the one with full coverage"
+  "faces": "the plan harness verbatim -- probe heights are WORLD y 0.4/1.5/2.2, so it cannot reach a lvl:\"upper\" wall. On kings-court it can only see 15 of 19 along-x and 16 of 23 along-z walls; read facesLvl instead.",
+  "facesLvl": "same probe lifted onto each wall's own storey (mainFloorY/upperFloorY) and requiring the hit to lie within TH+0.005 of the probed wall's own centreline; this is the reading of record"
  },
  "apartments": {
   "serenity": {
    "issues": [],
-   "bakeMs": 617.4,
+   "bakeMs": 804.1,
    "faces": {
     "totals": {
      "near": 224,
      "far": 0,
      "none": 46
+    },
+    "summary": {
+     "alongXWalls": 4,
+     "alongXShowingNear": 4,
+     "alongXShowingFar": 0,
+     "alongZWalls": 5,
+     "alongZShowingNear": 5,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -87,9 +95,13 @@
      "far": 0,
      "none": 46
     },
-    "noneBreakdown": {
-     "byOpening": 46,
-     "other": 0
+    "summary": {
+     "alongXWalls": 4,
+     "alongXShowingNear": 4,
+     "alongXShowingFar": 0,
+     "alongZWalls": 5,
+     "alongZShowingNear": 5,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -164,25 +176,29 @@
       "none": 12,
       "lvl": "main"
      }
-    ]
-   },
-   "summary": {
-    "alongXWalls": 4,
-    "alongXShowingNear": 4,
-    "alongXShowingFar": 0,
-    "alongZWalls": 5,
-    "alongZShowingNear": 5,
-    "alongZShowingFar": 0
+    ],
+    "noneBreakdown": {
+     "byOpening": 46,
+     "other": 0
+    }
    }
   },
   "kings-court": {
    "issues": [],
-   "bakeMs": 5939.6,
+   "bakeMs": 6221,
    "faces": {
     "totals": {
      "near": 799,
      "far": 0,
      "none": 361
+    },
+    "summary": {
+     "alongXWalls": 19,
+     "alongXShowingNear": 15,
+     "alongXShowingFar": 0,
+     "alongZWalls": 23,
+     "alongZShowingNear": 16,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -487,9 +503,13 @@
      "far": 0,
      "none": 133
     },
-    "noneBreakdown": {
-     "byOpening": 96,
-     "other": 37
+    "summary": {
+     "alongXWalls": 19,
+     "alongXShowingNear": 19,
+     "alongXShowingFar": 0,
+     "alongZWalls": 23,
+     "alongZShowingNear": 23,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -828,25 +848,29 @@
       "none": 0,
       "lvl": "upper"
      }
-    ]
-   },
-   "summary": {
-    "alongXWalls": 19,
-    "alongXShowingNear": 19,
-    "alongXShowingFar": 0,
-    "alongZWalls": 23,
-    "alongZShowingNear": 23,
-    "alongZShowingFar": 0
+    ],
+    "noneBreakdown": {
+     "byOpening": 96,
+     "other": 37
+    }
    }
   },
   "horkyone-10": {
    "issues": [],
-   "bakeMs": 1155.3,
+   "bakeMs": 1161.5,
    "faces": {
     "totals": {
      "near": 349,
      "far": 0,
      "none": 101
+    },
+    "summary": {
+     "alongXWalls": 6,
+     "alongXShowingNear": 6,
+     "alongXShowingFar": 0,
+     "alongZWalls": 9,
+     "alongZShowingNear": 9,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -962,9 +986,13 @@
      "far": 0,
      "none": 101
     },
-    "noneBreakdown": {
-     "byOpening": 44,
-     "other": 57
+    "summary": {
+     "alongXWalls": 6,
+     "alongXShowingNear": 6,
+     "alongXShowingFar": 0,
+     "alongZWalls": 9,
+     "alongZShowingNear": 9,
+     "alongZShowingFar": 0
     },
     "walls": [
      {
@@ -1087,15 +1115,11 @@
       "none": 16,
       "lvl": "main"
      }
-    ]
-   },
-   "summary": {
-    "alongXWalls": 6,
-    "alongXShowingNear": 6,
-    "alongXShowingFar": 0,
-    "alongZWalls": 9,
-    "alongZShowingNear": 9,
-    "alongZShowingFar": 0
+    ],
+    "noneBreakdown": {
+     "byOpening": 44,
+     "other": 57
+    }
    }
   }
  }
