@@ -22,7 +22,8 @@ No-Go, and the change was reverted.
 |---|---|
 | `sweep.json` | every raw reading, verbatim: the two before runs per apartment, all four SEG rows on all three apartments, the same-state repeats, the sampler-liveness proof, and the post-revert verification |
 | `write_metrics.py` | builds the three committed metrics files FROM `sweep.json`. `python write_metrics.py --check` rebuilds them in memory and diffs against disk — that is how "derived, not typed" is verified rather than asserted |
-| `check_metrics_readme.py` | asserts every figure in `docs/superpowers/metrics/README.md`'s plan-4a section against the metrics files it describes — 30 checks, exit 1 on any failure. Added in fix round 2, after that section shipped with a wrong range **and** a wrong file count |
+| `check_metrics_readme.py` | reads each figure **out of** `docs/superpowers/metrics/README.md`'s plan-4a section and compares it against the metrics files — 58 checks, exit 1 on any failure, and a regex that fails to match is a failure rather than a skip. Added in fix round 2 after that section shipped with a wrong range and a wrong file count; **rewritten in round 3, because the round-2 version was blind** (see below) |
+| `check_metrics_readme_selftest.py` | proves the checker's failure path actually runs: mutates a scratch copy of the README fourteen ways and one metrics JSON one way, and asserts a non-zero exit on every one plus a clean pass on the unmutated control |
 | `contrast.py` | the criterion's own instrument: linear-domain mean, p5 and contrast on serenity's poseVerified `compare` spots, at full precision. Phase B3 task 6's `linear.py`, unchanged in method |
 | `contrast.json` | its output for all six captured sets plus the photographs |
 | `meas.js` | the three browser-side functions every reading came from, with the reasons the awkward parts are the way they are |
@@ -48,7 +49,31 @@ python tools/delta_e.py --apt serenity --phase b4a-task2-<label>-legacy-allspots
 cd docs/superpowers/harnesses/2026-08-15-b4a-task2
 python contrast.py b4a-task2-<label>-serenity-legacy
 python write_metrics.py --check
+python check_metrics_readme.py           # README prose vs the metrics files
+python check_metrics_readme_selftest.py  # and: does that checker actually fail?
 ```
+
+### Why there is a self-test for a checker
+
+`check_metrics_readme.py` shipped in fix round 2 in a form that **could not
+fail**. Twenty-five of its thirty assertions recomputed a value from the JSON
+and compared it against a constant hard-coded three lines away — never against
+what the README prints — and that included every state-table cell and both
+gap ranges, the two figure classes it was added to protect. It had only ever
+been run against a correct document, so it passed, and its thirty green ticks
+were then quoted in the report as evidence the section was verified. The round-3
+re-review disproved that by experiment: revert the gap text to the old wrong
+values, corrupt a table cell to `99.99`, rerun unmodified — *"30 checks, 0
+failures", exit 0*.
+
+A checker whose failure path has never been executed is a checker whose failure
+path is untested, and a blind one is worse than none because the ticks persuade.
+So the rewrite reads every figure out of the document, treats a non-matching
+regex as a failure rather than a skip, and hard-codes **no expected values at
+all** — each comparison is README text against a `spots[]` array, or README text
+against other README text. And `check_metrics_readme_selftest.py` runs the
+fifteen mutations that must break it, every time, so the failure path stays
+exercised rather than assumed.
 
 `tools/delta_e.py` reads `tools/shots/render_<apt>_<file>.jpg` at the shots
 root; `contrast.py` (via `tools/luminance.py`) reads
