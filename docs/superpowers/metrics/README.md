@@ -1577,20 +1577,26 @@ tasks 5 and 6 net to zero on serenity's render in any case
 (`serenity-b3-task4-final-legacy[-repeat*]` 16.6018 / 16.6155 / 16.6064
 against task 7's 16.6082 / 16.6009).
 
-**Why paired and not pooled.** The ten BASE-lineage and eleven HEAD-lineage
-all-spot readings in this directory do separate without overlap — max BASE
-16.5700 against min HEAD 16.5882 — and that is worth recording as a
-description. **It is not worth a probability, and none is quoted here.** Task
-1 measured this metric on *unmodified pre-task code* and got **16.8667**
-(`serenity-b3-task1-baseline-allspots.json`) against 16.5700 for the same code
-in plan 2 task 9's session: a **0.297 cross-session offset on identical
-code**, roughly 6× the effect under test, documented in that file's own note
-and the whole reason task 1 captured a same-session control. Those two task-1
-readings are BASE-lineage and sit *above* the entire HEAD band; a pooled
-comparison separates cleanly only by omitting them. Exchangeability across
-sessions is known false here. Pairing within a session is what neutralises
-that offset, and there are two independent paired measurements agreeing to
-0.006.
+**Paired first, pooled as support.** The ten BASE-lineage and eleven
+HEAD-lineage all-spot legacy readings in this directory separate without
+overlap — max BASE 16.5700 against min HEAD 16.5882 — and the ten BASE
+readings, all of byte-identical render code across **five separate sessions**,
+span only **0.0291**, inside the ±0.039 same-session floor. That is a real
+supporting leg.
+
+**No probability is quoted for it, and none should be.** Repeat runs inside
+one page session are not independent draws — `materials.js` re-randomises per
+load but everything upstream of it is shared — so the 21 readings are not 21
+independent samples and any exchangeability arithmetic over them would
+overstate its own confidence. The load-bearing evidence stays the two
+same-session paired A/Bs above, which need no distributional assumption at
+all: both arms of each pair share a session, a machine and a build.
+
+Task 7's own reading is anchored the same way. It did not compare a naked HEAD
+number against a historical threshold — it measured **its own BASE arm**, at
+16.5409 / 16.5645, in family with five prior sessions, in the same session and
+on the same machine as the failing HEAD reading. The gate verdict rests on a
+same-session control, not on a remembered baseline.
 
 kings-court moved the same way and it does not matter there: **18.7346 →
 18.8557** on the four-run mean-of-rounded, +0.1211, against a ceiling 3.57
@@ -1610,26 +1616,57 @@ directory, by lineage. Values are the mean of each file's own rounded
 | HEAD (post-task-2 render) | 11 | **16.5882 – 16.6155** | `b3-task2-fix1`, `b3-task3-off`, `b3-task4-final-legacy[-repeat,-repeat2]`, `b3-task5-before-legacy`, `b3-task6-spotcheck-before-legacy`, `b3-task6-revert-legacy`, `b3-task6-revert-noloader-legacy`, `b3-task7-gate-legacy[-repeat]` |
 
 They do not overlap; the gap is 0.0182. **Do not convert that into a
-significance figure.** Two BASE-lineage readings are deliberately absent from
-the table above and would destroy the separation if pooled in:
-`serenity-b3-task1-baseline-allspots.json` (**16.8667**, captured on
-*unmodified pre-task code*) and `serenity-b3-task1-legacy-allspots.json`
-(**16.8616**). Both sit above the entire HEAD range. The reason is in task 1's
-own note: that session read ~0.297 high on identical code relative to plan 2
-task 9's, which is why task 1 captured a same-session control at all. A
-cross-session offset ~6× the effect under test means readings from different
-sessions are not exchangeable, so a pooled comparison is descriptive only.
-**The load-bearing evidence is the two same-session paired A/Bs above**, which
-are unaffected by that offset because both arms of each pair share a session.
+significance figure** — the readings are not independent draws (see "Paired
+first, pooled as support" above).
 
-Excluded from both rows for the same reason they have always been excluded
-elsewhere: fixed-FOV captures (`b2-final`, `b2-task9-newzero`,
-`b3-task4-final`), pre-fix-wave states (`b2-legacy` 17.14), and states that
-are neither lineage — GTAO on (`b3-task3-on` 21.68) and depth-normals
-(`b3-task3-depthnormals`), lightmap pack on (`b3-task5-after`,
-`b3-task6-spotcheck-after`), and `b3-task2-after` (16.6409), which is task 2
-*before* its own review fix round and so is a third render, not either
-lineage.
+Excluded from both rows for the reasons they have always been excluded:
+**fixed-FOV captures** (`b2-final`, `b2-fixwave-final`, `b2-task9-newzero`,
+`b3-task4-final`, and **both task-1 files** — see the note below),
+pre-fix-wave states (`b2-legacy` 17.14), and states that are neither lineage —
+GTAO on (`b3-task3-on` 21.68) and depth-normals (`b3-task3-depthnormals`),
+lightmap pack on (`b3-task5-after`, `b3-task6-spotcheck-after`), and
+`b3-task2-after` (16.6409), which is task 2 *before* its own review fix round
+and so is a third render, not either lineage.
+
+#### The task-1 pair is a fixed-FOV capture, not a session outlier
+
+`serenity-b3-task1-baseline-allspots.json` (16.8667) and
+`serenity-b3-task1-legacy-allspots.json` (16.8616) sit ~0.3 above every legacy
+reading. **Both files' own notes, and task 1's report, attribute that gap to
+"this session's own environment (GPU/driver/browser)". That attribution is
+wrong**, and an earlier version of this section repeated it. The gap is the
+**camera**, not the session:
+
+| spot | task1-baseline | fixed (`b2-task9-newzero`) | legacy (`b2-task9-legacy`) |
+|---|---:|---:|---:|
+| 3.webp | 17.45 | 17.46 | **15.29** |
+| 9.webp | 19.67 | 19.65 | **18.66** |
+| 10.webp | 22.01 | 22.04 | **25.29** |
+| 1.webp | 19.33 | 19.37 | **18.48** |
+
+All eleven spots track the **fixed-FOV** capture to within 0.11 (mean |Δ|
+**0.045**) while diverging from the legacy capture by −3.28 to +2.16 — **in
+both directions**. No GPU or driver term moves one spot down 3.3 and another
+up 2.2 while simultaneously reproducing a *different session's* fixed-FOV
+capture to 0.03.
+
+The mechanism is in the source: at task 1's own commit `d32f263`,
+`tour/measure.js` has **no `?fov=` check at all** — it applies
+`window.__spotFov(spot, W/H)` unconditionally, so every task-1 capture is
+necessarily per-photograph FOV. The `?fov=legacy` branch was restored later
+(`f56295d`). "All-spot" is a *population* and "legacy" is a *camera*; task 1's
+filename conflated them.
+
+Four same-session, same-code fixed-minus-legacy pairs in this directory give
+**+0.3227, +0.3427, +0.3118, +0.2845**. Task 1's 0.2967 sits inside that
+family. And the decisive check is the BASE row above: ten legacy readings of
+byte-identical code across five sessions spanning **0.0291**. A 0.297 session
+offset and a 0.029 five-session span cannot both be true.
+
+**No cross-session floor is documented anywhere** — `r128-reference.md`
+defines the ±0.03 / ±0.039 floor from same-session, same-page-session repeats.
+The BASE row is the best available estimate of a cross-session one and puts it
+at **≈0.03, comparable to the same-session floor**, not at 0.3.
 
 **Read this the right way round.** ΔE2000 against these photographs is
 dominated by pose and content mismatch, not by shading — 9 of serenity's 11
@@ -1730,10 +1767,14 @@ serenity. Plan 3 ends at 3.38.
 `framediff-t7.json` — per-frame BASE-vs-HEAD difference on every spawn,
 **against a HEAD-vs-HEAD control**, because `materials.js` randomises its
 procedural textures on every page load and a bare two-load diff would fold
-that in. Signal-over-noise runs 2-12 on most frames and collapses to 1.3-1.4
-on exactly the three frames whose walls carry a busy procedural pattern
-(kings-court Bedroom 1 at 1.35, Bathroom 2 at 1.44, horkyone-10 Hall at 1.31);
-those three are texture noise and nothing can be read off them.
+that in. Signal-over-noise across all 27 frames runs **serenity 3.89–11.80,
+kings-court 1.35–12.56, horkyone-10 1.31–8.07**. It collapses to 1.3–1.4 on
+the three frames whose walls carry a busy procedural pattern (kings-court
+Bedroom 1 at 1.35, Bathroom 2 at 1.44, horkyone-10 Hall at 1.31); those three
+are texture noise and nothing can be read off them. kings-court's top-down
+cutaway is a fourth low value (**1.77**) for an unrelated reason: it is a raw
+render of a plan mostly filled with background sky, so there is little
+lightmapped surface in frame to differ.
 
 The amplified difference maps put the change on **floors, ceilings, attic
 slopes and furniture contact points**, with ceiling-to-wall junctions

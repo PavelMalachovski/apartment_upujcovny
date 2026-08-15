@@ -114,7 +114,7 @@ inside both budgets.
 
 **The merge condition now FAILS on serenity.** All-spot legacy reads **16.61
 and 16.60** against ≤16.58 — a shortfall of 0.029/0.020 at full precision.
-Eight independent readings of this render sit in 16.59–16.61 and **not one has
+Eight independent readings of this render sit in 16.59–16.62 and **not one has
 reached 16.58**. kings-court still passes by ~3.57.
 
 **Plan 3 is what moved it, and the cause is identified.** The base tree reads

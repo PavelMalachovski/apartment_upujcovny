@@ -741,10 +741,19 @@ so **+0.0582 at constant exposure**. Task 7's endpoint pair is +0.0518; the
 two agree to 0.006. Task 4's sweep bounds the whole 0.326→0.329 interval at
 **0.0027** (16.6133 vs 16.6160) — measured on **task 4's own tree**,
 `cacheVersion "102"`, not HEAD; the first draft of this block said "on the
-HEAD tree" and was wrong. Pooling every reading is *not* the argument and no
-probability is quoted: task 1 read **16.8667** on unmodified pre-task code
-against 16.5700 for the same code a session earlier, a 0.297 cross-session
-offset ~6× the effect, which is why only same-session pairs count here.
+HEAD tree" and was wrong. Supporting it: ten BASE-lineage against eleven
+HEAD-lineage legacy readings separate without overlap (16.5409–16.5700 against
+16.5882–16.6155), and the ten BASE readings — byte-identical code across five
+sessions — span only **0.0291**. No probability is quoted for that, because
+repeat runs inside one page session are not independent draws. And task 7's
+verdict is anchored on its own same-session BASE arm (16.5409 / 16.5645), not
+on a remembered threshold.
+
+*(A second draft of this block excluded the two task-1 readings as a "0.297
+cross-session offset". That was wrong: both task-1 files are **fixed-FOV**
+captures — at `d32f263`, `measure.js` has no `?fov=` check and always applies
+the per-photograph camera — and they are excluded by the same rule every other
+fixed-FOV capture is. Details and per-spot evidence in the metrics README.)*
 
 kings-court passes comfortably either way (BASE **18.7346** → HEAD
 **18.8557**, four-run mean-of-rounded, ceiling 22.44). Read it knowing what
