@@ -92,7 +92,25 @@ def build(sw, apt):
             'beforeP5': p5s,
             'sweepP5': {str(SEG_VALUE[k]): sw['sweep'][k][apt]['spawnPooled']['p5L']
                         for k in SEG_ORDER},
-            'reading': None      # filled below
+            # SELECTION RULE, named because the first version of this file got it
+            # wrong and the error ran one way. It took the MINIMUM of both sides
+            # and called it "best", which overstated the fall by up to 2.8 points
+            # against the report's own table -- always in the direction that
+            # flatters the measured effect. The rule below is the one the report
+            # uses and the one this reading's question demands. The question is
+            # "did the dark end improve?", so the after side must be the value
+            # most FAVOURABLE to the change (the maximum across the sweep), and
+            # the before side must be the whole baseline rather than its luckier
+            # half (the mean of the two same-state runs).
+            'selectionRule': ('before = mean of the two same-state runs; after = the '
+                              'MAXIMUM pooled p5 across the sweep, i.e. the sweep point '
+                              'most favourable to the change. Not a minimum on either '
+                              'side. Matches task-2-report.md section 5 exactly.'),
+            'beforeMeanP5': None,        # filled below
+            'mostFavourableAfterP5': None,
+            'mostFavourableAfterSEG': None,
+            'deltaP5': None,
+            'reading': None
         },
         'samplerLiveness': sw['samplerLiveness'],
         'postRevertVerification': {
@@ -110,13 +128,74 @@ def build(sw, apt):
                    'here is comparable to a phase B3 number.')
     }
 
-    best_before = min(p5s)
-    best_after = min(r['spawnPooled']['p5L'] for r in rows)
-    doc['spawnPooledSecondReading']['reading'] = (
-        'Pooled p5 falls at every SEG on every apartment: best before %.1f, best after '
-        '%.1f. The second reading AGREES with the criterion -- the dark end of the frame '
-        'gets darker, not better. There is no disagreement to report.'
-        % (best_before, best_after))
+    before_mean = round(sum(p5s) / len(p5s), 2)
+    best_row = max(rows, key=lambda r: r['spawnPooled']['p5L'])
+    best_after = best_row['spawnPooled']['p5L']
+    sec = doc['spawnPooledSecondReading']
+    sec['beforeMeanP5'] = before_mean
+    sec['mostFavourableAfterP5'] = best_after
+    # Ties are real: serenity reads 88.6 at both 0.22 and 0.15. Report every
+    # SEG that attains the maximum rather than silently keeping whichever one
+    # max() happened to see first.
+    sec['mostFavourableAfterSEG'] = [r['SEG'] for r in rows
+                                     if r['spawnPooled']['p5L'] == best_after]
+    sec['deltaP5'] = round(best_after - before_mean, 2)
+
+    zeros = [r['pctWallVertsTrueZero'] for r in rows]
+    p5_by_seg = [r['spawnPooled']['p5L'] for r in rows]
+    corroboration = {
+        'serenity': ('serenity carries the direct case. Its Entrance -- the darkest spawn, '
+                     'and the one the criterion population excludes -- loses 20.5 points at '
+                     'SEG 0.45 (72.8 to 52.3) and is still 19.1 down at the most favourable '
+                     'sweep point (53.7 at SEG 0.15). 428 of 5568 wall vertices land at '
+                     'LITERAL zero where the shipped build has none. Recomputing Rec.709 '
+                     'luma over the committed entrance frames '
+                     '(serenity-entrance-{before,seg045,seg015}.webp, 900x560) puts the '
+                     'frame MINIMUM at 1.4 before and 0.0 under the trial: an ambient '
+                     'visibility integral over a lit interior room does not reach exactly '
+                     'zero on a face a visitor is looking at. That last figure comes from '
+                     'the committed frames, not from the 480x300 pooled captures the p5 '
+                     'numbers above come from.'),
+        'kings-court': ('kings-court corroborates by recovery. Its true-zero fraction falls '
+                        '6.0 / 4.5 / 4.2 / 3.7 percent across the sweep and its pooled p5 '
+                        'climbs back monotonically, 60.4 / 60.9 / 62.0 / 62.8. Where the '
+                        'artefact shrinks, p5 comes back -- which is what an artefact does '
+                        'and not what deeper shading would do.'),
+        'horkyone-10': ('horkyone-10 corroborates by NOT recovering. Its true-zero fraction '
+                        'does not fall (13.5 / 13.7 / 13.7 / 13.0 percent, roughly double '
+                        'the other two apartments) and its pooled p5 correspondingly does '
+                        'not recover (100.5 / 100.7 / 99.8 / 103.0). p5 tracks the zero '
+                        'fraction, not SEG.')
+    }[apt]
+
+    # kings-court's and horkyone-10's corroboration sentences already quote
+    # their own two series, so repeating them here would say the same numbers
+    # twice in one paragraph. serenity's does not, so it gets them appended.
+    series = ('On this apartment the true-zero fraction runs %s percent against pooled '
+              'p5 %s. ' % (' / '.join('%.1f' % z for z in zeros),
+                           ' / '.join('%.1f' % p for p in p5_by_seg))) if apt == 'serenity' else ''
+
+    sec['reading'] = (
+        'Pooled p5 FALLS: %.2f before, %.1f after at the most favourable sweep point '
+        '(SEG %s), a change of %+.2f, larger than the +-0.9 same-state floor. '
+        'DO NOT READ THAT AS SELF-EVIDENT AGREEMENT WITH THE NO-GO. A falling p5 is '
+        'the OBJECTIVE of this plan -- deeper shadow reaching the frame -- so on its '
+        'face this reading looks like the target effect, and taken at face value it '
+        'would read as success. It agrees with the No-Go only because the fall is '
+        'DISCOUNTED AS ARTEFACT, and that discount is the load-bearing part. '
+        'The mechanism: of the four grid() calls per wall piece that are hard-coded '
+        '1,1 -- both end reveals, top and bottom -- three are shaded, and SEG cannot '
+        'subdivide any of them at any value. Each is shaded from four geometric '
+        'corners with the sample point offset only 0.03 m along the normal, so a '
+        'reveal corner butted into the wall it meets is sampled INSIDE solid geometry '
+        'and the value returned is not a measurement of visibility on the visible '
+        'surface at all. The result is smeared across a full-height strip. That is '
+        'bake.js defect 2, and the screenshots in the harness directory show the same '
+        'bands at SEG 0.15 as at 0.45. %s '
+        '%sThe second reading therefore does not contradict the verdict -- but the '
+        'reason is the artefact, not the direction of travel.'
+        % (before_mean, best_after, '/'.join(str(x) for x in sec['mostFavourableAfterSEG']),
+           sec['deltaP5'], corroboration, series))
     return doc
 
 

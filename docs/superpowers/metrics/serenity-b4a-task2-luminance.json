@@ -9,7 +9,30 @@
     "threshold": 4.32,
     "bestMeasured": 3.9347,
     "bestMeasuredAt": "SEG 0.45, sampled=true, repeat run",
-    "shortfall": 0.3853
+    "shortfall": 0.3853,
+    "thresholdDerivation": "3.384 + (6.196 - 3.384) / 3 = 4.3213 -> 4.32. Fixed before the work, applied exactly as written, NOT re-derived and NOT renegotiated.",
+    "baselineShift": {
+      "issue": "the absolute threshold was derived from a render baseline of 3.384 that does not reproduce on this machine",
+      "baselineHere": 3.2062,
+      "baselineInTheDerivation": 3.384,
+      "photographsHere": 6.1998,
+      "photographsInTheDerivation": 6.196,
+      "note": "the photographs side reproduces essentially exactly (they are static files); only the render side moved, by -0.18",
+      "baselineEquivalentBar": 4.2041,
+      "baselineEquivalentBarDerivation": "3.2062 + (6.1998 - 3.2062) / 3 = 4.2041 -- the same one-third-of-the-gap rule applied to this machine's own baseline",
+      "shortfallAgainstBaselineEquivalentBar": 0.2694,
+      "verdictUnderBoth": "NO-GO either way. 3.9347 misses the fixed 4.32 by 0.3853 and the baseline-equivalent 4.2041 by 0.2694. This is recorded because a fixed absolute bar applied across a hardware change whose baseline moved is a live methodological question; had the reading landed between 4.2041 and 4.32 the record would have needed an answer and would not have had one."
+    },
+    "artefactSuppressedEffect": {
+      "what": "how much of the required rise survives once the artefact is suppressed as far as this sweep can suppress it",
+      "atFinestSEG": 3.438,
+      "unsampledBaseline": 3.2062,
+      "effect": 0.2318,
+      "requiredRise": 1.1138,
+      "fractionOfRequirement": 0.21,
+      "reading": "at SEG 0.15, with the true-zero fraction down 38% relative, the surviving effect is about +0.23 of the +1.11 the criterion asked for -- roughly a fifth.",
+      "scope": "This bounds VERTEX-SHADED walls, not walls. 3.4380 is NOT an upper bound on what a wall lightmap atlas could reach: an atlas samples per texel ON the surface and produces real gradients, where this shades from four geometric corners and, on the 1x1 quads, from corners that sit inside adjoining solids. A future reader deciding whether to build the atlas must not take this number as its ceiling."
+    }
   },
   "shipped": "NOTHING. The change was reverted in full: tour/ is byte-identical to task 1 tip 656b5c4 and the cache version stays at 109.",
   "environment": {
@@ -265,7 +288,15 @@
       "0.22": 88.6,
       "0.15": 88.6
     },
-    "reading": "Pooled p5 falls at every SEG on every apartment: best before 90.1, best after 88.1. The second reading AGREES with the criterion -- the dark end of the frame gets darker, not better. There is no disagreement to report."
+    "selectionRule": "before = mean of the two same-state runs; after = the MAXIMUM pooled p5 across the sweep, i.e. the sweep point most favourable to the change. Not a minimum on either side. Matches task-2-report.md section 5 exactly.",
+    "beforeMeanP5": 90.2,
+    "mostFavourableAfterP5": 88.6,
+    "mostFavourableAfterSEG": [
+      0.22,
+      0.15
+    ],
+    "deltaP5": -1.6,
+    "reading": "Pooled p5 FALLS: 90.20 before, 88.6 after at the most favourable sweep point (SEG 0.22/0.15), a change of -1.60, larger than the +-0.9 same-state floor. DO NOT READ THAT AS SELF-EVIDENT AGREEMENT WITH THE NO-GO. A falling p5 is the OBJECTIVE of this plan -- deeper shadow reaching the frame -- so on its face this reading looks like the target effect, and taken at face value it would read as success. It agrees with the No-Go only because the fall is DISCOUNTED AS ARTEFACT, and that discount is the load-bearing part. The mechanism: of the four grid() calls per wall piece that are hard-coded 1,1 -- both end reveals, top and bottom -- three are shaded, and SEG cannot subdivide any of them at any value. Each is shaded from four geometric corners with the sample point offset only 0.03 m along the normal, so a reveal corner butted into the wall it meets is sampled INSIDE solid geometry and the value returned is not a measurement of visibility on the visible surface at all. The result is smeared across a full-height strip. That is bake.js defect 2, and the screenshots in the harness directory show the same bands at SEG 0.15 as at 0.45. serenity carries the direct case. Its Entrance -- the darkest spawn, and the one the criterion population excludes -- loses 20.5 points at SEG 0.45 (72.8 to 52.3) and is still 19.1 down at the most favourable sweep point (53.7 at SEG 0.15). 428 of 5568 wall vertices land at LITERAL zero where the shipped build has none. Recomputing Rec.709 luma over the committed entrance frames (serenity-entrance-{before,seg045,seg015}.webp, 900x560) puts the frame MINIMUM at 1.4 before and 0.0 under the trial: an ambient visibility integral over a lit interior room does not reach exactly zero on a face a visitor is looking at. That last figure comes from the committed frames, not from the 480x300 pooled captures the p5 numbers above come from. On this apartment the true-zero fraction runs 7.7 / 6.5 / 5.9 / 4.8 percent against pooled p5 88.3 / 88.1 / 88.6 / 88.6. The second reading therefore does not contradict the verdict -- but the reason is the artefact, not the direction of travel."
   },
   "samplerLiveness": {
     "requirement": "window.__ambSampled === true and Sampler.selfTest() 8/8 on all three apartments -- a silent sampler failure renders bit-identical to the unsampled build",

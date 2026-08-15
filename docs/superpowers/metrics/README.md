@@ -1652,6 +1652,11 @@ lightmap pack on (`b3-task5-after`, `b3-task6-spotcheck-after`), and
 `b3-task2-after` (16.6409), which is task 2 *before* its own review fix round
 and so is a third render, not either lineage.
 
+**Also excluded: every `b4a-*` file.** Plan 4a's task 1 changed which wall face
+is drawn, so its readings are a further render again — 16.19–16.34, below both
+rows — and its task 2's are mostly a reverted trial. See "Plan 4a's readings
+are a third render, and one of them is a reverted trial" below.
+
 #### The task-1 pair is a fixed-FOV capture, not a session outlier
 
 `serenity-b3-task1-baseline-allspots.json` (16.8667) and
@@ -1702,6 +1707,70 @@ one. A lighting change moving this metric by 0.05 is not evidence that the
 lighting got worse; it is evidence that this metric cannot arbitrate lighting.
 But the merge condition is the merge condition, and against it serenity is now
 on the wrong side of it.
+
+#### Plan 4a's readings are a third render, and one of them is a reverted trial
+
+Plan 4a (`b4a-task1`, `b4a-task2`) adds **fifteen** all-spot legacy readings to
+this directory. **None of them belongs in either lineage row above, and none
+of them may be compared to the 16.58 merge ceiling.** Two independent reasons,
+either of which is sufficient:
+
+**They are a different render.** Plan 4a task 1 fixed the wall winding — eight
+of the file's twelve `grid()` call sites emitted a quad whose geometric front
+face disagreed with its own normal, so on the unmodified tip a visitor saw the
+*far* face of every along-z wall — and it also moved two serenity paintings out
+of a wall slab. That changes which surface is drawn and shaded. Task 1's own
+session measured the effect directly: serenity **16.60 → 16.40 → 16.32**
+(before, after the winding fix, after the paintings), kings-court
+**18.87 → 18.79**.
+
+**They are different hardware, twice over.** Task 2 ran on a third machine
+again (ANGLE / Intel UHD 630 / D3D11) and re-measured its own baseline rather
+than inheriting task 1's, precisely so its before/after pairs would be
+same-machine.
+
+The two facts together are what makes the cluster arithmetic unusable here, and
+they also give the one cross-session check worth recording: task 2's
+independently measured before is **16.34** against task 1's committed after of
+**16.32** (kings-court **18.81** against **18.79**), Δ0.02 on both — so the
+post-winding-fix render reproduces across two sessions and two machines at
+**≈16.33**, about **0.21–0.23 below** the BASE row's 16.5409–16.5700 and
+0.25–0.28 below HEAD's. That is a third lineage, not a stray reading in either
+existing one.
+
+| lineage | serenity all-spot legacy | files |
+|---|---|---|
+| BASE (pre-b3-task-2 render) | 16.5409 – 16.5700 | see the lineage table above |
+| HEAD (post-b3-task-2 render) | 16.5882 – 16.6155 | see the lineage table above |
+| **plan 4a, post-winding-fix** | **16.19 – 16.34** | `b4a-task1-after[-paintings]`, all five `b4a-task2-*` |
+
+**Ten of the fifteen are `b4a-task2`, and nine of those ten measure code that
+is not in the tree.** Task 2 switched walls to the visibility-scaled ambient
+and swept `SEG` over 0.45 / 0.30 / 0.22 / 0.15; it **failed its exit criterion
+(linear contrast 3.9347 against ≥ 4.32) and was reverted in full**, so `tour/`
+is byte-identical to task 1's tip. Only the two `-before-` files describe
+shipped code:
+
+| file | serenity | kings-court | state |
+|---|---:|---:|---|
+| `*-b4a-task2-before-legacy-allspots` | **16.34** | **18.81** | shipped (= task 1 tip) |
+| `*-b4a-task2-seg045-legacy-allspots` | 16.27 | 19.46 | **trial, reverted** |
+| `*-b4a-task2-seg030-legacy-allspots` | 16.19 | 19.35 | **trial, reverted** |
+| `*-b4a-task2-seg022-legacy-allspots` | 16.30 | 19.22 | **trial, reverted** |
+| `*-b4a-task2-seg015-legacy-allspots` | 16.29 | 19.24 | **trial, reverted** |
+
+`kings-court-b4a-task2-seg045-legacy-allspots.json` (**19.46**, against a
+before of 18.81) is the one most likely to be grepped alone and misread as a
+shipped regression. It is not: it is trial state, it was one of the readings
+that produced the No-Go, and nothing survived the revert. Following the
+`b3-task3` GTAO precedent, the not-shipped marker lives in the companion
+`{serenity,kings-court,horkyone-10}-b4a-task2-luminance.json` files
+(`"shipped": "NOTHING…"`), not in the all-spot files themselves — so read the
+two together.
+
+Task 2's own verdict, threshold arithmetic and the artefact finding that
+underwrites it are in those three luminance files and in
+`docs/superpowers/harnesses/2026-08-15-b4a-task2/`.
 
 ### The plan's own claim: blacks, before and after
 

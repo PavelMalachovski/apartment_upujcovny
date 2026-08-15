@@ -95,7 +95,9 @@ The full sets are, on disk during the session,
 (every spawn plus a pitched look-up and look-down at the Entrance), and
 `before-*` / `seg045-*` for kings-court and horkyone-10. `seg015` matters:
 **refining `SEG` does not touch the dark reveals**, because each end reveal,
-top and bottom is emitted as a single 1×1 quad whatever `SEG` says
-(`bake.js`, the six `grid(…, 1, 1, occ, …)` calls per wall piece). The
-darkened door reveals are still there at 0.15, and `entrance-lookup.jpg`
-still carries a hard black wall face at a junction.
+top and bottom is emitted as a single 1×1 quad whatever `SEG` says: `bake.js`
+makes **four `grid(…, 1, 1, occ, …)` calls per wall piece, three of them
+shaded** (the top face passes `shade=false` and takes the flat constant), in
+each of the two branches — eight `1,1` sites in the file. Only the two large
+faces take `su`/`sv`. The darkened door reveals are still there at 0.15, and
+`entrance-lookup.jpg` still carries a hard black wall face at a junction.
