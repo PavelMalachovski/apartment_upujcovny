@@ -476,6 +476,74 @@ git commit -m "Task 5: make the durable record match what 4a actually shipped"
 
 ---
 
+## Task 5's debt list, written down 2026-08-15
+
+Recorded here rather than only in the SDD ledger, because that ledger is
+git-ignored and dies with the workspace — a lesson this project learned the
+hard way in plan 3, where a partner ruling survived only by accident. Tasks
+1–4 accumulated the following; **task 5 owns all of it.**
+
+**Wrong until fixed, not merely stale:**
+
+1. `CLAUDE.md`'s `exposure` row names serenity 0.329, kings-court 0.575,
+   horkyone-10 0.46 and computes `1.05 / 0.329 ≈ 3.2`. All four figures are
+   superseded — the shipped values are **0.295 / 0.52 / 0.42** and the ratio
+   is `1.05 / 0.295 ≈ 3.6`. Task 3 deliberately did not edit `CLAUDE.md`,
+   judging it outside a task brief's authority; that call was accepted **on
+   condition task 5 closes it.**
+2. `docs/superpowers/metrics/README.md`'s horkyone-10 section is stale the
+   same way.
+3. `docs/PHASE-B-RESUME.md`'s "How the 0.03 was resolved" ends with option 4
+   ("fix the winding first and re-measure") **not taken**. It was
+   subsequently executed as this plan's task 1 and it **closed the gate
+   outright** — serenity reached 16.32 against the old 16.58 ceiling, and
+   16.00 after task 3. A reader who sees only "we accepted a 0.03 miss" is
+   reading a true sentence that has stopped describing reality. Record that
+   the shortfall was closed, by what, to what number, and that the merge
+   owner re-confirmed the restatement on the new numbers.
+
+**Comment blocks that now describe history as if it were present:**
+
+4. `tour/bake.js:502-547` describes defect 1 (winding) in the present tense
+   as a live bug. Rewrite it as history — **keeping** the record that the fix
+   is a sign test and explicitly *not* an else-branch reversal, since that
+   wrong fix has now been proposed twice in this project's life. Defect 2's
+   paragraph stays, updated with what task 2 measured.
+5. `CLAUDE.md`'s `bake.js` row and rule 5 need the winding fix noted; the row
+   about walls taking no AO is still correct, because task 2 returned NO-GO.
+
+**New deferred items found in passing, for the resume doc's table:**
+
+6. `tools/serve.py:90` calls `base64.b64decode(body)` unguarded in
+   `do_POST`, so any malformed save body raises, `socketserver` prints the
+   traceback and kills that handler thread. Sibling to the `%00`-in-a-path
+   item already listed. It matters more than it looks: **every** measurement
+   recipe here depends on that endpoint, and the failure mode next door is a
+   sandboxed `serve.py` returning HTTP 200 while writing nothing — two
+   different ways for a capture to be silently absent.
+7. The shipped horkyone-10 exposure `0.46` **was already failing its own
+   criterion** before this plan (+11.07 from serenity against a ±10 band).
+   Found by task 3 in passing; its refit was mandatory, not cosmetic. Worth
+   a line somewhere durable, because it means that criterion was unenforced
+   for some time.
+
+**The finding that must not be over-generalised:**
+
+8. Task 2's NO-GO says **vertex-shaded** walls buy about +0.23 of the +1.11
+   required — it does **not** say walls are not worth lighting. The wall
+   lightmap atlas is now unblocked by task 1 and remains the open path, with
+   a known cost (a from-scratch atlas rasteriser, since `UVUnwrapper` is a
+   thin wrapper over the `xatlas-web` WASM module). Whoever writes 4c or plan
+   5 must meet that distinction, not this task's headline number.
+
+**And the honest bound on everything this branch measured:**
+
+9. The verification chain is machine-checked **from `sweep.json` outward**
+   and is **hand-transcribed from the browser to `sweep.json`**. No harness
+   here verifies that first hop, and none could without re-running the
+   capture. Two committed checkers guard the metrics README; neither guards
+   that.
+
 ## Self-review notes
 
 - **Spec coverage.** Defect 1 → task 1. Defect 2 mitigation and its exit criterion → task 2. The re-fit both force → task 3. Gate and baselines → task 4. Documentation and the deferred-table discharge → task 5. Risks named in the spec — 28 cm narrower rooms, bake time, expired fit, "may deliver nothing visible" — appear as steps 10, 6, and the task 2 No-Go path respectively.
