@@ -38,6 +38,7 @@ same table.
 | `write_metrics.py` | builds the four committed metrics files. Sweep rows are **re-derived from the frames on disk**, not typed; `--check` rebuilds them in memory and diffs against disk |
 | `thresh-*.json` | the raw pre-tonemap-buffer probe dumps: serenity at 0.295, kings-court at 0.52, and serenity again at exposure 1.0 for the independence check |
 | `serenity-bathroom-*.webp` | the three frames the strength judgement was made on |
+| `serenity-start-{before-e0.329,after-e0.295}.webp` | hard rule 1's screenshot for the exposure change itself: serenity's own `APT.start`, 1000×620 through the full chain, only `renderer.toneMappingExposure` differing between the two |
 
 `tools/shots/` is gitignored, so the three strength frames are committed here
 as WebP; they were captured as JPEG under `tools/shots/b4a-task3/`.
