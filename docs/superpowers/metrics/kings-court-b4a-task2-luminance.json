@@ -1,0 +1,324 @@
+{
+  "apartment": "kings-court",
+  "task": "phase B plan 4a task 2 -- walls take the visibility-scaled ambient",
+  "verdict": "NO-GO",
+  "verdictRestsOn": {
+    "statistic": "serenity linear-domain contrast (mean / p5 of linear-light Rec.709 luminance)",
+    "camera": "?measure=1&fov=legacy, 1024 px wide, full post chain",
+    "population": "poseVerified compare spots -- 2 of 11 (1.webp Bathroom, 11.webp Bedroom)",
+    "threshold": 4.32,
+    "bestMeasured": 3.9347,
+    "bestMeasuredAt": "SEG 0.45, sampled=true, repeat run",
+    "shortfall": 0.3853
+  },
+  "shipped": "NOTHING. The change was reverted in full: tour/ is byte-identical to task 1 tip 656b5c4 and the cache version stays at 109.",
+  "environment": {
+    "machine": "Windows 11, ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "driver": "Playwright MCP Chromium, viewport 1280x820 desktop / 390x844 mobile-viewport, devicePixelRatio 1",
+    "postChain": "live and asserted on every reading (a.post.enabled === true)",
+    "note": "NOT the reference machine of the earlier phases. The before-baseline was re-measured here rather than inherited, so every before/after pair in this file is same-machine. Cross-phase comparisons against b3 numbers are NOT valid and are not made."
+  },
+  "noiseFloor": {
+    "source": "the bake's sampled ambient uses Math.random() cosine sampling, so two loads of the same code are not bit-identical",
+    "spawnPooledP5_sameStateSpread": {
+      "serenity_before": [
+        90.1,
+        90.3
+      ],
+      "kings-court_before": [
+        65.9,
+        65.0
+      ],
+      "horkyone-10_before": [
+        108.8,
+        107.9
+      ]
+    },
+    "contrast_sameStateSpread": {
+      "serenity_seg045_sampled": [
+        3.8647,
+        3.9347
+      ]
+    },
+    "summary": "spawn-pooled p5 repeats within about +-0.9; the contrast statistic within about +-0.07. The 0.3853 shortfall against 4.32 is roughly 5x the observed contrast spread."
+  },
+  "before": {
+    "state": "task 1 tip (656b5c4): SEG 0.45, lightAt sixth argument `sampled` = false for walls",
+    "cacheVersion": 109,
+    "runs": [
+      {
+        "run": 1,
+        "bakeMs": 4631,
+        "drawCallsDesktop": 165,
+        "wallVerts": 31260,
+        "wallZeroVerts": 0,
+        "wallMeanVertexColour": 0.4499,
+        "spawnPooled": {
+          "meanL": 154.1,
+          "p5L": 65.9,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        "perSpawnP5": {
+          "Entry hall": 132.4,
+          "Kitchen": 106.1,
+          "Dining room": 72.6,
+          "Living room": 69.8,
+          "Bedroom 1": 59.9,
+          "Bedroom 3": 79.7,
+          "Bedroom 2": 79.3,
+          "Hallway": 111.1,
+          "Bathroom 2": 44.9,
+          "Stairs": 103.0,
+          "Upper hall": 119.5,
+          "Upper living room": 99.2,
+          "Upper bedroom": 85.2,
+          "Terrace": 84.2
+        }
+      },
+      {
+        "run": 2,
+        "bakeMs": 4763,
+        "drawCallsDesktop": 165,
+        "wallVerts": 31260,
+        "spawnPooled": {
+          "meanL": 153.8,
+          "p5L": 65.0,
+          "pctPixelsBelowLuma16": 0.1
+        },
+        "perSpawnP5": {
+          "Entry hall": 128.7,
+          "Kitchen": 105.4,
+          "Dining room": 72.2,
+          "Living room": 69.8,
+          "Bedroom 1": 58.8,
+          "Bedroom 3": 79.5,
+          "Bedroom 2": 78.3,
+          "Hallway": 110.2,
+          "Bathroom 2": 47.2,
+          "Stairs": 101.8,
+          "Upper hall": 118.9,
+          "Upper living room": 96.2,
+          "Upper bedroom": 85.0,
+          "Terrace": 81.3
+        }
+      }
+    ],
+    "spawnPooledP5Runs": [
+      65.9,
+      65.0
+    ],
+    "population": "all spawns[] entries",
+    "camera": "in-page camera, 480x300, full post chain",
+    "linearContrast": null,
+    "deltaE_allSpot_legacy": 18.81,
+    "bakeMedianOnReferenceMachine": 8674
+  },
+  "sweep": [
+    {
+      "SEG": 0.45,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 149.7,
+        "p5L": 60.4,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Entry hall": 123.3,
+        "Kitchen": 98.0,
+        "Dining room": 70.6,
+        "Living room": 64.6,
+        "Bedroom 1": 56.9,
+        "Bedroom 3": 65.0,
+        "Bedroom 2": 73.9,
+        "Hallway": 65.6,
+        "Bathroom 2": 43.2,
+        "Stairs": 92.7,
+        "Upper hall": 110.2,
+        "Upper living room": 89.7,
+        "Upper bedroom": 79.1,
+        "Terrace": 70.1
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": 19.46,
+      "bakeMs": 5388,
+      "bakeMsVsMedian": 0.62,
+      "drawCallsDesktop": 165,
+      "wallVerts": 31260,
+      "wallVertsVsBefore": 1.0,
+      "wallZeroVerts": 1864,
+      "pctWallVertsTrueZero": 6.0,
+      "wallMeanVertexColour": 0.3396
+    },
+    {
+      "SEG": 0.3,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 150.0,
+        "p5L": 60.9,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Entry hall": 124.1,
+        "Kitchen": 96.9,
+        "Dining room": 71.1,
+        "Living room": 65.3,
+        "Bedroom 1": 57.5,
+        "Bedroom 3": 66.3,
+        "Bedroom 2": 73.4,
+        "Hallway": 69.8,
+        "Bathroom 2": 43.5,
+        "Stairs": 85.2,
+        "Upper hall": 112.1,
+        "Upper living room": 89.4,
+        "Upper bedroom": 79.8,
+        "Terrace": 70.4
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": 19.35,
+      "bakeMs": 6027,
+      "bakeMsVsMedian": 0.69,
+      "drawCallsDesktop": 165,
+      "wallVerts": 65604,
+      "wallVertsVsBefore": 2.1,
+      "wallZeroVerts": 2957,
+      "pctWallVertsTrueZero": 4.5,
+      "wallMeanVertexColour": 0.3612
+    },
+    {
+      "SEG": 0.22,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 150.3,
+        "p5L": 62.0,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Entry hall": 121.1,
+        "Kitchen": 97.6,
+        "Dining room": 70.9,
+        "Living room": 66.3,
+        "Bedroom 1": 56.9,
+        "Bedroom 3": 67.5,
+        "Bedroom 2": 74.4,
+        "Hallway": 75.9,
+        "Bathroom 2": 43.4,
+        "Stairs": 87.7,
+        "Upper hall": 112.8,
+        "Upper living room": 89.5,
+        "Upper bedroom": 81.8,
+        "Terrace": 70.4
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": 19.22,
+      "bakeMs": 7398,
+      "bakeMsVsMedian": 0.85,
+      "drawCallsDesktop": 165,
+      "wallVerts": 123768,
+      "wallVertsVsBefore": 3.96,
+      "wallZeroVerts": 5230,
+      "pctWallVertsTrueZero": 4.2,
+      "wallMeanVertexColour": 0.3715
+    },
+    {
+      "SEG": 0.15,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 150.7,
+        "p5L": 62.8,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Entry hall": 125.1,
+        "Kitchen": 98.8,
+        "Dining room": 71.8,
+        "Living room": 67.1,
+        "Bedroom 1": 58.1,
+        "Bedroom 3": 68.6,
+        "Bedroom 2": 74.1,
+        "Hallway": 76.8,
+        "Bathroom 2": 45.5,
+        "Stairs": 86.8,
+        "Upper hall": 114.0,
+        "Upper living room": 90.7,
+        "Upper bedroom": 81.6,
+        "Terrace": 71.1
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": 19.24,
+      "bakeMs": 8783,
+      "bakeMsVsMedian": 1.01,
+      "drawCallsDesktop": 165,
+      "wallVerts": 255324,
+      "wallVertsVsBefore": 8.17,
+      "wallZeroVerts": 9458,
+      "pctWallVertsTrueZero": 3.7,
+      "wallMeanVertexColour": 0.3772
+    }
+  ],
+  "spawnPooledSecondReading": {
+    "why": "The criterion population is 2 bright rooms and excludes the darkest spawn. This reading exists so a No-Go measured there is not written into the record as \"walls do not help\" full stop. It does NOT change the verdict.",
+    "population": "all spawns[] entries, including the darkest",
+    "beforeP5": [
+      65.9,
+      65.0
+    ],
+    "sweepP5": {
+      "0.45": 60.4,
+      "0.3": 60.9,
+      "0.22": 62.0,
+      "0.15": 62.8
+    },
+    "reading": "Pooled p5 falls at every SEG on every apartment: best before 65.0, best after 60.4. The second reading AGREES with the criterion -- the dark end of the frame gets darker, not better. There is no disagreement to report."
+  },
+  "samplerLiveness": {
+    "requirement": "window.__ambSampled === true and Sampler.selfTest() 8/8 on all three apartments -- a silent sampler failure renders bit-identical to the unsampled build",
+    "ambSampled": {
+      "serenity": true,
+      "kings-court": true,
+      "horkyone-10": true
+    },
+    "selfTest": {
+      "cases": 8,
+      "failed": 0,
+      "verdict": "passed",
+      "measuredOn": "serenity (console-captured case list); returned true on kings-court and horkyone-10"
+    },
+    "secondaryProof": "the sampled build is demonstrably NOT the unsampled one: serenity's wall vertices go from 0 true zeros / mean vertex colour 0.5510 to 428 zeros / 0.4459 at the same SEG."
+  },
+  "postRevertVerification": {
+    "facesLvl": {
+      "walls": 42,
+      "wallsNearOnly": 42,
+      "near": 1027,
+      "far": 0,
+      "none": 133
+    },
+    "issues": [],
+    "drawCallsDesktop": 165,
+    "drawCallsMobileViewport": 150,
+    "budgets": {
+      "desktop": 400,
+      "mobile": 250
+    },
+    "mobileCaveat": "the mobile row is a 390x844 VIEWPORT only. The Playwright MCP driver exposes no isMobile / hasTouch / deviceScaleFactor control, so the true mobile profile (DPR 2, touch) was NOT emulated. Draw calls do not depend on pixel ratio, so the count is expected to hold, but that is reasoning, not a measurement.",
+    "state": "tour/ byte-identical to task 1 tip; `git diff -- tour/` is empty; cache version left at 109"
+  },
+  "screenshots": {
+    "root": "tools/shots/b4a-task2/",
+    "sets": [
+      "before",
+      "seg045",
+      "seg015",
+      "before-kings-court",
+      "seg045-kings-court",
+      "before-horkyone-10",
+      "seg045-horkyone-10"
+    ],
+    "note": "serenity has a three-way set (before / SEG 0.45 / SEG 0.15) at every spawn plus two pitched entrance views; kings-court and horkyone-10 have before / SEG 0.45 at their spawns."
+  },
+  "caveat": "Absolute values carry no meaning across machines. This file's before and after were captured on the SAME machine in one session; nothing here is comparable to a phase B3 number."
+}

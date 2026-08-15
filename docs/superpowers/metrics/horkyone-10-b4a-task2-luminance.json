@@ -1,0 +1,290 @@
+{
+  "apartment": "horkyone-10",
+  "task": "phase B plan 4a task 2 -- walls take the visibility-scaled ambient",
+  "verdict": "NO-GO",
+  "verdictRestsOn": {
+    "statistic": "serenity linear-domain contrast (mean / p5 of linear-light Rec.709 luminance)",
+    "camera": "?measure=1&fov=legacy, 1024 px wide, full post chain",
+    "population": "poseVerified compare spots -- 2 of 11 (1.webp Bathroom, 11.webp Bedroom)",
+    "threshold": 4.32,
+    "bestMeasured": 3.9347,
+    "bestMeasuredAt": "SEG 0.45, sampled=true, repeat run",
+    "shortfall": 0.3853
+  },
+  "shipped": "NOTHING. The change was reverted in full: tour/ is byte-identical to task 1 tip 656b5c4 and the cache version stays at 109.",
+  "environment": {
+    "machine": "Windows 11, ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "driver": "Playwright MCP Chromium, viewport 1280x820 desktop / 390x844 mobile-viewport, devicePixelRatio 1",
+    "postChain": "live and asserted on every reading (a.post.enabled === true)",
+    "note": "NOT the reference machine of the earlier phases. The before-baseline was re-measured here rather than inherited, so every before/after pair in this file is same-machine. Cross-phase comparisons against b3 numbers are NOT valid and are not made."
+  },
+  "noiseFloor": {
+    "source": "the bake's sampled ambient uses Math.random() cosine sampling, so two loads of the same code are not bit-identical",
+    "spawnPooledP5_sameStateSpread": {
+      "serenity_before": [
+        90.1,
+        90.3
+      ],
+      "kings-court_before": [
+        65.9,
+        65.0
+      ],
+      "horkyone-10_before": [
+        108.8,
+        107.9
+      ]
+    },
+    "contrast_sameStateSpread": {
+      "serenity_seg045_sampled": [
+        3.8647,
+        3.9347
+      ]
+    },
+    "summary": "spawn-pooled p5 repeats within about +-0.9; the contrast statistic within about +-0.07. The 0.3853 shortfall against 4.32 is roughly 5x the observed contrast spread."
+  },
+  "before": {
+    "state": "task 1 tip (656b5c4): SEG 0.45, lightAt sixth argument `sampled` = false for walls",
+    "cacheVersion": 109,
+    "runs": [
+      {
+        "run": 1,
+        "bakeMs": 1105,
+        "drawCallsDesktop": 83,
+        "wallVerts": 17628,
+        "wallZeroVerts": 0,
+        "wallMeanVertexColour": 0.4801,
+        "spawnPooled": {
+          "meanL": 151.7,
+          "p5L": 108.8,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        "perSpawn": [
+          {
+            "spawn": "Living room",
+            "meanL": 149.9,
+            "p5L": 99.5
+          },
+          {
+            "spawn": "Bedroom",
+            "meanL": 158.4,
+            "p5L": 121.7
+          },
+          {
+            "spawn": "Bathroom",
+            "meanL": 144.9,
+            "p5L": 122.4
+          },
+          {
+            "spawn": "Hall",
+            "meanL": 153.8,
+            "p5L": 116.4
+          },
+          {
+            "spawn": "Terrace",
+            "meanL": 151.7,
+            "p5L": 72.5
+          }
+        ]
+      },
+      {
+        "run": 2,
+        "bakeMs": 991,
+        "drawCallsDesktop": 83,
+        "wallVerts": 17628,
+        "spawnPooled": {
+          "meanL": 151.2,
+          "p5L": 107.9,
+          "pctPixelsBelowLuma16": 0.2
+        },
+        "perSpawnP5": {
+          "Living room": 99.1,
+          "Bedroom": 120.7,
+          "Bathroom": 120.9,
+          "Hall": 116.1,
+          "Terrace": 72.6
+        }
+      }
+    ],
+    "spawnPooledP5Runs": [
+      108.8,
+      107.9
+    ],
+    "population": "all spawns[] entries",
+    "camera": "in-page camera, 480x300, full post chain",
+    "linearContrast": null,
+    "deltaE_allSpot_legacy": null,
+    "bakeMedianOnReferenceMachine": 1323
+  },
+  "sweep": [
+    {
+      "SEG": 0.45,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 149.1,
+        "p5L": 100.5,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Living room": 85.3,
+        "Bedroom": 110.9,
+        "Bathroom": 117.8,
+        "Hall": 100.2,
+        "Terrace": 72.4
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": null,
+      "bakeMs": 1665,
+      "bakeMsVsMedian": 1.26,
+      "drawCallsDesktop": 83,
+      "wallVerts": 17628,
+      "wallVertsVsBefore": 1.0,
+      "wallZeroVerts": 2371,
+      "pctWallVertsTrueZero": 13.5,
+      "wallMeanVertexColour": 0.353
+    },
+    {
+      "SEG": 0.3,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 149.1,
+        "p5L": 100.7,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Living room": 85.4,
+        "Bedroom": 111.3,
+        "Bathroom": 119.9,
+        "Hall": 99.5,
+        "Terrace": 70.4
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": null,
+      "bakeMs": 1907,
+      "bakeMsVsMedian": 1.44,
+      "drawCallsDesktop": 83,
+      "wallVerts": 24288,
+      "wallVertsVsBefore": 1.38,
+      "wallZeroVerts": 3316,
+      "pctWallVertsTrueZero": 13.7,
+      "wallMeanVertexColour": 0.3652
+    },
+    {
+      "SEG": 0.22,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 148.8,
+        "p5L": 99.8,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Living room": 83.8,
+        "Bedroom": 111.0,
+        "Bathroom": 117.5,
+        "Hall": 98.3,
+        "Terrace": 71.1
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": null,
+      "bakeMs": 1978,
+      "bakeMsVsMedian": 1.5,
+      "drawCallsDesktop": 83,
+      "wallVerts": 31776,
+      "wallVertsVsBefore": 1.8,
+      "wallZeroVerts": 4360,
+      "pctWallVertsTrueZero": 13.7,
+      "wallMeanVertexColour": 0.371
+    },
+    {
+      "SEG": 0.15,
+      "sampled": true,
+      "spawnPooled": {
+        "meanL": 149.7,
+        "p5L": 103.0,
+        "population": "all spawns[] entries",
+        "camera": "in-page camera, 480x300, full post chain"
+      },
+      "perSpawnP5": {
+        "Living room": 89.6,
+        "Bedroom": 113.8,
+        "Bathroom": 118.3,
+        "Hall": 103.9,
+        "Terrace": 71.9
+      },
+      "linearContrast": null,
+      "deltaE_allSpot_legacy": null,
+      "bakeMs": 3043,
+      "bakeMsVsMedian": 2.3,
+      "drawCallsDesktop": 83,
+      "wallVerts": 79992,
+      "wallVertsVsBefore": 4.54,
+      "wallZeroVerts": 10411,
+      "pctWallVertsTrueZero": 13.0,
+      "wallMeanVertexColour": 0.3895
+    }
+  ],
+  "spawnPooledSecondReading": {
+    "why": "The criterion population is 2 bright rooms and excludes the darkest spawn. This reading exists so a No-Go measured there is not written into the record as \"walls do not help\" full stop. It does NOT change the verdict.",
+    "population": "all spawns[] entries, including the darkest",
+    "beforeP5": [
+      108.8,
+      107.9
+    ],
+    "sweepP5": {
+      "0.45": 100.5,
+      "0.3": 100.7,
+      "0.22": 99.8,
+      "0.15": 103.0
+    },
+    "reading": "Pooled p5 falls at every SEG on every apartment: best before 107.9, best after 99.8. The second reading AGREES with the criterion -- the dark end of the frame gets darker, not better. There is no disagreement to report."
+  },
+  "samplerLiveness": {
+    "requirement": "window.__ambSampled === true and Sampler.selfTest() 8/8 on all three apartments -- a silent sampler failure renders bit-identical to the unsampled build",
+    "ambSampled": {
+      "serenity": true,
+      "kings-court": true,
+      "horkyone-10": true
+    },
+    "selfTest": {
+      "cases": 8,
+      "failed": 0,
+      "verdict": "passed",
+      "measuredOn": "serenity (console-captured case list); returned true on kings-court and horkyone-10"
+    },
+    "secondaryProof": "the sampled build is demonstrably NOT the unsampled one: serenity's wall vertices go from 0 true zeros / mean vertex colour 0.5510 to 428 zeros / 0.4459 at the same SEG."
+  },
+  "postRevertVerification": {
+    "facesLvl": {
+      "walls": 15,
+      "wallsNearOnly": 15,
+      "near": 349,
+      "far": 0,
+      "none": 101
+    },
+    "issues": [],
+    "drawCallsDesktop": 83,
+    "drawCallsMobileViewport": 64,
+    "budgets": {
+      "desktop": 400,
+      "mobile": 250
+    },
+    "mobileCaveat": "the mobile row is a 390x844 VIEWPORT only. The Playwright MCP driver exposes no isMobile / hasTouch / deviceScaleFactor control, so the true mobile profile (DPR 2, touch) was NOT emulated. Draw calls do not depend on pixel ratio, so the count is expected to hold, but that is reasoning, not a measurement.",
+    "state": "tour/ byte-identical to task 1 tip; `git diff -- tour/` is empty; cache version left at 109"
+  },
+  "screenshots": {
+    "root": "tools/shots/b4a-task2/",
+    "sets": [
+      "before",
+      "seg045",
+      "seg015",
+      "before-kings-court",
+      "seg045-kings-court",
+      "before-horkyone-10",
+      "seg045-horkyone-10"
+    ],
+    "note": "serenity has a three-way set (before / SEG 0.45 / SEG 0.15) at every spawn plus two pitched entrance views; kings-court and horkyone-10 have before / SEG 0.45 at their spawns."
+  },
+  "caveat": "Absolute values carry no meaning across machines. This file's before and after were captured on the SAME machine in one session; nothing here is comparable to a phase B3 number."
+}
