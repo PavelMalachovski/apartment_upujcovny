@@ -3,7 +3,6 @@
   "mainCeilH": 2.6,
   "terraceY": -0.05,
   "exposure": 0.329,
-  "lightmaps": true,
   "palette": {
     "floorWood": "#fdffff",
     "wall": "#fffffc",

@@ -1306,8 +1306,28 @@ so its numbers are inherited **with a check** rather than on trust.
 4-dp capture pair; 6.1998 is the same quantity at full precision. Nothing
 turns on it — both are far above 4.9 and far above the render.)
 
-**Contrast would have to rise 44.8% to reach 4.9, and it does not move at
-all.** Note the sign: task 5 measured the pack at **+0.001** on contrast
+**Contrast would have to rise 44.8% to reach 4.9 — and the mechanism is
+worth more than the shortfall.** Contrast here is mean ÷ p5, so at the
+with-pack mean of 0.288891 reaching 4.9 requires p5 to **fall** to
+**0.0590**: a **31% darkening of the shadows**. The pack **raised** p5 by
+**2.5%** (0.083283 → 0.085369). Bounce light fills shadows — that is what
+it is for — so **the pack moved the gated quantity in the direction
+opposite to the gate, by construction.** Not a wrong setting, and not an
+amount a better bake recovers.
+
+**Nor does a friendlier population rescue it.** On task 5's spawn-pooled
+set — which *includes* the Entrance that this gate's poseVerified
+population excludes, and where task 5 located the one genuine fill
+signature — the pack's contrast gain is **+0.83%** (1.7316 → 1.7460,
+`serenity-b3-task5-luminance.json`). Scale the gated 3.3870 by that, the
+most favourable relative figure anywhere in the committed record, and it
+lands at **~3.415** against 4.9, a 30% shortfall. (The two are different
+estimators — spawn-pooled sRGB luma vs. linear-light Rec.709 over the
+compare spots — so this is a scaling argument about the relative move, not
+a claim that 1.746 and 3.384 are the same quantity.) **The criterion fails
+on every population in the committed record, not only the gated one.**
+
+Note the sign: task 5 measured the pack at **+0.001** on contrast
 and this run measures it at **−0.003**. Both sit inside the same-state
 repeat spread of ±0.002–0.004, which *is* the finding — the change is not
 resolvable by either run, in either direction. On this population the
@@ -1359,11 +1379,53 @@ number, not as a gate: **16.61 → 16.71** here against task 5's 16.59 →
 16.75. Direction reproduces, magnitude is smaller, and the before reading
 sits inside the 16.60–16.62 this file already records for that state.
 
-### What was NOT decided
+### The decision, and the revert
 
-**Whether serenity keeps its pilot pack or reverts to the runtime bake.**
-The plan says a failure means "do not carry lightmaps to the other two
-apartments" and is silent on the pilot. Task 6 left the shipped state
-exactly as task 5 committed it — `lightmaps: true`, 11 files, 13,626
-bytes, `?v=104` — recorded the costs both ways in the verdict JSON, and
-recommends reverting. That call belongs to the human partner.
+**Whether serenity keeps its pilot pack was the one thing task 6 did not
+decide.** The plan says a failure means "do not carry lightmaps to the
+other two apartments" and is silent on the pilot; task 6 left the shipped
+state as task 5 committed it, recorded the costs both ways in the verdict
+JSON, and recommended reverting. **The human partner has now decided:
+serenity reverts to the runtime bake.**
+
+Done in a follow-up commit on `phaseB-plan3-light`: `"lightmaps": true`
+removed from `tour/apartments/serenity.json`, `tour/lightmaps/serenity/`
+(11 files, 13,626 bytes) deleted, `?v=` bumped **104 → 105** because
+shipped config changed. **`tour/lightmaps.js` and
+`tools/bake_lightmaps.mjs` were kept** — the loader's dormant path is
+already what kings-court and horkyone-10 run (`Lightmaps.load()` returns
+null before any I/O when the config does not set `lightmaps`), so serenity
+now runs the same path as the other two rather than a new one; and the
+offline baker is not shipped at all, so it costs the product nothing while
+being the expensive thing to rebuild.
+
+**Verified rather than assumed:** zero requests to `/lightmaps/` on all
+three apartments, no HTTP failure of any status, no `[lightmaps]` console
+warning, `__lightmaps.status = "off"` and `APT.lightmaps` absent
+everywhere; `__issues` empty, `__ambSampled` true, `Sampler.selfTest()`
+8/8, draw calls unchanged at 72/64, 165/150, 83/64; `exposure`
+(0.329 / 0.575 / 0.46) and bloom (1.8 / 0.1) untouched.
+
+**The number that proves it took:** serenity's all-spot legacy ΔE2000
+returned to **16.59** (`serenity-b3-task6-revert-legacy-allspots.json`) —
+task 5's pack-off reading exactly. Read the four runtime-bake readings and
+the two pack-on readings side by side:
+
+| state | task 4 | task 5 | task 6 | after the revert |
+|---|---:|---:|---:|---:|
+| runtime bake | 16.60 | 16.59 | 16.61 | **16.59** |
+| offline pack | — | 16.75 | 16.71 | — |
+
+A 16.59–16.61 band for the runtime bake against 16.71–16.75 with the pack:
+the post-revert reading is inside the first and 0.12 clear of the second.
+(This supersedes the "16.60–16.62" range quoted a few paragraphs above,
+which omitted task 5's own 16.59.)
+
+**Nothing is lost.** The baker, the loader, the pack, the staleness guard
+and every measurement remain in git history at **`6a607fa`** — the task 6
+verdict commit. Re-running the pilot is `git checkout 6a607fa --
+tour/lightmaps/serenity` plus restoring the one config key: a checkout,
+not another 551 s bake. **The standing warning is unchanged — do not
+extend the pilot to another apartment**, and re-adopting it on serenity
+would still owe the exposure and bloom re-fit that keeping it would have
+owed.

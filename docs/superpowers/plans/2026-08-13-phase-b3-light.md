@@ -560,6 +560,21 @@ either run, in either direction*. On this population the pack is a
 near-uniform gain (mean ×1.02415, p5 ×1.02505, 0.090 pp apart) and a mean/p5
 ratio is blind to a uniform gain by construction.
 
+**Why it failed, stated as the mechanism rather than as a shortfall.**
+Contrast here is mean ÷ p5, so at the with-pack mean of 0.288891 reaching 4.9
+requires p5 to **fall** to **0.0590** — a **31% darkening of the shadows**.
+The pack **raised** p5 by **2.5%** (0.083283 → 0.085369). Bounce light fills
+shadows; that is what it is for. **So the pack moved the gated quantity in
+the direction opposite to the gate, by construction** — not by a wrong
+setting, and not by an amount another bake could recover. Nor does a
+friendlier population rescue it: on task 5's spawn-pooled set, which
+*includes* the Entrance this gate's population excludes and where task 5
+located the one genuine fill signature, the pack's contrast gain is **+0.83%**
+(1.7316 → 1.7460), and scaling the gated 3.3870 by that most-favourable
+figure in the whole record still lands at **~3.415** against 4.9 — a 30%
+shortfall. **The criterion fails on every population in the committed record,
+not only the gated one.**
+
 **Blind A/B: 5 of 6, against a bar of 6/6 fixed before viewing.** Six pairs,
 poses chosen before any frame was seen and weighted *toward* where the pack
 can act; an unseeded `SystemRandom` coin chose the sides; the mapping was
@@ -585,20 +600,46 @@ All-spot legacy ΔE was re-run as a check on an inherited number, not as a
 gate: **16.61 → 16.71** here against task 5's 16.59 → 16.75. The pack moves it
 the wrong way, away from the 16.58 ceiling serenity already misses by 0.03.
 
-Per step 3, **lightmaps are not carried to kings-court or horkyone-10.**
+Per step 3, **lightmaps are not carried to kings-court or horkyone-10** — and
+the revert below does not change that.
 
-**Left open, deliberately: whether serenity keeps its pilot pack.** The plan
-does not say, and it decides what ships — 13,626 bytes and eleven HTTP
-requests, and whether the product carries a feature that failed its own exit
-criterion. Task 6 left the shipped state exactly as task 5 committed it,
-recorded the costs both ways, and **recommends reverting to the runtime
-bake**; the human partner owns the call. Nothing is lost by reverting —
-`tools/bake_lightmaps.mjs`, `tour/lightmaps.js`, the guard and the pack all
-remain in git history, so reconsidering costs a checkout rather than a redo.
+**DECIDED by the human partner: serenity reverts to the runtime bake.** The
+plan was silent on the pilot itself, so the call was put to the partner and
+made; it matches task 6's own recommendation. **Reverted in a follow-up
+commit on this branch** — `"lightmaps": true` removed from
+`tour/apartments/serenity.json`, `tour/lightmaps/serenity/` (11 files,
+13,626 bytes) deleted from the working tree, `?v=` bumped **104 → 105**
+because shipped config changed.
+
+**Kept, deliberately: `tour/lightmaps.js` and `tools/bake_lightmaps.mjs`.**
+The loader's dormant path is already what kings-court and horkyone-10 run in
+production — `Lightmaps.load()` returns null on its first line when the config
+does not set `lightmaps`, before any I/O — so serenity now runs the same code
+path as the other two rather than a new one, and removing it would mean
+editing `bake.js` and `main.js` to delete a reviewed staleness guard that is
+exactly what makes any future re-adoption safe. `tools/bake_lightmaps.mjs` is
+not shipped at all (site root is `tour/`), so it costs the product nothing and
+is the expensive artifact — ~551 s of bake logic — to rebuild from scratch.
+
+**Verified after the revert, not assumed:** zero requests to `/lightmaps/` on
+all three apartments, no HTTP failure of any status, no `[lightmaps]` console
+warning, `window.__lightmaps.status = "off"` and `APT.lightmaps` absent
+everywhere. serenity's all-spot legacy ΔE returned to **16.59** — task 5's
+pack-off reading exactly, inside the 16.59–16.61 band of the four runtime-bake
+readings across tasks 4/5/6, and clearly out of the 16.71–16.75 pack-on band.
+`exposure` (0.329 / 0.575 / 0.46) and bloom (1.8 / 0.1) untouched; six
+`verify.mjs` rows still pass with draw calls unchanged at 72/64, 165/150,
+83/64.
+
+**Nothing is lost.** The baker, the loader, the pack, the guard and every
+measurement remain in git history at **`6a607fa`**; re-running the pilot is
+`git checkout 6a607fa -- tour/lightmaps/serenity` plus restoring the one
+config key — a checkout, not a redo, and not another 551 s bake.
 
 Evidence: `docs/superpowers/metrics/serenity-b3-task6-verdict.json` (rebuilt
 from its inputs by `write_verdict.py --check`), the two
-`serenity-b3-task6-spotcheck-*-legacy-allspots.json` files in
+`serenity-b3-task6-spotcheck-*-legacy-allspots.json` files and the post-revert
+`serenity-b3-task6-revert-legacy-allspots.json`, all three in
 `tools/delta_e.py`'s native shape, and the harness with the sealed mapping and
 the calls-before-reveal at
 `docs/superpowers/harnesses/2026-08-13-b3-task6/`. Full account:
