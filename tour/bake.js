@@ -414,6 +414,16 @@ const Baker = (() => {
       // Texel (i, j) overlaps a wall piece? Tested in world XZ with the
       // wall box grown by half a texel, which is the same thing as asking
       // whether the texel's own footprint touches the wall.
+      //
+      // KNOWN LIMITATION, deliberately not fixed: the test ignores Y, so a
+      // wall on the upper storey counts as "on" a ground-floor plate edge
+      // directly beneath it. Not observable in any of the three shipped
+      // configs -- upper walls sit over lower walls, so a texel the upper
+      // wall matches is one the lower wall matches anyway -- and the failure
+      // mode if it ever did fire is a dilated boundary texel, i.e. exactly
+      // what this pass did unconditionally before it was made selective.
+      // Adding a Y test means giving wallPieces a height extent it does not
+      // currently carry (builder.js:228 pushes XZ AABBs only).
       const _E = new T.Vector3();
       const onWall = (i, j) => {
         _E.set(((i + 0.5) / W - 0.5) * w, (1 - (j + 0.5) / H - 0.5) * h, 0).applyMatrix4(mw);
@@ -721,7 +731,17 @@ const Baker = (() => {
     // the same moment window.__issues is (app.js sets that synchronously).
     window.__ambSampled = !!ambHandle;
     if (!ambHandle && Array.isArray(window.__issues)) {
-      window.__issues.push('bake: hemisphere sampler unavailable, ambient is the flat pre-B3 constant');
+      // Shaped like validate.js's own entries -- {kind, where} -- because
+      // that array has one consumer that formats them (`?check=1`'s badge,
+      // validate.js:230, prints i.kind + ' - ' + i.where). A bare string
+      // there prints "undefined - undefined". This entry cannot actually
+      // reach that badge, which is built synchronously inside Validate.run
+      // long before the bake starts, but __issues is a published debug
+      // surface and anything pushed into it should read like the rest of it.
+      window.__issues.push({
+        kind: 'bake: hemisphere sampler unavailable',
+        where: 'ambient falls back to the flat pre-B3 constant; window.__ambSampled is false'
+      });
     }
     return new Promise((resolve) => {
       // Indices are the pack's key, so the list is walked with its own

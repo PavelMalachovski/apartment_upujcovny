@@ -28,10 +28,14 @@ python tools/serve.py
 # http://localhost:8742/catalog.html property catalog
 
 # offline lightmap bake (needs the server above running, and playwright).
-# Kept working but drives NOTHING: the serenity pilot failed its exit
-# criterion and was reverted, and tour/lightmaps.js — the runtime loader
-# that consumed its output — was removed with it. Baking now produces files
-# no page will load until that loader is restored. See the `lightmaps` row.
+# KEPT, BUT IT CANNOT RUN AS THE TREE STANDS — corrected 2026-08-15; this
+# row previously said "kept working", which was false. The serenity pilot
+# failed its exit criterion and was reverted, and tour/lightmaps.js — the
+# runtime loader that consumed its output — was removed with it. The driver
+# stamps its manifest with that loader's Lightmaps.hash(), so with the
+# loader gone the run ends in a ReferenceError. It now refuses at the top
+# with that message instead, before it writes anything; restore the loader
+# first. See the `lightmaps` row.
 node tools/bake_lightmaps.mjs --apt serenity
 ```
 
@@ -93,7 +97,7 @@ now carries:
 | `palette` | Map of material key → `#rrggbb`; every key optional, an invalid or absent value falls back to the hardcoded constant (`Materials.color`). **Not** produced by directly sampling the photographs — that was measured and rejected (ΔE2000 16.79 vs. 16.57 doing nothing, task 8) because it double-counts illumination as albedo. The committed values were derived by a closed-loop correction (render's own colour vs. the photograph, old albedo scaled by the ratio) done by hand for task 8; `tools/sample_palette.py` outputs raw sampled photo colour only — see its header — and is a diagnostic input to that by-hand process, not something whose output can be pasted into `palette` directly. |
 | `quality.aoRays` | Ray count for the baked ambient-occlusion sampler (`bake.js aoAt`); defaults to 8 when the block or key is absent. Since phase B3 it reaches **furniture vertices only** — lightmapped surfaces get `ambientVis` instead, whose ray count is `AMB_RAYS` in `bake.js` and is deliberately not configurable |
 | `env.capture` | `{x, y, z}` override for where the environment-reflection panorama is shot from; falls back to `roomCenter.main`, then `start`, then the world origin (`app.js`) |
-| `lightmaps` | **Historical — nothing reads this key today, and the loader that did is no longer in the tree.** It meant: this apartment ships an offline lightmap pack under `tour/lightmaps/<id>/`, load it instead of baking those surfaces. **Serenity had a pilot pack; it FAILED its exit criterion and was REVERTED by the human partner's decision**, along with `tour/lightmaps.js` — measured linear contrast 3.384 against a required ≥4.9, and a blind six-pair A/B that could not separate the frames at viewing size. It failed *by construction*, not by tuning: contrast is mean÷p5, so reaching 4.9 needed p5 to **fall** 31%, and bounce light **raised** it 2.5% — and the same conclusion holds on every population in the record, including the friendlier spawn-pooled one (~3.415 vs 4.9). It was not a no-op (it filled the ceiling/wall perimeter and the floor beside obstructions, up to ~100/255 locally). It moved all-spot legacy ΔE the wrong way in **both** independent readings — task 5 **16.59→16.75**, task 6 **16.61→16.71** — so the runtime-bake band is 16.59–16.61 against 16.71–16.75 with the pack; after the revert serenity reads **16.59–16.60**, back inside the first band. **Do not extend it to another apartment, and do not re-adopt it on serenity without redoing the exposure and bloom re-fit.** `tools/bake_lightmaps.mjs` is kept and working (it is outside the deploy root, so it costs the product nothing) but drives nothing. Re-adopting is a checkout, not a rebuild: baker, loader, pack, guard and all measurements are in git history at **`6a607fa`** — `git checkout 6a607fa -- tour/lightmaps.js tour/lightmaps/serenity`, re-add `lightmaps.js` to `main.js`'s `CLASSIC` list and the key here; `bake.js` needs no edit, its `typeof Lightmaps === 'undefined'` guard is what makes the loader's absence safe. Verdict and costs both ways: `docs/superpowers/metrics/serenity-b3-task6-verdict.json` |
+| `lightmaps` | **Historical — nothing reads this key today, and the loader that did is no longer in the tree.** It meant: this apartment ships an offline lightmap pack under `tour/lightmaps/<id>/`, load it instead of baking those surfaces. **Serenity had a pilot pack; it FAILED its exit criterion and was REVERTED by the human partner's decision**, along with `tour/lightmaps.js` — measured linear contrast 3.384 against a required ≥4.9, and a blind six-pair A/B that could not separate the frames at viewing size. It failed *by construction*, not by tuning: contrast is mean÷p5, so reaching 4.9 needed p5 to **fall** 31%, and bounce light **raised** it 2.5% — and the same conclusion holds on every population in the record, including the friendlier spawn-pooled one (~3.415 vs 4.9). It was not a no-op (it filled the ceiling/wall perimeter and the floor beside obstructions, up to ~100/255 locally). It moved all-spot legacy ΔE the wrong way in **both** independent readings — task 5 **16.59→16.75**, task 6 **16.61→16.71** — so the runtime-bake band is 16.59–16.61 against 16.71–16.75 with the pack; after the revert serenity reads **16.59–16.60**, back inside the first band. **Do not extend it to another apartment, and do not re-adopt it on serenity without redoing the exposure and bloom re-fit.** `tools/bake_lightmaps.mjs` is kept (it is outside the deploy root, so it costs the product nothing) but **cannot run** until the loader is back — it stamps its manifest with `Lightmaps.hash()`, so it now refuses at the top with that message rather than writing a pack it cannot finish. Re-adopting is a checkout, not a rebuild: baker, loader, pack, guard and all measurements are in git history at **`6a607fa`** — `git checkout 6a607fa -- tour/lightmaps.js tour/lightmaps/serenity`, re-add `lightmaps.js` to `main.js`'s `CLASSIC` list and the key here; `bake.js` needs no edit, its `typeof Lightmaps === 'undefined'` guard is what makes the loader's absence safe. **Restoring it re-opens three known guard gaps, all reviewed and recorded rather than fixed, because the pilot was reverted before they mattered — close them as part of any re-adoption, not after:** (1) the per-surface geometry guard compares `w`/`h`/`pos`/`outdoor` but **not** `res`, `lvl`, `px` or the mesh quaternion, so a ceiling flipped in rotation at the same position and extent passes the guard and ships a mirrored lightmap — exactly the class the guard exists to catch; (2) an empty `man.surfaces` satisfies `0 === 0` and yields `status: 'ok'` with `loaded: 0`, i.e. a silently empty pack reads as a successful load; (3) neither the manifest fetch nor the texture loads carries a timeout, so a stalled-but-open response leaves `__bakeReady` unresolved and the start overlay up forever. Verdict and costs both ways: `docs/superpowers/metrics/serenity-b3-task6-verdict.json` |
 | `compare` (on a `photoSpots` entry) | Flags that spot for the resemblance harness — `measure.js` renders it, `tools/delta_e.py` scores it, `residual.py` decomposes it |
 
 ## Hard rules
@@ -212,8 +216,10 @@ was always going to cost more for it; this phase did not create that
 slowness. Remeasured this session on different hardware: serenity 323 ms,
 horkyone-10 1647 ms, kings-court 9942 ms — **15-24% higher, consistently,
 across all three.** That consistent proportional rise is equally
-explained by the hardware difference or by this phase's own AO baking
-(`aoAt()` now runs for every lightmap texel and every furniture vertex)
+explained by the hardware difference or by phase A's AO baking (`aoAt()`
+**then** ran for every lightmap texel as well as every furniture vertex —
+phase B3 task 2 dropped it from lightmap texels, so at HEAD it runs on
+furniture only; see the `bake.js` row and `quality.aoRays` above)
 costing something everywhere; the two measurements were not taken on the
 same machine, so this cannot be isolated further with what's on hand.
 Don't read more into it than that — say what the data supports (a
@@ -234,6 +240,21 @@ configuration measured on this same machine ran the sampler at 1.2 m with
 `aoAt` still multiplying and cost 1.70× / 1.99× / 2.41× — roughly double
 the shipped cost, which is what the radius and the removed second
 estimator are worth.
+
+**Two ratios are on record for that same task-2 change on kings-court, and
+both are right — do not carry away only the one above.** This row's
+**1.36×** (8443 → 11460 ms) is task 2's own machine measuring its own
+before/after. Plan 3's closing gate re-measured the same change on a
+*different* machine, serving the BASE and HEAD trees simultaneously, and
+got **about 3×** (warm medians 3133/3136 → 9858/11554 ms, with the two
+sides' raw loads disjoint in both batches) —
+`docs/superpowers/metrics/README.md`, "Bake time: one supportable claim,
+and a warning about the rest", which is also where the reasons the other
+two apartments support *no* claim are written down. Neither figure
+supersedes the other under this rule's own "compare within one machine's
+pair" instruction; they are two machines' pairs. The supportable summary
+is **1.4×–3× on kings-court: direction certain, magnitude
+machine-dependent.**
 
 Do not chase kings-court's underlying slowness down inside `bake.js`
 regardless of which explanation is right — the fix is architectural

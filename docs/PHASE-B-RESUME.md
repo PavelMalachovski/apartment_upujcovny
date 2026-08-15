@@ -1,8 +1,12 @@
 # Phase B — resume here
 
 Written 2026-08-14 for a fresh session with none of this conversation's
-context. Everything below is either committed on `phaseB-migration` or
-measured and recorded there.
+context; **updated 2026-08-15 as plan 3 closed.** Everything below is either
+committed on `phaseB-migration` (plans 1–2, merged to `main` at `c2bb0bd`) or
+on `phaseB-plan3-light` (plan 3, branched from that merge), or measured and
+recorded on one of them. The original line here said "committed on
+`phaseB-migration`" alone, which stopped being true once plan 3 got its own
+branch.
 
 **Read this file, then `docs/superpowers/metrics/README.md`, then the plan you
 are about to run.** Do not read the older handoff (`docs/PHASE-B-HANDOFF.md`)
@@ -22,13 +26,20 @@ its own yet.
 |---|---|---|
 | 1 — `2026-08-12-phase-b1-migration.md` | r128 → r185 migration | **Done**, 7 tasks, reviewed |
 | 2 — `2026-08-13-phase-b2-measurement-exposure.md` | Fix the metric's camera, re-fit exposure | **Done**, 9 tasks, reviewed, final fix wave applied |
-| 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | Tasks 1–4 **done and reviewed**; GTAO measured and **rejected** (task 3); the merge gate **does not close** on serenity — see below. Tasks 5–7 in progress |
+| 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | **Closed.** All 7 tasks done and reviewed, plus a whole-branch review and its fix wave. Two of its three bets measured and **rejected** on their own criteria — GTAO (task 3) and offline lightmaps (task 6). The merge gate **does not close** on serenity and plan 3 is what moved it — see "Immediately next" below, which is the open decision |
 | 4 — not yet written | serenity content: B1 geometry, exterior, GLTF, PBR | Not started |
 | 5 — not yet written | Re-validate constants, rewrite `CLAUDE.md` and `docs/PROMPT.md` | Not started |
 
-Roughly **17 tasks remain** across plans 3–5. Plan 4's model curation is
-human/asset work, not agent work — the design spec budgets a day or more per
-premium property.
+Roughly **10 tasks remain**, all of them in plans 4 and 5, both still to be
+written. (An earlier version of this line said "roughly 17 tasks remain across
+plans 3–5" and was written while plan 3 still had tasks left; plan 3's
+remaining 7 are now done.) Plan 4's model curation is human/asset work, not
+agent work — the design spec budgets a day or more per premium property.
+
+**Nothing in plan 3 is "in progress".** The one thing plan 3 leaves open is a
+decision, not a task: what to do about serenity's 0.03. It is a merge-owner
+call about a threshold and is laid out with its four honest options under
+"Immediately next".
 
 ## The numbers that matter
 

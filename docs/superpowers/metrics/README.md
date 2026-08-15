@@ -901,11 +901,20 @@ it. Both are cheap to keep and this is the only task in the table that
 raised the score; every one after it (AO, post, exposure) brought it
 back down and past baseline.
 
-## Every file in this directory
+## Every phase-A file in this directory
 
-Every one of the 14 `*.json` files in this directory is legended below —
-the trend table cites one canonical file per stage, and this section
-covers that file plus every intermediate and exploratory run behind it.
+Every one of the **14 phase-A files** — `serenity-baseline.json` plus the
+thirteen `serenity-a*.json` — is legended below: the trend table cites one
+canonical file per stage, and this section covers that file plus every
+intermediate and exploratory run behind it.
+
+**Scope corrected 2026-08-15.** This heading and sentence read "every file in
+this directory" and "every one of the 14 `*.json` files in this directory"
+when phase A's fourteen were all there was. The directory now holds **152**
+`*.json` files — phase B's plans 1–3 added the rest — and this section has
+never covered them. Phase B's files are legended in their own sections
+further down, named for the plan and task that produced them
+(`<apt>-b<plan>-task<n>-*.json`).
 Kept deliberately, not clutter: several of the non-canonical files are
 the actual evidence for findings stated elsewhere in this document.
 Canonical files (the ones the trend table's numbers come from) are marked

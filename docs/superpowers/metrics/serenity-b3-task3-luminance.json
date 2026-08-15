@@ -163,6 +163,7 @@
   },
   "cost": {
     "note": "Draw calls through the post chain per CLAUDE.md (info.autoReset off, reset by hand, post.render(0), read, restore); frame time is the median of three runs of 60 composed frames with gl.finish() around each, on ANGLE/Intel UHD 630. Values are [gtao-off, gtao-on]. desktop = 1280x820 @ DPR 1; mobile = 390x844 @ DPR 1.6 (624x1350 buffer, isMobile+hasTouch). Budget: <=400 desktop, <=250 mobile.",
+    "frameMsCaveat": "The frameMs figures in this block DID NOT REPRODUCE. Fix round 1 re-ran the same measurement and all 6 of 6 draw-call figures reproduced exactly -- including the load-bearing kings-court mobile 150->282 -- while frame time disagreed by up to 3x (the same desktop pair came back 23.8 -> 94.1 ms against the 15.4 -> 65.3 ms recorded here). Read frameMs for direction and rough size only, never as an absolute. The re-run, its ranges and its method are in <apt>-b3-task3-cost.json, which supersedes this block for cost; the calls are unaffected and agree across both runs. Note added 2026-08-15 by the whole-branch fix wave: no value in this file was changed.",
     "spot": "Entrance (spawns[0])",
     "desktop": {
       "calls": [

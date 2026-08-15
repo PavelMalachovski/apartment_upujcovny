@@ -87,6 +87,35 @@ From `docs/PHASE-B-OBSERVATIONS.md` and plan 1's record:
 | `tools/bake_lightmaps.mjs` | **New.** Playwright driver for the offline bake |
 | `tour/lightmaps/<apt>/` | **New.** Committed lightmaps plus `manifest.json` |
 
+### What actually shipped
+
+**Added 2026-08-15, at the close of the branch. Everything above this line is
+the plan as written before any of it was measured, and it is deliberately left
+standing — but three of its claims did not survive contact and a reader hits
+them ~300 lines before the `OUTCOME` blocks that correct them.** This block is
+the index to those corrections, not a replacement for them.
+
+| Front-matter claim | What happened | Where it is settled |
+|---|---|---|
+| Architecture: "`GTAOPass` from the r185 addons joins the existing post chain" | **Did not ship.** Vendored, wired, guarded and measured on all three apartments, then rejected — it blackens walls on every device (it is the first thing here to read scene normals, and the deferred winding defect points them away from the viewer) and its G-buffer prepass breaks the **mobile** draw-call budget, 150 → 282 against ≤250. No `tour/` file changed. Also: the addons were **not** already vendored, contrary to task 3 step 1 | `#### OUTCOME` under task 3 |
+| `tour/lightmaps.js` — **New** | **Shipped, then removed.** Built in task 5, reverted in task 6 (`3c622d4`, `736a867`) after the pilot missed its exit criterion. It is not in the tree | `#### OUTCOME` under task 6 |
+| `tour/lightmaps/<apt>/` — **New** | **Shipped, then removed.** serenity's pilot pack (11 files, 13,626 bytes) was deleted with the loader. Restore is a checkout at `6a607fa`, not a re-bake | `#### OUTCOME` under task 6 |
+| `tour/bake.js` — "walls get an atlas" | **Did not ship.** Split out under task 2 step 4's own escape hatch: `UVUnwrapper` turned out to be a thin wrapper over `xatlas-web`, an Emscripten WASM module, and would have needed a from-scratch atlas rasterizer in `bake.js` on top. Walls are also blocked on the winding defect independently | `#### OUTCOME` under task 2 |
+
+What **did** ship, and it is the whole of this plan's product: `tour/sampler.js`
+and the vendored BVH (task 1), and task 2's source fix in `lightAt`/`aoAt` —
+the sampled indoor ambient on lightmapped surfaces, and the removal of `aoAt`'s
+0.35 occlusion floor. `tools/bake_lightmaps.mjs` also remains, outside the
+deploy root and driving nothing.
+
+**And the plan's stated goal is largely unmet.** Endpoint to endpoint,
+spawn-pooled 5th-percentile luminance moved **0.0% on serenity**, −5.4% on
+kings-court, −1.2% on horkyone-10 — and serenity is the apartment the merge
+gate is judged by. The merge condition **fails** there (16.61/16.60 against
+≤16.58) where the BASE tree passes (16.54/16.56), and the cause is measured,
+not inferred: it is task 2's source fix. Read the `OUTCOME` block under task 7
+before reading anything above as a description of the product.
+
 ---
 
 ### Task 1: Vendor the BVH and build the sampler, failing first
@@ -277,6 +306,125 @@ The number can move for the wrong reason; a corner that now darkens
 continuously across the joint is the thing being bought.
 
 - [ ] **Step 8: Commit**
+
+#### OUTCOME: the source fix shipped, the atlas did not, and step 6's stop condition was tripped and deliberately not honoured
+
+**Added 2026-08-15, at the close of the branch — later than the other OUTCOME
+blocks, and that delay is itself the reason it exists.** Two things about this
+task lived only in the branch's git-ignored working ledger, which is deleted
+when the branch closes: the ruling that let the run continue past step 6's
+explicit halt, and the disappearance of step 4. A future reader would otherwise
+find a stop condition that was tripped and ignored, with no explanation
+anywhere in the repository.
+
+**What shipped** (`c2bb0bd..b06730e`, `?v=98 → 100`): `aoAt`'s `0.35` occlusion
+floor removed, so a fully enclosed sample really does reach 0; `lightAt`'s flat
+indoor ambient now scaled by `Sampler.visibility` at `AMB_DIST` **0.65 m** / 16
+rays, on **lightmapped surfaces only** (floors, ceilings, attic slopes); `aoAt`
+dropped from `bakeSurface` entirely, because at 0.65 m against `AO_DIST` 0.6 m
+it was the same estimator running twice and the product was roughly the square
+of the occlusion; per-texel, wall-conditional edge dilation; and
+`window.__ambSampled`, so a run can *assert* the sampler was live rather than
+score the old code and report it as "after".
+
+##### 1. Step 6's stop condition was tripped. The run continued, on a ruling made before the work started.
+
+Step 6 says: *"If it regressed past 16.58, **say so and do not proceed to the
+next task**."* It regressed. serenity's all-spot legacy ΔE went **16.54/16.55 →
+16.64** at first implementation and **16.60** after fix round 1; kings-court
+**18.75 → 18.81**. The run proceeded to tasks 3 and 4 anyway.
+
+**That was authorised by the human partner in a pre-flight adjudication, before
+task 2 was dispatched and before any number existed to be embarrassed by** —
+which is the only reason it is a ruling and not a rationalisation. The
+substance, recorded in full so the reasoning survives with the decision:
+
+- **Task 2's entire purpose is to darken shadow.** A fall in overall
+  luminance — and with it a rise in ΔE against photographs the render is
+  already darker than — is this change's *expected* result, not an anomaly. A
+  stop condition that fires on the intended effect is measuring the wrong thing
+  at the wrong moment.
+- **Task 4's re-fit is what the plan itself says recovers it.** This plan's own
+  "constraint that governs" section makes the exposure+bloom re-fit "mandatory,
+  not conditional" for exactly this reason. Halting at task 2 would have halted
+  before the step designed to answer the reading that caused the halt.
+- **What step 6 actually forbids is *hiding* the regression, and that stands in
+  full and was honoured in full.** Task 2 measured the all-spot legacy score,
+  reported it, committed it (`serenity-b3-task2-{before,before-repeat,after,
+  fix1}-allspots.json`, all-spot, 11/11 scored, 0 skipped) and carried it into
+  every downstream task's baseline. **The gate became binding again after task
+  4** — and there it failed, was reported as failing, and is the branch's
+  headline.
+
+**This ruling is not a licence to route around a stop condition when the number
+comes back wrong.** It was made in advance, by the person who owns the
+threshold, on the specific ground that this task's success and this gate's
+failure are the same event. Nothing here generalises to a stop condition
+tripped in flight.
+
+##### 2. Step 4 — the wall atlas — did not ship, under the step's own escape hatch.
+
+Step 4 budgets for this outcome in as many words: *"If the atlas turns out to
+be more than a task's worth of work, stop and report it."* It was more than a
+task's worth of work, twice over:
+
+- **`UVUnwrapper` is not the one-file vendor the Tech Stack line assumes.** It
+  turned out to be a thin wrapper over `xatlas-web`, an Emscripten WASM module
+  — not a source file that can be vendored verbatim beside its licence the way
+  everything else in `tour/lib/` is.
+- **And unwrapping alone would not have been enough.** `bake.js` has no atlas
+  rasterizer: `bakeSurface` maps texel `u,v` straight into a `PlaneGeometry`'s
+  local plane, which works only because every surface it bakes *is* a
+  rectangle. Baking into an atlas of arbitrary charts is a from-scratch
+  rasterizer on top of the unwrapper.
+
+**A third reason, found during this task and independent of both:** walls
+cannot take position-sensitive shading at all while `grid()` winds 8 of its 12
+faces backwards, because the renderer shows the far face and an atlas baked
+onto inside-out walls records the wrong side. So step 2's wall exclusion is a
+**blocked requirement, not a shortcut** — a distinction the controller ruled on
+explicitly, since the escape hatch covers step 4 and not step 2. The winding
+defect is written up in `docs/PHASE-B-RESUME.md`, "The wall-winding defect,
+deferred deliberately", and deferred to plan 4 or 5 by the human partner.
+
+**The cost of the split-out is most of this task's intended effect, and it is
+worth stating plainly rather than as an asterisk: walls carry most of a
+first-person frame's darkest 5%.** That single fact is why a change correct in
+direction on all three apartments is worth 0.6–6% instead of the several-fold
+move this plan aimed at.
+
+##### 3. The measured effect, and the attribution measurement the whole branch rests on.
+
+Spawn-pooled sRGB p5 falls **further than the mean** on all three apartments
+(serenity 80.1 → 79.2, kings-court 58.4 → 54.2, horkyone-10 98.6 → 96.3), which
+is what makes this a change *in shadow* rather than a global dim. Linear
+contrast rises. The effect **shrank** between the first implementation and fix
+round 1, and the smaller number is the honest one: round 0's larger figures were
+partly bought by a per-room dim (`AMB_DIST` at 1.2 m, which is wider than
+serenity's 1.41 m bathroom) and by the squared occlusion above, both of which
+the fix removed.
+
+**The one measurement everything downstream depends on is this task's own
+before/after with exposure held constant.** Plan 3's closing gate needed to
+attribute serenity's regression to a task, and this pair is what does it —
+both arms captured in a single session, both **before** commit `6372939`
+changed serenity's `exposure` from 0.326 to 0.329:
+
+| File | All-spot legacy ΔE |
+|---|---:|
+| `serenity-b3-task2-before-allspots.json` | **16.5427** |
+| `serenity-b3-task2-before-repeat-allspots.json` | **16.5464** |
+| `serenity-b3-task2-fix1-allspots.json` | **16.6027** |
+
+**+0.0582, with exposure held.** Task 7's independent endpoint measurement —
+BASE and HEAD trees served simultaneously — reads **+0.0518**, and the two
+agree to 0.006. Both are same-session paired A/Bs, so neither needs a
+distributional assumption about cross-session comparability. **This is why the
+branch's headline names task 2's source fix and not task 4's exposure:** task 4's
+own sweep bounds the entire 0.326 → 0.329 interval at 0.0027, and the best
+exposure anywhere in 0.30–0.34 at 0.0056. See
+`docs/superpowers/metrics/README.md`, "It is task 2's change, not task 4's
+exposure", and the `OUTCOME` block under task 7.
 
 ---
 

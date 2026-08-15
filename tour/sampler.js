@@ -278,7 +278,15 @@ const Sampler = (() => {
       ['rayFirst turns the hit normal back toward the ray it came from',
         !!hitDown && !!hitUp && hitDown.normal.y > 0.999 && hitUp.normal.y < -0.999,
         hitDown && hitUp ? [hitDown.normal.y, hitUp.normal.y] : null],
-      ['rayFirst reports nothing where rayHit reports nothing',
+      // Named for what it asserts and no more. An earlier name --
+      // "rayFirst reports nothing where rayHit reports nothing" -- claimed
+      // an equivalence between the two functions that the code does NOT
+      // provide: rayFirst defaults `near` to SELF_HIT_EPS while rayHit
+      // passes 0, so on a ray that starts exactly on a surface they can
+      // legitimately disagree. On THIS geometry (P is 0.5 m clear of the
+      // floor, pointing away from it) both report nothing and the assertion
+      // is true either way -- but the old name generalised it.
+      ['rayFirst returns null on the escaping ray, not a phantom hit',
         Sampler.rayFirst(P, up, 50, hFloor) === null, null]
     ];
     const failed = results.filter((r) => !r[1]);

@@ -4,9 +4,21 @@
 //   python tools/serve.py                       # in another shell
 //   node tools/bake_lightmaps.mjs --apt serenity
 //
-// Writes tour/lightmaps/<apt>/s000.webp … and manifest.json. tour/lightmaps.js
-// loads them at runtime instead of baking, but only while the manifest's hash
-// still matches the apartment's geometry — see that file for the guard.
+// Writes tour/lightmaps/<apt>/s000.webp … and manifest.json.
+//
+// THIS TOOL CANNOT RUN AS THE TREE STANDS, and it refuses to start rather
+// than half-run. It was written against tour/lightmaps.js, the runtime
+// loader that read those files back and owned the manifest's staleness
+// hash. That loader was REMOVED at 736a867 when the serenity pilot was
+// reverted (it failed its exit criterion — see CLAUDE.md's `lightmaps`
+// row), so `Lightmaps` no longer exists in the page and the hash call near
+// the bottom of this file is a ReferenceError. The precondition in the
+// driver below says so and stops before anything is written; restore the
+// loader first, per the same row's checkout recipe.
+//
+// When the loader IS present, it loads the pack at runtime instead of
+// baking, but only while the manifest's hash still matches the apartment's
+// geometry — see that file for the guard.
 //
 // Requires playwright (`npm i playwright`, or NODE_PATH pointing at an install
 // that has it) and a Chromium with a real GPU: the flags below are not
@@ -315,6 +327,32 @@ await page.evaluate(() => window.__bakeReady);
 const samplerOk = await page.evaluate(() => Sampler.selfTest());
 if (!samplerOk) { await browser.close(); throw new Error('Sampler.selfTest() failed — refusing to bake'); }
 
+// PRECONDITION, and its POSITION is the whole point of it: it is the last
+// thing this driver does before it starts producing output, and it sits
+// ABOVE the fs.mkdirSync at `const OUT = …` and every fs.writeFileSync
+// below it. The manifest hash near the bottom of this file comes from
+// Lightmaps.hash(), and tour/lightmaps.js — the only definition of that
+// class — was removed at 736a867. Without this check the run bakes every
+// surface, WRITES ALL OF THEM into tour/lightmaps/<apt>/ (inside the Vercel
+// deploy root), and only then throws a ReferenceError on the hash, leaving
+// orphaned assets no page will ever load and no manifest to identify them
+// by. `--dry` is not a safeguard against that: it guards the writes but
+// still reaches the hash call, so it fails in the same place for the same
+// reason. Failing here instead costs one page load and touches no disk.
+const hasLoader = await page.evaluate(() => typeof Lightmaps !== 'undefined');
+if (!hasLoader) {
+  await browser.close();
+  throw new Error(
+    'tour/lightmaps.js is not in the page, so Lightmaps.hash() — which stamps the ' +
+    'manifest — cannot run, and a pack without its manifest is unusable. The loader ' +
+    'was removed at 736a867 when the serenity lightmap pilot was reverted. To restore ' +
+    'it: `git checkout 6a607fa -- tour/lightmaps.js`, re-add "lightmaps.js" to the ' +
+    'CLASSIC array in tour/main.js, bump ?v= in tour/index.html, then re-run this tool. ' +
+    'See CLAUDE.md\'s `lightmaps` config-key row for the full recipe and for the guard ' +
+    'gaps that restoration re-opens. Refusing to bake — nothing was written.'
+  );
+}
+
 const setup = await page.evaluate(INSTALL, CFG);
 console.log('setup', JSON.stringify({ apt: APT, ...setup, cfg: CFG }));
 
@@ -349,6 +387,12 @@ for (let i = 0; i < n; i++) {
 // The hash comes from the PAGE, not from a second implementation here: the
 // loader's Lightmaps.hash is the only thing that decides whether a pack is
 // stale, so it is also the only thing that decides what to stamp on one.
+//
+// THIS is the line the `hasLoader` precondition above exists to guard. By
+// the time control reaches it the loop has already written every surface to
+// disk, so a ReferenceError here is a destructive failure, not a clean one.
+// Do not move the precondition below this point, and do not delete it
+// without first restoring tour/lightmaps.js.
 const hash = await page.evaluate(() => Lightmaps.hash(window.APT));
 
 const manifest = {
