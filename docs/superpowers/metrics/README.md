@@ -658,7 +658,10 @@ adding a third paragraph of disclosure on top of this one.
 > bake, and serenity now reads **16.61 all-spot legacy against the same
 > ≤16.58 ceiling**, over six independent readings spanning three tasks
 > and two exposure values. Do not quote this section as the live gate
-> status.
+> status. **Nor is the ≤16.58 ceiling itself live any more** — it was
+> superseded on 2026-08-15 when the merge owner accepted that 0.03 and
+> restated the gate as a baseline-plus-attribution tripwire
+> (`docs/PHASE-B-RESUME.md`, "The gate, restated 2026-08-15").
 
 Everything above this section was recorded by tasks 4–7. This section is the
 gate itself — re-measured independently rather than trusted from the last
@@ -1145,7 +1148,19 @@ crosses at 0.575 — and the luminance value was taken, costing **+0.06**
 
 **The merge condition, all-spot, `&fov=legacy`:**
 
-| Apartment | Ceiling | Now | Verdict |
+> **The measurements below stand; the ceilings they are read against do
+> not.** On 2026-08-15 the merge owner accepted serenity's 0.03 and
+> **restated the gate** — the all-spot legacy reading is now a regression
+> tripwire with per-apartment baselines and an attribution rule, not a
+> pass/fail ceiling. serenity's **16.61** and kings-court's **18.90** are
+> the recorded baselines under that regime, so this table's *numbers* are
+> the live ones while its *verdict column* is history. The grounds were not
+> "the threshold is noisy" — they are this file's own finding that the
+> metric is dominated by pose and content mismatch and cannot arbitrate a
+> 0.03 of lighting. See `docs/PHASE-B-RESUME.md`, "The gate, restated
+> 2026-08-15" and "How the 0.03 was resolved".
+
+| Apartment | Ceiling (superseded) | Now | Verdict at the time |
 |---|---:|---:|---|
 | serenity | ≤16.58 | **16.61** (four runs: 16.60, 16.62, 16.61, 16.60) | **fails by 0.03** |
 | kings-court | ≤22.44 | **18.90** | passes by 3.54 |

@@ -26,7 +26,7 @@ its own yet.
 |---|---|---|
 | 1 — `2026-08-12-phase-b1-migration.md` | r128 → r185 migration | **Done**, 7 tasks, reviewed |
 | 2 — `2026-08-13-phase-b2-measurement-exposure.md` | Fix the metric's camera, re-fit exposure | **Done**, 9 tasks, reviewed, final fix wave applied |
-| 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | **Closed.** All 7 tasks done and reviewed, plus a whole-branch review and its fix wave. Two of its three bets measured and **rejected** on their own criteria — GTAO (task 3) and offline lightmaps (task 6). The merge gate **does not close** on serenity and plan 3 is what moved it — see "Immediately next" below, which is the open decision |
+| 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | **Closed.** All 7 tasks done and reviewed, plus a whole-branch review and its fix wave. Two of its three bets measured and **rejected** on their own criteria — GTAO (task 3) and offline lightmaps (task 6). Plan 3 pushed serenity out of the then-current merge gate; that gate was **restated on 2026-08-15** and the 0.03 accepted — see "The gate, restated 2026-08-15" |
 | 4 — not yet written | serenity content: B1 geometry, exterior, GLTF, PBR | Not started |
 | 5 — not yet written | Re-validate constants, rewrite `CLAUDE.md` and `docs/PROMPT.md` | Not started |
 
@@ -36,30 +36,89 @@ plans 3–5" and was written while plan 3 still had tasks left; plan 3's
 remaining 7 are now done.) Plan 4's model curation is human/asset work, not
 agent work — the design spec budgets a day or more per premium property.
 
-**Nothing in plan 3 is "in progress".** The one thing plan 3 leaves open is a
-decision, not a task: what to do about serenity's 0.03. It is a merge-owner
-call about a threshold and is laid out with its four honest options under
-"Immediately next".
+**Nothing in plan 3 is "in progress", and it no longer leaves anything open.**
+The one thing it did leave open was a decision rather than a task — what to do
+about serenity's 0.03 — and the merge owner settled it on 2026-08-15 by
+accepting the shortfall and restating the gate. The reasoning, the three
+rejected alternatives and the new rules are recorded below.
 
 ## The numbers that matter
 
 | Apartment | pre-migration (r128) | end of plan 2 | now, after plan 3 | note |
 |---|---:|---:|---:|---|
-| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | **FAILS the gate** by 0.02–0.03 |
-| kings-court | 22.44 | 18.73–18.75 | **~18.87** | passes by ~3.57 |
+| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | now the recorded baseline; the 0.03 was accepted |
+| kings-court | 22.44 | 18.73–18.75 | **~18.87–18.90** | now the recorded baseline, replacing 22.44 |
 | horkyone-10 | — | — | — | no photographs; accepted on luminance proximity |
 
 Plan 2 closed serenity to parity and PR #27 merged on that basis. **Plan 3
 then pushed it back out**, by +0.0516 at full precision — larger than the
-±0.039 noise floor, reproduced across two trees and eight readings. See
-"Immediately next" below; this is the open decision.
+±0.039 noise floor, reproduced across two trees and eight readings. That
+movement is real and it is attributed (task 2's source fix). What was
+decided on 2026-08-15 is that it is **accepted** and that the gate it
+tripped was the wrong instrument for the question — see "The gate, restated
+2026-08-15" above and "How the 0.03 was resolved" below.
 
 Shipped config: serenity `exposure` **0.329**, kings-court **0.575**,
-horkyone-10 **0.46**; bloom threshold **1.8**, strength **0.1**; `?v=106`.
+horkyone-10 **0.46**; bloom threshold **1.8**, strength **0.1**; `?v=107`.
+(This line said `?v=106` until 2026-08-15; plan 3's final fix wave `7f90820`
+bumped it to 107 and the resume doc was not updated with it. Verified against
+`tour/index.html:254`, which is the single module tag that versions
+everything.)
 
-**The gate is `serenity ≤ 16.58` and `kings-court ≤ 22.44`, measured
-all-spot in legacy mode.** Those thresholds are each apartment's own final
-pre-migration score, so the condition means "match your prior self".
+## The gate, restated 2026-08-15
+
+**This is the live definition. It replaced the previous one by a merge-owner
+decision on 2026-08-15.** Until then the gate was `serenity ≤ 16.58` and
+`kings-court ≤ 22.44`, measured all-spot in legacy mode — each apartment's
+own final pre-migration score, so the condition read "match your prior self".
+Plan 3 left serenity at 16.60–16.61 against that ceiling. **The 0.03
+shortfall was accepted deliberately, not tuned away**; the four options are
+in "How the 0.03 was resolved" below, and the old thresholds stay in the
+metrics record as the measurements they were.
+
+**The all-spot legacy ΔE reading is a regression tripwire, not a quality
+ceiling.** It was never able to be the latter. ΔE2000 against these
+photographs is dominated by pose and content mismatch rather than by
+shading — 9 of serenity's 11 compare spots and 6 of kings-court's 14 fail
+pose verification, serenity's living room is modelled with a punched window
+where the flat has a sliding door, kings-court's Bathroom 2 has no shower at
+all, and two of serenity's worst spots photograph a real swimming pool
+against a flat abstraction of one. `metrics/README.md` already states the
+consequence outright: *a lighting change moving this metric by 0.05 is not
+evidence that the lighting got worse; it is evidence that this metric cannot
+arbitrate lighting.* The old gate asked it to arbitrate anyway, at a
+resolution of 0.03.
+
+Three rules replace the two thresholds:
+
+1. **Baseline.** Each apartment carries a recorded all-spot legacy value and
+   the commit that produced it. Movement inside the noise floor (±0.03
+   rounded, ±0.039 full precision) passes silently.
+2. **Attribution.** Movement past the floor does *not* fail on sight — it
+   must be **attributed** before it is accepted: a same-session paired A/B,
+   both arms on the same machine, session and harness, naming the change
+   that produced it, committed to the metrics record. **An unattributed
+   movement past the floor fails the gate.** This is exactly the discipline
+   that made plan 3's regression traceable to task 2 rather than a mystery;
+   it is now the rule rather than a habit.
+3. **Hard stop.** Any single task that makes an apartment's reading worse by
+   more than **0.5** stops the branch and is reported, attributed or not.
+   That is the breakage catch the absolute ceilings used to provide.
+
+Baselines as of `b39a99a`, `?v=107`:
+
+| Apartment | Baseline | Recorded at |
+|---|---:|---|
+| serenity | **16.61** | plan 3 task 7; eight readings spanning 16.59–16.62 |
+| kings-court | **18.90** | plan 3 tasks 4 and 7 |
+| horkyone-10 | — | no photographs; accepted on luminance proximity only |
+
+**This loosens serenity by 0.03 and tightens kings-court by about 3.5.** The
+old 22.44 was kings-court's pre-migration score and the apartment has since
+improved to 18.90, so that ceiling carried three and a half points of slack
+in which a real regression could have hidden unseen. Re-baselining removes
+it. The restatement is not a blanket relaxation, and it must not be quoted
+as one.
 
 ```bash
 # capture: open ?apt=<id>&measure=1&fov=legacy, then in the console
@@ -73,12 +132,15 @@ restored** — `--all-spots` on `delta_e.py` and the `?fov=legacy` branch in
 
 ## The five constraints that govern everything left
 
-1. **serenity's gate margin never had room, and plan 3 has now spent it.** It
-   passed by 0.01–0.02 against a ±0.03–0.039 noise floor; it now *fails* by
-   0.02–0.03. Any change upstream of serenity's render moves it, so re-run the
-   gate **after each such task**, not once at the end — that discipline is
-   exactly what made plan 3's regression attributable to task 2 rather than a
-   mystery.
+1. **Re-run the gate after each task that touches a render, never once at the
+   end.** Under the restated gate this is no longer a margin-preservation
+   habit — it is what makes rule 2 (attribution) possible at all. A movement
+   can only be paired against a same-session control if someone measured
+   before and after that specific change. Measure once at the end and every
+   task's contribution collapses into one unattributable number, which now
+   *fails* the gate rather than merely being untidy. serenity is still the
+   sensitive one: its margin never had room, plan 3 spent it, and the
+   baseline it now carries was set at the edge of the noise floor.
 2. **Never fit toward ΔE.** Fit toward the photographs' luminance from
    `tools/luminance.py` and report ΔE as a consequence. Plan 2 caught this
    substitution once: an exposure was chosen as the ΔE minimum and labelled a
@@ -149,23 +211,40 @@ criteria, which is the process working rather than failing:
   pre-agreed exit criterion, serenity was reverted to the runtime bake, and
   the loader was removed with it (`3c622d4`, `736a867`).
 
-**So the decision waiting for a human is what to do about serenity's 0.03.**
-The honest options, none of them free:
+### How the 0.03 was resolved
 
-1. **Revert task 2's source fix.** It costs the only mechanism plan 3 shipped,
-   and it did buy −5.4% p5 on kings-court.
-2. **Re-fit serenity's exposure against the new render** and see whether the
-   gate closes. Task 4 already fitted toward luminance; a fit that chases the
-   0.03 would be fitting toward ΔE, which this phase forbids.
-3. **Accept the 0.03 and restate the gate**, on the argument that the
-   threshold is itself one noisy historical reading. That is a real argument —
-   but it is also exactly the shape of "move the goalposts", and it should be
-   made deliberately by a person, not folded into a task.
-4. **Fix the winding defect first** (below) and re-measure. It changes the
-   render, so every number above would need retaking anyway.
+**Decided by the merge owner on 2026-08-15: option 3 — accept the 0.03 and
+restate the gate.** The decision was put as four options and none of them was
+free:
 
-Do not resolve this by tuning. Every number in this section was reproduced
-across two trees and eight readings.
+1. **Revert task 2's source fix.** Rejected. It is the only mechanism plan 3
+   shipped, and it did buy −5.4% p5 on kings-court.
+2. **Re-fit serenity's exposure against the new render.** Rejected, and it
+   was already proved impossible before it was offered: a sweep across
+   0.30–0.34 in the gate's own camera bottoms at 16.6085, so the best
+   exposure anywhere buys 0.0057 of the 0.03. A fit chasing the remainder
+   would be fitting toward ΔE, which this phase forbids outright.
+3. **Accept the 0.03 and restate the gate.** **Taken.**
+4. **Fix the wall-winding defect first and re-measure.** Not taken now, but
+   not dropped — it stays deferred to plan 4 or 5 with its own entry below.
+
+The restatement did **not** rest on "the threshold is one noisy historical
+reading", which is the weak form of this argument and is the shape of moving
+the goalposts. It rests on something the metrics record had already
+established independently: this metric is dominated by pose and content
+mismatch, so it cannot arbitrate a 0.03 difference in lighting, and the
+defects that dominate it are precisely what plan 4 exists to fix. Holding a
+16.58 ceiling through plan 4 would have been incoherent regardless of how
+today's 0.03 was settled — serenity's ΔE is expected to move by whole points
+once the living-room opening, the missing shower and the mis-pointed spots
+are corrected.
+
+What replaced it is in "The gate, restated 2026-08-15" above. Note that it
+tightens kings-court by about 3.5 points while loosening serenity by 0.03.
+
+**None of this was resolved by tuning, and nothing was re-measured to make it
+come out.** Every number in this section was reproduced across two trees and
+eight readings before the decision was put.
 
 ## How to work in this repo
 
