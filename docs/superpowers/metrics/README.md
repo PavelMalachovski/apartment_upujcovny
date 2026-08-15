@@ -1712,8 +1712,8 @@ on the wrong side of it.
 
 #### Plan 4a's readings are a third render, and one of them is a reverted trial
 
-Plan 4a (`b4a-task1`, `b4a-task2`) adds **fifteen** all-spot legacy readings to
-this directory. **None of them belongs in either lineage row above, and none
+Plan 4a (`b4a-task1`, `b4a-task2`, `b4a-task3`)
+adds **nineteen** all-spot legacy readings to this directory. **None of them belongs in either lineage row above, and none
 of them may be compared to the 16.58 merge ceiling.** Two independent reasons,
 either of which is sufficient:
 
@@ -1756,7 +1756,7 @@ those two and not the row's full span. `b4a-task1-before` (16.6036) is
 deliberately **not** in the row: it is the pre-fix render, which is the thing
 this row exists to be distinguished from.
 
-**Ten of the fifteen are `b4a-task2`, and eight of those ten measure code that
+**Ten of the nineteen are `b4a-task2`, and eight of those ten measure code that
 is not in the tree** — the two `-before-` files are the shipped state, one per
 apartment. Task 2 switched walls to the visibility-scaled ambient
 and swept `SEG` over 0.45 / 0.30 / 0.22 / 0.15; it **failed its exit criterion
@@ -1780,6 +1780,35 @@ that produced the No-Go, and nothing survived the revert. Following the
 `{serenity,kings-court,horkyone-10}-b4a-task2-luminance.json` files
 (`"shipped": "NOTHING…"`), not in the all-spot files themselves — so read the
 two together.
+
+**Four of the nineteen are `b4a-task3`, and they are a FOURTH render again —
+do not fold them into the plan-4a row above.** Task 3 re-fitted every
+apartment's `exposure` against the post-winding render (serenity 0.329 →
+**0.295**, kings-court 0.575 → **0.52**, horkyone-10 0.46 → **0.42**), because
+task 1's winding fix brightened the scene and expired the fit plan 3 task 4
+had made. An exposure change alters every pixel, so these readings share no
+render state with the rows above and their span is not comparable to the
+16.19–16.40 row, let alone to the 16.58 merge ceiling.
+
+| file | serenity | kings-court | state |
+|---|---:|---:|---|
+| `*-b4a-task3-BEFORE-e<old>-legacy-allspots` | 16.34 | 18.80 | task 1's tip, re-measured this session as the paired before arm |
+| `*-b4a-task3-final-legacy-allspots` | 16.00 | 18.58 | **shipped**, independent page load |
+| `*-b4a-task3-final-legacy-allspots-repeat` | **15.98** | **18.58** | **shipped, and the headline gate arm** — same page load as the BEFORE row |
+
+**The `-repeat` suffix is misleading and is explained rather than renamed.**
+The two `-final-` files are both the shipped state; they differ only in which
+page load they came from. The one carrying `-repeat` is the *same-load* arm,
+paired against the `BEFORE` row on the identical page and bake with only
+`renderer.toneMappingExposure` moved, so it is the arm the −0.36 / −0.22 gate
+delta is computed from. The unsuffixed `-final-` file is the independent
+second load, quoted as the reproduction check (16.00 against 15.98; kings-court
+18.58 both times). Either is a valid statement of the shipped ΔE; only the
+`-repeat` one is half of a controlled pair.
+
+The task-3 BEFORE rows reproduce task 1's committed tip (16.32 / 18.79) to 0.02
+and 0.01, which is what licenses reading the deltas as caused by the exposure
+change rather than by the session.
 
 Task 2's own verdict, threshold arithmetic and the artefact finding that
 underwrites it are in those three luminance files and in

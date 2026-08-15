@@ -52,7 +52,12 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
 WORDS = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
          'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10, 'eleven': 11,
          'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-         'sixteen': 16}
+         'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19,
+         'twenty': 20, 'twentyone': 21}
+# A word this map does not know resolves to None, which never equals an int, so
+# an unknown number word FAILS rather than passing quietly. Extended in plan 4a
+# task 3, when the b4a reading count reached nineteen.
+
 NUM = r'\d+\.\d+'
 DASH = r'\s*[–—-]\s*'      # en dash, em dash or hyphen, spaced or not
 
@@ -135,7 +140,14 @@ def main():
     # ---- 1. the three counts, as the README words them -------------------
     for label, pattern, actual in [
         ('count: total b4a readings', r'adds \*\*(\w+)\*\* all-spot legacy readings', len(files)),
-        ('count: how many are task 2', r'\*\*(\w+) of the fifteen are `b4a-task2`', len(t2)),
+        # The total is a literal `\w+` here, not the word "fifteen": hard-coding
+        # it made this pattern stop MATCHING the moment plan 4a task 3 added
+        # four more readings and the total became "nineteen", and a
+        # non-matching pattern is a failure, not a skip. The count this line
+        # asserts is group(1) against len(t2); the total in the same sentence
+        # is asserted separately, against len(files), by the
+        # 'count: "of the fifteen" agrees' check below. Nothing is weakened.
+        ('count: how many are task 2', r'\*\*(\w+) of the \w+ are `b4a-task2`', len(t2)),
         ('count: how many are trial state', r'and (\w+) of those ten measure code', len(t2_trial)),
         ('count: how many are shipped state',
          r'the (\w+) `-before-` files are the shipped state', len(t2) - len(t2_trial)),

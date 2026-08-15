@@ -62,8 +62,14 @@ MUTATIONS = [
      lambda t: sub_once(t, '**16.19 – 16.40**', '**16.19 – 16.34**', 'lineage row')),
     ('count "eight of those ten" reverted to "nine"', 'readme',
      lambda t: sub_once(t, 'eight of those ten', 'nine of those ten', 'trial count')),
-    ('count "fifteen" changed to "fourteen"', 'readme',
-     lambda t: sub_once(t, 'adds **fifteen**', 'adds **fourteen**', 'total count')),
+    ('count "nineteen" changed to "eighteen"', 'readme',
+     lambda t: sub_once(t, 'adds **nineteen**', 'adds **eighteen**', 'total count')),
+    # Added in plan 4a task 3, when relaxing a hard-coded "fifteen" in the
+    # checker's own pattern: prove the SECOND half of that sentence is still
+    # checked, i.e. that "Ten of the nineteen" going stale is still caught.
+    ('count "of the nineteen" changed to "of the fifteen"', 'readme',
+     lambda t: sub_once(t, 'of the nineteen are `b4a-task2`',
+                        'of the fifteen are `b4a-task2`', 'inner total')),
     ('cross-session kings-court after 18.79 -> 18.99', 'readme',
      lambda t: sub_once(t, 'against **18.79**), Δ0.02', 'against **18.99**), Δ0.02', 'cross-session')),
     ('4-dp parenthetical 16.4027 -> 16.4028', 'readme',

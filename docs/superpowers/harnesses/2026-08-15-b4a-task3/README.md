@@ -103,6 +103,25 @@ The sweep filenames deviate from the brief's literal
 `…-b4a-task3-exposure-sweep.json` / `…-final.json` for exactly this reason;
 the deviation is recorded in the report.
 
+### …but the `-repeat` suffix on the gate files is backwards. Read this first.
+
+Both `…-final-legacy-allspots.json` and `…-final-legacy-allspots-repeat.json`
+hold the **shipped** state, and either is a truthful statement of the shipped
+ΔE. They differ only in which page load produced them, and the suffix implies
+the wrong one is primary:
+
+| file | serenity | kings-court | what it actually is |
+|---|---:|---:|---|
+| `*-b4a-task3-BEFORE-e<old>-legacy-allspots` | 16.34 | 18.80 | the paired **before** arm |
+| `*-b4a-task3-final-legacy-allspots-repeat` | **15.98** | **18.58** | **the gate reading** — same page load and bake as the BEFORE row, only `renderer.toneMappingExposure` moved, so this is the arm the −0.36 / −0.22 delta comes from |
+| `*-b4a-task3-final-legacy-allspots` | 16.00 | 18.58 | an **independent** second load — the reproduction check |
+
+They were not renamed: the `-repeat` files do not match
+`check_metrics_readme.py`'s `*b4a-*allspots.json` glob, so renaming would move
+a count that checker asserts, and the review had already quoted these names.
+The JSONs are left byte-exact as `delta_e.py` wrote them — hand-editing a note
+into them would destroy the provenance that makes them worth reading.
+
 ## The noise floor, and why it is not zero
 
 `materials.js` randomises its procedural canvas textures on every page load and
