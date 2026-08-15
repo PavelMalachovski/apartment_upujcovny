@@ -1,0 +1,101 @@
+{
+  "label": "t7-before-kings-court",
+  "apt": "kings-court",
+  "yawOk": true,
+  "errors": [],
+  "pooled": {
+    "meanL": 149.4,
+    "p5L": 58.4,
+    "pctPixelsBelowLuma16": 0.1
+  },
+  "per": [
+    {
+      "spawn": "Entry hall",
+      "meanL": 163.2,
+      "p5L": 116.6,
+      "pctPixelsBelowLuma16": 0.2
+    },
+    {
+      "spawn": "Kitchen",
+      "meanL": 159,
+      "p5L": 104.4,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Dining room",
+      "meanL": 145.6,
+      "p5L": 73.2,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Living room",
+      "meanL": 144.1,
+      "p5L": 75.7,
+      "pctPixelsBelowLuma16": 1.4
+    },
+    {
+      "spawn": "Bedroom 1",
+      "meanL": 135.9,
+      "p5L": 54.8,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bedroom 3",
+      "meanL": 151.6,
+      "p5L": 71.8,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bedroom 2",
+      "meanL": 149.3,
+      "p5L": 77.3,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Hallway",
+      "meanL": 144.3,
+      "p5L": 104.9,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bathroom 2",
+      "meanL": 120.4,
+      "p5L": 34.9,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Stairs",
+      "meanL": 157.9,
+      "p5L": 86.9,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Upper hall",
+      "meanL": 159.8,
+      "p5L": 113.3,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Upper living room",
+      "meanL": 146.9,
+      "p5L": 94.1,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Upper bedroom",
+      "meanL": 161.7,
+      "p5L": 81,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Terrace",
+      "meanL": 152.6,
+      "p5L": 90.2,
+      "pctPixelsBelowLuma16": 0.1
+    }
+  ],
+  "issues": [],
+  "bakeMs": 14773,
+  "exposure": 0.56,
+  "contrast_mean_over_p5": 2.558
+}

@@ -692,8 +692,81 @@ deleted when this plan finishes).
 - [ ] **Step 4: Look at the tours.** Walk all three and step through
   `?compare=1` on both scored apartments.
 
-- [ ] **Step 5: Bump `?v=` last, verify it is served, commit, push, update
-  PR #27.**
+- [ ] **Step 5: Bump `?v=` last, verify it is served, commit, ~~push, update
+  PR #27~~.**
+
+*Corrected when task 7 ran, the way tasks 3 and 6 corrected their own briefs.
+**PR #27 was merged before this branch existed** — it is `c2bb0bd`, this
+plan's own BASE — and `phaseB-plan3-light` has no PR of its own. There is
+nothing to update and nothing for this task to push; the human partner handles
+branch integration. The `?v=` half of the step still stands, with its own
+condition attached: bump it **only if shipped code changed**. Task 7 changed
+none — every file it touched is under `docs/`, outside `vercel.json`'s
+`outputDirectory: "tour"` — so `?v=` correctly stays at **106**, and "verify it
+is served" is discharged by confirming that, not by bumping.*
+
+#### OUTCOME: the structural gate is clean, the merge condition is not, and
+#### the plan's own goal is largely unmet
+
+Measured with **both trees served at once** — HEAD `736a867` on `:8742`, a
+detached `c2bb0bd` worktree on `:8743` — and the same scripts pointed at each
+side, so before and after cannot differ by method. `measure.js` is
+byte-identical across the two trees and the only config difference is
+`exposure`. Full write-up and every table:
+`docs/superpowers/metrics/README.md`, "Phase B3 plan 3 task 7". Harness:
+`docs/superpowers/harnesses/2026-08-13-b3-task7/`.
+
+**Structural: clean.** Six rows, three apartments × desktop/mobile.
+`window.__issues` empty, `window.__ambSampled` true, `Sampler.selfTest()` 8/8,
+zero console errors everywhere. Draw calls through the post chain 72/165/83
+desktop and 64/150/64 mobile at `APT.start`, 71/165/56 and 62/150/54 at
+`spawns[0]` — **all eight figures with a precedent reproduce it exactly**,
+against both budgets (≤400 / ≤250). Sky-leak raycasts and all four standing
+walk routes match precedent exactly.
+
+**The merge condition does not close on serenity, and plan 3 is what moved
+it.** All-spot legacy population, fresh: HEAD **16.61 / 16.60** against
+≤16.58 — **fails by 0.03 / 0.02** (0.0289 / 0.0200 full precision). The
+shortfall is the size of the documented noise floor, and it is still a
+failure: eight independent readings of this render now sit in 16.59–16.61 and
+none has reached 16.58. The BASE tree reads **16.54 / 16.56 — passing.** So
+plan 3 moved serenity from the right side of the ceiling to the wrong one, by
+0.0516 at full precision, larger than the ±0.039 floor. It is task 2's change
+and not task 4's exposure: task 4's own sweep reads 16.6133 at exposure 0.326
+on the HEAD tree, against BASE's 16.5409/16.5648 at that same exposure.
+kings-court passes comfortably either way (BASE 18.7366 → HEAD 18.8658,
+ceiling 22.44). Read it knowing what this metric is: 9 of serenity's 11
+compare spots are not pose-verified, its living room is the wrong shape, and
+its two worst spots photograph a real swimming pool against a flat abstraction
+— ΔE2000 here cannot arbitrate lighting. But the condition is the condition.
+
+**The plan's own claim.** Spawn-pooled sRGB p5, endpoint to endpoint:
+serenity **0.0 %**, kings-court **−5.4 %**, horkyone-10 **−1.2 %**.
+serenity's zero is two effects cancelling — at constant exposure the three
+read −0.6 %, −6.1 %, −2.4 %. The direction is right everywhere (p5 falls
+further than the mean on all three, so the change is in shadow, not a global
+dim) and linear contrast rises with **disjoint** BASE/HEAD ranges on both
+scored apartments: serenity 3.1734 → **3.3829** (+6.6 %), kings-court
+3.0142 → **3.1844** (+5.7 %). Against the photographs that closes **6.9 %**
+and **1.5 %** of the gap; task 6's own exit criterion for the pack was ≥ 4.9.
+horkyone-10 has no `compare`-flagged spots at all, so the linear domain is
+undefined for it, not zero.
+
+**Why so little, in one sentence.** The difference maps put the change on
+floors, ceilings, slopes and furniture contact and leave flat wall faces
+untouched — which is what `bake.js` says will happen, since `bakeWalls()`
+calls `lightAt(P, N, occ, data, false, false)` — and **walls carry most of a
+first-person frame's darkest 5 %.** Walls were excluded because of the
+deferred `grid()` winding defect. Plan 3's small effect and that deferral are
+the same fact, and enlarging the effect starts with fixing the winding.
+
+**Cost recorded:** kings-court's bake is about **3× slower** (raw load times
+disjoint between the trees in both batches). serenity and horkyone-10 are not
+resolvable — no claim made. Rule 4a's conclusion is unchanged; the fix is a
+Worker, deferred.
+
+**No shipped file changed.** Everything this task wrote is under `docs/`, so
+`?v=` correctly stays at **106**, confirmed served.
 
 ---
 

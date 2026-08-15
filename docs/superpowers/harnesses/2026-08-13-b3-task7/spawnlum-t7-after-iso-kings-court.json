@@ -1,0 +1,104 @@
+{
+  "label": "t7-after-iso-kings-court",
+  "apt": "kings-court",
+  "yawOk": true,
+  "errors": [],
+  "exposureOverride": 0.56,
+  "exposureBefore": 0.575,
+  "pooled": {
+    "meanL": 147.6,
+    "p5L": 55.1,
+    "pctPixelsBelowLuma16": 0.2
+  },
+  "per": [
+    {
+      "spawn": "Entry hall",
+      "meanL": 162.1,
+      "p5L": 114.2,
+      "pctPixelsBelowLuma16": 0.3
+    },
+    {
+      "spawn": "Kitchen",
+      "meanL": 156.3,
+      "p5L": 88.1,
+      "pctPixelsBelowLuma16": 0.2
+    },
+    {
+      "spawn": "Dining room",
+      "meanL": 143.7,
+      "p5L": 67.7,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Living room",
+      "meanL": 138.6,
+      "p5L": 56.2,
+      "pctPixelsBelowLuma16": 1.8
+    },
+    {
+      "spawn": "Bedroom 1",
+      "meanL": 134.2,
+      "p5L": 52.9,
+      "pctPixelsBelowLuma16": 0.2
+    },
+    {
+      "spawn": "Bedroom 3",
+      "meanL": 150.4,
+      "p5L": 67.7,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Bedroom 2",
+      "meanL": 147.6,
+      "p5L": 73,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Hallway",
+      "meanL": 143.4,
+      "p5L": 103.7,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Bathroom 2",
+      "meanL": 120.6,
+      "p5L": 36.5,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Stairs",
+      "meanL": 157.3,
+      "p5L": 80.9,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Upper hall",
+      "meanL": 158.2,
+      "p5L": 108,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Upper living room",
+      "meanL": 146,
+      "p5L": 87.3,
+      "pctPixelsBelowLuma16": 0
+    },
+    {
+      "spawn": "Upper bedroom",
+      "meanL": 160.9,
+      "p5L": 79.3,
+      "pctPixelsBelowLuma16": 0.1
+    },
+    {
+      "spawn": "Terrace",
+      "meanL": 147.7,
+      "p5L": 58.3,
+      "pctPixelsBelowLuma16": 0.4
+    }
+  ],
+  "ambSampled": true,
+  "issues": [],
+  "bakeMs": 37103,
+  "exposure": 0.56,
+  "contrast_mean_over_p5": 2.679
+}
