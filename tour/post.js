@@ -132,9 +132,11 @@ const Post = (() => {
       // threshold at one shared exposure (1.05, the only value any apartment
       // ran at when it was written). Task 7 fits exposure *per apartment*
       // instead -- serenity 0.326, kings-court 0.56, horkyone-10 0.45 as task
-      // 7 left them; **0.329, 0.575 and 0.46 since phase B3 task 4 re-fitted
-      // all three** against the radiances plan 3 task 2 changed (see the
-      // re-measurement note at the end of this block). All
+      // 7 left them; phase B3 task 4 re-fitted all three to 0.329, 0.575 and
+      // 0.46 against the radiances plan 3 task 2 changed, and **plan 4a task 3
+      // re-fitted them again to 0.295, 0.52 and 0.42** after task 1 fixed the
+      // wall winding (see the re-measurement note at the end of this block).
+      // All
       // three are fitted, not two: horkyone-10 has no `compare` spots to fit
       // an exposure against by resemblance, so it is fitted on mean scene
       // luminance landing within ±10 of the other two instead (see the
@@ -210,13 +212,46 @@ const Post = (() => {
       // reasoning are in .superpowers/sdd/2026-08-13-phase-b3-light/
       // task-4-report.md (agent scratch, not in the repo).
       //
+      // RE-MEASURED AND HELD AGAIN, PHASE B4a TASK 3. Plan 4a task 1 fixed the
+      // wall winding, so 8 of 12 wall faces stopped presenting their far face
+      // and the render got brighter -- a scene-radiance change, which is
+      // exactly the one thing that CAN move this threshold (see the
+      // exposure-independence note below). Both constants were therefore
+      // measured from scratch a third time, by the same method, at the newly
+      // fitted exposures. Both landed back on the same values again.
+      // Fraction of frame area over threshold, 1280x800, every spawn and every
+      // `compare` photo spot: the daylight wash still has its cliff between
+      // 1.6 and 1.7 (serenity's entrance 4.00% -> 0.02%, its Living Room photo
+      // spots 4.33-4.39% -> 0.11%) and 1.7-3.0 is still one flat plateau, so
+      // 1.8 still sits just past the cliff inside a wide indifference band;
+      // serenity's backlit bathroom mirror still keeps its real crossing there
+      // (0.1987%, against 0.19% before this task and 0.21% before plan 3 task
+      // 2). Strength was re-judged at the new exposures by the same
+      // bloom-on-vs-off frame comparison at both fitted apartments' brightest
+      // highlights: 0.22 still spreads a soft halo that lifts the whole
+      // bathroom frame, 0.1 still reads as a contained glint. Per-position
+      // numbers in docs/superpowers/metrics/bloom-b4a-task3.json.
+      //
+      // One premise from the earlier rounds no longer holds exactly and is
+      // recorded rather than repeated: horkyone-10's spawns are no longer all
+      // 0.00% over threshold -- its Living room and Terrace now cross at
+      // 0.0015% and 0.0048% of frame area (about 15 and 49 pixels of
+      // 1,024,000). Measured, not inferred: with bloom on vs off its
+      // spawn-pooled mean sRGB luminance is identical to 0.01 at every
+      // exposure tested, so bloom still contributes nothing measurable there.
+      //
       // Worth knowing before re-deriving anything here: on r185 this buffer is
       // exposure-INDEPENDENT, and that was verified, not assumed -- probing it
-      // at exposure 0.326 and at 1.0 gives the same fractions to within the
+      // at exposure 0.326 and at 1.0 gave the same fractions to within the
       // per-load texture noise (materials.js randomises its canvas textures on
       // every load), because OutputPass is the only stage that reads
-      // toneMappingExposure and it runs after this. So a future exposure re-fit
-      // does not move the threshold; only a change to scene radiance does.
+      // toneMappingExposure and it runs after this. Plan 4a task 3 tightened
+      // that from "within noise" to exact by probing both exposures inside a
+      // SINGLE page load, where the textures cannot differ: all 16 serenity
+      // positions returned **bit-identical** fractions and peak luminances at
+      // exposure 0.295 and at 1.0. So a future exposure re-fit does not move
+      // the threshold; only a change to scene radiance does -- which is what
+      // task 1's winding fix was, and why it was re-measured above.
       const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);
       composer.addPass(bloom);
 

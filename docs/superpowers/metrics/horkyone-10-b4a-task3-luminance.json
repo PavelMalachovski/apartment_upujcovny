@@ -1,0 +1,191 @@
+{
+  "apartment": "horkyone-10",
+  "metric": "exposure fit -- mean scene luminance proximity to the two fitted siblings",
+  "task": "phase B plan 4a task 3",
+  "population": "n/a -- horkyone-10 has ZERO `compare`-flagged photo spots, so it has no photographs to fit resemblance or photograph luminance against. Its criterion is the fallback set in plan 2 task 6: mean scene luminance within +-10 of both fitted apartments.",
+  "method": "every APT.spawns[] entry, 480x300, pixelRatio 1, through the full post chain, sRGB 0-255, pixels pooled across spawns before the mean and the interpolated p5. Same method as docs/superpowers/metrics/README.md's horkyone-10 table.",
+  "deliberateDeviation": "Measured through the FULL post chain, not with bloom disabled the way the exposure sweep is. Named as a deviation rather than assumed harmless. The earlier rounds justified it by \"every horkyone-10 spawn measures 0.00% over threshold\" -- that premise NO LONGER HOLDS exactly: its Living room and Terrace spawns now cross threshold 1.8 at 0.0015% and 0.0048% of frame area. So it was measured instead of inferred: at 0.40, 0.42 and 0.44, and again at the shipped 0.42 on a third load, bloom-on and bloom-off give an IDENTICAL pooled mean and p5 to 0.01 -- far below the +-10 criterion and below this measurement's own +-0.32 repeat spread. Bloom contributes nothing here.",
+  "siblingBand": {
+    "serenity": {
+      "exposure": 0.295,
+      "meanL": 140.27,
+      "loads": 2
+    },
+    "kings-court": {
+      "exposure": 0.52,
+      "meanL": 148.19,
+      "loads": 2
+    },
+    "acceptanceWindow": [
+      138.19,
+      150.27
+    ],
+    "windowMidpoint": 144.23
+  },
+  "previousValue": 0.46,
+  "chosen": {
+    "exposure": 0.42,
+    "meanL": 145.44,
+    "loads": 3,
+    "diffFromSerenity": 5.17,
+    "diffFromKingsCourt": -2.75,
+    "why": "Closest tested value to the midpoint of the acceptance window, and inside +-10 of both siblings with margin. The shipped 0.46 now FAILS the criterion outright: it measures 151.03/151.65, i.e. +10.8 to +11.4 from serenity, because task 1's winding fix brightened every apartment and serenity's own fitted exposure came down further than horkyone-10's would have."
+  },
+  "sweep": [
+    {
+      "load": "A",
+      "exposure": 0.36,
+      "bloomOn": true,
+      "meanL": 134.86,
+      "p5L": 92.03
+    },
+    {
+      "load": "A",
+      "exposure": 0.38,
+      "bloomOn": true,
+      "meanL": 138.47,
+      "p5L": 95.47
+    },
+    {
+      "load": "A",
+      "exposure": 0.4,
+      "bloomOn": true,
+      "meanL": 141.87,
+      "p5L": 98.79
+    },
+    {
+      "load": "A",
+      "exposure": 0.42,
+      "bloomOn": true,
+      "meanL": 145.09,
+      "p5L": 101.99
+    },
+    {
+      "load": "A",
+      "exposure": 0.44,
+      "bloomOn": true,
+      "meanL": 148.15,
+      "p5L": 105.08
+    },
+    {
+      "load": "A",
+      "exposure": 0.46,
+      "bloomOn": true,
+      "meanL": 151.03,
+      "p5L": 108.05
+    },
+    {
+      "load": "A",
+      "exposure": 0.5,
+      "bloomOn": true,
+      "meanL": 156.37,
+      "p5L": 113.68
+    },
+    {
+      "load": "A",
+      "exposure": 0.4,
+      "bloomOn": false,
+      "meanL": 141.87,
+      "p5L": 98.79
+    },
+    {
+      "load": "A",
+      "exposure": 0.42,
+      "bloomOn": false,
+      "meanL": 145.09,
+      "p5L": 101.99
+    },
+    {
+      "load": "A",
+      "exposure": 0.44,
+      "bloomOn": false,
+      "meanL": 148.15,
+      "p5L": 105.08
+    },
+    {
+      "load": "B",
+      "exposure": 0.4,
+      "bloomOn": true,
+      "meanL": 142.5,
+      "p5L": 99.59
+    },
+    {
+      "load": "B",
+      "exposure": 0.41,
+      "bloomOn": true,
+      "meanL": 144.13,
+      "p5L": 101.18
+    },
+    {
+      "load": "B",
+      "exposure": 0.42,
+      "bloomOn": true,
+      "meanL": 145.72,
+      "p5L": 102.79,
+      "per": [
+        {
+          "spawn": "Living room",
+          "meanL": 144.15,
+          "p5L": 93.86
+        },
+        {
+          "spawn": "Bedroom",
+          "meanL": 152.49,
+          "p5L": 115.32
+        },
+        {
+          "spawn": "Bathroom",
+          "meanL": 137.19,
+          "p5L": 115.99
+        },
+        {
+          "spawn": "Hall",
+          "meanL": 148.68,
+          "p5L": 111.99
+        },
+        {
+          "spawn": "Terrace",
+          "meanL": 146.09,
+          "p5L": 69.52
+        }
+      ]
+    },
+    {
+      "load": "B",
+      "exposure": 0.43,
+      "bloomOn": true,
+      "meanL": 147.27,
+      "p5L": 104.32
+    },
+    {
+      "load": "B",
+      "exposure": 0.44,
+      "bloomOn": true,
+      "meanL": 148.77,
+      "p5L": 105.86
+    },
+    {
+      "load": "B",
+      "exposure": 0.46,
+      "bloomOn": true,
+      "meanL": 151.65,
+      "p5L": 108.83
+    },
+    {
+      "load": "C (shipped config, ?v=110)",
+      "exposure": 0.42,
+      "bloomOn": true,
+      "meanL": 145.52,
+      "p5L": 102.09
+    },
+    {
+      "load": "C (shipped config, ?v=110)",
+      "exposure": 0.42,
+      "bloomOn": false,
+      "meanL": 145.52,
+      "p5L": 102.09
+    }
+  ],
+  "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code are not bit-identical and bake repeats are not deterministic (bake.js's cosine sampling uses Math.random()). Measured here across independent loads: all-spot mean linear luminance +-0.0003 (serenity, at 0.295) / +-0.0003 (kings-court, at 0.52); all-spot dE2000 +-0.02; spawn-pooled sRGB mean +-0.32. Rows inside one batch share a page load and one set of textures.",
+  "harness": "Playwright MCP -> Chromium on ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11) -- a real GPU, so post.js's capable() accepts the chain; post.enabled was asserted before every reading. Frames were rendered by measure.js's own renderAt (never a re-implementation): window.fetch was patched for the duration of each capture so measure.js's save POST is mirrored into tools/shots/<label>/ as well as the shots root."
+}
