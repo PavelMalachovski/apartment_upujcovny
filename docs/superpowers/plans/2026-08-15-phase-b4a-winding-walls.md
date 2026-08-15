@@ -194,7 +194,7 @@ a.renderer.info.autoReset = true;
 
 - [ ] **Step 10: Take the before/after a human will actually look at**
 
-The rooms will read about 28 cm narrower along z. That is the truth — collision in `controls.js` was always against the config's centrelines and it is the render that disagreed — but it is a visible product change. Capture the same first-person view before and after on serenity and kings-court and file both frames in the harness directory.
+The rooms will read about 28 cm narrower **along x** — the reversed large faces belong to along-z walls, whose normals are ±x, so they bound a room in x. (This line said "along z" until task 1 measured it: z spans moved by exactly 0.000 and x spans narrowed by exactly 0.280 to the config's true clear size.) That is the truth — collision in `controls.js` was always against the config's centrelines and it is the render that disagreed — but it is a visible product change. Capture the same first-person view before and after on serenity and kings-court and file both frames in the harness directory.
 
 - [ ] **Step 11: Measure the gate and attribute the movement**
 
@@ -461,7 +461,9 @@ Follow the file's own convention — a narrated `>` blockquote marker in place, 
 git diff --stat HEAD~1 -- tour/
 ```
 
-Docs and comments only. If `tour/` shows anything but comment text, the `?v=` rule applies and this step is wrong. Comment-only edits to `tour/bake.js` still count as a code edit for cache purposes — bump `?v=` if `tour/bake.js` was touched at all.
+**Expected: `tour/bake.js` changes, and every changed line is comment text.** If any executable line moved, this task has exceeded its scope — stop and report.
+
+**Bump `?v=` anyway.** A comment-only edit to a shipped file is still a code edit for cache purposes, and the precedent is explicit: plan 3 bumped `?v=100` → `?v=101` for a `post.js` header pointer that changed no behaviour. `CLAUDE.md`, `docs/` and `docs/superpowers/` are not shipped and never trigger a bump; `tour/bake.js` is.
 
 - [ ] **Step 6: Commit**
 

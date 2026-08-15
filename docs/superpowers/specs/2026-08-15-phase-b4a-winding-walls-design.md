@@ -239,11 +239,19 @@ asserts on it rather than on the render looking plausible.
 
 ## Risks, stated up front
 
-- **Rooms will read about 28 cm narrower along z once the winding is fixed.**
+- **Rooms will read about 28 cm narrower along x once the winding is fixed.**
   This is the truth, not a regression: collision in `controls.js` was always
   against the config's wall segments, and it is the *render* that disagreed
   with them. But it is a visible product change and the owner should see a
   before/after by eye, not only in numbers.
+
+  *(Corrected after task 1 measured it. This line first said "along z",
+  which conflated the direction a wall **runs** with the direction it
+  **bounds**. The reversed large faces belong to along-z walls, whose
+  normals are ±x, so they bound a room in x. Task 1 measured z spans moving
+  by exactly 0.000 on all three apartments and x spans narrowing by exactly
+  0.280 to the config's true clear size. Magnitude and direction were right;
+  the axis was not.)*
 - **Bake time will rise** — more wall vertices, each running 16 ambient rays
   against the BVH. kings-court is already the slow one at ~8.7 s on the
   reference machine. Rule 4a's position stands: no fixed ceiling, and the
