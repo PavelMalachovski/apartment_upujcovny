@@ -544,6 +544,31 @@ hard way in plan 3, where a partner ruling survived only by accident. Tasks
    capture. Two committed checkers guard the metrics README; neither guards
    that.
 
+## Two items parked at branch close, 2026-08-16
+
+Raised by the re-review of the final fix wave, adjudicated by the controller as
+not load-bearing, and written down here for the same reason as the list above:
+the SDD ledger that held them is git-ignored and does not survive the branch.
+Neither blocks anything; both are for whoever next edits the file concerned.
+
+- **The coverage paragraph in `docs/superpowers/metrics/README.md` is itself
+  slightly inaccurate.** It says the checker reads its inputs "by literal
+  filename, no glob", but one line globs `metrics/*b4a-*allspots.json`, and the
+  sentence omits `tour/bake.js`, which the checker also reads. This does not
+  re-inflate the coverage claim the paragraph exists to narrow — the narrowing
+  is substantively correct — but an inaccuracy inside the one paragraph whose
+  job is accuracy deserves fixing on sight.
+
+- **`Doll.floorPoint()` now returns `null` on wall footprints with no floor
+  plate beneath them** — measured at 100 of 4218 grid cells on kings-court,
+  about 37% of wall-footprint cells. **This is better than what it replaced and
+  is not a regression:** before the fix those cells returned the wall's own
+  bottom quad at y 0, so the tape silently *misread* them; now it declines to
+  answer. It is a disclosure gap rather than a defect, and no committed text
+  outside this note mentions it. Whether the null cells matter in practice is a
+  product judgement nobody has made — the honest position is that the tape is
+  now correct where it answers and silent where it cannot.
+
 ## Self-review notes
 
 - **Spec coverage.** Defect 1 → task 1. Defect 2 mitigation and its exit criterion → task 2. The re-fit both force → task 3. Gate and baselines → task 4. Documentation and the deferred-table discharge → task 5. Risks named in the spec — 28 cm narrower rooms, bake time, expired fit, "may deliver nothing visible" — appear as steps 10, 6, and the task 2 No-Go path respectively.
