@@ -1,0 +1,2190 @@
+{
+  "apartment": "serenity",
+  "metric": "exposure fit -- all-spot linear-light mean luminance vs the photographs",
+  "task": "phase B plan 4a task 3",
+  "fitTarget": "The photographs' own mean linear-light relative luminance (Rec.709, sRGB EOTF) over the ALL-SPOT compare population, i.e. minimise |render mean - photograph mean|. Stated in writing before the first capture (task-3-report.md step 1). dE2000 is recorded on every row and was NOT used to choose any value; where the two disagree the report says so and says what taking luminance cost.",
+  "population": "all-spot: every `compare`-flagged spot, scored == compareTotal, skippedPoseVerification 0. This REVERSES plan 3 task 4, which fitted on the poseVerified subset that tools/luminance.py hard-codes; the poseVerified figures are carried on every row as a diagnostic only. score.py exists because luminance.py cannot report the all-spot population at all.",
+  "scored": 11,
+  "compareTotal": 11,
+  "skippedPoseVerification": 0,
+  "harnessMode": "fixed-fov (\"new zero\"): ?apt=<id>&measure=1 with NO &fov=legacy -- the camera that matches each photograph's own field of view, so render and photograph frame the same subject and a luminance comparison between them is like-for-like. The gate reading is a separate capture in the legacy 72-degree camera; those files are named -legacy-allspots.",
+  "bloom": "DISABLED on every sweep row (bloom pass .enabled = false).",
+  "harness": "Playwright MCP -> Chromium on ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11) -- a real GPU, so post.js's capable() accepts the chain; post.enabled was asserted before every reading. Frames were rendered by measure.js's own renderAt (never a re-implementation): window.fetch was patched for the duration of each capture so measure.js's save POST is mirrored into tools/shots/<label>/ as well as the shots root.",
+  "exposureOverrideEquivalence": "Rows were swept by setting renderer.toneMappingExposure in-page. That is equivalent to editing the JSON by construction, not empirically: app.js:90 assigns APT.exposure to that exact property and nothing else reads the key; three.module.js:18345-18351 forces NoToneMapping whenever the render target is non-null (which is what RenderPass renders into); and OutputPass.js:93 is the only consumer of toneMappingExposure in the whole chain.",
+  "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code are not bit-identical and bake repeats are not deterministic (bake.js's cosine sampling uses Math.random()). Measured here across independent loads: all-spot mean linear luminance +-0.0003 (serenity, at 0.295) / +-0.0003 (kings-court, at 0.52); all-spot dE2000 +-0.02; spawn-pooled sRGB mean +-0.32. Rows inside one batch share a page load and one set of textures.",
+  "windingDefect": "FIXED. Plan 4a task 1 corrected grid()'s triangle order, so walls now present their near face. That is the scene change this re-fit exists for: the earlier fits (plan 2 task 7, plan 3 task 4) were made against the defective render and have expired.",
+  "photographs": {
+    "allSpot": {
+      "n": 11,
+      "meanLum": 0.2945,
+      "p5Lum": 0.0386
+    },
+    "poseVerified": {
+      "n": 2,
+      "meanLum": 0.2993,
+      "p5Lum": 0.0483
+    }
+  },
+  "previousValue": 0.329,
+  "chosen": {
+    "exposure": 0.295,
+    "previousValue": 0.329,
+    "why": "The all-spot luminance crossing. Signed diff (render - photographs) changes sign between 0.295 and 0.296 in BOTH independent refine loads, and 0.295 also carries the smallest |diff| in both (0.0002 and 0.0001, against 0.296's 0.0008 and 0.0011). dE2000 was NOT used: it falls monotonically below the crossing to a minimum near 0.26 (15.59 all-spot), so taking the luminance value costs about +0.24 dE2000 -- disclosed, not hidden."
+  },
+  "batches": [
+    {
+      "batch": "coarse (one page load)",
+      "points": [
+        {
+          "exposure": 0.2,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.2",
+          "renderMeanLum": 0.194,
+          "diffFromPhotographs": -0.1005,
+          "absDiffFromPhotographs": 0.1005,
+          "renderP5Lum": 0.0514,
+          "dE2000": 16.5,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.1961,
+            "diffFromPhotographs": -0.1032,
+            "dE2000": 16.41
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.1804,
+              "deltaE": 17.51
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.1689,
+              "deltaE": 20.21
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2026,
+              "deltaE": 15.81
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2124,
+              "deltaE": 12.91
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.1774,
+              "deltaE": 15.36
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2029,
+              "deltaE": 13.06
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.1927,
+              "deltaE": 16.85
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.1983,
+              "deltaE": 11.96
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2189,
+              "deltaE": 18.05
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.168,
+              "deltaE": 24.5
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2119,
+              "deltaE": 15.31
+            }
+          ]
+        },
+        {
+          "exposure": 0.22,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.22",
+          "renderMeanLum": 0.2167,
+          "diffFromPhotographs": -0.0778,
+          "absDiffFromPhotographs": 0.0778,
+          "renderP5Lum": 0.0592,
+          "dE2000": 15.94,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2188,
+            "diffFromPhotographs": -0.0805,
+            "dE2000": 15.62
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2022,
+              "deltaE": 17.41
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.1897,
+              "deltaE": 19.44
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2256,
+              "deltaE": 15.92
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2363,
+              "deltaE": 13.47
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.1989,
+              "deltaE": 13.84
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2265,
+              "deltaE": 12.51
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2158,
+              "deltaE": 15.64
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.222,
+              "deltaE": 11.4
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2421,
+              "deltaE": 18.27
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.189,
+              "deltaE": 23.65
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2353,
+              "deltaE": 13.82
+            }
+          ]
+        },
+        {
+          "exposure": 0.24,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.24",
+          "renderMeanLum": 0.2385,
+          "diffFromPhotographs": -0.056,
+          "absDiffFromPhotographs": 0.056,
+          "renderP5Lum": 0.0675,
+          "dE2000": 15.66,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2405,
+            "diffFromPhotographs": -0.0588,
+            "dE2000": 15.17
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2233,
+              "deltaE": 17.54
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.21,
+              "deltaE": 18.94
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2478,
+              "deltaE": 16.25
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2592,
+              "deltaE": 14.25
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2198,
+              "deltaE": 12.74
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2491,
+              "deltaE": 12.23
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2381,
+              "deltaE": 14.79
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2449,
+              "deltaE": 11.13
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2642,
+              "deltaE": 18.6
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2096,
+              "deltaE": 23.0
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2577,
+              "deltaE": 12.8
+            }
+          ]
+        },
+        {
+          "exposure": 0.26,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.26",
+          "renderMeanLum": 0.2596,
+          "diffFromPhotographs": -0.0349,
+          "absDiffFromPhotographs": 0.0349,
+          "renderP5Lum": 0.0756,
+          "dE2000": 15.59,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2616,
+            "diffFromPhotographs": -0.0377,
+            "dE2000": 14.96
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2439,
+              "deltaE": 17.83
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2299,
+              "deltaE": 18.65
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2691,
+              "deltaE": 16.71
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2812,
+              "deltaE": 15.12
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2401,
+              "deltaE": 12.01
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2709,
+              "deltaE": 12.21
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2597,
+              "deltaE": 14.23
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.267,
+              "deltaE": 11.1
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2852,
+              "deltaE": 19.0
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2298,
+              "deltaE": 22.55
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2792,
+              "deltaE": 12.1
+            }
+          ]
+        },
+        {
+          "exposure": 0.28,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.28",
+          "renderMeanLum": 0.2799,
+          "diffFromPhotographs": -0.0146,
+          "absDiffFromPhotographs": 0.0146,
+          "renderP5Lum": 0.0839,
+          "dE2000": 15.68,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2818,
+            "diffFromPhotographs": -0.0175,
+            "dE2000": 14.96
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2638,
+              "deltaE": 18.23
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2491,
+              "deltaE": 18.48
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2895,
+              "deltaE": 17.26
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3021,
+              "deltaE": 15.99
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2598,
+              "deltaE": 11.61
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2919,
+              "deltaE": 12.48
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2806,
+              "deltaE": 13.89
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2884,
+              "deltaE": 11.26
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3051,
+              "deltaE": 19.43
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2493,
+              "deltaE": 22.22
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2997,
+              "deltaE": 11.68
+            }
+          ]
+        },
+        {
+          "exposure": 0.29,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.29",
+          "renderMeanLum": 0.2898,
+          "diffFromPhotographs": -0.0047,
+          "absDiffFromPhotographs": 0.0047,
+          "renderP5Lum": 0.0883,
+          "dE2000": 15.78,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2915,
+            "diffFromPhotographs": -0.0078,
+            "dE2000": 15.02
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2735,
+              "deltaE": 18.47
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2584,
+              "deltaE": 18.42
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2994,
+              "deltaE": 17.55
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3122,
+              "deltaE": 16.42
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2694,
+              "deltaE": 11.48
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3021,
+              "deltaE": 12.68
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2908,
+              "deltaE": 13.78
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2988,
+              "deltaE": 11.41
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3147,
+              "deltaE": 19.67
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2588,
+              "deltaE": 22.11
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3095,
+              "deltaE": 11.56
+            }
+          ]
+        },
+        {
+          "exposure": 0.3,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.3",
+          "renderMeanLum": 0.2995,
+          "diffFromPhotographs": 0.005,
+          "absDiffFromPhotographs": 0.005,
+          "renderP5Lum": 0.0927,
+          "dE2000": 15.89,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3011,
+            "diffFromPhotographs": 0.0018,
+            "dE2000": 15.1
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.283,
+              "deltaE": 18.71
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2676,
+              "deltaE": 18.39
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3091,
+              "deltaE": 17.86
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3223,
+              "deltaE": 16.85
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2788,
+              "deltaE": 11.41
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3122,
+              "deltaE": 12.91
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3008,
+              "deltaE": 13.7
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3091,
+              "deltaE": 11.58
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3241,
+              "deltaE": 19.9
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2681,
+              "deltaE": 22.02
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3192,
+              "deltaE": 11.49
+            }
+          ]
+        },
+        {
+          "exposure": 0.31,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.31",
+          "renderMeanLum": 0.3089,
+          "diffFromPhotographs": 0.0144,
+          "absDiffFromPhotographs": 0.0144,
+          "renderP5Lum": 0.0969,
+          "dE2000": 16.02,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3105,
+            "diffFromPhotographs": 0.0112,
+            "dE2000": 15.22
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2923,
+              "deltaE": 18.97
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2766,
+              "deltaE": 18.36
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3185,
+              "deltaE": 18.16
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3318,
+              "deltaE": 17.25
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2881,
+              "deltaE": 11.37
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3218,
+              "deltaE": 13.15
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3105,
+              "deltaE": 13.66
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3189,
+              "deltaE": 11.78
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3331,
+              "deltaE": 20.14
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2773,
+              "deltaE": 21.96
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3286,
+              "deltaE": 11.47
+            }
+          ]
+        },
+        {
+          "exposure": 0.32,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.32",
+          "renderMeanLum": 0.3181,
+          "diffFromPhotographs": 0.0236,
+          "absDiffFromPhotographs": 0.0236,
+          "renderP5Lum": 0.1013,
+          "dE2000": 16.17,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3196,
+            "diffFromPhotographs": 0.0203,
+            "dE2000": 15.36
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3014,
+              "deltaE": 19.24
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2854,
+              "deltaE": 18.36
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3277,
+              "deltaE": 18.47
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3412,
+              "deltaE": 17.66
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2971,
+              "deltaE": 11.37
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3314,
+              "deltaE": 13.41
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.32,
+              "deltaE": 13.64
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3287,
+              "deltaE": 12.01
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.342,
+              "deltaE": 20.37
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2863,
+              "deltaE": 21.91
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3377,
+              "deltaE": 11.48
+            }
+          ]
+        },
+        {
+          "exposure": 0.329,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.329",
+          "renderMeanLum": 0.3262,
+          "diffFromPhotographs": 0.0317,
+          "absDiffFromPhotographs": 0.0317,
+          "renderP5Lum": 0.1049,
+          "dE2000": 16.32,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3276,
+            "diffFromPhotographs": 0.0283,
+            "dE2000": 15.5
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3095,
+              "deltaE": 19.49
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2932,
+              "deltaE": 18.37
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3357,
+              "deltaE": 18.74
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3494,
+              "deltaE": 18.01
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.3052,
+              "deltaE": 11.39
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3397,
+              "deltaE": 13.64
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3284,
+              "deltaE": 13.64
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3372,
+              "deltaE": 12.23
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3497,
+              "deltaE": 20.58
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2942,
+              "deltaE": 21.88
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3457,
+              "deltaE": 11.51
+            }
+          ]
+        },
+        {
+          "exposure": 0.35,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.35",
+          "renderMeanLum": 0.3444,
+          "diffFromPhotographs": 0.0499,
+          "absDiffFromPhotographs": 0.0499,
+          "renderP5Lum": 0.114,
+          "dE2000": 16.68,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3457,
+            "diffFromPhotographs": 0.0464,
+            "dE2000": 15.86
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3277,
+              "deltaE": 20.07
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.311,
+              "deltaE": 18.44
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3537,
+              "deltaE": 19.36
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3677,
+              "deltaE": 18.78
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.3233,
+              "deltaE": 11.53
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3583,
+              "deltaE": 14.2
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3473,
+              "deltaE": 13.71
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3563,
+              "deltaE": 12.77
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3669,
+              "deltaE": 21.06
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3125,
+              "deltaE": 21.88
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3637,
+              "deltaE": 11.64
+            }
+          ]
+        },
+        {
+          "exposure": 0.4,
+          "set": "t3-serenity-fixedfov-bloomOff-e0.4",
+          "renderMeanLum": 0.3844,
+          "diffFromPhotographs": 0.0899,
+          "absDiffFromPhotographs": 0.0899,
+          "renderP5Lum": 0.1359,
+          "dE2000": 17.61,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3853,
+            "diffFromPhotographs": 0.086,
+            "dE2000": 16.8
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3679,
+              "deltaE": 21.5
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3503,
+              "deltaE": 18.73
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3932,
+              "deltaE": 20.78
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.4077,
+              "deltaE": 20.49
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.3632,
+              "deltaE": 12.07
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3992,
+              "deltaE": 15.52
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3888,
+              "deltaE": 14.18
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3984,
+              "deltaE": 14.16
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.4043,
+              "deltaE": 22.11
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3523,
+              "deltaE": 22.01
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.4028,
+              "deltaE": 12.11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "refine 1 (independent page load)",
+      "points": [
+        {
+          "exposure": 0.291,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.291",
+          "renderMeanLum": 0.2904,
+          "diffFromPhotographs": -0.0041,
+          "absDiffFromPhotographs": 0.0041,
+          "renderP5Lum": 0.0888,
+          "dE2000": 15.76,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2927,
+            "diffFromPhotographs": -0.0066,
+            "dE2000": 15.02
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2743,
+              "deltaE": 18.47
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2596,
+              "deltaE": 18.44
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3001,
+              "deltaE": 17.57
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.313,
+              "deltaE": 16.47
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2697,
+              "deltaE": 11.42
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3037,
+              "deltaE": 12.76
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2896,
+              "deltaE": 13.59
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2983,
+              "deltaE": 11.28
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3154,
+              "deltaE": 19.67
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2598,
+              "deltaE": 22.1
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3112,
+              "deltaE": 11.58
+            }
+          ]
+        },
+        {
+          "exposure": 0.293,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.293",
+          "renderMeanLum": 0.2924,
+          "diffFromPhotographs": -0.0021,
+          "absDiffFromPhotographs": 0.0021,
+          "renderP5Lum": 0.0898,
+          "dE2000": 15.78,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2946,
+            "diffFromPhotographs": -0.0047,
+            "dE2000": 15.04
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2762,
+              "deltaE": 18.52
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2615,
+              "deltaE": 18.44
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.302,
+              "deltaE": 17.63
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.315,
+              "deltaE": 16.56
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2715,
+              "deltaE": 11.4
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3058,
+              "deltaE": 12.81
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2916,
+              "deltaE": 13.57
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3004,
+              "deltaE": 11.32
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3173,
+              "deltaE": 19.72
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2616,
+              "deltaE": 22.08
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3131,
+              "deltaE": 11.56
+            }
+          ]
+        },
+        {
+          "exposure": 0.294,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.294",
+          "renderMeanLum": 0.2933,
+          "diffFromPhotographs": -0.0012,
+          "absDiffFromPhotographs": 0.0012,
+          "renderP5Lum": 0.0902,
+          "dE2000": 15.79,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2956,
+            "diffFromPhotographs": -0.0037,
+            "dE2000": 15.04
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2772,
+              "deltaE": 18.54
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2624,
+              "deltaE": 18.43
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.303,
+              "deltaE": 17.66
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.316,
+              "deltaE": 16.6
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2725,
+              "deltaE": 11.39
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3068,
+              "deltaE": 12.82
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2926,
+              "deltaE": 13.57
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3014,
+              "deltaE": 11.34
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3182,
+              "deltaE": 19.74
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2626,
+              "deltaE": 22.07
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3141,
+              "deltaE": 11.55
+            }
+          ]
+        },
+        {
+          "exposure": 0.295,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.295",
+          "renderMeanLum": 0.2943,
+          "diffFromPhotographs": -0.0002,
+          "absDiffFromPhotographs": 0.0002,
+          "renderP5Lum": 0.0904,
+          "dE2000": 15.8,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2966,
+            "diffFromPhotographs": -0.0027,
+            "dE2000": 15.06
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2781,
+              "deltaE": 18.57
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2633,
+              "deltaE": 18.43
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.304,
+              "deltaE": 17.69
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.317,
+              "deltaE": 16.64
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2734,
+              "deltaE": 11.38
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3078,
+              "deltaE": 12.85
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2936,
+              "deltaE": 13.56
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3025,
+              "deltaE": 11.36
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3192,
+              "deltaE": 19.76
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2636,
+              "deltaE": 22.06
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3151,
+              "deltaE": 11.55
+            }
+          ]
+        },
+        {
+          "exposure": 0.296,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.296",
+          "renderMeanLum": 0.2953,
+          "diffFromPhotographs": 0.0008,
+          "absDiffFromPhotographs": 0.0008,
+          "renderP5Lum": 0.0909,
+          "dE2000": 15.82,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2975,
+            "diffFromPhotographs": -0.0018,
+            "dE2000": 15.06
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2791,
+              "deltaE": 18.59
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2642,
+              "deltaE": 18.43
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3049,
+              "deltaE": 17.72
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.318,
+              "deltaE": 16.69
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2744,
+              "deltaE": 11.38
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3088,
+              "deltaE": 12.87
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2946,
+              "deltaE": 13.55
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3035,
+              "deltaE": 11.37
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3201,
+              "deltaE": 19.79
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2645,
+              "deltaE": 22.06
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.316,
+              "deltaE": 11.54
+            }
+          ]
+        },
+        {
+          "exposure": 0.297,
+          "set": "t3r1-serenity-fixedfov-bloomOff-e0.297",
+          "renderMeanLum": 0.2963,
+          "diffFromPhotographs": 0.0018,
+          "absDiffFromPhotographs": 0.0018,
+          "renderP5Lum": 0.0915,
+          "dE2000": 15.83,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2985,
+            "diffFromPhotographs": -0.0008,
+            "dE2000": 15.07
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.28,
+              "deltaE": 18.62
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2652,
+              "deltaE": 18.42
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.306,
+              "deltaE": 17.75
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3191,
+              "deltaE": 16.73
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2753,
+              "deltaE": 11.37
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3098,
+              "deltaE": 12.89
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2956,
+              "deltaE": 13.54
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3045,
+              "deltaE": 11.39
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3211,
+              "deltaE": 19.81
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2654,
+              "deltaE": 22.05
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.317,
+              "deltaE": 11.53
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "refine 2 (independent page load, repeat of refine 1)",
+      "points": [
+        {
+          "exposure": 0.293,
+          "set": "t3r2-serenity-fixedfov-bloomOff-e0.293",
+          "renderMeanLum": 0.2926,
+          "diffFromPhotographs": -0.0019,
+          "absDiffFromPhotographs": 0.0019,
+          "renderP5Lum": 0.0899,
+          "dE2000": 15.81,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2951,
+            "diffFromPhotographs": -0.0042,
+            "dE2000": 15.02
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2765,
+              "deltaE": 18.54
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2613,
+              "deltaE": 18.42
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3019,
+              "deltaE": 17.64
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3149,
+              "deltaE": 16.56
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.271,
+              "deltaE": 11.4
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3059,
+              "deltaE": 12.84
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2934,
+              "deltaE": 13.7
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3013,
+              "deltaE": 11.51
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3174,
+              "deltaE": 19.72
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2617,
+              "deltaE": 22.07
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3136,
+              "deltaE": 11.51
+            }
+          ]
+        },
+        {
+          "exposure": 0.294,
+          "set": "t3r2-serenity-fixedfov-bloomOff-e0.294",
+          "renderMeanLum": 0.2936,
+          "diffFromPhotographs": -0.0009,
+          "absDiffFromPhotographs": 0.0009,
+          "renderP5Lum": 0.0903,
+          "dE2000": 15.82,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2961,
+            "diffFromPhotographs": -0.0032,
+            "dE2000": 15.03
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2775,
+              "deltaE": 18.56
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2623,
+              "deltaE": 18.42
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3029,
+              "deltaE": 17.66
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3159,
+              "deltaE": 16.6
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.272,
+              "deltaE": 11.39
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3069,
+              "deltaE": 12.86
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2944,
+              "deltaE": 13.69
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3024,
+              "deltaE": 11.53
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3183,
+              "deltaE": 19.74
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2627,
+              "deltaE": 22.06
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3146,
+              "deltaE": 11.5
+            }
+          ]
+        },
+        {
+          "exposure": 0.295,
+          "set": "t3r2-serenity-fixedfov-bloomOff-e0.295",
+          "renderMeanLum": 0.2946,
+          "diffFromPhotographs": 0.0001,
+          "absDiffFromPhotographs": 0.0001,
+          "renderP5Lum": 0.0907,
+          "dE2000": 15.83,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.297,
+            "diffFromPhotographs": -0.0023,
+            "dE2000": 15.04
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2784,
+              "deltaE": 18.59
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2632,
+              "deltaE": 18.41
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3039,
+              "deltaE": 17.7
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3169,
+              "deltaE": 16.64
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2729,
+              "deltaE": 11.38
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.308,
+              "deltaE": 12.88
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2954,
+              "deltaE": 13.68
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3034,
+              "deltaE": 11.54
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3193,
+              "deltaE": 19.76
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2636,
+              "deltaE": 22.05
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3156,
+              "deltaE": 11.49
+            }
+          ]
+        },
+        {
+          "exposure": 0.296,
+          "set": "t3r2-serenity-fixedfov-bloomOff-e0.296",
+          "renderMeanLum": 0.2956,
+          "diffFromPhotographs": 0.0011,
+          "absDiffFromPhotographs": 0.0011,
+          "renderP5Lum": 0.0911,
+          "dE2000": 15.84,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.298,
+            "diffFromPhotographs": -0.0013,
+            "dE2000": 15.05
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2794,
+              "deltaE": 18.61
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2641,
+              "deltaE": 18.41
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3048,
+              "deltaE": 17.73
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3179,
+              "deltaE": 16.68
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2739,
+              "deltaE": 11.38
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.309,
+              "deltaE": 12.91
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2964,
+              "deltaE": 13.68
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3045,
+              "deltaE": 11.56
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3201,
+              "deltaE": 19.78
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2646,
+              "deltaE": 22.05
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3166,
+              "deltaE": 11.49
+            }
+          ]
+        },
+        {
+          "exposure": 0.297,
+          "set": "t3r2-serenity-fixedfov-bloomOff-e0.297",
+          "renderMeanLum": 0.2965,
+          "diffFromPhotographs": 0.002,
+          "absDiffFromPhotographs": 0.002,
+          "renderP5Lum": 0.0916,
+          "dE2000": 15.86,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2989,
+            "diffFromPhotographs": -0.0004,
+            "dE2000": 15.06
+          },
+          "perSpot": [
+            {
+              "file": "1.webp",
+              "name": "Bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2803,
+              "deltaE": 18.64
+            },
+            {
+              "file": "2.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.265,
+              "deltaE": 18.41
+            },
+            {
+              "file": "3.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3058,
+              "deltaE": 17.76
+            },
+            {
+              "file": "4.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3189,
+              "deltaE": 16.73
+            },
+            {
+              "file": "5.webp",
+              "name": "Kitchen & Hall",
+              "poseVerified": false,
+              "renderMeanLum": 0.2748,
+              "deltaE": 11.37
+            },
+            {
+              "file": "6.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.31,
+              "deltaE": 12.93
+            },
+            {
+              "file": "7.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2974,
+              "deltaE": 13.67
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3055,
+              "deltaE": 11.58
+            },
+            {
+              "file": "9.webp",
+              "name": "Living Room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3211,
+              "deltaE": 19.81
+            },
+            {
+              "file": "10.webp",
+              "name": "Pool Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2655,
+              "deltaE": 22.03
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3176,
+              "deltaE": 11.48
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

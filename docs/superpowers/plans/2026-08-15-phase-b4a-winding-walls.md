@@ -52,7 +52,9 @@
 
 **Interfaces:**
 - Produces: a corrected `grid()`. No signature change — `grid(o, uVec, vVec, n, su, sv, occ, shade)` stays exactly as it is. Task 2 calls it unchanged.
-- Produces: `faces.mjs`'s console function `__faces()` returning `{apt, walls:[{i, alongX, near, far, none}], totals:{near, far, none}}`. Task 2 re-runs it to prove the winding fix survived its edits.
+- Produces: `faces.mjs` with **two** console functions, both returning `{apt, walls:[{i, alongX, near, far, none}], totals:{near, far, none}}` (`__facesLvl` adds `lvl` per wall). Task 2 re-runs it to prove the winding fix survived its edits — **using `__facesLvl()`, not `__faces()`**.
+  - `__faces()` is the probe as originally specified here, kept verbatim. It probes at **world** y 0.4/1.5/2.2 and therefore cannot reach a `lvl:"upper"` wall at all: on kings-court it is blind to 4 of 19 along-x and 7 of 23 along-z walls, in **both** arms. Do not assert on it.
+  - `__facesLvl()` lifts each ray onto the wall's own storey and is the reading of record. Expected on the fixed tree: every wall `near`, none `far` — serenity 9/9, kings-court 42/42, horkyone-10 15/15.
 
 - [ ] **Step 1: Read the spec and the defect's own comment**
 
@@ -194,7 +196,7 @@ a.renderer.info.autoReset = true;
 
 - [ ] **Step 10: Take the before/after a human will actually look at**
 
-The rooms will read about 28 cm narrower along z. That is the truth — collision in `controls.js` was always against the config's centrelines and it is the render that disagreed — but it is a visible product change. Capture the same first-person view before and after on serenity and kings-court and file both frames in the harness directory.
+The rooms will read about 28 cm narrower **along x** — the reversed large faces belong to along-z walls, whose normals are ±x, so they bound a room in x. (This line said "along z" until task 1 measured it: z spans moved by exactly 0.000 and x spans narrowed by exactly 0.280 to the config's true clear size.) That is the truth — collision in `controls.js` was always against the config's centrelines and it is the render that disagreed — but it is a visible product change. Capture the same first-person view before and after on serenity and kings-court and file both frames in the harness directory.
 
 - [ ] **Step 11: Measure the gate and attribute the movement**
 
@@ -228,7 +230,7 @@ git commit -m "Task 1: fix the wall winding with a sign test, not an else-branch
 - Modify: `tour/index.html:254` — `?v=` bump
 
 **Interfaces:**
-- Consumes: task 1's corrected `grid()` and its `__faces()` harness.
+- Consumes: task 1's corrected `grid()` and its `faces.mjs` harness. **Assert on `__facesLvl()`, never on `__faces()`** — the latter cannot see an upper-storey wall, so on kings-court it reports 15/19 and 16/23 even with the fix in place and correct.
 - Consumes: `lightAt(P, N, occ, data, outdoor, sampled, ambFn)` at `tour/bake.js:258`. The sixth positional argument is `sampled`; `grid()` currently passes `false` at `:571`.
 - Consumes: `window.__ambSampled` (boolean, set in `run()` at `:732`) and the `__issues` entry pushed beside it at `:743`.
 - Produces: either a shipped `SEG` value and `sampled=true` for walls, or a full revert plus a committed null result.
@@ -303,7 +305,7 @@ await window.__bakeReady; console.log(window.__ambSampled, window.__issues);
 
 - [ ] **Step 8: On GO — ship it**
 
-Keep the chosen `SEG` and `sampled=true`. Bump `?v=108` → `?v=109`. Re-run `__faces()` from task 1 and confirm the winding fix survived: every wall still `near`. Commit the sweep, the metrics and the screenshots.
+Keep the chosen `SEG` and `sampled=true`. Bump `?v=` on the single module tag in `tour/index.html` (task 1 left it at `?v=109`, so `?v=110`). Re-run **`__facesLvl()`** from task 1 and confirm the winding fix survived — every wall `near` and **none `far`**: serenity 9/9, kings-court 42/42, horkyone-10 15/15, with `far == 0` on all three. Do **not** assert "every wall near" on `__faces()`: it cannot reach an upper-storey wall, so kings-court legitimately reads 15/19 and 16/23 there with the fix in place. The `far == 0` half of the assertion does hold under both probes and is the one that actually detects a winding regression. Commit the sweep, the metrics and the screenshots.
 
 - [ ] **Step 9: On NO-GO — revert in full and commit the null result**
 
@@ -461,7 +463,9 @@ Follow the file's own convention — a narrated `>` blockquote marker in place, 
 git diff --stat HEAD~1 -- tour/
 ```
 
-Docs and comments only. If `tour/` shows anything but comment text, the `?v=` rule applies and this step is wrong. Comment-only edits to `tour/bake.js` still count as a code edit for cache purposes — bump `?v=` if `tour/bake.js` was touched at all.
+**Expected: `tour/bake.js` changes, and every changed line is comment text.** If any executable line moved, this task has exceeded its scope — stop and report.
+
+**Bump `?v=` anyway.** A comment-only edit to a shipped file is still a code edit for cache purposes, and the precedent is explicit: plan 3 bumped `?v=100` → `?v=101` for a `post.js` header pointer that changed no behaviour. `CLAUDE.md`, `docs/` and `docs/superpowers/` are not shipped and never trigger a bump; `tour/bake.js` is.
 
 - [ ] **Step 6: Commit**
 
@@ -471,6 +475,74 @@ git commit -m "Task 5: make the durable record match what 4a actually shipped"
 ```
 
 ---
+
+## Task 5's debt list, written down 2026-08-15
+
+Recorded here rather than only in the SDD ledger, because that ledger is
+git-ignored and dies with the workspace — a lesson this project learned the
+hard way in plan 3, where a partner ruling survived only by accident. Tasks
+1–4 accumulated the following; **task 5 owns all of it.**
+
+**Wrong until fixed, not merely stale:**
+
+1. `CLAUDE.md`'s `exposure` row names serenity 0.329, kings-court 0.575,
+   horkyone-10 0.46 and computes `1.05 / 0.329 ≈ 3.2`. All four figures are
+   superseded — the shipped values are **0.295 / 0.52 / 0.42** and the ratio
+   is `1.05 / 0.295 ≈ 3.6`. Task 3 deliberately did not edit `CLAUDE.md`,
+   judging it outside a task brief's authority; that call was accepted **on
+   condition task 5 closes it.**
+2. `docs/superpowers/metrics/README.md`'s horkyone-10 section is stale the
+   same way.
+3. `docs/PHASE-B-RESUME.md`'s "How the 0.03 was resolved" ends with option 4
+   ("fix the winding first and re-measure") **not taken**. It was
+   subsequently executed as this plan's task 1 and it **closed the gate
+   outright** — serenity reached 16.32 against the old 16.58 ceiling, and
+   16.00 after task 3. A reader who sees only "we accepted a 0.03 miss" is
+   reading a true sentence that has stopped describing reality. Record that
+   the shortfall was closed, by what, to what number, and that the merge
+   owner re-confirmed the restatement on the new numbers.
+
+**Comment blocks that now describe history as if it were present:**
+
+4. `tour/bake.js:502-547` describes defect 1 (winding) in the present tense
+   as a live bug. Rewrite it as history — **keeping** the record that the fix
+   is a sign test and explicitly *not* an else-branch reversal, since that
+   wrong fix has now been proposed twice in this project's life. Defect 2's
+   paragraph stays, updated with what task 2 measured.
+5. `CLAUDE.md`'s `bake.js` row and rule 5 need the winding fix noted; the row
+   about walls taking no AO is still correct, because task 2 returned NO-GO.
+
+**New deferred items found in passing, for the resume doc's table:**
+
+6. `tools/serve.py:90` calls `base64.b64decode(body)` unguarded in
+   `do_POST`, so any malformed save body raises, `socketserver` prints the
+   traceback and kills that handler thread. Sibling to the `%00`-in-a-path
+   item already listed. It matters more than it looks: **every** measurement
+   recipe here depends on that endpoint, and the failure mode next door is a
+   sandboxed `serve.py` returning HTTP 200 while writing nothing — two
+   different ways for a capture to be silently absent.
+7. The shipped horkyone-10 exposure `0.46` **was already failing its own
+   criterion** before this plan (+11.07 from serenity against a ±10 band).
+   Found by task 3 in passing; its refit was mandatory, not cosmetic. Worth
+   a line somewhere durable, because it means that criterion was unenforced
+   for some time.
+
+**The finding that must not be over-generalised:**
+
+8. Task 2's NO-GO says **vertex-shaded** walls buy about +0.23 of the +1.11
+   required — it does **not** say walls are not worth lighting. The wall
+   lightmap atlas is now unblocked by task 1 and remains the open path, with
+   a known cost (a from-scratch atlas rasteriser, since `UVUnwrapper` is a
+   thin wrapper over the `xatlas-web` WASM module). Whoever writes 4c or plan
+   5 must meet that distinction, not this task's headline number.
+
+**And the honest bound on everything this branch measured:**
+
+9. The verification chain is machine-checked **from `sweep.json` outward**
+   and is **hand-transcribed from the browser to `sweep.json`**. No harness
+   here verifies that first hop, and none could without re-running the
+   capture. Two committed checkers guard the metrics README; neither guards
+   that.
 
 ## Self-review notes
 

@@ -58,13 +58,13 @@ accepted description style.
 | `main.js` | Loader: reads `?apt=<id>`, fetches the config with the same `?v=` as its own tag, degrees→radians, calls `initApp()` |
 | `materials.js` | Material palette `M.*` and procedural canvas textures, split out of `builder.js`; `Materials.color(key, fallback)` resolves an `APT.palette` hex or falls back, shared with `bake.js`'s wall tint |
 | `builder.js` | Config → scene: walls with openings, attic slopes, floors/ceilings, stairs, terrace, furniture constructors `F.*` (chamfered edges via `chamferBoxGeometry`), occluders and light sources for the bake, `mergeStatic` |
-| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic). Occlusion on those surfaces is **one** estimator, the hemisphere visibility that scales the indoor ambient (`ambientVis` → `sampler.js`, 16 cosine-weighted rays to `AMB_DIST` 0.65 m over the real triangles); `aoAt` is deliberately NOT applied there any more — it measured the same thing at 0.6 m over AABBs and multiplying both squared the occlusion. `aoAt` (no lower clamp — a fully enclosed sample really is 0) still runs on furniture vertices via `bakeFurnitureAO`, its only remaining caller and the only consumer of `quality.aoRays`. Lightmaps are edge-dilated **per boundary texel, only where that texel's footprint overlaps a wall** — a blanket border would plant a plateau down the interior seam between two floor plates (hard rule 2f). `window.__ambSampled` reports whether the sampler was live; false means the render is the flat pre-B3 ambient and any measurement of it is void. Walls → one merged mesh per level with per-vertex baked light only, **no occlusion of any kind**: `bakeWalls()` calls `lightAt()` with `sampled=false`, so a floor-to-wall corner still darkens on the floor side only. Two defects block closing it, both written up above `bakeWalls`: `grid()` reverses the winding on **8 of its 12 faces** — all six of an along-z piece, plus top and bottom of an along-x one — so the renderer shows the far face (measured on the tip: along-z shows far 8/8 serenity, 17/18 kings-court; along-x verticals are correct 6/6 and 14/16). Fix the sign test, not the `else` branch, or top and bottom stay broken everywhere. And 0.45 m corner-sampled Gouraud cannot carry contact shading |
+| `bake.js` | CPU lightmapper: floors/ceilings/slopes → CanvasTexture lightmaps (uv2, MeshBasic). Occlusion on those surfaces is **one** estimator, the hemisphere visibility that scales the indoor ambient (`ambientVis` → `sampler.js`, 16 cosine-weighted rays to `AMB_DIST` 0.65 m over the real triangles); `aoAt` is deliberately NOT applied there any more — it measured the same thing at 0.6 m over AABBs and multiplying both squared the occlusion. `aoAt` (no lower clamp — a fully enclosed sample really is 0) still runs on furniture vertices via `bakeFurnitureAO`, its only remaining caller and the only consumer of `quality.aoRays`. Lightmaps are edge-dilated **per boundary texel, only where that texel's footprint overlaps a wall** — a blanket border would plant a plateau down the interior seam between two floor plates (hard rule 2f). `window.__ambSampled` reports whether the sampler was live; false means the render is the flat pre-B3 ambient and any measurement of it is void. Walls → one merged mesh per level with per-vertex baked light only, **no occlusion of any kind**: `bakeWalls()` calls `lightAt()` with `sampled=false`, so a floor-to-wall corner still darkens on the floor side only. Two defects blocked closing it, both written up above `bakeWalls`. **The first is FIXED** (plan 4a task 1, `b767b4b`): `grid()` used to reverse the winding on **8 of its 12 faces** — all six of an along-z piece, plus top and bottom of an along-x one — so the renderer showed the far face, 14 cm from where the visitor thought the surface was. It is now wound to match the normal it is passed, by a **sign test** (`flip` when `(uVec × vVec) · n < 0`) and explicitly **not** by reversing the `else` branch, which would leave top and bottom broken everywhere; that wrong fix has been proposed twice and the comment block above `bakeWalls` exists to stop a third. Pre-fix probe of record: along-x showed near 4/4 serenity, 19/19 kings-court, 6/6 horkyone-10 and along-z showed far 5/5, 23/23, 9/9 (the older 8/8, 17/18, 6/6, 14/16 figures counted a different population and are superseded). **The second is still live**: reveals, tops and bottoms are single 1×1 quads whatever `SEG` says, so corner-sampled Gouraud cannot carry contact shading and refining `SEG` cannot help. Plan 4a task 2 tried the sampled ambient on walls anyway and returned **NO-GO** (serenity linear contrast 3.9347 against a required ≥4.32, reverted in full) — with the smearing artefact suppressed as far as that sweep could, vertex shading buys about **+0.23 of the +1.11** required. Read that at its scope: it bounds *vertex-shaded* walls, not walls. The per-texel wall lightmap atlas is the open path, task 1 **unblocked** it, and its remaining cost is a from-scratch atlas rasteriser |
 | `post.js` | Post-processing chain: restrained bloom + film grain/vignette (`Post.create`), degrades to a plain render when the example files are missing or the GPU is weak; no SSAO — occlusion lives in the bake: hemisphere visibility on floors/ceilings/slopes, `aoAt` on furniture, nothing on walls (see `bake.js` above). `GTAOPass` was vendored, wired in and measured on all three apartments, then rejected — see hard rule 4 and the file's own header |
 | `lib/three-0.185.0/` | Vendored Three.js r185: `build/three.module.js` + `build/three.core.js` (the facade imports the core, which is where `REVISION` lives), and the `examples/jsm/` addons the post chain needs — `postprocessing/{EffectComposer,RenderPass,ShaderPass,MaskPass,Pass,UnrealBloomPass,OutputPass}`, `shaders/{CopyShader,LuminosityHighPassShader,OutputShader}` — none of which ship in the core build. **The version is in the directory name, not a `?v=` query**: addons import each other by relative path and a relative specifier does not inherit the importing module's query string, so `?v=` would version only the files named in the importmap and leave every transitively-imported file cacheable forever. Never edit anything under here |
 | `measure.js` | Resemblance capture, loaded only under `?measure=1`: renders every `compare`-flagged photo spot from its own camera/aspect and POSTs the frame to `tools/serve.py`'s save endpoint for offline `tools/delta_e.py` scoring |
 | `validate.js` | Layout self-check: blocked openings, openings into the void, unreachable rooms, markers inside solids |
 | `controls.js` | Walking: WASD + drag-look (NOT pointer lock), touch joystick + swipe, collisions against wall segments and furniture AABBs, floor levels via `groundZones`, camera clamped under attic slopes |
-| `doll.js` | Dollhouse: orbit camera, ground/upper/whole cutaway, m² badges, measuring tape, click-teleport |
+| `doll.js` | Dollhouse: orbit camera, ground/upper/whole cutaway, m² badges, measuring tape, click-teleport. **The tape and the teleport are the only UI that reads geometry off the merged wall mesh** — `floorPoint`/`teleport` raycast and test `h.face.normal`, which is the *winding* normal under FrontSide culling, so anything that changes triangle order in `bake.js` changes what they return. Plan 4a's winding fix silently made both land on wall **tops** until they were taught to skip `userData.doll` meshes; re-drive them after any winding or wall-geometry change |
 | `app.js` | Init, render loop, minimap, Rooms menu, photo gallery, first-visit hint, environment capture (`captureEnvironment`) that reflects the apartment's own space instead of a stock studio |
 
 ## Numbers that matter
@@ -79,7 +79,7 @@ accepted description style.
 | Walk / run speed | 1.9 / 3.4 m·s⁻¹ | `controls.js` |
 | Reachability grid / max step | 0.25 m / 0.35 m | `validate.js` |
 | HDR headroom `EXP` | 1.7 (= `lightMapIntensity`) | `bake.js` |
-| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures 69) | measured, revised in phase A — see rule 4 |
+| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures 72; was 69 in phase A) | measured, revised in phase A — see rule 4 |
 | Bake time | no fixed ceiling; latest medians (3 runs, one machine, phase B3 task 2): serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms — **ratios, not seconds** | see rule 4a |
 | Dynamic PointLights | ≤8, flagged `dyn` in the config | `builder.js` |
 
@@ -93,7 +93,7 @@ now carries:
 
 | Key | One-liner |
 |---|---|
-| `exposure` | `renderer.toneMappingExposure` override, fitted per-apartment against its own photographs where it has any (`app.js`); an apartment with none is still fitted, not left at the default — horkyone-10 has zero `compare` spots and ships 0.46, fitted on mean-scene-luminance proximity to the other two (within ±10) instead of resemblance (`docs/superpowers/metrics/README.md`, "horkyone-10: fitted, and it passes the ±10 luminance check"). The bare default 1.05 is only what an apartment with an absent or invalid key falls back to. Must be a finite number `> 0` — `app.js` warns and falls back to 1.05 for anything else (`null`, `0`, a string). **Compensates for the scene running about three times as hot at source** (1.05 / 0.329 ≈ 3.2): serenity's fitted value is 0.329, kings-court's 0.575. Anyone correcting `lightAt`'s constants in `bake.js` must re-fit or clear this per-apartment override, or the render goes about three times too dark — and that is not hypothetical: phase B3 task 2 changed `lightAt`'s indoor ambient, and its own before/after (`tools/luminance.py`, the poseVerified compare spots, `?fov=legacy` — `*-b3-task2-luminance.json`) measures the cost as **−0.0058 of linear mean luminance at serenity (0.2854→0.2796) and −0.0063 at kings-court (0.3423→0.3360)**. Task 4 then re-fitted all three exposures upward to put the mean back: 0.326→0.329, 0.56→0.575, 0.45→0.46. |
+| `exposure` | `renderer.toneMappingExposure` override, fitted per-apartment against its own photographs where it has any (`app.js`); an apartment with none is still fitted, not left at the default — horkyone-10 has zero `compare` spots and ships 0.42 (was 0.46), fitted on mean-scene-luminance proximity to the other two (within ±10) instead of resemblance (`docs/superpowers/metrics/README.md`, "horkyone-10: fitted, and it passes the ±10 luminance check"). The bare default 1.05 is only what an apartment with an absent or invalid key falls back to. Must be a finite number `> 0` — `app.js` warns and falls back to 1.05 for anything else (`null`, `0`, a string). **Compensates for the scene running about three and a half times as hot at source** (1.05 / 0.295 ≈ 3.6): serenity's fitted value is 0.295, kings-court's 0.52. Anyone correcting `lightAt`'s constants in `bake.js` must re-fit or clear this per-apartment override, or the render goes several times too dark — and that is not hypothetical: phase B3 task 2 changed `lightAt`'s indoor ambient, and its own before/after (`tools/luminance.py`, the poseVerified compare spots, `?fov=legacy` — `*-b3-task2-luminance.json`) measures the cost as **−0.0058 of linear mean luminance at serenity (0.2854→0.2796) and −0.0063 at kings-court (0.3423→0.3360)**. Plan 3 task 4 then re-fitted all three exposures upward to put the mean back: 0.326→0.329, 0.56→0.575, 0.45→0.46. **Those three values, and the `1.05 / 0.329 ≈ 3.2` this row used to compute from them, are superseded and are kept here only as the lineage.** Plan 4a task 1 fixed the `grid()` winding defect, which brightened every apartment and expired that fit exactly as the deferred-item write-up predicted; plan 4a task 3 re-fitted against the post-winding render on the mandated **all-spot** population: 0.329→**0.295**, 0.575→**0.52**, 0.46→**0.42** (fitted and measured at `?v=110`; the tree is at **`?v=112`** after two comment-only bumps that moved no value — branch `phaseB-plan4a-winding`, and `main` still carries the older three until it merges). Same rule as before — fit toward luminance, never toward ΔE. |
 | `palette` | Map of material key → `#rrggbb`; every key optional, an invalid or absent value falls back to the hardcoded constant (`Materials.color`). **Not** produced by directly sampling the photographs — that was measured and rejected (ΔE2000 16.79 vs. 16.57 doing nothing, task 8) because it double-counts illumination as albedo. The committed values were derived by a closed-loop correction (render's own colour vs. the photograph, old albedo scaled by the ratio) done by hand for task 8; `tools/sample_palette.py` outputs raw sampled photo colour only — see its header — and is a diagnostic input to that by-hand process, not something whose output can be pasted into `palette` directly. |
 | `quality.aoRays` | Ray count for the baked ambient-occlusion sampler (`bake.js aoAt`); defaults to 8 when the block or key is absent. Since phase B3 it reaches **furniture vertices only** — lightmapped surfaces get `ambientVis` instead, whose ray count is `AMB_RAYS` in `bake.js` and is deliberately not configurable |
 | `env.capture` | `{x, y, z}` override for where the environment-reflection panorama is shot from; falls back to `roomCenter.main`, then `start`, then the world origin (`app.js`) |
@@ -186,10 +186,15 @@ measured against plain box furniture with no post-processing, and the
 chamfered edges (more triangles, still one draw call per merged mesh)
 plus the bloom/grain/vignette chain (a handful of extra full-screen
 passes on top of the scene) both add real cost that has nothing to do
-with regressed batching. Serenity's entrance measures **69** draw calls
+with regressed batching. Serenity's entrance measures **72** draw calls
 with the full chain running — comfortably inside budget; see the fixed
 "Draw calls in a spot" recipe below, the naive version undercounts by
-roughly 14. New furniture goes through `F.*` constructors so it merges
+roughly 14. **(This said 69 from phase A until 2026-08-16, when plan 4a's
+whole-branch review re-ran the recipe verbatim and got 72, three runs in a
+row. The cause is uninvestigated. It is not plan 4a's: the merge-base
+`b39a99a` measures 72 as well, on the same machine in the same browser
+session, so the difference is between the phase-A machine and this one, not
+between the two trees. A triangle-order fix cannot change draw-call count.)** New furniture goes through `F.*` constructors so it merges
 automatically and gets a shadow occluder. No new dynamic PointLights —
 light lives in the bake. Markers are `THREE.Points`, one object per
 level; sprites do not batch and 14 photo spots used to cost 14 calls.
@@ -288,7 +293,21 @@ environment highlight instead of showing a razor-sharp silhouette — walls
 and floors deliberately stay unchamfered, both because they carry their
 own baked lightmap where a bevel buys nothing and because chamfering
 every wall edge would multiply the vertex count of the one thing in the
-scene that is already merged into a handful of huge meshes.
+scene that is already merged into a handful of huge meshes. **Wall faces
+are wound to match the normal they are given** — `grid()` in `bake.js`
+reverses a quad when `(uVec × vVec) · n < 0`, so the merged wall mesh
+presents the face a visitor is standing in front of rather than the one
+14 cm behind it (fixed in plan 4a task 1; before that, 8 of 12 faces were
+inside-out). The material is `MeshBasicMaterial` with backface culling
+live and no `side` override, so any new wall geometry must go through
+`grid()` or reproduce that test — a hand-rolled quad with the wrong
+winding renders as a hole from the side a visitor sees, and moving those
+faces moves apparent room dimensions: every measurable **x** span in all
+three apartments shrank by exactly **0.280** (2 × the 0.14 wall thickness)
+and every **z** span by exactly 0.000, because the reversed faces belonged
+to walls running along z, which bound a room in x. Each room now measures
+its configured centreline distance minus 0.14 exactly — the correct
+dimension, not merely a closer one.
 
 **6. Photos.** `tour/photos/<id>/*.webp`, ≤1200 px. Source photos in the
 repo root are gitignored (`*.jpeg`); only the compressed webp ship.
@@ -368,7 +387,7 @@ a.renderer.info.autoReset = false;
 a.renderer.info.reset();
 if (a.post && a.post.enabled) a.post.render(0);
 else a.renderer.render(a.scene, a.camera);
-console.log(a.renderer.info.render.calls);   // Serenity entrance: 69
+console.log(a.renderer.info.render.calls);   // Serenity entrance: 72 (69 in phase A)
 a.renderer.info.autoReset = true;
 ```
 

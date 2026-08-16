@@ -1,0 +1,1875 @@
+{
+  "apartment": "kings-court",
+  "metric": "exposure fit -- all-spot linear-light mean luminance vs the photographs",
+  "task": "phase B plan 4a task 3",
+  "fitTarget": "The photographs' own mean linear-light relative luminance (Rec.709, sRGB EOTF) over the ALL-SPOT compare population, i.e. minimise |render mean - photograph mean|. Stated in writing before the first capture (task-3-report.md step 1). dE2000 is recorded on every row and was NOT used to choose any value; where the two disagree the report says so and says what taking luminance cost.",
+  "population": "all-spot: every `compare`-flagged spot, scored == compareTotal, skippedPoseVerification 0. This REVERSES plan 3 task 4, which fitted on the poseVerified subset that tools/luminance.py hard-codes; the poseVerified figures are carried on every row as a diagnostic only. score.py exists because luminance.py cannot report the all-spot population at all.",
+  "scored": 14,
+  "compareTotal": 14,
+  "skippedPoseVerification": 0,
+  "harnessMode": "fixed-fov (\"new zero\"): ?apt=<id>&measure=1 with NO &fov=legacy -- the camera that matches each photograph's own field of view, so render and photograph frame the same subject and a luminance comparison between them is like-for-like. The gate reading is a separate capture in the legacy 72-degree camera; those files are named -legacy-allspots.",
+  "bloom": "DISABLED on every sweep row (bloom pass .enabled = false).",
+  "harness": "Playwright MCP -> Chromium on ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11) -- a real GPU, so post.js's capable() accepts the chain; post.enabled was asserted before every reading. Frames were rendered by measure.js's own renderAt (never a re-implementation): window.fetch was patched for the duration of each capture so measure.js's save POST is mirrored into tools/shots/<label>/ as well as the shots root.",
+  "exposureOverrideEquivalence": "Rows were swept by setting renderer.toneMappingExposure in-page. That is equivalent to editing the JSON by construction, not empirically: app.js:90 assigns APT.exposure to that exact property and nothing else reads the key; three.module.js:18345-18351 forces NoToneMapping whenever the render target is non-null (which is what RenderPass renders into); and OutputPass.js:93 is the only consumer of toneMappingExposure in the whole chain.",
+  "noise": "materials.js randomises its procedural canvas textures on every page load, so two loads of identical code are not bit-identical and bake repeats are not deterministic (bake.js's cosine sampling uses Math.random()). Measured here across independent loads: all-spot mean linear luminance +-0.0003 (serenity, at 0.295) / +-0.0003 (kings-court, at 0.52); all-spot dE2000 +-0.02; spawn-pooled sRGB mean +-0.32. Rows inside one batch share a page load and one set of textures.",
+  "windingDefect": "FIXED. Plan 4a task 1 corrected grid()'s triangle order, so walls now present their near face. That is the scene change this re-fit exists for: the earlier fits (plan 2 task 7, plan 3 task 4) were made against the defective render and have expired.",
+  "photographs": {
+    "allSpot": {
+      "n": 14,
+      "meanLum": 0.3252,
+      "p5Lum": 0.0168
+    },
+    "poseVerified": {
+      "n": 8,
+      "meanLum": 0.3479,
+      "p5Lum": 0.0246
+    }
+  },
+  "previousValue": 0.575,
+  "chosen": {
+    "exposure": 0.52,
+    "previousValue": 0.575,
+    "why": "The all-spot luminance crossing. Signed diff changes sign between 0.52 and 0.525 in refine 1 and between 0.52 and 0.521 in refine 2; 0.52 reads -0.0002 and -0.0003, the smallest |diff| of any value measured twice. 0.521 measured +0.0002 on its single load, which is inside the +-0.0003 repeat spread, so the two are not distinguishable and the rounder value was taken. dE2000 has a shallow minimum near 0.46-0.50 (18.32-18.34), so taking the luminance value costs about +0.06 dE2000 -- the same order as the precedent in plan 3 task 4, and disclosed the same way."
+  },
+  "batches": [
+    {
+      "batch": "coarse (one page load)",
+      "points": [
+        {
+          "exposure": 0.42,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.42",
+          "renderMeanLum": 0.2681,
+          "diffFromPhotographs": -0.0571,
+          "absDiffFromPhotographs": 0.0571,
+          "renderP5Lum": 0.0776,
+          "dE2000": 18.42,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2722,
+            "diffFromPhotographs": -0.0757,
+            "dE2000": 17.8
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2604,
+              "deltaE": 18.64
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.2661,
+              "deltaE": 13.68
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.2757,
+              "deltaE": 13.62
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.2821,
+              "deltaE": 23.77
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3001,
+              "deltaE": 10.82
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2112,
+              "deltaE": 19.73
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3279,
+              "deltaE": 17.73
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.2729,
+              "deltaE": 23.06
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.2425,
+              "deltaE": 12.69
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.1605,
+              "deltaE": 28.76
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3422,
+              "deltaE": 15.01
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2497,
+              "deltaE": 17.55
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.2942,
+              "deltaE": 23.05
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2682,
+              "deltaE": 19.75
+            }
+          ]
+        },
+        {
+          "exposure": 0.46,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.46",
+          "renderMeanLum": 0.2919,
+          "diffFromPhotographs": -0.0333,
+          "absDiffFromPhotographs": 0.0333,
+          "renderP5Lum": 0.0877,
+          "dE2000": 18.32,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.2955,
+            "diffFromPhotographs": -0.0524,
+            "dE2000": 17.54
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.2829,
+              "deltaE": 18.3
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.2895,
+              "deltaE": 12.68
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3007,
+              "deltaE": 13.81
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3093,
+              "deltaE": 24.48
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3256,
+              "deltaE": 10.77
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2303,
+              "deltaE": 18.5
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.354,
+              "deltaE": 17.9
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.2946,
+              "deltaE": 23.55
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.2679,
+              "deltaE": 12.17
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.1785,
+              "deltaE": 27.02
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3673,
+              "deltaE": 15.49
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.2755,
+              "deltaE": 17.32
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3183,
+              "deltaE": 24.12
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.2915,
+              "deltaE": 20.37
+            }
+          ]
+        },
+        {
+          "exposure": 0.5,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.5",
+          "renderMeanLum": 0.3143,
+          "diffFromPhotographs": -0.0109,
+          "absDiffFromPhotographs": 0.0109,
+          "renderP5Lum": 0.0983,
+          "dE2000": 18.34,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3175,
+            "diffFromPhotographs": -0.0304,
+            "dE2000": 17.41
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.304,
+              "deltaE": 18.08
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3117,
+              "deltaE": 11.93
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3243,
+              "deltaE": 14.09
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.335,
+              "deltaE": 25.21
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3494,
+              "deltaE": 10.95
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2485,
+              "deltaE": 17.44
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3785,
+              "deltaE": 18.16
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3146,
+              "deltaE": 24.02
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.2923,
+              "deltaE": 11.88
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.1963,
+              "deltaE": 25.49
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3906,
+              "deltaE": 16.07
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3001,
+              "deltaE": 17.27
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3408,
+              "deltaE": 25.17
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3136,
+              "deltaE": 21.07
+            }
+          ]
+        },
+        {
+          "exposure": 0.53,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.53",
+          "renderMeanLum": 0.3303,
+          "diffFromPhotographs": 0.0051,
+          "absDiffFromPhotographs": 0.0051,
+          "renderP5Lum": 0.1059,
+          "dE2000": 18.42,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3331,
+            "diffFromPhotographs": -0.0148,
+            "dE2000": 17.39
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3192,
+              "deltaE": 17.99
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3275,
+              "deltaE": 11.5
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3411,
+              "deltaE": 14.33
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3532,
+              "deltaE": 25.75
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3663,
+              "deltaE": 11.17
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2615,
+              "deltaE": 16.76
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3957,
+              "deltaE": 18.38
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3286,
+              "deltaE": 24.36
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3099,
+              "deltaE": 11.78
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2094,
+              "deltaE": 24.51
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4069,
+              "deltaE": 16.53
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3179,
+              "deltaE": 17.3
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3567,
+              "deltaE": 25.93
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3297,
+              "deltaE": 21.54
+            }
+          ]
+        },
+        {
+          "exposure": 0.56,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.56",
+          "renderMeanLum": 0.3455,
+          "diffFromPhotographs": 0.0203,
+          "absDiffFromPhotographs": 0.0203,
+          "renderP5Lum": 0.1138,
+          "dE2000": 18.52,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3481,
+            "diffFromPhotographs": 0.0002,
+            "dE2000": 17.41
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3336,
+              "deltaE": 17.93
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3426,
+              "deltaE": 11.17
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3571,
+              "deltaE": 14.6
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3704,
+              "deltaE": 26.26
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3824,
+              "deltaE": 11.45
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2741,
+              "deltaE": 16.16
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.4119,
+              "deltaE": 18.63
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.342,
+              "deltaE": 24.69
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3269,
+              "deltaE": 11.76
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2221,
+              "deltaE": 23.57
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4225,
+              "deltaE": 17.0
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3349,
+              "deltaE": 17.37
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3719,
+              "deltaE": 26.68
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3445,
+              "deltaE": 21.95
+            }
+          ]
+        },
+        {
+          "exposure": 0.575,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.575",
+          "renderMeanLum": 0.3528,
+          "diffFromPhotographs": 0.0276,
+          "absDiffFromPhotographs": 0.0276,
+          "renderP5Lum": 0.1178,
+          "dE2000": 18.58,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3553,
+            "diffFromPhotographs": 0.0074,
+            "dE2000": 17.43
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3406,
+              "deltaE": 17.91
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3499,
+              "deltaE": 11.04
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3649,
+              "deltaE": 14.74
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3787,
+              "deltaE": 26.51
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3902,
+              "deltaE": 11.62
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2802,
+              "deltaE": 15.88
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.4197,
+              "deltaE": 18.76
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3484,
+              "deltaE": 24.86
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3351,
+              "deltaE": 11.77
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2283,
+              "deltaE": 23.12
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4299,
+              "deltaE": 17.23
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3431,
+              "deltaE": 17.41
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3792,
+              "deltaE": 27.04
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3517,
+              "deltaE": 22.19
+            }
+          ]
+        },
+        {
+          "exposure": 0.62,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.62",
+          "renderMeanLum": 0.3741,
+          "diffFromPhotographs": 0.0489,
+          "absDiffFromPhotographs": 0.0489,
+          "renderP5Lum": 0.1289,
+          "dE2000": 18.81,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3761,
+            "diffFromPhotographs": 0.0282,
+            "dE2000": 17.55
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3608,
+              "deltaE": 17.94
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.371,
+              "deltaE": 10.77
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3871,
+              "deltaE": 15.17
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.4025,
+              "deltaE": 27.28
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.4127,
+              "deltaE": 12.13
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2979,
+              "deltaE": 15.14
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.442,
+              "deltaE": 19.18
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.367,
+              "deltaE": 25.36
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.359,
+              "deltaE": 11.92
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.247,
+              "deltaE": 21.95
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.451,
+              "deltaE": 17.93
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3665,
+              "deltaE": 17.57
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.4004,
+              "deltaE": 28.09
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3724,
+              "deltaE": 22.94
+            }
+          ]
+        },
+        {
+          "exposure": 0.7,
+          "set": "t3-kings-court-fixedfov-bloomOff-e0.7",
+          "renderMeanLum": 0.4087,
+          "diffFromPhotographs": 0.0835,
+          "absDiffFromPhotographs": 0.0835,
+          "renderP5Lum": 0.1494,
+          "dE2000": 19.32,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.4101,
+            "diffFromPhotographs": 0.0622,
+            "dE2000": 17.87
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.394,
+              "deltaE": 18.18
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4055,
+              "deltaE": 10.6
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.4231,
+              "deltaE": 15.94
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.4423,
+              "deltaE": 28.63
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.4492,
+              "deltaE": 13.11
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.3269,
+              "deltaE": 14.12
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.4778,
+              "deltaE": 20.05
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3973,
+              "deltaE": 26.19
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3979,
+              "deltaE": 12.41
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2786,
+              "deltaE": 20.23
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4847,
+              "deltaE": 19.11
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.4045,
+              "deltaE": 17.93
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.4347,
+              "deltaE": 29.77
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.4053,
+              "deltaE": 24.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "refine 1 (same page load as coarse)",
+      "points": [
+        {
+          "exposure": 0.51,
+          "set": "t3r1-kings-court-fixedfov-bloomOff-e0.51",
+          "renderMeanLum": 0.3197,
+          "diffFromPhotographs": -0.0055,
+          "absDiffFromPhotographs": 0.0055,
+          "renderP5Lum": 0.1009,
+          "dE2000": 18.36,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3228,
+            "diffFromPhotographs": -0.0251,
+            "dE2000": 17.4
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3091,
+              "deltaE": 18.05
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.317,
+              "deltaE": 11.79
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.33,
+              "deltaE": 14.17
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3412,
+              "deltaE": 25.39
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3552,
+              "deltaE": 11.01
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2529,
+              "deltaE": 17.21
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3843,
+              "deltaE": 18.23
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3193,
+              "deltaE": 24.13
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.2982,
+              "deltaE": 11.84
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2007,
+              "deltaE": 25.16
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3961,
+              "deltaE": 16.22
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3061,
+              "deltaE": 17.28
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3462,
+              "deltaE": 25.42
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3189,
+              "deltaE": 21.2
+            }
+          ]
+        },
+        {
+          "exposure": 0.515,
+          "set": "t3r1-kings-court-fixedfov-bloomOff-e0.515",
+          "renderMeanLum": 0.3223,
+          "diffFromPhotographs": -0.0029,
+          "absDiffFromPhotographs": 0.0029,
+          "renderP5Lum": 0.1022,
+          "dE2000": 18.38,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3254,
+            "diffFromPhotographs": -0.0225,
+            "dE2000": 17.39
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3117,
+              "deltaE": 18.03
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3197,
+              "deltaE": 11.71
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3328,
+              "deltaE": 14.2
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3442,
+              "deltaE": 25.49
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3579,
+              "deltaE": 11.05
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2551,
+              "deltaE": 17.1
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3872,
+              "deltaE": 18.27
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3217,
+              "deltaE": 24.19
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3012,
+              "deltaE": 11.82
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2029,
+              "deltaE": 24.99
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3989,
+              "deltaE": 16.3
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3091,
+              "deltaE": 17.28
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3488,
+              "deltaE": 25.54
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3215,
+              "deltaE": 21.28
+            }
+          ]
+        },
+        {
+          "exposure": 0.52,
+          "set": "t3r1-kings-court-fixedfov-bloomOff-e0.52",
+          "renderMeanLum": 0.325,
+          "diffFromPhotographs": -0.0002,
+          "absDiffFromPhotographs": 0.0002,
+          "renderP5Lum": 0.1033,
+          "dE2000": 18.39,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.328,
+            "diffFromPhotographs": -0.0199,
+            "dE2000": 17.39
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3142,
+              "deltaE": 18.02
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3223,
+              "deltaE": 11.64
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3356,
+              "deltaE": 14.24
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3473,
+              "deltaE": 25.57
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3608,
+              "deltaE": 11.09
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2573,
+              "deltaE": 16.98
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.39,
+              "deltaE": 18.31
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.324,
+              "deltaE": 24.24
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3041,
+              "deltaE": 11.81
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.205,
+              "deltaE": 24.82
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4016,
+              "deltaE": 16.37
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.312,
+              "deltaE": 17.29
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3514,
+              "deltaE": 25.67
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3246,
+              "deltaE": 21.42
+            }
+          ]
+        },
+        {
+          "exposure": 0.525,
+          "set": "t3r1-kings-court-fixedfov-bloomOff-e0.525",
+          "renderMeanLum": 0.3276,
+          "diffFromPhotographs": 0.0024,
+          "absDiffFromPhotographs": 0.0024,
+          "renderP5Lum": 0.105,
+          "dE2000": 18.4,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3306,
+            "diffFromPhotographs": -0.0173,
+            "dE2000": 17.39
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3167,
+              "deltaE": 18.0
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3249,
+              "deltaE": 11.57
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3383,
+              "deltaE": 14.29
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3503,
+              "deltaE": 25.66
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3635,
+              "deltaE": 11.12
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2594,
+              "deltaE": 16.87
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3929,
+              "deltaE": 18.35
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3263,
+              "deltaE": 24.3
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.307,
+              "deltaE": 11.8
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2072,
+              "deltaE": 24.66
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4043,
+              "deltaE": 16.45
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.315,
+              "deltaE": 17.29
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3541,
+              "deltaE": 25.8
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3271,
+              "deltaE": 21.45
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "refine 2 (independent page load)",
+      "points": [
+        {
+          "exposure": 0.515,
+          "set": "t3r2-kings-court-fixedfov-bloomOff-e0.515",
+          "renderMeanLum": 0.3222,
+          "diffFromPhotographs": -0.003,
+          "absDiffFromPhotographs": 0.003,
+          "renderP5Lum": 0.1036,
+          "dE2000": 18.39,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.326,
+            "diffFromPhotographs": -0.0219,
+            "dE2000": 17.37
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3115,
+              "deltaE": 18.02
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3232,
+              "deltaE": 11.38
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3318,
+              "deltaE": 14.17
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.343,
+              "deltaE": 25.48
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3568,
+              "deltaE": 11.07
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2568,
+              "deltaE": 17.12
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3867,
+              "deltaE": 18.28
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3223,
+              "deltaE": 23.9
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3005,
+              "deltaE": 11.93
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2027,
+              "deltaE": 25.03
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4007,
+              "deltaE": 16.35
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3037,
+              "deltaE": 17.94
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3492,
+              "deltaE": 25.55
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3219,
+              "deltaE": 21.3
+            }
+          ]
+        },
+        {
+          "exposure": 0.52,
+          "set": "t3r2-kings-court-fixedfov-bloomOff-e0.52",
+          "renderMeanLum": 0.3249,
+          "diffFromPhotographs": -0.0003,
+          "absDiffFromPhotographs": 0.0003,
+          "renderP5Lum": 0.1052,
+          "dE2000": 18.41,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3286,
+            "diffFromPhotographs": -0.0193,
+            "dE2000": 17.37
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.314,
+              "deltaE": 18.0
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3258,
+              "deltaE": 11.31
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3346,
+              "deltaE": 14.21
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.346,
+              "deltaE": 25.57
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3596,
+              "deltaE": 11.11
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.259,
+              "deltaE": 17.01
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3895,
+              "deltaE": 18.32
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3246,
+              "deltaE": 23.95
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3034,
+              "deltaE": 11.92
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2048,
+              "deltaE": 24.86
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4034,
+              "deltaE": 16.43
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3066,
+              "deltaE": 17.94
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3518,
+              "deltaE": 25.67
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3249,
+              "deltaE": 21.43
+            }
+          ]
+        },
+        {
+          "exposure": 0.521,
+          "set": "t3r2-kings-court-fixedfov-bloomOff-e0.521",
+          "renderMeanLum": 0.3254,
+          "diffFromPhotographs": 0.0002,
+          "absDiffFromPhotographs": 0.0002,
+          "renderP5Lum": 0.1054,
+          "dE2000": 18.41,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3291,
+            "diffFromPhotographs": -0.0188,
+            "dE2000": 17.36
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3145,
+              "deltaE": 18.0
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3264,
+              "deltaE": 11.29
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3352,
+              "deltaE": 14.22
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.3466,
+              "deltaE": 25.58
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3601,
+              "deltaE": 11.12
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2594,
+              "deltaE": 16.99
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3901,
+              "deltaE": 18.32
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.3251,
+              "deltaE": 23.96
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.304,
+              "deltaE": 11.91
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.2053,
+              "deltaE": 24.81
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.404,
+              "deltaE": 16.45
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3072,
+              "deltaE": 17.94
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3523,
+              "deltaE": 25.7
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3255,
+              "deltaE": 21.45
+            }
+          ]
+        },
+        {
+          "exposure": 0.525,
+          "set": "t3r2-kings-court-fixedfov-bloomOff-e0.525",
+          "renderMeanLum": 0.3275,
+          "diffFromPhotographs": 0.0023,
+          "absDiffFromPhotographs": 0.0023,
+          "renderP5Lum": 0.1065,
+          "dE2000": 18.42,
+          "diagnostic_poseVerified": {
+            "renderMeanLum": 0.3311,
+            "diffFromPhotographs": -0.0168,
+            "dE2000": 17.36
+          },
+          "perSpot": [
+            {
+              "file": "2.webp",
+              "name": "Living room",
+              "poseVerified": false,
+              "renderMeanLum": 0.3164,
+              "deltaE": 17.99
+            },
+            {
+              "file": "7.webp",
+              "name": "Dining room",
+              "poseVerified": true,
+              "renderMeanLum": 0.3285,
+              "deltaE": 11.24
+            },
+            {
+              "file": "20.webp",
+              "name": "Kitchen",
+              "poseVerified": true,
+              "renderMeanLum": 0.3374,
+              "deltaE": 14.25
+            },
+            {
+              "file": "4.webp",
+              "name": "Coffee corner",
+              "poseVerified": false,
+              "renderMeanLum": 0.349,
+              "deltaE": 25.66
+            },
+            {
+              "file": "8.webp",
+              "name": "Bedroom 1",
+              "poseVerified": true,
+              "renderMeanLum": 0.3623,
+              "deltaE": 11.15
+            },
+            {
+              "file": "11.webp",
+              "name": "Bedroom 1 · desk",
+              "poseVerified": true,
+              "renderMeanLum": 0.2611,
+              "deltaE": 16.9
+            },
+            {
+              "file": "12.webp",
+              "name": "Bedroom 2",
+              "poseVerified": true,
+              "renderMeanLum": 0.3924,
+              "deltaE": 18.36
+            },
+            {
+              "file": "14.webp",
+              "name": "Bathroom 2",
+              "poseVerified": false,
+              "renderMeanLum": 0.327,
+              "deltaE": 24.0
+            },
+            {
+              "file": "17.webp",
+              "name": "Guest WC",
+              "poseVerified": false,
+              "renderMeanLum": 0.3063,
+              "deltaE": 11.9
+            },
+            {
+              "file": "19.webp",
+              "name": "Laundry",
+              "poseVerified": true,
+              "renderMeanLum": 0.207,
+              "deltaE": 24.7
+            },
+            {
+              "file": "3.webp",
+              "name": "Upper living room",
+              "poseVerified": true,
+              "renderMeanLum": 0.4061,
+              "deltaE": 16.51
+            },
+            {
+              "file": "10.webp",
+              "name": "Upper bedroom",
+              "poseVerified": false,
+              "renderMeanLum": 0.3095,
+              "deltaE": 17.94
+            },
+            {
+              "file": "13.webp",
+              "name": "Upper bathroom",
+              "poseVerified": true,
+              "renderMeanLum": 0.3544,
+              "deltaE": 25.79
+            },
+            {
+              "file": "18.webp",
+              "name": "Terrace",
+              "poseVerified": false,
+              "renderMeanLum": 0.3275,
+              "deltaE": 21.46
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

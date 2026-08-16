@@ -1,0 +1,163 @@
+{
+  "task": "phase B plan 4a task 2 -- walls take the visibility-scaled ambient",
+  "verdict": "NO-GO",
+  "criterion": {
+    "statistic": "serenity linear-domain contrast (mean / p5 of linear-light Rec.709 luminance)",
+    "camera": "?measure=1&fov=legacy, 1024 px wide, full post chain",
+    "population": "poseVerified compare spots -- 2 of 11 (1.webp Bathroom, 11.webp Bedroom)",
+    "threshold": 4.32,
+    "bestMeasured": 3.9347,
+    "bestMeasuredAt": "SEG 0.45, sampled=true, repeat run",
+    "shortfall": 0.3853,
+    "thresholdDerivation": "3.384 + (6.196 - 3.384) / 3 = 4.3213 -> 4.32. Fixed before the work, applied exactly as written, NOT re-derived and NOT renegotiated.",
+    "baselineShift": {
+      "issue": "the absolute threshold was derived from a render baseline of 3.384 that does not reproduce on this machine",
+      "baselineHere": 3.2062,
+      "baselineInTheDerivation": 3.384,
+      "photographsHere": 6.1998,
+      "photographsInTheDerivation": 6.196,
+      "note": "the photographs side reproduces essentially exactly (they are static files); only the render side moved, by -0.18",
+      "baselineEquivalentBar": 4.2041,
+      "baselineEquivalentBarDerivation": "3.2062 + (6.1998 - 3.2062) / 3 = 4.2041 -- the same one-third-of-the-gap rule applied to this machine's own baseline",
+      "shortfallAgainstBaselineEquivalentBar": 0.2694,
+      "verdictUnderBoth": "NO-GO either way. 3.9347 misses the fixed 4.32 by 0.3853 and the baseline-equivalent 4.2041 by 0.2694. This is recorded because a fixed absolute bar applied across a hardware change whose baseline moved is a live methodological question; had the reading landed between 4.2041 and 4.32 the record would have needed an answer and would not have had one."
+    },
+    "artefactSuppressedEffect": {
+      "what": "how much of the required rise survives once the artefact is suppressed as far as this sweep can suppress it",
+      "atFinestSEG": 3.4380,
+      "unsampledBaseline": 3.2062,
+      "effect": 0.2318,
+      "requiredRise": 1.1138,
+      "fractionOfRequirement": 0.21,
+      "reading": "at SEG 0.15, with the true-zero fraction down 38% relative, the surviving effect is about +0.23 of the +1.11 the criterion asked for -- roughly a fifth.",
+      "scope": "This bounds VERTEX-SHADED walls, not walls. 3.4380 is NOT an upper bound on what a wall lightmap atlas could reach: an atlas samples per texel ON the surface and produces real gradients, where this shades from four geometric corners and, on the 1x1 quads, from corners that sit inside adjoining solids. A future reader deciding whether to build the atlas must not take this number as its ceiling."
+    }
+  },
+  "environment": {
+    "machine": "Windows 11, ANGLE (Intel, Intel(R) UHD Graphics 630 (0x00003E9B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "driver": "Playwright MCP Chromium, viewport 1280x820 desktop / 390x844 mobile-viewport, devicePixelRatio 1",
+    "postChain": "live and asserted on every reading (a.post.enabled === true)",
+    "note": "NOT the reference machine of the earlier phases. The before-baseline was re-measured here rather than inherited, so every before/after pair in this file is same-machine. Cross-phase comparisons against b3 numbers are NOT valid and are not made."
+  },
+  "noiseFloor": {
+    "source": "the bake's sampled ambient uses Math.random() cosine sampling, so two loads of the same code are not bit-identical",
+    "spawnPooledP5_sameStateSpread": {
+      "serenity_before": [90.1, 90.3],
+      "kings-court_before": [65.9, 65.0],
+      "horkyone-10_before": [108.8, 107.9]
+    },
+    "contrast_sameStateSpread": {
+      "serenity_seg045_sampled": [3.8647, 3.9347]
+    },
+    "summary": "spawn-pooled p5 repeats within about +-0.9; the contrast statistic within about +-0.07. The 0.3853 shortfall against 4.32 is roughly 5x the observed contrast spread."
+  },
+  "before": {
+    "state": "task 1 tip (656b5c4): SEG 0.45, lightAt sixth argument `sampled` = false for walls",
+    "cacheVersion": 109,
+    "serenity": {
+      "runs": [
+        {"run": 1, "bakeMs": 597, "drawCallsDesktop": 72, "wallVerts": 5568, "wallZeroVerts": 0, "wallMeanVertexColour": 0.5510,
+         "spawnPooled": {"meanL": 147.2, "p5L": 90.1, "pctPixelsBelowLuma16": 0.1},
+         "perSpawn": [{"spawn": "Entrance", "meanL": 148.9, "p5L": 72.8}, {"spawn": "Living Room", "meanL": 148.1, "p5L": 90.1}, {"spawn": "Bedroom", "meanL": 150.8, "p5L": 97.4}, {"spawn": "Bathroom", "meanL": 150.6, "p5L": 119.7}, {"spawn": "Pool Terrace", "meanL": 137.3, "p5L": 88.2}]},
+        {"run": 2, "bakeMs": 560, "drawCallsDesktop": 72, "wallVerts": 5568, "wallZeroVerts": 0, "wallMeanVertexColour": 0.5510,
+         "spawnPooled": {"meanL": 147.2, "p5L": 90.3, "pctPixelsBelowLuma16": 0.1},
+         "perSpawn": [{"spawn": "Entrance", "meanL": 149.0, "p5L": 73.3}, {"spawn": "Living Room", "meanL": 148.2, "p5L": 90.3}, {"spawn": "Bedroom", "meanL": 151.0, "p5L": 98.6}, {"spawn": "Bathroom", "meanL": 150.5, "p5L": 119.6}, {"spawn": "Pool Terrace", "meanL": 137.5, "p5L": 88.4}]}
+      ],
+      "linearContrast": {"set": "b4a-task2-before-serenity-legacy", "mean": 0.303993, "p5": 0.094814, "contrast": 3.2062},
+      "deltaE_allSpot_legacy": 16.34
+    },
+    "kings-court": {
+      "runs": [
+        {"run": 1, "bakeMs": 4631, "drawCallsDesktop": 165, "wallVerts": 31260, "wallZeroVerts": 0, "wallMeanVertexColour": 0.4499,
+         "spawnPooled": {"meanL": 154.1, "p5L": 65.9, "pctPixelsBelowLuma16": 0.1},
+         "perSpawnP5": {"Entry hall": 132.4, "Kitchen": 106.1, "Dining room": 72.6, "Living room": 69.8, "Bedroom 1": 59.9, "Bedroom 3": 79.7, "Bedroom 2": 79.3, "Hallway": 111.1, "Bathroom 2": 44.9, "Stairs": 103.0, "Upper hall": 119.5, "Upper living room": 99.2, "Upper bedroom": 85.2, "Terrace": 84.2}},
+        {"run": 2, "bakeMs": 4763, "drawCallsDesktop": 165, "wallVerts": 31260,
+         "spawnPooled": {"meanL": 153.8, "p5L": 65.0, "pctPixelsBelowLuma16": 0.1},
+         "perSpawnP5": {"Entry hall": 128.7, "Kitchen": 105.4, "Dining room": 72.2, "Living room": 69.8, "Bedroom 1": 58.8, "Bedroom 3": 79.5, "Bedroom 2": 78.3, "Hallway": 110.2, "Bathroom 2": 47.2, "Stairs": 101.8, "Upper hall": 118.9, "Upper living room": 96.2, "Upper bedroom": 85.0, "Terrace": 81.3}}
+      ],
+      "deltaE_allSpot_legacy": 18.81
+    },
+    "horkyone-10": {
+      "runs": [
+        {"run": 1, "bakeMs": 1105, "drawCallsDesktop": 83, "wallVerts": 17628, "wallZeroVerts": 0, "wallMeanVertexColour": 0.4801,
+         "spawnPooled": {"meanL": 151.7, "p5L": 108.8, "pctPixelsBelowLuma16": 0.2},
+         "perSpawn": [{"spawn": "Living room", "meanL": 149.9, "p5L": 99.5}, {"spawn": "Bedroom", "meanL": 158.4, "p5L": 121.7}, {"spawn": "Bathroom", "meanL": 144.9, "p5L": 122.4}, {"spawn": "Hall", "meanL": 153.8, "p5L": 116.4}, {"spawn": "Terrace", "meanL": 151.7, "p5L": 72.5}]},
+        {"run": 2, "bakeMs": 991, "drawCallsDesktop": 83, "wallVerts": 17628,
+         "spawnPooled": {"meanL": 151.2, "p5L": 107.9, "pctPixelsBelowLuma16": 0.2},
+         "perSpawnP5": {"Living room": 99.1, "Bedroom": 120.7, "Bathroom": 120.9, "Hall": 116.1, "Terrace": 72.6}}
+      ],
+      "deltaE_allSpot_legacy": null,
+      "note": "horkyone-10 has zero compare-flagged photo spots, so it has no delta-E and no linear contrast by construction."
+    }
+  },
+  "sweep": {
+    "change": "tour/bake.js grid(): lightAt(P, N, occ, data, false, false) -> (..., true). SEG swept at the same site.",
+    "SEG_0.45": {
+      "serenity": {"bakeMs": 616, "drawCallsDesktop": 72, "wallVerts": 5568, "wallZeroVerts": 428, "pctWallVertsTrueZero": 7.7, "wallMeanVertexColour": 0.4459,
+        "spawnPooled": {"meanL": 145.3, "p5L": 88.3}, "perSpawnP5": {"Entrance": 52.3, "Living Room": 89.9, "Bedroom": 96.5, "Bathroom": 104.5, "Pool Terrace": 88.0},
+        "linearContrast": 3.8647, "linearMean": 0.292046, "linearP5": 0.075567, "deltaE_allSpot_legacy": 16.27,
+        "plainPageControl": {"bakeMs": 646, "wallZeroVerts": 439, "spawnPooled": {"meanL": 145.2, "p5L": 87.9}, "note": "spawn-pooled reading taken on a page WITHOUT ?measure=1, to show the combined-load readings above are equivalent: 87.9 vs 88.3, inside the +-0.9 noise floor."},
+        "repeat": {"bakeMs": 612, "wallZeroVerts": 426, "spawnPooled": {"meanL": 145.3, "p5L": 88.0}, "linearContrast": 3.9347, "linearMean": 0.291258, "linearP5": 0.074023}},
+      "kings-court": {"bakeMs": 5388, "drawCallsDesktop": 165, "wallVerts": 31260, "wallZeroVerts": 1864, "pctWallVertsTrueZero": 6.0, "wallMeanVertexColour": 0.3396,
+        "spawnPooled": {"meanL": 149.7, "p5L": 60.4}, "perSpawnP5": {"Entry hall": 123.3, "Kitchen": 98.0, "Dining room": 70.6, "Living room": 64.6, "Bedroom 1": 56.9, "Bedroom 3": 65.0, "Bedroom 2": 73.9, "Hallway": 65.6, "Bathroom 2": 43.2, "Stairs": 92.7, "Upper hall": 110.2, "Upper living room": 89.7, "Upper bedroom": 79.1, "Terrace": 70.1},
+        "deltaE_allSpot_legacy": 19.46},
+      "horkyone-10": {"bakeMs": 1665, "drawCallsDesktop": 83, "wallVerts": 17628, "wallZeroVerts": 2371, "pctWallVertsTrueZero": 13.5, "wallMeanVertexColour": 0.3530,
+        "spawnPooled": {"meanL": 149.1, "p5L": 100.5}, "perSpawnP5": {"Living room": 85.3, "Bedroom": 110.9, "Bathroom": 117.8, "Hall": 100.2, "Terrace": 72.4}}
+    },
+    "SEG_0.30": {
+      "serenity": {"bakeMs": 664, "drawCallsDesktop": 72, "wallVerts": 11436, "wallZeroVerts": 749, "pctWallVertsTrueZero": 6.5, "wallMeanVertexColour": 0.4653,
+        "spawnPooled": {"meanL": 145.6, "p5L": 88.1}, "perSpawnP5": {"Entrance": 52.8, "Living Room": 89.6, "Bedroom": 95.9, "Bathroom": 105.3, "Pool Terrace": 87.8},
+        "linearContrast": 3.6405, "linearMean": 0.295145, "linearP5": 0.081073, "deltaE_allSpot_legacy": 16.19},
+      "kings-court": {"bakeMs": 6027, "drawCallsDesktop": 165, "wallVerts": 65604, "wallZeroVerts": 2957, "pctWallVertsTrueZero": 4.5, "wallMeanVertexColour": 0.3612,
+        "spawnPooled": {"meanL": 150.0, "p5L": 60.9}, "perSpawnP5": {"Entry hall": 124.1, "Kitchen": 96.9, "Dining room": 71.1, "Living room": 65.3, "Bedroom 1": 57.5, "Bedroom 3": 66.3, "Bedroom 2": 73.4, "Hallway": 69.8, "Bathroom 2": 43.5, "Stairs": 85.2, "Upper hall": 112.1, "Upper living room": 89.4, "Upper bedroom": 79.8, "Terrace": 70.4},
+        "deltaE_allSpot_legacy": 19.35},
+      "horkyone-10": {"bakeMs": 1907, "drawCallsDesktop": 83, "wallVerts": 24288, "wallZeroVerts": 3316, "pctWallVertsTrueZero": 13.7, "wallMeanVertexColour": 0.3652,
+        "spawnPooled": {"meanL": 149.1, "p5L": 100.7}, "perSpawnP5": {"Living room": 85.4, "Bedroom": 111.3, "Bathroom": 119.9, "Hall": 99.5, "Terrace": 70.4}}
+    },
+    "SEG_0.22": {
+      "serenity": {"bakeMs": 743, "drawCallsDesktop": 72, "wallVerts": 20496, "wallZeroVerts": 1216, "pctWallVertsTrueZero": 5.9, "wallMeanVertexColour": 0.4821,
+        "spawnPooled": {"meanL": 146.0, "p5L": 88.6}, "perSpawnP5": {"Entrance": 53.7, "Living Room": 90.0, "Bedroom": 96.5, "Bathroom": 110.3, "Pool Terrace": 88.1},
+        "linearContrast": 3.3748, "linearMean": 0.300099, "linearP5": 0.088923, "deltaE_allSpot_legacy": 16.30},
+      "kings-court": {"bakeMs": 7398, "drawCallsDesktop": 165, "wallVerts": 123768, "wallZeroVerts": 5230, "pctWallVertsTrueZero": 4.2, "wallMeanVertexColour": 0.3715,
+        "spawnPooled": {"meanL": 150.3, "p5L": 62.0}, "perSpawnP5": {"Entry hall": 121.1, "Kitchen": 97.6, "Dining room": 70.9, "Living room": 66.3, "Bedroom 1": 56.9, "Bedroom 3": 67.5, "Bedroom 2": 74.4, "Hallway": 75.9, "Bathroom 2": 43.4, "Stairs": 87.7, "Upper hall": 112.8, "Upper living room": 89.5, "Upper bedroom": 81.8, "Terrace": 70.4},
+        "deltaE_allSpot_legacy": 19.22},
+      "horkyone-10": {"bakeMs": 1978, "drawCallsDesktop": 83, "wallVerts": 31776, "wallZeroVerts": 4360, "pctWallVertsTrueZero": 13.7, "wallMeanVertexColour": 0.3710,
+        "spawnPooled": {"meanL": 148.8, "p5L": 99.8}, "perSpawnP5": {"Living room": 83.8, "Bedroom": 111.0, "Bathroom": 117.5, "Hall": 98.3, "Terrace": 71.1}}
+    },
+    "SEG_0.15": {
+      "serenity": {"bakeMs": 946, "drawCallsDesktop": 72, "wallVerts": 42132, "wallZeroVerts": 2003, "pctWallVertsTrueZero": 4.8, "wallMeanVertexColour": 0.4898,
+        "spawnPooled": {"meanL": 146.2, "p5L": 88.6}, "perSpawnP5": {"Entrance": 53.7, "Living Room": 89.9, "Bedroom": 95.2, "Bathroom": 113.0, "Pool Terrace": 88.0},
+        "linearContrast": 3.4380, "linearMean": 0.301117, "linearP5": 0.087585, "deltaE_allSpot_legacy": 16.29},
+      "kings-court": {"bakeMs": 8783, "drawCallsDesktop": 165, "wallVerts": 255324, "wallZeroVerts": 9458, "pctWallVertsTrueZero": 3.7, "wallMeanVertexColour": 0.3772,
+        "spawnPooled": {"meanL": 150.7, "p5L": 62.8}, "perSpawnP5": {"Entry hall": 125.1, "Kitchen": 98.8, "Dining room": 71.8, "Living room": 67.1, "Bedroom 1": 58.1, "Bedroom 3": 68.6, "Bedroom 2": 74.1, "Hallway": 76.8, "Bathroom 2": 45.5, "Stairs": 86.8, "Upper hall": 114.0, "Upper living room": 90.7, "Upper bedroom": 81.6, "Terrace": 71.1},
+        "deltaE_allSpot_legacy": 19.24},
+      "horkyone-10": {"bakeMs": 3043, "drawCallsDesktop": 83, "wallVerts": 79992, "wallZeroVerts": 10411, "pctWallVertsTrueZero": 13.0, "wallMeanVertexColour": 0.3895,
+        "spawnPooled": {"meanL": 149.7, "p5L": 103.0}, "perSpawnP5": {"Living room": 89.6, "Bedroom": 113.8, "Bathroom": 118.3, "Hall": 103.9, "Terrace": 71.9}}
+    }
+  },
+  "samplerLiveness": {
+    "requirement": "window.__ambSampled === true and Sampler.selfTest() 8/8 on all three apartments -- a silent sampler failure renders bit-identical to the unsampled build",
+    "ambSampled": {"serenity": true, "kings-court": true, "horkyone-10": true},
+    "selfTest": {"cases": 8, "failed": 0, "verdict": "passed", "measuredOn": "serenity (console-captured case list); returned true on kings-court and horkyone-10"},
+    "secondaryProof": "the sampled build is demonstrably NOT the unsampled one: serenity's wall vertices go from 0 true zeros / mean vertex colour 0.5510 to 428 zeros / 0.4459 at the same SEG."
+  },
+  "postRevertVerification": {
+    "state": "tour/ byte-identical to task 1 tip; `git diff -- tour/` is empty; cache version left at 109",
+    "facesLvl": {
+      "serenity": {"walls": 9, "wallsNearOnly": 9, "near": 224, "far": 0, "none": 46},
+      "kings-court": {"walls": 42, "wallsNearOnly": 42, "near": 1027, "far": 0, "none": 133},
+      "horkyone-10": {"walls": 15, "wallsNearOnly": 15, "near": 349, "far": 0, "none": 101}
+    },
+    "issues": {"serenity": [], "kings-court": [], "horkyone-10": []},
+    "drawCalls": {
+      "desktop_1280x820": {"serenity": 72, "kings-court": 165, "horkyone-10": 83, "budget": 400},
+      "mobileViewport_390x844": {"serenity": 64, "kings-court": 150, "horkyone-10": 64, "budget": 250},
+      "caveat": "the mobile row is a 390x844 VIEWPORT only. The Playwright MCP driver exposes no isMobile / hasTouch / deviceScaleFactor control, so the true mobile profile (DPR 2, touch) was NOT emulated. Draw calls do not depend on pixel ratio, so the count is expected to hold, but that is reasoning, not a measurement."
+    }
+  },
+  "screenshots": {
+    "root": "tools/shots/b4a-task2/",
+    "sets": ["before", "seg045", "seg015", "before-kings-court", "seg045-kings-court", "before-horkyone-10", "seg045-horkyone-10"],
+    "note": "serenity has a three-way set (before / SEG 0.45 / SEG 0.15) at every spawn plus two pitched entrance views; kings-court and horkyone-10 have before / SEG 0.45 at their spawns."
+  }
+}
