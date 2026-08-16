@@ -1,0 +1,117 @@
+{
+  "task": "phase B plan 4a task 3 — exposure and bloom re-fit",
+  "branch": "phaseB-plan4a-winding",
+  "base": "e80b879",
+  "harness": "Playwright MCP → Chromium, ANGLE (Intel, Intel(R) UHD Graphics 630, Direct3D11). post.enabled asserted true before every reading.",
+  "note": "Everything in this file is a VERBATIM transcription of a browser probe's return value. The exposure-sweep rows are NOT here — those are re-derived from the captured frames on disk by write_metrics.py calling score.py, so they cannot be mistyped.",
+
+  "spawnPooledLuminance": {
+    "method": "every APT.spawns[] entry, 480x300, pixelRatio 1, through the full post chain, sRGB 0-255, pixels pooled across spawns before the mean and the interpolated p5. Same method as docs/superpowers/metrics/README.md's horkyone-10 table.",
+    "serenity": [
+      { "load": "A", "exposure": 0.295, "bloomOn": true, "meanL": 140.27, "p5L": 84.13,
+        "per": [
+          { "spawn": "Entrance", "meanL": 142.55, "p5L": 72.39 },
+          { "spawn": "Living Room", "meanL": 141.25, "p5L": 83.85 },
+          { "spawn": "Bedroom", "meanL": 143.91, "p5L": 92.24 },
+          { "spawn": "Bathroom", "meanL": 143.08, "p5L": 111.46 },
+          { "spawn": "Pool Terrace", "meanL": 130.56, "p5L": 81.99 }
+        ] },
+      { "load": "A", "exposure": 0.329, "bloomOn": true, "meanL": 147.47, "p5L": 90.70,
+        "per": [
+          { "spawn": "Entrance", "meanL": 149.52, "p5L": 78.54 },
+          { "spawn": "Living Room", "meanL": 148.43, "p5L": 90.41 },
+          { "spawn": "Bedroom", "meanL": 151.10, "p5L": 99.41 },
+          { "spawn": "Bathroom", "meanL": 150.50, "p5L": 118.97 },
+          { "spawn": "Pool Terrace", "meanL": 137.82, "p5L": 88.54 }
+        ] },
+      { "load": "B (shipped config, ?v=110)", "exposure": 0.295, "bloomOn": true, "meanL": 140.27, "p5L": 84.13 }
+    ],
+    "kings-court": [
+      { "load": "A", "exposure": 0.52, "bloomOn": true, "meanL": 148.04, "p5L": 61.19 },
+      { "load": "A", "exposure": 0.575, "bloomOn": true, "meanL": 154.14, "p5L": 66.30 },
+      { "load": "B (shipped config, ?v=110)", "exposure": 0.52, "bloomOn": true, "meanL": 148.35, "p5L": 60.78 }
+    ],
+    "horkyone-10": [
+      { "load": "A", "exposure": 0.36, "bloomOn": true, "meanL": 134.86, "p5L": 92.03 },
+      { "load": "A", "exposure": 0.38, "bloomOn": true, "meanL": 138.47, "p5L": 95.47 },
+      { "load": "A", "exposure": 0.40, "bloomOn": true, "meanL": 141.87, "p5L": 98.79 },
+      { "load": "A", "exposure": 0.42, "bloomOn": true, "meanL": 145.09, "p5L": 101.99 },
+      { "load": "A", "exposure": 0.44, "bloomOn": true, "meanL": 148.15, "p5L": 105.08 },
+      { "load": "A", "exposure": 0.46, "bloomOn": true, "meanL": 151.03, "p5L": 108.05 },
+      { "load": "A", "exposure": 0.50, "bloomOn": true, "meanL": 156.37, "p5L": 113.68 },
+      { "load": "A", "exposure": 0.40, "bloomOn": false, "meanL": 141.87, "p5L": 98.79 },
+      { "load": "A", "exposure": 0.42, "bloomOn": false, "meanL": 145.09, "p5L": 101.99 },
+      { "load": "A", "exposure": 0.44, "bloomOn": false, "meanL": 148.15, "p5L": 105.08 },
+      { "load": "B", "exposure": 0.40, "bloomOn": true, "meanL": 142.50, "p5L": 99.59 },
+      { "load": "B", "exposure": 0.41, "bloomOn": true, "meanL": 144.13, "p5L": 101.18 },
+      { "load": "B", "exposure": 0.42, "bloomOn": true, "meanL": 145.72, "p5L": 102.79,
+        "per": [
+          { "spawn": "Living room", "meanL": 144.15, "p5L": 93.86 },
+          { "spawn": "Bedroom", "meanL": 152.49, "p5L": 115.32 },
+          { "spawn": "Bathroom", "meanL": 137.19, "p5L": 115.99 },
+          { "spawn": "Hall", "meanL": 148.68, "p5L": 111.99 },
+          { "spawn": "Terrace", "meanL": 146.09, "p5L": 69.52 }
+        ] },
+      { "load": "B", "exposure": 0.43, "bloomOn": true, "meanL": 147.27, "p5L": 104.32 },
+      { "load": "B", "exposure": 0.44, "bloomOn": true, "meanL": 148.77, "p5L": 105.86 },
+      { "load": "B", "exposure": 0.46, "bloomOn": true, "meanL": 151.65, "p5L": 108.83 },
+      { "load": "C (shipped config, ?v=110)", "exposure": 0.42, "bloomOn": true, "meanL": 145.52, "p5L": 102.09 },
+      { "load": "C (shipped config, ?v=110)", "exposure": 0.42, "bloomOn": false, "meanL": 145.52, "p5L": 102.09 }
+    ]
+  },
+
+  "bloomStrength": {
+    "method": "Full composited tonemapped chain, bloom on vs off at the fitted exposure, threshold 1.8, 800x500, counting pixels whose max channel differs by >=1, >=2, >=8 of 255. post.render(0) on both sides, so grain is identical and every differing pixel differs because of bloom.",
+    "serenity": {
+      "position": "photoSpot 1.webp Bathroom (the backlit mirror, plan 1)",
+      "exposure": 0.295,
+      "rows": [
+        { "strength": 0.05, "pctChanged_ge1": 27.05, "pctChanged_ge2": 5.88, "pctChanged_ge8": 0.88, "maxDelta": 18 },
+        { "strength": 0.10, "pctChanged_ge1": 40.25, "pctChanged_ge2": 12.40, "pctChanged_ge8": 2.14, "maxDelta": 31 },
+        { "strength": 0.15, "pctChanged_ge1": 49.95, "pctChanged_ge2": 15.56, "pctChanged_ge8": 3.29, "maxDelta": 43 },
+        { "strength": 0.22, "pctChanged_ge1": 59.91, "pctChanged_ge2": 17.31, "pctChanged_ge8": 4.47, "maxDelta": 56 },
+        { "strength": 0.30, "pctChanged_ge1": 67.98, "pctChanged_ge2": 20.10, "pctChanged_ge8": 5.88, "maxDelta": 67 },
+        { "strength": 0.40, "pctChanged_ge1": 74.98, "pctChanged_ge2": 25.60, "pctChanged_ge8": 7.92, "maxDelta": 79 }
+      ]
+    },
+    "kings-court": {
+      "position": "photoSpot 7.webp Dining room (pendant-lamp speculars, max linear luminance 138)",
+      "exposure": 0.52,
+      "rows": [
+        { "strength": 0.05, "pctChanged_ge1": 13.11, "pctChanged_ge2": 0.52, "pctChanged_ge8": 0.05, "maxDelta": 78 },
+        { "strength": 0.10, "pctChanged_ge1": 24.73, "pctChanged_ge2": 1.68, "pctChanged_ge8": 0.08, "maxDelta": 117 },
+        { "strength": 0.15, "pctChanged_ge1": 34.08, "pctChanged_ge2": 3.27, "pctChanged_ge8": 0.15, "maxDelta": 140 },
+        { "strength": 0.22, "pctChanged_ge1": 44.21, "pctChanged_ge2": 5.15, "pctChanged_ge8": 0.30, "maxDelta": 158 },
+        { "strength": 0.30, "pctChanged_ge1": 52.54, "pctChanged_ge2": 7.94, "pctChanged_ge8": 0.50, "maxDelta": 171 }
+      ]
+    }
+  },
+
+  "peakVsFractionAcrossRenderTargetSizes": {
+    "why": "The task's binding rule is to track the FRACTION of frame over threshold, never the peak. Re-established here on the current render rather than carried on trust.",
+    "position": "serenity photoSpot 1.webp (backlit bathroom mirror)",
+    "threshold": 1.8,
+    "rows": [
+      { "size": "240x150", "peakLuminance": 37.779, "fractionOverThresholdPct": 0.2000 },
+      { "size": "480x300", "peakLuminance": 43.563, "fractionOverThresholdPct": 0.1986 },
+      { "size": "800x500", "peakLuminance": 54.883, "fractionOverThresholdPct": 0.1985 },
+      { "size": "1280x800", "peakLuminance": 63.277, "fractionOverThresholdPct": 0.1987 },
+      { "size": "1920x1200", "peakLuminance": 67.255, "fractionOverThresholdPct": 0.1987 }
+    ]
+  },
+
+  "shippedTreeVerification": {
+    "note": "All three apartments after the JSON edits and the ?v= bump, read live in the browser.",
+    "serenity": { "v": "main.js?v=110", "aptExposure": 0.295, "issues": [], "drawCalls": 72, "bakeMs": 551, "bloom": { "threshold": 1.8, "strength": 0.1, "radius": 0.5 } },
+    "kings-court": { "v": "main.js?v=110", "aptExposure": 0.52, "issues": [], "drawCalls": 165, "bakeMs": 4851, "bloom": { "threshold": 1.8, "strength": 0.1, "radius": 0.5 } },
+    "horkyone-10": { "v": "main.js?v=110", "aptExposure": 0.42, "issues": [], "drawCalls": 83, "bakeMs": 1148, "bloom": { "threshold": 1.8, "strength": 0.1, "radius": 0.5 } }
+  },
+
+  "gateReadings": {
+    "camera": "?fov=legacy",
+    "population": "all-spot (tools/delta_e.py --all-spots)",
+    "bloom": "ON, shipped chain",
+    "serenity": { "before_e0.329": 16.34, "after_e0.295_sameLoad": 15.98, "after_e0.295_independentLoad": 16.00, "task1Recorded": 16.32 },
+    "kings-court": { "before_e0.575": 18.80, "after_e0.52_sameLoad": 18.58, "after_e0.52_independentLoad": 18.58, "task1Recorded": 18.79 }
+  }
+}

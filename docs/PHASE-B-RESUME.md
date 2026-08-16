@@ -46,9 +46,13 @@ rejected alternatives and the new rules are recorded below.
 
 | Apartment | pre-migration (r128) | end of plan 2 | now, after plan 3 | note |
 |---|---:|---:|---:|---|
-| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | now the recorded baseline; the 0.03 was accepted |
-| kings-court | 22.44 | 18.73–18.75 | **~18.87–18.90** | now the recorded baseline, replacing 22.44 |
+| serenity | 16.58 | 16.56–16.57 | **16.60–16.61** | superseded — plan 4a task 4 rebaselined to 16.00 |
+| kings-court | 22.44 | 18.73–18.75 | **~18.87–18.90** | superseded — plan 4a task 4 rebaselined to 18.58 |
 | horkyone-10 | — | — | — | no photographs; accepted on luminance proximity |
+
+The "after plan 3" column is the record as of `b39a99a` and is left as measured.
+The **live** baselines are plan 4a task 4's, in the table under "The gate,
+restated 2026-08-15" below; read that one before quoting a number.
 
 Plan 2 closed serenity to parity and PR #27 merged on that basis. **Plan 3
 then pushed it back out**, by +0.0516 at full precision — larger than the
@@ -58,12 +62,26 @@ decided on 2026-08-15 is that it is **accepted** and that the gate it
 tripped was the wrong instrument for the question — see "The gate, restated
 2026-08-15" above and "How the 0.03 was resolved" below.
 
-Shipped config: serenity `exposure` **0.329**, kings-court **0.575**,
-horkyone-10 **0.46**; bloom threshold **1.8**, strength **0.1**; `?v=107`.
+Shipped config **on `main` (`c2bb0bd`, and at `b39a99a`)**: serenity `exposure`
+**0.329**, kings-court **0.575**, horkyone-10 **0.46**; bloom threshold **1.8**,
+strength **0.1**; `?v=107`.
 (This line said `?v=106` until 2026-08-15; plan 3's final fix wave `7f90820`
 bumped it to 107 and the resume doc was not updated with it. Verified against
 `tour/index.html:254`, which is the single module tag that versions
 everything.)
+
+**On branch `phaseB-plan4a-winding` (`f0315ea`, unmerged)** plan 4a task 3
+re-fitted every exposure against the post-winding render: serenity **0.295**,
+kings-court **0.52**, horkyone-10 **0.42**; bloom unchanged at threshold
+**1.8** / strength **0.1**; `?v=110`. The baseline table below is measured
+against that tip. (Plan 4a task 5 then bumped the tree to `?v=111`, and to
+**`?v=112`** in its fix round, both for comment-only rewrites in
+`tour/bake.js`. No shader, constant or config value moved with either, so
+every baseline below still stands unremeasured — the bumps follow the
+precedent that any edit to a shipped file bumps the cache tag, `?v=100 → 101`
+for a `post.js` header pointer. Proved rather than asserted: strip every
+`^\s*//` line from both revisions of `bake.js` and the remainder is
+byte-identical, md5 `e22e63e5…` on both sides.)
 
 ## The gate, restated 2026-08-15
 
@@ -105,20 +123,111 @@ Three rules replace the two thresholds:
    more than **0.5** stops the branch and is reported, attributed or not.
    That is the breakage catch the absolute ceilings used to provide.
 
-Baselines as of `b39a99a`, `?v=107`:
+Baselines as of `f0315ea` (branch `phaseB-plan4a-winding`, plan 4a tasks 1–3
+applied), `?v=110`:
 
 | Apartment | Baseline | Recorded at |
 |---|---:|---|
-| serenity | **16.61** | plan 3 task 7; eight readings spanning 16.59–16.62 |
-| kings-court | **18.90** | plan 3 tasks 4 and 7 |
+| serenity | **16.00** | plan 4a task 4; three-round mean 15.9973, readings 15.9891 / 16.0055 / 15.9973 |
+| kings-court | **18.58** | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
 | horkyone-10 | — | no photographs; accepted on luminance proximity only |
 
+The outgoing rows read *serenity **16.61** — plan 3 task 7; eight readings
+spanning 16.59–16.62* and *kings-court **18.90** — plan 3 tasks 4 and 7*,
+carried here verbatim so that replacing them loses no provenance.
+
+**These replace serenity 16.61 and kings-court 18.90**, which were the
+baselines as of `b39a99a` (`?v=107`) recorded by plan 3 tasks 4 and 7. Both
+movements are improvements and both are attributed, per rule 2: plan 4a task 4
+re-measured `b39a99a` in the same session as `f0315ea` — a detached worktree on
+`:8743` against the tip on `:8742`, three interleaved rounds each — and read
+the old tree at **16.6109** and **18.8788**, reproducing the outgoing baselines
+to 0.000 and 0.021, i.e. inside the noise floor. The movement is therefore the
+branch's and not the session's.
+
+| Apartment | old → new | movement | attribution |
+|---|---|---:|---|
+| serenity | 16.61 → **16.00** | −0.614 | task 1 winding fix −0.201, task 1 paintings −0.080, task 2 **0.000** (reverted in full), task 3 exposure 0.329→0.295 −0.357; sum −0.638 against −0.614 measured, residual +0.025 inside the floor |
+| kings-court | 18.90 → **18.58** | −0.303 | task 1 winding fix −0.081, task 2 **0.000**, task 3 exposure 0.575→0.52 −0.228; sum −0.309 against −0.303 measured, residual +0.006 |
+
+> **The winding fix had one side effect nobody looked for: it broke the
+> dollhouse tape.** Found by the final whole-branch review 2026-08-16, fixed
+> the same day in `doll.js` (`?v=113`). **Task 1's report had stated the
+> opposite** — that the tape and the m² badges "cannot detect this change."
+> The m² half is right; the tape half is exactly backwards, and that sentence
+> is why five task reviews never drove it. `Doll.floorPoint()` accepted the
+> first visible hit whose face normal pointed up, and `h.face.normal` is the
+> **winding** normal with FrontSide culling live — so while the winding was
+> wrong a wall's top quad was culled and the ray fell through to the floor by
+> accident, and once it was right the top quad was returned first. Driving the
+> real `floorPoint` on both arms: a serenity bay of a true 2.65 m read
+> **2.650 at `b39a99a`** and **3.719 at `6214d00`** (+40%), marker 2.6 m in
+> the air. **`teleport` was affected too, on kings-court** — the review
+> believed its ground-proximity guard covered it, and on serenity it does, but
+> kings-court's upper ground zones (2.98 / 3.10) sit within 0.6 of its
+> 2.80 m wall tops, so 12 of 28 ground-floor wall centrelines passed that
+> guard and a cutaway click put the player on the **upper** floor (ground 3.10
+> where `b39a99a` gave 0.00). The fix skips the merged wall meshes by
+> `userData.doll` in both readers — not a height test, which is the thing
+> kings-court just disproved, and not a different normal, since a wall top's
+> true normal really is +y. **No published figure moves:** `measure.js`
+> renders from photo-spot cameras and never calls `floorPoint`.
+
+**Do not read kings-court's movement as entirely a better render.** Task 3's
+exposure re-fit was made on the mandated **all-spot** population where plan 3
+task 4 had fitted on `poseVerified`, and that convention change moved the
+fitted exposure in its own right. Task 4 measured the split directly, by
+re-reading the tip at the exposure each apartment's `poseVerified` fit would
+have chosen — taken from task 3's committed sweep as that population's own
+zero crossing, and paired against a control at the shipped exposure **on the
+same page load**:
+
+| Apartment | counterfactual | render | convention | convention share |
+|---|---:|---:|---:|---:|
+| serenity | 0.298 | −0.590 | −0.024 | 4% |
+| kings-court | 0.5596 | −0.151 | −0.152 | **50%** |
+
+**serenity's improvement is essentially all render.** **kings-court's is about
+half measurement convention** — and the two halves are 0.0005 apart, so which
+of them is larger is *not* resolved and must not be quoted as though it were.
+The condition this rests on: the counterfactuals are the sweep's crossings, and
+at the measured ΔE slopes the split would read 50/50 at 0.3339 (serenity) and
+0.5595 (kings-court). serenity's crossing sits 0.036 below its break-even, so
+that conclusion is robust; kings-court's sits 0.0001 from its own, which is
+what "a dead heat" means quantitatively. Full working in
+`docs/superpowers/harnesses/2026-08-15-b4a-task4/`.
+
+**Where each movement comes from, per spot.** Both baselines are all-spot means
+by rule 5, and on both apartments the movement is concentrated. **serenity's
+−0.61 is carried entirely by two `poseVerified: false` spots** (`7.webp` −4.96,
+`6.webp` −4.11, together more than the whole movement), while its **only two**
+pose-verified spots moved slightly the other way (+0.37, +0.16). **kings-court
+is the reverse** — seven of its eight pose-verified spots improved; the
+exception, `19.webp`, regresses **+1.55**, the largest single-spot movement on
+the branch, most of it traceable to the exposure rather than the render (19.95
+at 0.56 against 21.18 at the shipped 0.52). Neither fact moves a baseline; both
+are recorded so that a later reader does not discover them.
+
+**Hard stop (rule 3): not tripped.** No task on this branch made either
+apartment's reading worse at all, let alone by more than 0.5. The one figure on
+the branch that looks like a breach is
+`kings-court-b4a-task2-seg045-legacy-allspots.json` at 19.4636 against a before
+of 18.8079, **+0.656** — that is plan 4a task 2's trial state, which failed its
+exit criterion and was **reverted in full**; `tour/` carries none of it, and
+the hard stop is about what a task leaves in the tree.
+
+**These baselines are recorded from an unmerged branch tip.** `main` is still
+at `c2bb0bd` and the `b39a99a` values above are what a checkout of `main`
+measures. If plan 4a is not merged, the outgoing baselines stand.
+
 **This loosens serenity by 0.03 and tightens kings-court by about 3.5.** The
-old 22.44 was kings-court's pre-migration score and the apartment has since
+old 22.44 was kings-court's pre-migration score and the apartment had by then
 improved to 18.90, so that ceiling carried three and a half points of slack
 in which a real regression could have hidden unseen. Re-baselining removes
 it. The restatement is not a blanket relaxation, and it must not be quoted
-as one.
+as one. (This paragraph describes the 2026-08-15 restatement as it stood at
+`b39a99a`; kings-court has since been rebaselined again, to **18.58**, by plan
+4a task 4 — the tightening is now about 3.9, not 3.5.)
 
 ```bash
 # capture: open ?apt=<id>&measure=1&fov=legacy, then in the console
@@ -225,8 +334,57 @@ free:
    exposure anywhere buys 0.0057 of the 0.03. A fit chasing the remainder
    would be fitting toward ΔE, which this phase forbids outright.
 3. **Accept the 0.03 and restate the gate.** **Taken.**
-4. **Fix the wall-winding defect first and re-measure.** Not taken now, but
-   not dropped — it stays deferred to plan 4 or 5 with its own entry below.
+4. **Fix the wall-winding defect first and re-measure.** Not taken at the
+   time — it was deferred to plan 4 or 5 with its own entry below.
+   **Superseded: it was taken, and it closed the shortfall outright.** See
+   the block immediately below.
+
+#### Option 4 was executed after all, and the 0.03 is gone
+
+**Written 2026-08-15 by plan 4a task 5.** The paragraphs above are true of
+the moment they describe and are kept as the record of that decision. They
+have stopped describing the current state, and a reader who stops at "we
+accepted a 0.03 miss" will carry away something that is no longer the case.
+
+Plan 4a was written to do option 4 and did it. Task 1 fixed the `grid()`
+winding with the sign test (`b767b4b`) and un-buried two paintings that had
+been inside a wall; **serenity's all-spot legacy reading moved 16.60 →
+16.32**, which is **0.26 *under* the old 16.58 ceiling**, not 0.03 over it.
+Task 3 then re-fitted exposure against the post-winding render (0.329 →
+0.295) and it reached **16.00**. kings-court moved the same way, 18.90 →
+**18.58**. Both movements are attributed per rule 2 and are recorded in the
+baseline table above; the 0.03 shortfall that this whole section exists to
+explain **does not exist in the current tree.**
+
+Two things follow, and the second matters more than the first:
+
+- **The shortfall was closed by fixing a real rendering defect, not by
+  tuning and not by moving a threshold.** Option 2 — re-fit exposure against
+  the old render — remains rejected and was proved impossible before it was
+  offered; the exposure re-fit that did happen (task 3) came *after* the
+  render changed, which is a different act.
+- **The restatement of the gate still stands, and it was re-confirmed on the
+  new numbers.** After task 1's readings were verified, the merge owner made
+  a **second ruling on 2026-08-15**: keep the restated gate — baselines plus
+  attribution plus the 0.5 hard stop — rather than reinstating the old
+  absolute ceilings now that serenity would pass them.
+  **Provenance, stated plainly because it is thinner than the first
+  ruling's.** This was a merge-owner decision taken **in session on
+  2026-08-15** and recorded by the controller; the decision was made
+  conversationally, after task 1's numbers were verified, so **there is no
+  in-tree artefact of it** — no commit, no report, no metrics file. That is
+  exactly why it is written here, and why it is mirrored into
+  `docs/superpowers/metrics/README.md` beside the first ruling's marker: a
+  ruling that exists in one file can be lost by one deletion. Read it as a
+  recorded decision, not as a citation. The first ruling, by contrast, is
+  documented in three places and has the plan-3 gate readings behind it.
+  The grounds are
+  unchanged and never depended on the 0.03: this metric is dominated by pose
+  and content mismatch, so it cannot arbitrate lighting at that resolution,
+  and serenity's ΔE is expected to move by whole points once plan 4 fixes the
+  living-room opening, the missing shower and the mis-pointed spots. Passing
+  a ceiling once is not a reason to re-adopt an instrument that was retired
+  for being the wrong instrument.
 
 The restatement did **not** rest on "the threshold is one noisy historical
 reading", which is the weak form of this argument and is the shape of moving
@@ -262,6 +420,13 @@ eight readings before the decision was put.
   `info.autoReset` handled); a bare `renderer.render()` undercounts by ~15.
 - Bump `?v=` on the **single** module tag in `index.html`, after the last code
   edit.
+- **Know where the machine-checking stops.** Every committed checker in this
+  repo verifies the chain *from the raw JSON outward* — metrics files derived
+  from `sweep.json`, README figures matching the metrics files, the checker's
+  own failure path exercised. The first hop, **browser console → JSON, is
+  hand-transcribed and nothing verifies it**, and nothing could without
+  re-running the capture. If a number ever has to be defended, re-capture it;
+  do not re-read it.
 - Execution method: `superpowers:subagent-driven-development` — a fresh
   implementer per task, a review after each, a whole-branch review at the end.
   Ledgers live in `.superpowers/sdd/<plan-basename>/progress.md` and carry the
@@ -274,12 +439,22 @@ eight readings before the decision was put.
 | `vercel.json` still caches the deleted `/three.min.js`; the version-stamped `tour/lib/` gets the generic `max-age=300` | any plan touching deploy |
 | No explicit `Cache-Control` on the HTML entry point — now the single point of failure, since one tag versions everything | plan 5 |
 | `serve.py`: `%00` in a path raises instead of returning 400; realpath check is TOCTOU-racy in principle | deferred, dev-only, fails closed |
+| `serve.py:90`: `base64.b64decode(body)` is unguarded in `do_POST`, so a malformed save body raises, `socketserver` prints the traceback and **kills that handler thread**. Sibling to the `%00` row above, and it matters more than it looks: **every** measurement recipe in this repo goes through `/save/`, and the failure mode next door is a sandboxed `serve.py` answering HTTP 200 while writing nothing. Two independent ways for a capture to be silently absent, and neither announces itself — probe for the file on disk, never trust the response | deferred, dev-only; found by plan 4a |
+| The horkyone-10 ±10 luminance criterion **went unenforced for some time**: the shipped `exposure` 0.46 was already failing it before plan 4a started (+11.07 from serenity against a ±10 band), because plan 4a task 1 brightened all three apartments and serenity's re-fit came down further, moving the band out from under horkyone-10. Found in passing by plan 4a task 3, whose refit to 0.42 was therefore **mandatory, not cosmetic**. The criterion has no automated check and nothing re-runs it when a sibling's exposure moves — that is the actual gap | plan 5 |
 | `CLAUDE.md` beyond the two rows already corrected | plan 5 |
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
-| **`grid()` winds 8 of 12 wall faces backwards** — see below | **plan 4 or 5**, decided 2026-08-14 |
+| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
 
-### The wall-winding defect, deferred deliberately
+### The wall-winding defect, deferred deliberately — and since fixed
+
+> **Status, 2026-08-15:** fixed on branch `phaseB-plan4a-winding` by plan 4a
+> task 1 (`b767b4b`), with the sign test this section prescribes rather than
+> the `else`-branch reversal it warns against. Still present on `main`. The
+> third consequence below — that the fix expires plan 3 task 4's exposure fit —
+> came true and was discharged by plan 4a task 3; plan 4a task 4 then
+> re-measured the gate and rebaselined both apartments. Everything below is
+> the original diagnosis, kept because it is what the fix was built from.
 
 Found by plan 3 task 2, confirmed independently by two reviewers reading the
 code. **This is a shipped rendering bug that predates phase B**, and the
@@ -303,20 +478,54 @@ Not a reversal of the `else` branch: that would leave top and bottom broken
 everywhere, and an earlier draft of this write-up said exactly that before it
 was corrected.
 
-Three consequences were accepted knowingly when this was deferred:
+Three consequences were accepted knowingly when this was deferred. **All three
+have now played out; here is each one's disposal, added 2026-08-15 by plan 4a
+task 5.**
 
 - **It blocks any wall lightmap atlas.** An atlas baked onto inside-out walls
   records the wrong side. Plan 3 task 2 split that atlas out for this reason,
   and most of that task's intended effect went with it — walls carry most of a
   first-person frame's darkest 5%.
+  → **UNBLOCKED, and still unbuilt.** Task 1 removed this obstacle. Plan 4a
+  task 2 then tried the *cheap* substitute — vertex-shaded walls taking the
+  visibility-scaled ambient, `SEG` swept 0.45/0.30/0.22/0.15 — and returned
+  **NO-GO** (serenity linear-domain contrast 3.9347 against a required ≥4.32,
+  reverted in full, `tour/` carries none of it). **Do not over-read that
+  verdict.** It says *vertex-shaded* walls cannot reach the bar; it does not
+  say walls are not worth lighting. With the smearing artefact suppressed as
+  far as the sweep could, the surviving real effect is **+0.23 of the +1.11
+  required — about a fifth** — and 3.4380 is **not** a ceiling on a per-texel
+  atlas, which samples on the surface and produces real gradients where this
+  shades from four geometric corners, some of them buried inside adjoining
+  solids. The atlas remains the open path, and its known cost is a
+  **from-scratch atlas rasteriser**: three.js's `UVUnwrapper` is a thin
+  wrapper over the `xatlas-web` WASM module, so there is nothing in the
+  vendored tree to reuse for the packing. Whoever writes plan 4c or 5 must
+  meet that distinction rather than plan 4a task 2's headline number.
 - **It is why GTAO was rejected.** GTAO is the first thing in this pipeline to
   read scene normals; with them pointing away from the viewer it closes the
   hemisphere and multiplies walls to black (plan 3 task 3). That rejection has
   a second, independent ground — a mobile draw-call breach — so it survives
   this fix, but the black walls do not.
+  → **The black walls are CURED; GTAO stays rejected anyway.** The normals now
+  face the viewer, so that specific failure cannot recur. The surviving ground
+  is the one that never depended on the winding: GTAO's G-buffer prepass takes
+  kings-court from **150 to 282 mobile draw calls against a ≤250 budget**.
+  Re-adopting GTAO means solving that, not re-testing the walls.
 - **It expires plan 3 task 4's exposure fit.** That fit is correct for the
   render as it ships today; fixing the winding changes the render and forces a
   re-fit.
+  → **Came true, and was discharged.** Plan 4a task 3 re-fitted all three
+  against the post-winding render: serenity 0.329 → **0.295**, kings-court
+  0.575 → **0.52**, horkyone-10 0.46 → **0.42**. It also found that the
+  shipped horkyone-10 0.46 had *already* fallen out of its own ±10 band
+  (+11.07 from serenity) once serenity's fit came down — see the deferred
+  table above.
 
 Whoever fixes it owns a verification pass of its own: moving those faces moves
-apparent room dimensions.
+apparent room dimensions. → **It did, exactly as predicted and on the axis the
+original note got wrong.** Every measurable **x** span in all three apartments
+shrank by exactly **0.280**, every **z** span by exactly 0.000; the reversed
+faces belong to walls *running* along z, which bound a room in **x**. Each room
+now measures its configured centreline distance minus the 0.14 wall thickness
+exactly.

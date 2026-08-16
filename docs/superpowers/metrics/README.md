@@ -498,6 +498,39 @@ exposure itself is.
 
 ### horkyone-10: fitted, and it passes the ±10 luminance check
 
+> **Superseded values — the method below is still the live one, every number
+> in it is not.** Added 2026-08-15 by plan 4a task 5. This section fits
+> horkyone-10 to **0.45** against siblings at serenity **0.326** /
+> kings-court **0.56**, and its sibling-band arithmetic (window
+> [139.66, 148.36], the ±5-ish diffs, the 1.05 comparison) is computed from
+> those three. All three have since moved twice: plan 3 task 4 →
+> 0.329 / 0.575 / 0.46, then plan 4a task 3 → **0.295 / 0.52 / 0.42**, which
+> is what ships on `phaseB-plan4a-winding` (fitted and measured at `?v=110`;
+> the tree is at **`?v=112`** after two comment-only bumps that moved no
+> value — `main` still carries plan 3 task 4's set until that branch
+> merges). **Read this section for the
+> criterion and the procedure — "mean sRGB luminance within ±10 of both
+> fitted flats, every `spawns[]` entry at 480×300 through the full post
+> chain, pooled" — and for nothing else.** The live band and the live sweep
+> are in plan 4a task 3's harness
+> (`docs/superpowers/harnesses/2026-08-15-b4a-task3/`, `session.json` →
+> `spawnPooledLuminance`): serenity 140.27, kings-court 148.19, acceptance
+> window **[138.19, 150.27]**, and horkyone-10 at 0.42 reads 145.44 pooled
+> over three loads, +5.17 from serenity and −2.75 from kings-court.
+>
+> **And the criterion had lapsed unnoticed.** The 0.46 this section's
+> successor fitted **was already failing the same ±10 test before plan 4a
+> touched anything** — at +11.07 from serenity, measured on the sweep above.
+> Nothing broke it directly: plan 4a task 1's winding fix brightened all
+> three apartments, serenity's own re-fit came down further than
+> horkyone-10's, and the band moved out from under a value nobody re-checked.
+> That is a structural gap, not a slip. **horkyone-10's exposure is defined
+> relative to two other apartments' exposures and no check re-runs when
+> either of them moves**, so it can fall out of its band silently and stay
+> there. Plan 4a task 3's refit to 0.42 was therefore mandatory rather than
+> cosmetic. Carried into `docs/PHASE-B-RESUME.md`'s deferred table so it is
+> owned by a plan rather than only recorded here.
+
 **Correction (review fix wave).** The pass this section originally described
 measured horkyone-10 failing the ±10 check at its untouched default (1.05)
 and stopped there, reasoning that picking an exposure purely to land inside
@@ -797,6 +830,15 @@ either direction. A margin this size is a statement about today, not a
 guarantee about tomorrow.
 
 ### horkyone-10: the luminance criterion, reconfirmed
+
+> **Reconfirmed then, superseded twice since.** Added 2026-08-15 by plan 4a
+> task 5. The exposures in the table below (0.326 / 0.56 / 0.45) are two
+> generations old — plan 3 task 4 moved them to 0.329 / 0.575 / 0.46 and plan
+> 4a task 3 to **0.295 / 0.52 / 0.42**. The criterion and the method are
+> unchanged and still current; only the values are history. See the marker
+> under "horkyone-10: fitted, and it passes the ±10 luminance check" above
+> for the live band, and for why this criterion went unenforced between the
+> two moves.
 
 Task 7 fitted horkyone-10 to exposure 0.45 on the criterion task 6 set —
 mean sRGB luminance within ±10 of the two fitted flats. Re-measured fresh
@@ -1159,6 +1201,26 @@ crosses at 0.575 — and the luminance value was taken, costing **+0.06**
 > metric is dominated by pose and content mismatch and cannot arbitrate a
 > 0.03 of lighting. See `docs/PHASE-B-RESUME.md`, "The gate, restated
 > 2026-08-15" and "How the 0.03 was resolved".
+>
+> **And there is a SECOND ruling, mirrored here so one deletion cannot lose
+> it.** Added 2026-08-15 by plan 4a task 5. After plan 4a task 1's winding
+> fix put serenity at **16.32** — *under* the old ≤16.58 ceiling, not over
+> it — and task 3's re-fit took it to **16.00** (kings-court **18.58**), the
+> merge owner ruled a second time: **keep the restated gate; do not
+> reinstate the absolute ceilings** now that serenity would pass them. The
+> grounds are the ones above and never depended on the 0.03 — this metric
+> cannot arbitrate lighting at that resolution, and serenity's ΔE is
+> expected to move by whole points once plan 4 fixes the living-room
+> opening, the missing shower and the mis-pointed spots.
+> **Provenance, stated because it is thinner than the first ruling's:** a
+> merge-owner decision taken **in session on 2026-08-15** and recorded by
+> the controller, made conversationally after task 1's numbers were
+> verified. **No in-tree artefact of it exists** — no commit, no report, no
+> metrics file — which is why it is written into committed prose in two
+> places rather than cited. Read it as a recorded decision, not a citation.
+> The primary copy, with the numbers that occasioned it, is in
+> `docs/PHASE-B-RESUME.md` under "Option 4 was executed after all, and the
+> 0.03 is gone".
 
 | Apartment | Ceiling (superseded) | Now | Verdict at the time |
 |---|---:|---:|---|
@@ -1208,6 +1270,17 @@ one; the decision about it belongs to whoever owns the merge.
 spawn-pooled mean sRGB luminance **143.6** against serenity 138.7 and
 kings-court 149.0 — inside ±10 of both, and 0.25 off the siblings'
 midpoint.
+
+> **This pass expired, and nothing noticed for a while.** Added 2026-08-15 by
+> plan 4a task 5. The 0.46 fitted here stopped satisfying its own ±10
+> criterion once plan 4a task 1's winding fix brightened all three
+> apartments: re-measured on the post-winding render it reads **+11.07 from
+> serenity**, outside the band. It was not broken by anything done to
+> horkyone-10 — serenity's own re-fit came down further and the band moved
+> out from under it. Plan 4a task 3 refit horkyone-10 to **0.42** (pooled
+> mean 145.44, +5.17 / −2.75 against the siblings' 140.27 / 148.19). The
+> measurement is a paragraph up in this section's own terms; the reading of
+> record is `docs/superpowers/harnesses/2026-08-15-b4a-task3/session.json`.
 
 **This fit expires.** It was made against a render carrying the deferred
 `grid()` winding defect (8 of 12 wall faces backwards, `bake.js`),
@@ -1652,6 +1725,13 @@ lightmap pack on (`b3-task5-after`, `b3-task6-spotcheck-after`), and
 `b3-task2-after` (16.6409), which is task 2 *before* its own review fix round
 and so is a third render, not either lineage.
 
+**Also excluded: every `b4a-*` file.** Plan 4a's task 1 changed which wall face
+is drawn, so its post-fix readings are a further render again — 16.19–16.40,
+below both rows — and its task 2's are mostly a reverted trial. (Its
+`b4a-task1-before`, 16.6036, is the pre-fix render and belongs to no row
+either.) See "Plan 4a's readings are a third render, and one of them is a
+reverted trial" below.
+
 #### The task-1 pair is a fixed-FOV capture, not a session outlier
 
 `serenity-b3-task1-baseline-allspots.json` (16.8667) and
@@ -1702,6 +1782,305 @@ one. A lighting change moving this metric by 0.05 is not evidence that the
 lighting got worse; it is evidence that this metric cannot arbitrate lighting.
 But the merge condition is the merge condition, and against it serenity is now
 on the wrong side of it.
+
+#### Plan 4a's readings are a third render, and one of them is a reverted trial
+
+Plan 4a (`b4a-task1`, `b4a-task2`, `b4a-task3`, `b4a-task4`)
+adds **twenty-three** all-spot legacy readings to this directory. **None of them belongs in either lineage row above, and none
+of them may be compared to the 16.58 merge ceiling.** Two independent reasons,
+either of which is sufficient:
+
+**They are a different render.** Plan 4a task 1 fixed the wall winding — eight
+of the file's twelve `grid()` call sites emitted a quad whose geometric front
+face disagreed with its own normal, so on the unmodified tip a visitor saw the
+*far* face of every along-z wall — and it also moved two serenity paintings out
+of a wall slab. That changes which surface is drawn and shaded. Task 1's own
+session measured the effect directly: serenity **16.60 → 16.40 → 16.32**
+(before, after the winding fix, after the paintings), kings-court
+**18.87 → 18.79**.
+
+**They are different hardware, twice over.** Task 2 ran on a third machine
+again (ANGLE / Intel UHD 630 / D3D11) and re-measured its own baseline rather
+than inheriting task 1's, precisely so its before/after pairs would be
+same-machine.
+
+The two facts together are what makes the cluster arithmetic unusable here, and
+they also give the one cross-session check worth recording: task 2's
+independently measured before is **16.34** against task 1's committed after of
+**16.32** (kings-court **18.81** against **18.79**), Δ0.02 on both — so the
+post-winding-fix render reproduces across two sessions and two machines at
+**≈16.33** (16.3227 and 16.3391, mean 16.3309), about **0.21–0.24 below** the
+BASE row's 16.5409–16.5700 and **0.26–0.28** below HEAD's. That is a third
+lineage, not a stray reading in either existing one.
+
+| lineage | serenity all-spot legacy | files |
+|---|---|---|
+| BASE (pre-b3-task-2 render) | 16.5409 – 16.5700 | see the lineage table above |
+| HEAD (post-b3-task-2 render) | 16.5882 – 16.6155 | see the lineage table above |
+| **plan 4a, post-winding-fix** | **16.19 – 16.40** | `b4a-task1-after[-paintings]`, all five `b4a-task2-*` |
+
+Values are the mean of each file's own rounded `spots[]`, the same computation
+as the lineage table above, quoted here at 2 dp. The plan-4a row's **upper end
+is `b4a-task1-after` (16.4027), which is an intermediate state** — winding
+fixed, paintings still buried in the wall slab — and it is the only reading in
+the row above 16.34. Task 1's *tip* is `-after-paintings` (16.3227), and that
+is the state task 2's before (16.3391) reproduces; the ≈16.33 figure above is
+those two and not the row's full span. `b4a-task1-before` (16.6036) is
+deliberately **not** in the row: it is the pre-fix render, which is the thing
+this row exists to be distinguished from.
+
+**Ten of the twenty-three are `b4a-task2`, and eight of those ten measure code that
+is not in the tree** — the two `-before-` files are the shipped state, one per
+apartment. Task 2 switched walls to the visibility-scaled ambient
+and swept `SEG` over 0.45 / 0.30 / 0.22 / 0.15; it **failed its exit criterion
+(linear contrast 3.9347 against ≥ 4.32) and was reverted in full**, so `tour/`
+is byte-identical to task 1's tip. Only the two `-before-` files describe
+shipped code:
+
+| file | serenity | kings-court | state |
+|---|---:|---:|---|
+| `*-b4a-task2-before-legacy-allspots` | **16.34** | **18.81** | shipped (= task 1 tip) |
+| `*-b4a-task2-seg045-legacy-allspots` | 16.27 | 19.46 | **trial, reverted** |
+| `*-b4a-task2-seg030-legacy-allspots` | 16.19 | 19.35 | **trial, reverted** |
+| `*-b4a-task2-seg022-legacy-allspots` | 16.30 | 19.22 | **trial, reverted** |
+| `*-b4a-task2-seg015-legacy-allspots` | 16.29 | 19.24 | **trial, reverted** |
+
+`kings-court-b4a-task2-seg045-legacy-allspots.json` (**19.46**, against a
+before of 18.81) is the one most likely to be grepped alone and misread as a
+shipped regression. It is not: it is trial state, it was one of the readings
+that produced the No-Go, and nothing survived the revert. Following the
+`b3-task3` GTAO precedent, the not-shipped marker lives in the companion
+`{serenity,kings-court,horkyone-10}-b4a-task2-luminance.json` files
+(`"shipped": "NOTHING…"`), not in the all-spot files themselves — so read the
+two together.
+
+> **Read task 2's NO-GO at its own scope — it is about vertex shading, not
+> about walls.** Added 2026-08-15 by plan 4a task 5, because this verdict is
+> the single most over-generalisable finding on the branch. What the data
+> supports: ***vertex-shaded*** walls taking the visibility-scaled ambient
+> cannot reach a linear contrast of 4.32. What it does **not** support:
+> "walls are not worth lighting". The sweep's own shape is the reason —
+> contrast was **highest at the coarsest `SEG`** and fell as `SEG` refined —
+> **3.8647 (0.45) → 3.6405 (0.30) → 3.3748 (0.22) → 3.4380 (0.15)**, each
+> the *first* reading at its own state, so the four are like for like; the
+> 0.45 state's repeat is the 3.9347 quoted above, and the last two differ by
+> less than the sweep's own ±0.07 spread, so they are not resolvable from
+> each other. All five are `sweep.json`'s own `linearContrast` values (the
+> file writes the last one as `3.438`; it is shown here to 4 dp to match the
+> artefact-suppressed figure below, and no other digit differs). (An
+> earlier version of this marker wrote the first value as **3.90**, which is
+> the *mean* of the two 0.45 readings — 3.8997 rounded — set alongside three
+> direct readings. Corrected in fix round 1; the conclusion is unaffected
+> either way.) The statistic was being moved by defect 2's smeared near-zero
+> vertices rather than by walls being correctly shaded, and buying the
+> criterion would have meant shipping the artefact that produced it. Suppress that artefact as far as the sweep can (`SEG`
+> 0.15, true-zero fraction 7.7% → 4.8%) and the surviving real effect is
+> 3.2062 → **3.4380: about +0.23 of the +1.11 the criterion asked for,
+> roughly a fifth.** **3.4380 is not an upper bound on a wall lightmap
+> atlas.** An atlas samples per texel *on* the surface and produces real
+> gradients; this shades from four geometric corners, and on the reveals,
+> tops and bottoms — single 1×1 quads whatever `SEG` says, which is why
+> refining `SEG` cannot fix them — some of those corners sit inside adjoining
+> solids. Plan 4a task 1 **unblocked** that atlas (it could not be baked onto
+> inside-out walls at all); its remaining cost is a from-scratch atlas
+> rasteriser, since three.js's `UVUnwrapper` is a thin wrapper over the
+> `xatlas-web` WASM module. Whoever writes plan 4c or 5 owns that decision on
+> these terms, not on the headline 3.9347.
+
+**Four of the twenty-three are `b4a-task3`, and they are a FOURTH render again —
+do not fold them into the plan-4a row above.** Task 3 re-fitted every
+apartment's `exposure` against the post-winding render (serenity 0.329 →
+**0.295**, kings-court 0.575 → **0.52**, horkyone-10 0.46 → **0.42**), because
+task 1's winding fix brightened the scene and expired the fit plan 3 task 4
+had made. An exposure change alters every pixel, so these readings share no
+render state with the rows above and their span is not comparable to the
+16.19–16.40 row, let alone to the 16.58 merge ceiling.
+
+| file | serenity | kings-court | state |
+|---|---:|---:|---|
+| `*-b4a-task3-BEFORE-e<old>-legacy-allspots` | 16.34 | 18.80 | task 1's tip, re-measured this session as the paired before arm |
+| `*-b4a-task3-final-legacy-allspots` | 16.00 | 18.58 | **shipped**, independent page load |
+| `*-b4a-task3-final-legacy-allspots-repeat` | **15.98** | **18.58** | **shipped, and the headline gate arm** — same page load as the BEFORE row |
+
+**The `-repeat` suffix is misleading and is explained rather than renamed.**
+The two `-final-` files are both the shipped state; they differ only in which
+page load they came from. The one carrying `-repeat` is the *same-load* arm,
+paired against the `BEFORE` row on the identical page and bake with only
+`renderer.toneMappingExposure` moved, so it is the arm the −0.36 / −0.22 gate
+delta is computed from. The unsuffixed `-final-` file is the independent
+second load, quoted as the reproduction check (16.00 against 15.98; kings-court
+18.58 both times). Either is a valid statement of the shipped ΔE; only the
+`-repeat` one is half of a controlled pair.
+
+The task-3 BEFORE rows reproduce task 1's committed tip (16.32 / 18.79) to 0.02
+and 0.01, which is what licenses reading the deltas as caused by the exposure
+change rather than by the session.
+
+Task 2's own verdict, threshold arithmetic and the artefact finding that
+underwrites it are in those three luminance files and in
+`docs/superpowers/harnesses/2026-08-15-b4a-task2/`.
+
+**The remaining four of the twenty-three are `b4a-task4`, and they are the only
+pair in this directory measured on two trees at once.** Task 4 is plan 4a's
+closing gate. It ran `b39a99a` (the branch's merge-base, `?v=107`) on port 8743
+and the branch tip `f0315ea` (`?v=110`) on port 8742 from one browser session on
+one machine, three interleaved rounds per arm, so no reading in the pair can
+differ by machine, session or harness. `tools/` is byte-identical between the
+two commits, so both arms ran the same scorer and the same `measure.js`; the
+`compare` populations are identical too (serenity 11, kings-court 14, same
+files).
+
+| file | serenity | kings-court | what it is |
+|---|---:|---:|---|
+| `*-b4a-task4-BASE-legacy-allspots` | 16.6173 | 18.8443 | merge-base `b39a99a`, round 1 |
+| `*-b4a-task4-gate-legacy-allspots` | 15.9891 | 18.5864 | branch tip `f0315ea`, round 1 |
+
+Rounds 2 and 3 of both arms, and the two counterfactual-exposure probes that
+decompose the movement, are in
+`docs/superpowers/harnesses/2026-08-15-b4a-task4/` rather than here, following
+task 3's precedent for raw probe dumps. Over three rounds the arms read
+serenity BASE 16.6173/16.6182/16.5973 against tip 15.9891/16.0055/15.9973, and
+kings-court BASE 18.8443/18.8921/18.9000 against tip 18.5864/18.5643/18.5764 —
+a within-arm spread of 0.016–0.056, and a movement of **−0.61 on serenity and
+−0.30 on kings-court**, both improvements and both far outside it. The BASE arm
+reproduces the recorded baselines it was measured against (serenity 16.61
+exactly, kings-court 18.88 against a recorded 18.90), which is the check that
+licenses reading the movement as the branch's rather than the session's.
+
+**Do not read the whole of kings-court's −0.30 as the render getting better.**
+Plan 4a task 3 re-fitted every `exposure` on the mandated **all-spot**
+population where plan 3 task 4 had fitted on `poseVerified`. That convention
+change moved the fitted exposure in its own right, and an exposure change moves
+every pixel — so part of this branch's ΔE movement is a change in how the fit's
+population is chosen rather than anything a visitor would see.
+
+The split was measured, not inferred. For each apartment the tip was re-read at
+the exposure its **`poseVerified`** fit would have chosen — read off task 3's
+own committed sweep as the zero crossing of that population's luminance diff,
+the same method for both apartments — against a control at the shipped
+exposure **on the same page load**, two loads each:
+
+| apartment | counterfactual | render | convention | convention share |
+|---|---:|---:|---:|---:|
+| serenity | 0.298 | **−0.590** | **−0.024** | **3.9%** |
+| kings-court | 0.5596 | **−0.151** | **−0.152** | **50.1%** |
+
+**serenity's improvement is essentially all render** — 96% of it. **kings-court's
+splits about evenly**, and the two halves are 0.0005 apart, which is far inside
+this measurement's own spread: **which half is larger is not resolved, and must
+not be reported as though it were.** What is resolved is the magnitude — about
+half of kings-court's headline improvement is measurement convention.
+
+> **"Render" here does not mean "the winding fix" — read this before quoting
+> the 96%.** Added 2026-08-16 by the final whole-branch review, which found
+> that this section carried no per-task attribution at all and that a reader
+> of it alone would credit the geometry fix with the whole movement. In this
+> section "render" means exactly **"not attributable to the all-spot vs
+> `poseVerified` population convention"**, and it therefore **includes task
+> 3's exposure re-fit**, which is the single largest component. The per-task
+> split lives in [`docs/PHASE-B-RESUME.md`](../../PHASE-B-RESUME.md)'s
+> attribution table, not here: serenity's −0.614 is **winding −0.201,
+> paintings −0.080, task 2 0.000 (reverted in full), exposure −0.357** (sum
+> −0.638, residual +0.025); kings-court's −0.303 is **winding −0.081, task 2
+> 0.000, exposure −0.228** (sum −0.309, residual +0.006). So on serenity the
+> exposure constant is **58%** of the movement and the geometry fix plus the
+> painting move are **46%** — both inside the 96% called "render". Neither
+> framing is wrong; quoting one without the other is.
+
+The counterfactual crossings come from
+`{serenity,kings-court}-b4a-task3-exposure-sweep-fixedfov-allspot.json`:
+kings-court's `poseVerified` diff crosses zero between 0.53 (−0.0148) and 0.56
+(+0.0002), i.e. **0.5596**; serenity's crosses at **0.2974–0.2981** across three
+independent batches, probed here at 0.298.
+
+**Sensitivity, since the split depends on those two numbers.** The measured ΔE
+slopes are 7.879 (serenity) and 3.833 (kings-court) per unit exposure, so the
+counterfactual at which each split would read 50/50 is **0.3339** and
+**0.5595**. serenity's crossing sits 0.036 below its break-even — further below
+than the whole 0.329→0.295 exposure change — so its render-dominated conclusion
+is robust. kings-court's crossing sits **0.0001** from its break-even, which is
+another way of saying its split is a dead heat and its ordering is not
+recoverable from this data.
+
+**An earlier version of this section reported 60% for kings-court and 14% for
+serenity, and both were wrong.** serenity's counterfactual was taken from task
+3's finding-2 slope arithmetic (0.295 + 0.011) rather than from the sweep, and
+the 0.011 was computed on the pre-winding tree; and both probes were single
+loads compared against means of *other* loads, which inflated kings-court's
+slope from 3.833 to 4.554 because the probe load happened to sit high. Pairing
+control and probe on the same load removes that: the per-load convention
+readings agree to 0.0018 (serenity) and 0.0036 (kings-court), where the loads'
+absolute values disagree by up to 0.074. Corrected in plan 4a task 4's fix
+round 1; the superseding readings are the `*-b4a-task4-fix1-*` files in the
+harness.
+
+**A claim that was withdrawn rather than repaired:** the earlier text said this
+split "confirms task 3's own prediction from luminance slopes (~62%) by an
+independent route". It does not. 62% is a share of the *exposure* move and this
+is a share of the *ΔE* move; the two need not agree even when both are right.
+Task 3's slope table and this sweep also disagree about the exposure worth of
+the population switch — 0.032 against a measured 0.560 − 0.520 = 0.040 — so
+there was no corroboration to claim.
+
+**Which spots the movement actually comes from.** Both figures are all-spot
+means by mandate, and on both apartments the movement is concentrated in a
+handful of spots. Stated here because the concentration cuts against the
+headline in serenity's case:
+
+* **serenity's −0.61 is carried entirely by two spots that are
+  `poseVerified: false`** — `7.webp` (−4.96) and `6.webp` (−4.11), together
+  −0.825 of the −0.614, i.e. more than all of it. Its **only two** pose-verified
+  spots both moved slightly the *other* way (`1.webp` +0.37, `11.webp` +0.16).
+  So serenity's headline improvement comes from spots this same document says
+  cannot arbitrate lighting, and its two readable spots did not improve.
+* **kings-court's is the other way round**: seven of its eight pose-verified
+  spots improved. The exception, `19.webp` (Laundry), regresses **+1.55** — the
+  largest single-spot movement on the branch, reproduced in all three rounds
+  (19.63/19.63/19.62 → 21.18/21.18/21.17). The probe locates most of it in the
+  exposure rather than the render: at 0.56 it reads 19.95, at the shipped 0.52
+  it reads 21.18.
+
+Neither fact changes a baseline — the gate is all-spot by rule 5 and both
+readings stand — but neither should be discovered by a later reader rather than
+read here.
+
+> **The honest bound on everything plan 4a measured.** Added 2026-08-15 by
+> plan 4a task 5. **Narrowed 2026-08-16 by the final whole-branch review: the
+> sentence below used to say the chain is machine-checked "from `sweep.json`
+> (and the other committed harness JSON) outward", and that overstated it.**
+> `check_metrics_readme.py` never opens `sweep.json`, nor anything else in
+> task 2's or task 3's harness — it reads the section of this README headed
+> "Plan 4a's readings are a third render", and for data it reads `metrics/`
+> plus the **task-4** harness directory, by literal filename, no glob.
+> **Machine-checked:** task 1's before/after/paintings series, task 2's
+> per-file state table and the three file counts, the `grid()` claim against
+> `bake.js`'s own argument lists, and all of task 4 — the gate pair, the
+> twelve round readings, the two headline movements, the render/convention
+> split, the slopes, the break-evens and the per-spot disclosures.
+> **Not machine-checked, at all:** every figure in **task 3's** three-row
+> table and its three exposure values (that whole table can be deleted with a
+> green run), **task 5's narrated `linearContrast` blockquote** two rounds
+> above — 3.8647 / 3.6405 / 3.3748 / 3.4380 / 3.9347, 3.2062, the 4.32 bar,
+> ±0.07, 7.7%→4.8% — **both blacks tables**, and the 16.58 merge ceiling. The
+> cost of that gap is visible in this very file: the erratum above says
+> `sweep.json` "writes the last one as `3.438`" when it writes **`3.4380`** —
+> a wrong claim about a committed file, sitting inside the unguarded
+> blockquote, which no checker could catch because no checker reads either
+> the sentence or that file. Extending the coverage is a follow-up; this
+> paragraph is narrowed so it stops claiming coverage that does not exist.
+> Within that scope, `write_metrics.py
+> --check` proves the metrics files are derived from the raw readings rather
+> than typed, `check_metrics_readme.py` proves this README's figures match
+> those files, and `check_metrics_readme_selftest.py` proves that checker can
+> actually fail. **None of that reaches the first hop.** The raw readings were
+> **hand-transcribed out of a browser console into `sweep.json` and into the
+> task harnesses' `session.json`.** No harness here verifies that step, and
+> none could without re-running the capture — a checker can only confirm that
+> the document agrees with the file, never that the file agrees with what the
+> browser printed. Two committed checkers guard this README; neither guards
+> that. Treat the transcription as the weakest link in every number on this
+> branch, and re-capture rather than re-read if a figure ever has to be
+> defended.
 
 ### The plan's own claim: blacks, before and after
 
