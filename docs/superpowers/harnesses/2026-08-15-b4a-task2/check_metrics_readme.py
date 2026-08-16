@@ -32,8 +32,20 @@ either from the README text or from a `spots[]` array. The only constants here
 are regexes and the word-numeral table.
 
 The failure path is exercised, not assumed: `check_metrics_readme_selftest.py`
-beside this file mutates a scratch copy of the README (and of a metrics JSON)
-twelve different ways and asserts this script exits non-zero on every one.
+beside this file mutates a scratch copy of the README (and of a metrics or
+harness JSON) **thirty-seven** different ways and asserts this script exits
+non-zero on every one. This run makes **100** assertions. (Both counts have
+been stale before: the line said "twelve different ways" from round 3 until the
+final whole-branch review, while the self-test grew to 34 and then 37 cases.
+They are prose, nothing computes them -- re-read the tail of a real run rather
+than trusting them.)
+
+WHAT THIS DOES **NOT** REACH -- read `metrics/README.md`'s scope note with it.
+Everything below is read out of ONE section of that README, and it opens only
+the task-4 harness directory. Task 2's `sweep.json` and task 3's harness are
+never opened, and task 3's own figures in the README are unguarded. The
+`metrics/README.md` blockquote that used to claim the chain is machine-checked
+"from `sweep.json` outward" has been narrowed to say so.
 
 Values are the mean of each file's own rounded `spots[]` -- the computation the
 lineage table in that README declares for itself, NOT the files' own `mean`
@@ -104,6 +116,44 @@ def mean_of_rounded(metrics_dir, name):
     d = json.load(open(os.path.join(metrics_dir, name + '.json'), encoding='utf-8'))
     spots = [x['deltaE'] for x in d['spots']]
     return sum(spots) / len(spots)
+
+
+def disagreeing_grid_calls(src):
+    """Recompute the '8 of 12' claim from `bake.js`'s own argument lists.
+
+    Each wall quad is emitted as `grid(origin, uVec, vVec, n, ...)`, and grid()
+    winds its triangles along uVec x vVec, so the quad's geometric front face
+    disagrees with the normal it was handed exactly when
+    `(uVec x vVec) . n < 0`. Every component of those three literals is one of
+    `0`, `1`, `-1`, or a `w`/`h`/`d` extent with an optional sign, and all
+    three extents are strictly positive (builder.js builds each piece as
+    centre -/+ size/2), so substituting 1 for every named extent preserves
+    every sign in the product. Returns (disagreeing, parsed).
+
+    Nothing is typed here: 8 and 12 both come out of the source file. The
+    README's two words are compared against these.
+    """
+    def vec(s):
+        out = []
+        for tok in s.strip()[1:-1].split(','):
+            tok = tok.strip()
+            sign = -1.0 if tok.startswith('-') else 1.0
+            out.append(0.0 if tok.lstrip('-') == '0' else sign)
+        if len(out) != 3:
+            raise SystemExit('grid() argument is not a 3-vector: %r' % s)
+        return out
+
+    bad = parsed = 0
+    for mm in re.finditer(r'^\s*grid\(\s*\[[^\]]*\],\s*(\[[^\]]*\]),\s*(\[[^\]]*\]),'
+                          r'\s*(\[[^\]]*\])', src, re.M):
+        u, v, n = (vec(mm.group(i)) for i in (1, 2, 3))
+        cross = [u[1] * v[2] - u[2] * v[1],
+                 u[2] * v[0] - u[0] * v[2],
+                 u[0] * v[1] - u[1] * v[0]]
+        parsed += 1
+        if sum(cross[k] * n[k] for k in range(3)) < 0:
+            bad += 1
+    return bad, parsed
 
 
 def grab(text, pattern, c, label, flags=0):
@@ -333,9 +383,19 @@ def main():
         c.ok('grid() call sites match bake.js',
              WORDS.get(m.group(2).lower()) == sites,
              'README "%s" (=%s) vs bake.js %d' % (m.group(2), WORDS.get(m.group(2).lower()), sites))
-        c.ok('grid() disagreeing count is a subset of the sites',
-             WORDS.get(m.group(1).lower(), 0) <= sites,
-             'README "%s" of %d' % (m.group(1), sites))
+        # The headline number, recomputed from bake.js's own argument lists.
+        # It used to be asserted as `WORDS.get(word, 0) <= sites`, which is
+        # only "n <= 12" -- and the `, 0` default meant an unrecognised word
+        # scored 0 and passed. The whole-branch review proved it empirically:
+        # rewriting "eight" to "most", to "zero" or to "twelve" all returned
+        # exit 0. The branch's headline claim was guarded by nothing.
+        bad, parsed = disagreeing_grid_calls(src)
+        c.ok('grid() call sites parsed = call sites counted', parsed == sites,
+             'parsed %d vs counted %d' % (parsed, sites))
+        c.ok('grid() disagreeing count matches bake.js',
+             WORDS.get(m.group(1).lower()) == bad,
+             'README "%s" (=%s) vs bake.js %d'
+             % (m.group(1), WORDS.get(m.group(1).lower()), bad))
 
     # ---- 8a. plan 4a task 4: the two-tree gate pair ----------------------
     # Added in task 4. Everything here is compared against a spots[] array;

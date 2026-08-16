@@ -1971,6 +1971,22 @@ this measurement's own spread: **which half is larger is not resolved, and must
 not be reported as though it were.** What is resolved is the magnitude — about
 half of kings-court's headline improvement is measurement convention.
 
+> **"Render" here does not mean "the winding fix" — read this before quoting
+> the 96%.** Added 2026-08-16 by the final whole-branch review, which found
+> that this section carried no per-task attribution at all and that a reader
+> of it alone would credit the geometry fix with the whole movement. In this
+> section "render" means exactly **"not attributable to the all-spot vs
+> `poseVerified` population convention"**, and it therefore **includes task
+> 3's exposure re-fit**, which is the single largest component. The per-task
+> split lives in [`docs/PHASE-B-RESUME.md`](../../PHASE-B-RESUME.md)'s
+> attribution table, not here: serenity's −0.614 is **winding −0.201,
+> paintings −0.080, task 2 0.000 (reverted in full), exposure −0.357** (sum
+> −0.638, residual +0.025); kings-court's −0.303 is **winding −0.081, task 2
+> 0.000, exposure −0.228** (sum −0.309, residual +0.006). So on serenity the
+> exposure constant is **58%** of the movement and the geometry fix plus the
+> painting move are **46%** — both inside the 96% called "render". Neither
+> framing is wrong; quoting one without the other is.
+
 The counterfactual crossings come from
 `{serenity,kings-court}-b4a-task3-exposure-sweep-fixedfov-allspot.json`:
 kings-court's `poseVerified` diff crosses zero between 0.53 (−0.0148) and 0.56
@@ -2029,8 +2045,30 @@ readings stand — but neither should be discovered by a later reader rather tha
 read here.
 
 > **The honest bound on everything plan 4a measured.** Added 2026-08-15 by
-> plan 4a task 5. This branch's verification chain is machine-checked **from
-> `sweep.json` (and the other committed harness JSON) outward**: `write_metrics.py
+> plan 4a task 5. **Narrowed 2026-08-16 by the final whole-branch review: the
+> sentence below used to say the chain is machine-checked "from `sweep.json`
+> (and the other committed harness JSON) outward", and that overstated it.**
+> `check_metrics_readme.py` never opens `sweep.json`, nor anything else in
+> task 2's or task 3's harness — it reads the section of this README headed
+> "Plan 4a's readings are a third render", and for data it reads `metrics/`
+> plus the **task-4** harness directory, by literal filename, no glob.
+> **Machine-checked:** task 1's before/after/paintings series, task 2's
+> per-file state table and the three file counts, the `grid()` claim against
+> `bake.js`'s own argument lists, and all of task 4 — the gate pair, the
+> twelve round readings, the two headline movements, the render/convention
+> split, the slopes, the break-evens and the per-spot disclosures.
+> **Not machine-checked, at all:** every figure in **task 3's** three-row
+> table and its three exposure values (that whole table can be deleted with a
+> green run), **task 5's narrated `linearContrast` blockquote** two rounds
+> above — 3.8647 / 3.6405 / 3.3748 / 3.4380 / 3.9347, 3.2062, the 4.32 bar,
+> ±0.07, 7.7%→4.8% — **both blacks tables**, and the 16.58 merge ceiling. The
+> cost of that gap is visible in this very file: the erratum above says
+> `sweep.json` "writes the last one as `3.438`" when it writes **`3.4380`** —
+> a wrong claim about a committed file, sitting inside the unguarded
+> blockquote, which no checker could catch because no checker reads either
+> the sentence or that file. Extending the coverage is a follow-up; this
+> paragraph is narrowed so it stops claiming coverage that does not exist.
+> Within that scope, `write_metrics.py
 > --check` proves the metrics files are derived from the raw readings rather
 > than typed, `check_metrics_readme.py` proves this README's figures match
 > those files, and `check_metrics_readme_selftest.py` proves that checker can

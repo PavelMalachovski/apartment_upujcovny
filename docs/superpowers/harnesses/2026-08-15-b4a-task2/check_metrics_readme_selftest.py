@@ -141,6 +141,22 @@ MUTATIONS = [
     ('source claim: "twelve grid() call sites" -> "ten"', 'readme',
      lambda t: sub_once(t, "of the file's twelve `grid()` call sites",
                         "of the file's ten `grid()` call sites", 'grid count')),
+    # The branch's HEADLINE claim. Until the final whole-branch review it was
+    # asserted only as `WORDS.get(word, 0) <= sites` -- "n <= 12", with an
+    # unknown word defaulting to 0 -- so all three of these mutations returned
+    # exit 0 / "0 failures". They are here because the fix to that assertion is
+    # worthless unless the failure it enables is executed: "most" covers the
+    # unknown-word default, "zero" and "twelve" cover the two ends of the
+    # vacuous `<=` range.
+    ('headline: "eight of the file\'s twelve" -> "most" (unknown word)', 'readme',
+     lambda t: sub_once(t, "winding — eight\nof the file's twelve",
+                        "winding — most\nof the file's twelve", 'grid disagreeing / most')),
+    ('headline: "eight" -> "zero"', 'readme',
+     lambda t: sub_once(t, "winding — eight\nof the file's twelve",
+                        "winding — zero\nof the file's twelve", 'grid disagreeing / zero')),
+    ('headline: "eight" -> "twelve" (the whole file)', 'readme',
+     lambda t: sub_once(t, "winding — eight\nof the file's twelve",
+                        "winding — twelve\nof the file's twelve", 'grid disagreeing / twelve')),
     ('section heading removed entirely', 'readme',
      lambda t: sub_once(t, "#### Plan 4a's readings are a third render",
                         "#### Plan 4a notes", 'heading')),
