@@ -534,15 +534,27 @@ const Baker = (() => {
   //      it back into a branch reversal.
   //      Measured on the pre-fix tip, standing 1 m off each wall's
   //      centreline and raycasting at it: EVERY along-x wall showed the near
-  //      face and no far face, and EVERY along-z wall the far face and no
-  //      near face -- serenity 4/4 and 5/5, kings-court 19/19 and 23/23,
+  //      face and no far face, and EVERY along-z wall the far face -- and,
+  //      with one traced exception, no near face -- serenity 4/4 and 5/5,
+  //      kings-court 19/19 and 23/23,
   //      horkyone-10 6/6 and 9/9. (The older 6/6, 14/16, 8/8, 17/18 figures
   //      counted a different population and are superseded; the probe that
   //      produced these is docs/superpowers/harnesses/2026-08-15-b4a-task1.)
-  //      One along-z wall did also report a near hit -- horkyone-10 wall 3,
-  //      1 of 9 -- and it is coincident geometry, not a counter-example: it
-  //      sits 0.15 m from wall 7, so the two walls' faces fall inside the
-  //      probe's own tolerance and each reads the other's. The committed
+  //      The exception, so it is not mistaken for a counter-example: under
+  //      __facesLvl -- the reading of record -- horkyone-10 wall 3 (x 4.86)
+  //      also reports a near hit, 1 of 9 along-z walls, on 3 of its 30
+  //      probes. The triangle it hits is at x 4.93 spanning z 3.14-3.28 with
+  //      normal +x: the EAST END REVEAL OF WALL 2, the along-x wall at
+  //      z 3.21 that ends at x 4.93. Walls join at centrelines, so that
+  //      reveal is exactly coplanar with wall 3's east face, and along-x
+  //      reveals are among the four faces that were never reversed. The
+  //      probe is right that there is wall material at the near-face
+  //      distance; it belongs to the neighbour's end cap, not to wall 3's
+  //      own culled face. (Wall 7 is a DIFFERENT case and is not this one:
+  //      it reports near under __faces only, where wall 3's far face at 4.93
+  //      sits 0.01 from wall 7's near face at 4.94, inside the +-0.02 range
+  //      tolerance. __facesLvl's centreline test rejects it and wall 7 reads
+  //      near 0. That case is what set the tolerance.) The committed
   //      summary.alongZShowingNear says 1/9 and this line used to imply 0/9.
   //      So the surface a visitor looked at was shaded
   //      from a sample point 14 cm away on the OTHER side of that wall --
@@ -571,11 +583,15 @@ const Baker = (() => {
   //      swept 0.45 / 0.30 / 0.22 / 0.15, against a pre-agreed exit
   //      criterion of serenity linear-domain contrast >= 4.32. Best of eight
   //      readings 3.9347 -- NO-GO, reverted in full. The sweep's own shape is
-  //      the finding: contrast was HIGHEST at the coarsest SEG (3.90 at 0.45,
-  //      decaying to 3.37-3.44 at 0.22-0.15) because the statistic was being
-  //      moved by this defect's smeared near-zeros, not by walls being
-  //      correctly shaded. Buying the criterion would have meant shipping the
-  //      artefact that produced it. With the artefact suppressed as far as
+  //      the finding: contrast was HIGHEST at the coarsest SEG and fell as
+  //      SEG refined. Four values, all of them the FIRST reading at their
+  //      own state so they are like for like -- 3.8647 (0.45), 3.6405
+  //      (0.30), 3.3748 (0.22), 3.4380 (0.15); the 0.45 state's repeat is
+  //      the 3.9347 above, and the last two differ by less than the sweep's
+  //      own +-0.07 spread, so they are not resolvable from each other.
+  //      The statistic was being moved by this defect's smeared near-zeros,
+  //      not by walls being correctly shaded. Buying the criterion would
+  //      have meant shipping the artefact that produced it. With the artefact suppressed as far as
   //      the sweep could suppress it (SEG 0.15, true-zero fraction 7.7% ->
   //      4.8%), the surviving real effect is 3.2062 -> 3.4380: about +0.23 of
   //      the +1.11 the criterion asked for, roughly a fifth.

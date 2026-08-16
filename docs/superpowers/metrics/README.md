@@ -505,8 +505,10 @@ exposure itself is.
 > [139.66, 148.36], the ±5-ish diffs, the 1.05 comparison) is computed from
 > those three. All three have since moved twice: plan 3 task 4 →
 > 0.329 / 0.575 / 0.46, then plan 4a task 3 → **0.295 / 0.52 / 0.42**, which
-> is what ships on `phaseB-plan4a-winding` (`?v=110`; `main` still carries
-> plan 3 task 4's set until that branch merges). **Read this section for the
+> is what ships on `phaseB-plan4a-winding` (fitted and measured at `?v=110`;
+> the tree is at **`?v=112`** after two comment-only bumps that moved no
+> value — `main` still carries plan 3 task 4's set until that branch
+> merges). **Read this section for the
 > criterion and the procedure — "mean sRGB luminance within ±10 of both
 > fitted flats, every `spawns[]` entry at 480×300 through the full post
 > chain, pooled" — and for nothing else.** The live band and the live sweep
@@ -1199,6 +1201,26 @@ crosses at 0.575 — and the luminance value was taken, costing **+0.06**
 > metric is dominated by pose and content mismatch and cannot arbitrate a
 > 0.03 of lighting. See `docs/PHASE-B-RESUME.md`, "The gate, restated
 > 2026-08-15" and "How the 0.03 was resolved".
+>
+> **And there is a SECOND ruling, mirrored here so one deletion cannot lose
+> it.** Added 2026-08-15 by plan 4a task 5. After plan 4a task 1's winding
+> fix put serenity at **16.32** — *under* the old ≤16.58 ceiling, not over
+> it — and task 3's re-fit took it to **16.00** (kings-court **18.58**), the
+> merge owner ruled a second time: **keep the restated gate; do not
+> reinstate the absolute ceilings** now that serenity would pass them. The
+> grounds are the ones above and never depended on the 0.03 — this metric
+> cannot arbitrate lighting at that resolution, and serenity's ΔE is
+> expected to move by whole points once plan 4 fixes the living-room
+> opening, the missing shower and the mis-pointed spots.
+> **Provenance, stated because it is thinner than the first ruling's:** a
+> merge-owner decision taken **in session on 2026-08-15** and recorded by
+> the controller, made conversationally after task 1's numbers were
+> verified. **No in-tree artefact of it exists** — no commit, no report, no
+> metrics file — which is why it is written into committed prose in two
+> places rather than cited. Read it as a recorded decision, not a citation.
+> The primary copy, with the numbers that occasioned it, is in
+> `docs/PHASE-B-RESUME.md` under "Option 4 was executed after all, and the
+> 0.03 is gone".
 
 | Apartment | Ceiling (superseded) | Now | Verdict at the time |
 |---|---:|---:|---|
@@ -1838,11 +1860,20 @@ two together.
 > supports: ***vertex-shaded*** walls taking the visibility-scaled ambient
 > cannot reach a linear contrast of 4.32. What it does **not** support:
 > "walls are not worth lighting". The sweep's own shape is the reason —
-> contrast was **highest at the coarsest `SEG`** and fell as `SEG` refined
-> (3.90 → 3.64 → 3.37 → 3.44), because the statistic was being moved by
-> defect 2's smeared near-zero vertices rather than by walls being correctly
-> shaded, and buying the criterion would have meant shipping the artefact
-> that produced it. Suppress that artefact as far as the sweep can (`SEG`
+> contrast was **highest at the coarsest `SEG`** and fell as `SEG` refined —
+> **3.8647 (0.45) → 3.6405 (0.30) → 3.3748 (0.22) → 3.4380 (0.15)**, each
+> the *first* reading at its own state, so the four are like for like; the
+> 0.45 state's repeat is the 3.9347 quoted above, and the last two differ by
+> less than the sweep's own ±0.07 spread, so they are not resolvable from
+> each other. All five are `sweep.json`'s own `linearContrast` values (the
+> file writes the last one as `3.438`; it is shown here to 4 dp to match the
+> artefact-suppressed figure below, and no other digit differs). (An
+> earlier version of this marker wrote the first value as **3.90**, which is
+> the *mean* of the two 0.45 readings — 3.8997 rounded — set alongside three
+> direct readings. Corrected in fix round 1; the conclusion is unaffected
+> either way.) The statistic was being moved by defect 2's smeared near-zero
+> vertices rather than by walls being correctly shaded, and buying the
+> criterion would have meant shipping the artefact that produced it. Suppress that artefact as far as the sweep can (`SEG`
 > 0.15, true-zero fraction 7.7% → 4.8%) and the surviving real effect is
 > 3.2062 → **3.4380: about +0.23 of the +1.11 the criterion asked for,
 > roughly a fifth.** **3.4380 is not an upper bound on a wall lightmap

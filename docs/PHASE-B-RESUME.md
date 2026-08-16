@@ -74,11 +74,14 @@ everything.)
 re-fitted every exposure against the post-winding render: serenity **0.295**,
 kings-court **0.52**, horkyone-10 **0.42**; bloom unchanged at threshold
 **1.8** / strength **0.1**; `?v=110`. The baseline table below is measured
-against that tip. (Plan 4a task 5 then bumped the tree to **`?v=111`** for a
-comment-only rewrite in `tour/bake.js`. No shader, constant or config value
-moved with it, so every baseline below still stands unremeasured — the bump
-follows the precedent that any edit to a shipped file bumps the cache tag,
-`?v=100 → 101` for a `post.js` header pointer.)
+against that tip. (Plan 4a task 5 then bumped the tree to `?v=111`, and to
+**`?v=112`** in its fix round, both for comment-only rewrites in
+`tour/bake.js`. No shader, constant or config value moved with either, so
+every baseline below still stands unremeasured — the bumps follow the
+precedent that any edit to a shipped file bumps the cache tag, `?v=100 → 101`
+for a `post.js` header pointer. Proved rather than asserted: strip every
+`^\s*//` line from both revisions of `bake.js` and the remainder is
+byte-identical, md5 `e22e63e5…` on both sides.)
 
 ## The gate, restated 2026-08-15
 
@@ -341,7 +344,18 @@ Two things follow, and the second matters more than the first:
   new numbers.** After task 1's readings were verified, the merge owner made
   a **second ruling on 2026-08-15**: keep the restated gate — baselines plus
   attribution plus the 0.5 hard stop — rather than reinstating the old
-  absolute ceilings now that serenity would pass them. The grounds are
+  absolute ceilings now that serenity would pass them.
+  **Provenance, stated plainly because it is thinner than the first
+  ruling's.** This was a merge-owner decision taken **in session on
+  2026-08-15** and recorded by the controller; the decision was made
+  conversationally, after task 1's numbers were verified, so **there is no
+  in-tree artefact of it** — no commit, no report, no metrics file. That is
+  exactly why it is written here, and why it is mirrored into
+  `docs/superpowers/metrics/README.md` beside the first ruling's marker: a
+  ruling that exists in one file can be lost by one deletion. Read it as a
+  recorded decision, not as a citation. The first ruling, by contrast, is
+  documented in three places and has the plan-3 gate readings behind it.
+  The grounds are
   unchanged and never depended on the 0.03: this metric is dominated by pose
   and content mismatch, so it cannot arbitrate lighting at that resolution,
   and serenity's ΔE is expected to move by whole points once plan 4 fixes the
