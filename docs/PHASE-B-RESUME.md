@@ -27,14 +27,22 @@ its own yet.
 | 1 — `2026-08-12-phase-b1-migration.md` | r128 → r185 migration | **Done**, 7 tasks, reviewed |
 | 2 — `2026-08-13-phase-b2-measurement-exposure.md` | Fix the metric's camera, re-fit exposure | **Done**, 9 tasks, reviewed, final fix wave applied |
 | 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | **Closed.** All 7 tasks done and reviewed, plus a whole-branch review and its fix wave. Two of its three bets measured and **rejected** on their own criteria — GTAO (task 3) and offline lightmaps (task 6). Plan 3 pushed serenity out of the then-current merge gate; that gate was **restated on 2026-08-15** and the 0.03 accepted — see "The gate, restated 2026-08-15" |
-| 4 — not yet written | serenity content: B1 geometry, exterior, GLTF, PBR | Not started |
-| 5 — not yet written | Re-validate constants, rewrite `CLAUDE.md` and `docs/PROMPT.md` | Not started |
+| 4a — `2026-08-15-phase-b4a-winding-walls.md` | Wall winding, walls taking their own light, the re-fit both force | **Done**, 5 tasks, reviewed, whole-branch review and its fix wave applied. Fixed a shipped rendering bug older than phase B; the wall-shading trial returned **NO-GO** and reverted |
+| 4b — `2026-08-16-phase-b4b-content-poses.md` | serenity's terrace opening, kings-court's missing shower, the mis-pointed and mis-mapped `photoSpots` | **Written, not started.** 5 tasks |
+| 4c — not yet written | HDRI and exterior, GLTF furniture, PBR/KTX2 | **Deliberately not written.** Its critical path is human asset curation, and a plan whose bottleneck is someone else's time is better written when that is settled |
+| 5 — `2026-08-16-phase-b5-revalidate-and-docs.md` | Re-validate every constant, rewrite `CLAUDE.md` and `docs/PROMPT.md`, close the deploy caching hole | **Written, not started.** 5 tasks |
 
-Roughly **10 tasks remain**, all of them in plans 4 and 5, both still to be
-written. (An earlier version of this line said "roughly 17 tasks remain across
-plans 3–5" and was written while plan 3 still had tasks left; plan 3's
-remaining 7 are now done.) Plan 4's model curation is human/asset work, not
-agent work — the design spec budgets a day or more per premium property.
+**"Plan 4" was one line and three different kinds of work** — engine code,
+config geometry, and an asset-curation effort the design spec budgets at a day
+or more of *human* work per property. It was split on 2026-08-15 so its code
+half would not wait on its human half. 4a shipped; 4b is written; 4c waits on
+a decision about who curates the assets.
+
+**Ten tasks are written and unstarted** (5 in 4b, 5 in plan 5), plus 4c
+whenever it is written. **4b is the one that matters most**: nine of serenity's
+eleven `compare` spots and six of kings-court's fourteen fail pose
+verification, and that — not lighting — is what dominates the metric every
+other plan has been judged by.
 
 **Nothing in plan 3 is "in progress", and it no longer leaves anything open.**
 The one thing it did leave open was a decision rather than a task — what to do
