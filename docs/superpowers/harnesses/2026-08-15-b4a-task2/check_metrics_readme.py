@@ -350,9 +350,30 @@ def main():
                      Hf('%s-b4a-task4-run2-HEAD-f0315ea-legacy-allspots' % apt),
                      Hf('%s-b4a-task4-run3-HEAD-f0315ea-legacy-allspots' % apt)],
         }
-    T4['serenity']['probe'] = Hf('serenity-b4a-task4-probe-HEAD-f0315ea-e0.306-legacy-allspots')
-    T4['kings-court']['probe'] = Hf('kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots')
     avg = lambda v: sum(v) / len(v)                                      # noqa: E731
+    # The render/convention split. Fix round 1 replaced task 4's original
+    # single-load probes with SAME-LOAD paired control/probe captures, two loads
+    # each, at the counterfactual read off task 3's committed sweep. The
+    # convention part is a paired within-load difference; the render part is the
+    # two-tree total minus it. Superseded probes (e0.306, e0.56) are still in the
+    # harness but nothing in the README is computed from them any more.
+    SHIP = {'serenity': '0.295', 'kings-court': '0.52'}
+    CF = {'serenity': '0.298', 'kings-court': '0.5596'}
+    for apt in T4:
+        pairs = []
+        for L in (1, 2):
+            ctl = Hf('%s-b4a-task4-fix1-HEAD-f0315ea-L%d-control-e%s-legacy-allspots'
+                     % (apt, L, SHIP[apt]))
+            prb = Hf('%s-b4a-task4-fix1-HEAD-f0315ea-L%d-probe-e%s-legacy-allspots'
+                     % (apt, L, CF[apt]))
+            pairs.append(ctl - prb)
+        T4[apt]['convention'] = avg(pairs)
+        T4[apt]['total'] = avg(T4[apt]['HEAD']) - avg(T4[apt]['BASE'])
+        T4[apt]['render'] = T4[apt]['total'] - T4[apt]['convention']
+        T4[apt]['share'] = 100.0 * T4[apt]['convention'] / T4[apt]['total']
+        T4[apt]['slope'] = -T4[apt]['convention'] / (float(CF[apt]) - float(SHIP[apt]))
+        T4[apt]['breakeven'] = (float(SHIP[apt])
+                                + 0.5 * abs(T4[apt]['total']) / T4[apt]['slope'])
 
     # the two-row table: round 1 of each arm, both apartments
     for label, tag, arm in [('task4 table: BASE row', 'BASE', 'BASE'),
@@ -393,22 +414,72 @@ def main():
         c.near('task4 movement kings-court', -float(m.group(2)),
                avg(T4['kings-court']['HEAD']) - avg(T4['kings-court']['BASE']), 2)
 
-    for apt, pat in [
-        # \s+ everywhere a space could be a hard wrap: the README wraps at ~79
-        # columns and a literal ' ' in a prose pattern is a latent failure that
-        # appears only when the sentence happens to reflow. Section 8's comment
-        # records the same trap being sprung once already.
-        ('kings-court', r'0\.52,\s+the\s+arm\s+reads\s+(' + NUM + r')\..*?\*\*' + MINUS +
-         r'(' + NUM + r')\s+render\*\*\s+and\s+\*\*' + MINUS + r'(' + NUM + r')\s+fit-population'),
-        ('serenity', r'counterfactual\s+0\.306\s+the\s+tip\s+reads\s+(' + NUM + r'),\s+so\s+'
-         r'\*\*' + MINUS + r'(' + NUM + r')\s+render,\s+' + MINUS + r'(' + NUM + r')\s+convention'),
-    ]:
-        m = grab(sec, pat, c, 'task4 split: ' + apt, re.S)
+    # the split table: counterfactual, render, convention, convention share
+    for apt in ['serenity', 'kings-court']:
+        m = grab(sec, r'\|\s*' + apt + r'\s*\|\s*(' + NUM + r')\s*\|\s*\*\*' + MINUS +
+                 r'(' + NUM + r')\*\*\s*\|\s*\*\*' + MINUS + r'(' + NUM + r')\*\*\s*\|\s*\*\*(' +
+                 NUM + r')%\*\*\s*\|', c, 'task4 split row: ' + apt)
         if m:
-            probe, base, head = T4[apt]['probe'], avg(T4[apt]['BASE']), avg(T4[apt]['HEAD'])
-            c.near('task4 split %s: probe reading' % apt, float(m.group(1)), probe, 4)
-            c.near('task4 split %s: render part' % apt, -float(m.group(2)), probe - base, 2)
-            c.near('task4 split %s: convention part' % apt, -float(m.group(3)), head - probe, 2)
+            c.near('task4 split %s: counterfactual' % apt, float(m.group(1)),
+                   float(CF[apt]), 4)
+            c.near('task4 split %s: render part' % apt, -float(m.group(2)),
+                   T4[apt]['render'], 3)
+            c.near('task4 split %s: convention part' % apt, -float(m.group(3)),
+                   T4[apt]['convention'], 3)
+            c.near('task4 split %s: convention share' % apt, float(m.group(4)),
+                   T4[apt]['share'], 1)
+
+    # the sensitivity sentence: the two slopes and the two break-even points
+    m = grab(sec, r'slopes are (' + NUM + r')\s*\(serenity\) and (' + NUM + r')\s*\(kings-court\).*?'
+             r'would read 50/50 is \*\*(' + NUM + r')\*\* and\s*\n?\*\*(' + NUM + r')\*\*',
+             c, 'task4 sensitivity', re.S)
+    if m:
+        c.near('task4 slope serenity', float(m.group(1)), T4['serenity']['slope'], 3)
+        c.near('task4 slope kings-court', float(m.group(2)), T4['kings-court']['slope'], 3)
+        c.near('task4 break-even serenity', float(m.group(3)), T4['serenity']['breakeven'], 4)
+        c.near('task4 break-even kings-court', float(m.group(4)), T4['kings-court']['breakeven'], 4)
+
+    # the withdrawn-corroboration paragraph must keep naming the superseded slope
+    m = grab(sec, r'inflated kings-court\'s\s+slope\s+from\s+(' + NUM + r')\s+to\s+(' + NUM + r')',
+             c, 'task4 superseded slope', re.S)
+    if m:
+        c.near('task4 corrected slope', float(m.group(1)), T4['kings-court']['slope'], 3)
+        old = Hf('kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots')
+        c.near('task4 superseded slope value', float(m.group(2)),
+               (old - avg(T4['kings-court']['HEAD'])) / 0.04, 3)
+
+    # the per-spot disclosures, against the round arrays themselves
+    def spot_delta(apt, f):
+        base = [json.load(open(os.path.join(d, n), encoding='utf-8'))
+                for d, n in [(args.metrics, '%s-b4a-task4-BASE-legacy-allspots.json' % apt),
+                             (args.harness, '%s-b4a-task4-run2-BASE-b39a99a-legacy-allspots.json' % apt),
+                             (args.harness, '%s-b4a-task4-run3-BASE-b39a99a-legacy-allspots.json' % apt)]]
+        head = [json.load(open(os.path.join(d, n), encoding='utf-8'))
+                for d, n in [(args.metrics, '%s-b4a-task4-gate-legacy-allspots.json' % apt),
+                             (args.harness, '%s-b4a-task4-run2-HEAD-f0315ea-legacy-allspots.json' % apt),
+                             (args.harness, '%s-b4a-task4-run3-HEAD-f0315ea-legacy-allspots.json' % apt)]]
+        pick = lambda ds: avg([[s['deltaE'] for s in d['spots'] if s['file'] == f][0] for d in ds])
+        return pick(head) - pick(base)
+
+    m = grab(sec, r'`7\.webp` \(' + MINUS + r'(' + NUM + r')\) and `6\.webp` \(' + MINUS +
+             r'(' + NUM + r')\), together\s*\n?' + MINUS + r'(' + NUM + r') of the ' + MINUS +
+             r'(' + NUM + r')', c, 'task4 serenity spot concentration', re.S)
+    if m:
+        d7, d6 = spot_delta('serenity', '7.webp'), spot_delta('serenity', '6.webp')
+        c.near('task4 serenity 7.webp', -float(m.group(1)), d7, 2)
+        c.near('task4 serenity 6.webp', -float(m.group(2)), d6, 2)
+        c.near('task4 serenity pair contribution', -float(m.group(3)), (d7 + d6) / 11.0, 3)
+        c.near('task4 serenity total restated', -float(m.group(4)), T4['serenity']['total'], 3)
+    m = grab(sec, r'`1\.webp` \+(' + NUM + r'), `11\.webp` \+(' + NUM + r')\)', c,
+             'task4 serenity pose-verified spots')
+    if m:
+        c.near('task4 serenity 1.webp', float(m.group(1)), spot_delta('serenity', '1.webp'), 2)
+        c.near('task4 serenity 11.webp', float(m.group(2)), spot_delta('serenity', '11.webp'), 2)
+    m = grab(sec, r'`19\.webp` \(Laundry\), regresses \*\*\+(' + NUM + r')\*\*', c,
+             'task4 kings-court 19.webp')
+    if m:
+        c.near('task4 kings-court 19.webp', float(m.group(1)),
+               spot_delta('kings-court', '19.webp'), 2)
 
     # ---- 9. the exclusion note higher up the file ------------------------
     excl = grab(readme, r'\*\*Also excluded: every `b4a-\*` file\.\*\*.*?below\.',

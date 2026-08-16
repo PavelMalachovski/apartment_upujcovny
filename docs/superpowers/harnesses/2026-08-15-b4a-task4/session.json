@@ -187,40 +187,6 @@
       "movement_HEAD_minus_BASE": -0.3031
     }
   },
-  "probes": {
-    "purpose": "Counterfactual exposures: what each apartment's fit would have chosen on the poseVerified population instead of the mandated all-spot one, per task 3's own luminance-slope decomposition (kings-court ~0.56, serenity ~0.306). Applied as a runtime renderer.toneMappingExposure override on the HEAD tree only; NO apartment JSON was touched. These split the measured movement into a render part and a fit-population-convention part directly, instead of propagating task 3's ratio.",
-    "caveat": "0.56 and 0.306 are task 3's estimates of the counterfactual fit, not re-fitted here. The split is exact conditional on those two numbers.",
-    "serenity": {
-      "counterfactual_exposure": 0.306,
-      "reading": {
-        "file": "serenity-b4a-task4-probe-HEAD-f0315ea-e0.306-legacy-allspots.json",
-        "mean_field": 16.08,
-        "mean_of_spots": 16.0836,
-        "scored": 11,
-        "compareTotal": 11,
-        "skippedPoseVerification": 0
-      },
-      "render_part": -0.5273,
-      "convention_part": -0.0863,
-      "total": -0.6136,
-      "convention_share": 0.141
-    },
-    "kings-court": {
-      "counterfactual_exposure": 0.56,
-      "reading": {
-        "file": "kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots.json",
-        "mean_field": 18.76,
-        "mean_of_spots": 18.7579,
-        "scored": 14,
-        "compareTotal": 14,
-        "skippedPoseVerification": 0
-      },
-      "render_part": -0.1209,
-      "convention_part": -0.1822,
-      "total": -0.3031,
-      "convention_share": 0.601
-    }
-  },
   "structural": {
     "window.__issues": {
       "serenity": [],
@@ -243,5 +209,192 @@
     },
     "budget": "<=400 desktop, <=250 mobile -- all inside",
     "console_errors_from_this_session": 0
+  },
+  "probes_SUPERSEDED": {
+    "status": "SUPERSEDED by probes_fix1 below. Kept because the files are committed and a reader will meet them. Three defects, all found in task 4 review round 1:",
+    "defect_1_wrong_counterfactual": "serenity's 0.306 was taken from task 3's finding-2 slope arithmetic (0.295 + 0.011) where the 0.011 was computed on the PRE-WINDING tree. It is not the poseVerified fit's crossing, which task 3's own committed sweep puts at 0.2974-0.2981.",
+    "defect_2_unpaired": "both probes were single page loads compared against MEANS OF OTHER LOADS. Between-load variation then enters the difference. kings-court's probe load sat high, inflating its measured slope from 3.833 to 4.554 and its convention share from 50.1% to 60.1%.",
+    "defect_3_method_attribution": "this block previously said BOTH counterfactuals came from task 3's luminance-slope decomposition. That was true only of serenity's -- and that is the one that was wrong. kings-court's 0.56 was in fact the sweep crossing (0.5596) all along.",
+    "original_block": {
+      "purpose": "Counterfactual exposures: what each apartment's fit would have chosen on the poseVerified population instead of the mandated all-spot one, per task 3's own luminance-slope decomposition (kings-court ~0.56, serenity ~0.306). Applied as a runtime renderer.toneMappingExposure override on the HEAD tree only; NO apartment JSON was touched. These split the measured movement into a render part and a fit-population-convention part directly, instead of propagating task 3's ratio.",
+      "caveat": "0.56 and 0.306 are task 3's estimates of the counterfactual fit, not re-fitted here. The split is exact conditional on those two numbers.",
+      "serenity": {
+        "counterfactual_exposure": 0.306,
+        "reading": {
+          "file": "serenity-b4a-task4-probe-HEAD-f0315ea-e0.306-legacy-allspots.json",
+          "mean_field": 16.08,
+          "mean_of_spots": 16.0836,
+          "scored": 11,
+          "compareTotal": 11,
+          "skippedPoseVerification": 0
+        },
+        "render_part": -0.5273,
+        "convention_part": -0.0863,
+        "total": -0.6136,
+        "convention_share": 0.141
+      },
+      "kings-court": {
+        "counterfactual_exposure": 0.56,
+        "reading": {
+          "file": "kings-court-b4a-task4-probe-HEAD-f0315ea-e0.56-legacy-allspots.json",
+          "mean_field": 18.76,
+          "mean_of_spots": 18.7579,
+          "scored": 14,
+          "compareTotal": 14,
+          "skippedPoseVerification": 0
+        },
+        "render_part": -0.1209,
+        "convention_part": -0.1822,
+        "total": -0.3031,
+        "convention_share": 0.601
+      }
+    }
+  },
+  "probes_fix1": {
+    "method": "SAME-LOAD PAIRED. Per page load: await __bakeReady, set renderer.toneMappingExposure to the SHIPPED value, __measure(), score; then set it to the COUNTERFACTUAL on the same load, __measure(), score. Two loads per apartment. The convention part is the within-load difference, so between-load variation cancels instead of entering the estimate.",
+    "counterfactual_source": "BOTH apartments: the zero crossing of the poseVerified population's luminance diff in task 3's committed <apt>-b4a-task3-exposure-sweep-fixedfov-allspot.json. One method for both, which is the correction to the superseded block.",
+    "crossings": {
+      "serenity": {
+        "batches": [
+          0.2981,
+          0.2978,
+          0.2974
+        ],
+        "note": "coarse bracket 0.29/-0.0078 -> 0.30/+0.0018; refine 1 and refine 2 extrapolated from their last two points, which stop just short of the crossing"
+      },
+      "kings-court": {
+        "batches": [
+          0.5596
+        ],
+        "note": "coarse bracket 0.53/-0.0148 -> 0.56/+0.0002; the two refine batches sit around 0.52 and do not span it"
+      }
+    },
+    "no_json_touched": "runtime renderer.toneMappingExposure override only; no apartment JSON was edited. Same technique as plan 3 task 7's \"at BASE's exposure\" rows.",
+    "total_source": "the two-tree movement from the original session (serenity -0.6136, kings-court -0.3031). The convention part is measured here; the render part is total - convention.",
+    "apartments": {
+      "serenity": {
+        "shipped_exposure": 0.295,
+        "counterfactual_exposure": 0.298,
+        "loads": [
+          {
+            "load": 1,
+            "control": {
+              "file": "serenity-b4a-task4-fix1-HEAD-f0315ea-L1-control-e0.295-legacy-allspots.json",
+              "mean_of_spots": 15.9882,
+              "scored": 11,
+              "compareTotal": 11,
+              "skippedPoseVerification": 0
+            },
+            "probe": {
+              "file": "serenity-b4a-task4-fix1-HEAD-f0315ea-L1-probe-e0.298-legacy-allspots.json",
+              "mean_of_spots": 16.0109,
+              "scored": 11,
+              "compareTotal": 11,
+              "skippedPoseVerification": 0
+            },
+            "convention_this_load": -0.0227
+          },
+          {
+            "load": 2,
+            "control": {
+              "file": "serenity-b4a-task4-fix1-HEAD-f0315ea-L2-control-e0.295-legacy-allspots.json",
+              "mean_of_spots": 15.9782,
+              "scored": 11,
+              "compareTotal": 11,
+              "skippedPoseVerification": 0
+            },
+            "probe": {
+              "file": "serenity-b4a-task4-fix1-HEAD-f0315ea-L2-probe-e0.298-legacy-allspots.json",
+              "mean_of_spots": 16.0027,
+              "scored": 11,
+              "compareTotal": 11,
+              "skippedPoseVerification": 0
+            },
+            "convention_this_load": -0.0245
+          }
+        ],
+        "convention_per_load": [
+          -0.0227,
+          -0.0245
+        ],
+        "convention_spread": 0.0018,
+        "convention": -0.0236,
+        "render": -0.59,
+        "total": -0.6136,
+        "convention_share_pct": 3.9,
+        "slope_dE_per_exposure": 7.879,
+        "breakeven_counterfactual_for_50_50": 0.3339,
+        "control_vs_original_3round_mean": {
+          "fresh_control_mean": 15.9832,
+          "original_3round_mean": 15.9973
+        },
+        "rounding_note": "every derived field here is computed from UNROUNDED spot means and rounded only for display, so it agrees with harnesses/2026-08-15-b4a-task2/check_metrics_readme.py, which does the same. Rounding the convention part first shifted the share by 0.1pp and the slope by 0.012 -- caught and corrected before commit."
+      },
+      "kings-court": {
+        "shipped_exposure": 0.52,
+        "counterfactual_exposure": 0.5596,
+        "loads": [
+          {
+            "load": 1,
+            "control": {
+              "file": "kings-court-b4a-task4-fix1-HEAD-f0315ea-L1-control-e0.52-legacy-allspots.json",
+              "mean_of_spots": 18.605,
+              "scored": 14,
+              "compareTotal": 14,
+              "skippedPoseVerification": 0
+            },
+            "probe": {
+              "file": "kings-court-b4a-task4-fix1-HEAD-f0315ea-L1-probe-e0.5596-legacy-allspots.json",
+              "mean_of_spots": 18.7586,
+              "scored": 14,
+              "compareTotal": 14,
+              "skippedPoseVerification": 0
+            },
+            "convention_this_load": -0.1536
+          },
+          {
+            "load": 2,
+            "control": {
+              "file": "kings-court-b4a-task4-fix1-HEAD-f0315ea-L2-control-e0.52-legacy-allspots.json",
+              "mean_of_spots": 18.5314,
+              "scored": 14,
+              "compareTotal": 14,
+              "skippedPoseVerification": 0
+            },
+            "probe": {
+              "file": "kings-court-b4a-task4-fix1-HEAD-f0315ea-L2-probe-e0.5596-legacy-allspots.json",
+              "mean_of_spots": 18.6814,
+              "scored": 14,
+              "compareTotal": 14,
+              "skippedPoseVerification": 0
+            },
+            "convention_this_load": -0.15
+          }
+        ],
+        "convention_per_load": [
+          -0.1536,
+          -0.15
+        ],
+        "convention_spread": 0.0036,
+        "convention": -0.1518,
+        "render": -0.1513,
+        "total": -0.3031,
+        "convention_share_pct": 50.1,
+        "slope_dE_per_exposure": 3.833,
+        "breakeven_counterfactual_for_50_50": 0.5595,
+        "control_vs_original_3round_mean": {
+          "fresh_control_mean": 18.5682,
+          "original_3round_mean": 18.5757
+        },
+        "rounding_note": "every derived field here is computed from UNROUNDED spot means and rounded only for display, so it agrees with harnesses/2026-08-15-b4a-task2/check_metrics_readme.py, which does the same. Rounding the convention part first shifted the share by 0.1pp and the slope by 0.012 -- caught and corrected before commit."
+      }
+    }
+  },
+  "fix_round_1": {
+    "date": "2026-08-16",
+    "what_changed": "the render/convention split only. No baseline, no attribution step and no gate reading moved; the twelve two-tree round readings are untouched.",
+    "headline_correction": "kings-court convention share 60.1% -> 50.1% (a dead heat, ordering not resolved); serenity 14.1% -> 3.9%.",
+    "withdrawn_claim": "the earlier text said this split corroborated task 3's ~62% slope-derived figure by an independent route. Withdrawn: 62% is a share of the EXPOSURE move, 50.1% is a share of the dE move, and task 3's slope table and this sweep disagree about the exposure worth of the population switch (0.032 vs a measured 0.560-0.520 = 0.040).",
+    "also_added": "per-spot disclosures: serenity's movement is carried by two poseVerified:false spots while both its pose-verified spots regressed; kings-court 19.webp regresses +1.55 on a pose-verified spot, the largest single-spot movement on the branch."
   }
 }

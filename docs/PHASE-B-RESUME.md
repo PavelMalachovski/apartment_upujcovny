@@ -125,6 +125,10 @@ applied), `?v=110`:
 | kings-court | **18.58** | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
 | horkyone-10 | — | no photographs; accepted on luminance proximity only |
 
+The outgoing rows read *serenity **16.61** — plan 3 task 7; eight readings
+spanning 16.59–16.62* and *kings-court **18.90** — plan 3 tasks 4 and 7*,
+carried here verbatim so that replacing them loses no provenance.
+
 **These replace serenity 16.61 and kings-court 18.90**, which were the
 baselines as of `b39a99a` (`?v=107`) recorded by plan 3 tasks 4 and 7. Both
 movements are improvements and both are attributed, per rule 2: plan 4a task 4
@@ -139,15 +143,40 @@ branch's and not the session's.
 | serenity | 16.61 → **16.00** | −0.614 | task 1 winding fix −0.201, task 1 paintings −0.080, task 2 **0.000** (reverted in full), task 3 exposure 0.329→0.295 −0.357; sum −0.638 against −0.614 measured, residual +0.025 inside the floor |
 | kings-court | 18.90 → **18.58** | −0.303 | task 1 winding fix −0.081, task 2 **0.000**, task 3 exposure 0.575→0.52 −0.228; sum −0.309 against −0.303 measured, residual +0.006 |
 
-**Do not read either movement as entirely a better render.** Task 3's exposure
-re-fit was made on the mandated **all-spot** population where plan 3 task 4 had
-fitted on `poseVerified`, and that convention change moved the fitted exposure
-in its own right. Task 4 measured the split directly, by re-reading the tip at
-the exposure each apartment's `poseVerified` fit would have chosen: **60% of
-kings-court's −0.30 is the fit-population convention, not the render**
-(−0.121 render, −0.182 convention). serenity splits the other way (−0.527
-render, −0.086 convention). Details and the caveat on the two counterfactual
-exposures are in `docs/superpowers/harnesses/2026-08-15-b4a-task4/`.
+**Do not read kings-court's movement as entirely a better render.** Task 3's
+exposure re-fit was made on the mandated **all-spot** population where plan 3
+task 4 had fitted on `poseVerified`, and that convention change moved the
+fitted exposure in its own right. Task 4 measured the split directly, by
+re-reading the tip at the exposure each apartment's `poseVerified` fit would
+have chosen — taken from task 3's committed sweep as that population's own
+zero crossing, and paired against a control at the shipped exposure **on the
+same page load**:
+
+| Apartment | counterfactual | render | convention | convention share |
+|---|---:|---:|---:|---:|
+| serenity | 0.298 | −0.590 | −0.024 | 4% |
+| kings-court | 0.5596 | −0.151 | −0.152 | **50%** |
+
+**serenity's improvement is essentially all render.** **kings-court's is about
+half measurement convention** — and the two halves are 0.0005 apart, so which
+of them is larger is *not* resolved and must not be quoted as though it were.
+The condition this rests on: the counterfactuals are the sweep's crossings, and
+at the measured ΔE slopes the split would read 50/50 at 0.3339 (serenity) and
+0.5595 (kings-court). serenity's crossing sits 0.036 below its break-even, so
+that conclusion is robust; kings-court's sits 0.0001 from its own, which is
+what "a dead heat" means quantitatively. Full working in
+`docs/superpowers/harnesses/2026-08-15-b4a-task4/`.
+
+**Where each movement comes from, per spot.** Both baselines are all-spot means
+by rule 5, and on both apartments the movement is concentrated. **serenity's
+−0.61 is carried entirely by two `poseVerified: false` spots** (`7.webp` −4.96,
+`6.webp` −4.11, together more than the whole movement), while its **only two**
+pose-verified spots moved slightly the other way (+0.37, +0.16). **kings-court
+is the reverse** — seven of its eight pose-verified spots improved; the
+exception, `19.webp`, regresses **+1.55**, the largest single-spot movement on
+the branch, most of it traceable to the exposure rather than the render (19.95
+at 0.56 against 21.18 at the shipped 0.52). Neither fact moves a baseline; both
+are recorded so that a later reader does not discover them.
 
 **Hard stop (rule 3): not tripped.** No task on this branch made either
 apartment's reading worse at all, let alone by more than 0.5. The one figure on
@@ -162,11 +191,13 @@ at `c2bb0bd` and the `b39a99a` values above are what a checkout of `main`
 measures. If plan 4a is not merged, the outgoing baselines stand.
 
 **This loosens serenity by 0.03 and tightens kings-court by about 3.5.** The
-old 22.44 was kings-court's pre-migration score and the apartment has since
+old 22.44 was kings-court's pre-migration score and the apartment had by then
 improved to 18.90, so that ceiling carried three and a half points of slack
 in which a real regression could have hidden unseen. Re-baselining removes
 it. The restatement is not a blanket relaxation, and it must not be quoted
-as one.
+as one. (This paragraph describes the 2026-08-15 restatement as it stood at
+`b39a99a`; kings-court has since been rebaselined again, to **18.58**, by plan
+4a task 4 — the tightening is now about 3.9, not 3.5.)
 
 ```bash
 # capture: open ?apt=<id>&measure=1&fov=legacy, then in the console

@@ -1842,16 +1842,85 @@ exactly, kings-court 18.88 against a recorded 18.90), which is the check that
 licenses reading the movement as the branch's rather than the session's.
 
 **Do not read the whole of kings-court's −0.30 as the render getting better.**
-Measured directly this session on the tip, at the exposure kings-court's
-*poseVerified* fit would have chosen (0.56) instead of the shipped all-spot
-0.52, the arm reads 18.7579. So the movement splits into **−0.12 render** and
-**−0.18 fit-population convention** — about 60% of kings-court's improvement is
-downstream of plan 4a task 3's mandated switch of the exposure fit's population
-from `poseVerified` to all-spot, not of anything a visitor would see. serenity
-splits the other way: at its own counterfactual 0.306 the tip reads 16.0836, so
-**−0.53 render, −0.09 convention**. Both splits confirm task 3's own prediction
-from luminance slopes (kings-court ~0.032 of 0.052 exposure-worth attributable
-to the population switch, i.e. ~62%) by an independent route.
+Plan 4a task 3 re-fitted every `exposure` on the mandated **all-spot**
+population where plan 3 task 4 had fitted on `poseVerified`. That convention
+change moved the fitted exposure in its own right, and an exposure change moves
+every pixel — so part of this branch's ΔE movement is a change in how the fit's
+population is chosen rather than anything a visitor would see.
+
+The split was measured, not inferred. For each apartment the tip was re-read at
+the exposure its **`poseVerified`** fit would have chosen — read off task 3's
+own committed sweep as the zero crossing of that population's luminance diff,
+the same method for both apartments — against a control at the shipped
+exposure **on the same page load**, two loads each:
+
+| apartment | counterfactual | render | convention | convention share |
+|---|---:|---:|---:|---:|
+| serenity | 0.298 | **−0.590** | **−0.024** | **3.9%** |
+| kings-court | 0.5596 | **−0.151** | **−0.152** | **50.1%** |
+
+**serenity's improvement is essentially all render** — 96% of it. **kings-court's
+splits about evenly**, and the two halves are 0.0005 apart, which is far inside
+this measurement's own spread: **which half is larger is not resolved, and must
+not be reported as though it were.** What is resolved is the magnitude — about
+half of kings-court's headline improvement is measurement convention.
+
+The counterfactual crossings come from
+`{serenity,kings-court}-b4a-task3-exposure-sweep-fixedfov-allspot.json`:
+kings-court's `poseVerified` diff crosses zero between 0.53 (−0.0148) and 0.56
+(+0.0002), i.e. **0.5596**; serenity's crosses at **0.2974–0.2981** across three
+independent batches, probed here at 0.298.
+
+**Sensitivity, since the split depends on those two numbers.** The measured ΔE
+slopes are 7.879 (serenity) and 3.833 (kings-court) per unit exposure, so the
+counterfactual at which each split would read 50/50 is **0.3339** and
+**0.5595**. serenity's crossing sits 0.036 below its break-even — further below
+than the whole 0.329→0.295 exposure change — so its render-dominated conclusion
+is robust. kings-court's crossing sits **0.0001** from its break-even, which is
+another way of saying its split is a dead heat and its ordering is not
+recoverable from this data.
+
+**An earlier version of this section reported 60% for kings-court and 14% for
+serenity, and both were wrong.** serenity's counterfactual was taken from task
+3's finding-2 slope arithmetic (0.295 + 0.011) rather than from the sweep, and
+the 0.011 was computed on the pre-winding tree; and both probes were single
+loads compared against means of *other* loads, which inflated kings-court's
+slope from 3.833 to 4.554 because the probe load happened to sit high. Pairing
+control and probe on the same load removes that: the per-load convention
+readings agree to 0.0018 (serenity) and 0.0036 (kings-court), where the loads'
+absolute values disagree by up to 0.074. Corrected in plan 4a task 4's fix
+round 1; the superseding readings are the `*-b4a-task4-fix1-*` files in the
+harness.
+
+**A claim that was withdrawn rather than repaired:** the earlier text said this
+split "confirms task 3's own prediction from luminance slopes (~62%) by an
+independent route". It does not. 62% is a share of the *exposure* move and this
+is a share of the *ΔE* move; the two need not agree even when both are right.
+Task 3's slope table and this sweep also disagree about the exposure worth of
+the population switch — 0.032 against a measured 0.560 − 0.520 = 0.040 — so
+there was no corroboration to claim.
+
+**Which spots the movement actually comes from.** Both figures are all-spot
+means by mandate, and on both apartments the movement is concentrated in a
+handful of spots. Stated here because the concentration cuts against the
+headline in serenity's case:
+
+* **serenity's −0.61 is carried entirely by two spots that are
+  `poseVerified: false`** — `7.webp` (−4.96) and `6.webp` (−4.11), together
+  −0.825 of the −0.614, i.e. more than all of it. Its **only two** pose-verified
+  spots both moved slightly the *other* way (`1.webp` +0.37, `11.webp` +0.16).
+  So serenity's headline improvement comes from spots this same document says
+  cannot arbitrate lighting, and its two readable spots did not improve.
+* **kings-court's is the other way round**: seven of its eight pose-verified
+  spots improved. The exception, `19.webp` (Laundry), regresses **+1.55** — the
+  largest single-spot movement on the branch, reproduced in all three rounds
+  (19.63/19.63/19.62 → 21.18/21.18/21.17). The probe locates most of it in the
+  exposure rather than the render: at 0.56 it reads 19.95, at the shipped 0.52
+  it reads 21.18.
+
+Neither fact changes a baseline — the gate is all-spot by rule 5 and both
+readings stand — but neither should be discovered by a later reader rather than
+read here.
 
 ### The plan's own claim: blacks, before and after
 
