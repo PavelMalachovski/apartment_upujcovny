@@ -64,7 +64,7 @@ accepted description style.
 | `measure.js` | Resemblance capture, loaded only under `?measure=1`: renders every `compare`-flagged photo spot from its own camera/aspect and POSTs the frame to `tools/serve.py`'s save endpoint for offline `tools/delta_e.py` scoring |
 | `validate.js` | Layout self-check: blocked openings, openings into the void, unreachable rooms, markers inside solids |
 | `controls.js` | Walking: WASD + drag-look (NOT pointer lock), touch joystick + swipe, collisions against wall segments and furniture AABBs, floor levels via `groundZones`, camera clamped under attic slopes |
-| `doll.js` | Dollhouse: orbit camera, ground/upper/whole cutaway, m² badges, measuring tape, click-teleport |
+| `doll.js` | Dollhouse: orbit camera, ground/upper/whole cutaway, m² badges, measuring tape, click-teleport. **The tape and the teleport are the only UI that reads geometry off the merged wall mesh** — `floorPoint`/`teleport` raycast and test `h.face.normal`, which is the *winding* normal under FrontSide culling, so anything that changes triangle order in `bake.js` changes what they return. Plan 4a's winding fix silently made both land on wall **tops** until they were taught to skip `userData.doll` meshes; re-drive them after any winding or wall-geometry change |
 | `app.js` | Init, render loop, minimap, Rooms menu, photo gallery, first-visit hint, environment capture (`captureEnvironment`) that reflects the apartment's own space instead of a stock studio |
 
 ## Numbers that matter
@@ -79,7 +79,7 @@ accepted description style.
 | Walk / run speed | 1.9 / 3.4 m·s⁻¹ | `controls.js` |
 | Reachability grid / max step | 0.25 m / 0.35 m | `validate.js` |
 | HDR headroom `EXP` | 1.7 (= `lightMapIntensity`) | `bake.js` |
-| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures 69) | measured, revised in phase A — see rule 4 |
+| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures 72; was 69 in phase A) | measured, revised in phase A — see rule 4 |
 | Bake time | no fixed ceiling; latest medians (3 runs, one machine, phase B3 task 2): serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms — **ratios, not seconds** | see rule 4a |
 | Dynamic PointLights | ≤8, flagged `dyn` in the config | `builder.js` |
 
@@ -186,10 +186,15 @@ measured against plain box furniture with no post-processing, and the
 chamfered edges (more triangles, still one draw call per merged mesh)
 plus the bloom/grain/vignette chain (a handful of extra full-screen
 passes on top of the scene) both add real cost that has nothing to do
-with regressed batching. Serenity's entrance measures **69** draw calls
+with regressed batching. Serenity's entrance measures **72** draw calls
 with the full chain running — comfortably inside budget; see the fixed
 "Draw calls in a spot" recipe below, the naive version undercounts by
-roughly 14. New furniture goes through `F.*` constructors so it merges
+roughly 14. **(This said 69 from phase A until 2026-08-16, when plan 4a's
+whole-branch review re-ran the recipe verbatim and got 72, three runs in a
+row. The cause is uninvestigated. It is not plan 4a's: the merge-base
+`b39a99a` measures 72 as well, on the same machine in the same browser
+session, so the difference is between the phase-A machine and this one, not
+between the two trees. A triangle-order fix cannot change draw-call count.)** New furniture goes through `F.*` constructors so it merges
 automatically and gets a shadow occluder. No new dynamic PointLights —
 light lives in the bake. Markers are `THREE.Points`, one object per
 level; sprites do not batch and 14 photo spots used to cost 14 calls.
@@ -382,7 +387,7 @@ a.renderer.info.autoReset = false;
 a.renderer.info.reset();
 if (a.post && a.post.enabled) a.post.render(0);
 else a.renderer.render(a.scene, a.camera);
-console.log(a.renderer.info.render.calls);   // Serenity entrance: 69
+console.log(a.renderer.info.render.calls);   // Serenity entrance: 72 (69 in phase A)
 a.renderer.info.autoReset = true;
 ```
 

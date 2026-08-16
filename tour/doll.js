@@ -132,6 +132,33 @@ class DollMode {
     }
   }
 
+  // A merged wall mesh is never a floor, whatever its faces point at.
+  //
+  // `h.face.normal` is the *winding* normal (three.core.js Triangle.getNormal),
+  // and the wall material is FrontSide, so back faces are never returned. Until
+  // plan 4a fixed grid()'s winding in bake.js, a wall's top quad wound
+  // downwards: the ray was culled through it and both readers below landed on
+  // the floor underneath by accident. With the winding correct the top quad
+  // faces up, is returned first, and sails through a `normal.y >= 0.6` test —
+  // the tape then measured at wall-top height (a 2.65 m serenity bay read
+  // 3.72 m, +40%, marker 2.6 m in the air) and kings-court's teleport put the
+  // player on the upper floor from a ground-floor cutaway click.
+  //
+  // So identify walls, not up-ness. The two rejected alternatives:
+  //   * teleport's ground-proximity guard is NOT enough. Measured on
+  //     kings-court: of 28 wall centrelines returning an above-floor upward
+  //     hit, 12 pass `|groundAt - y| <= 0.6`, because its 2.80 m ground-floor
+  //     wall tops sit 0.18-0.30 under the upper zones at 2.98/3.10.
+  //   * a geometric/attribute normal cannot discriminate at all: a wall top's
+  //     true outward normal *is* +y (bake.js pushes that same N per vertex).
+  //     The normal is not wrong any more — it is the right normal on a
+  //     surface the tape must not use.
+  // `userData.doll` is classify()'s own existing tag for these two meshes
+  // (bake.js sets it), so this adds no new vocabulary.
+  static isWall(obj) {
+    return obj.userData.doll === 'walls1' || obj.userData.doll === 'walls2';
+  }
+
   // Floor point under the click (for the tape)
   floorPoint(clientX, clientY) {
     const r = this.dom.getBoundingClientRect();
@@ -143,6 +170,7 @@ class DollMode {
     const hits = this.ray.intersectObjects(this.scene.children, true);
     for (const h of hits) {
       if (!h.object.visible || h.object.parent === this.measureGroup) continue;
+      if (DollMode.isWall(h.object)) continue;          // see isWall() above
       if (!h.face || h.face.normal.clone().transformDirection(h.object.matrixWorld).y < 0.6) continue;
       return h.point;
     }
@@ -245,6 +273,7 @@ class DollMode {
       let o = h.object;
       while (o && o !== this.scene && !o.visible) o = o.parent;
       if (!h.object.visible) continue;
+      if (DollMode.isWall(h.object)) continue;          // see isWall() above
       if (!h.face || h.face.normal.clone().transformDirection(h.object.matrixWorld).y < 0.6) continue;
       const g = this.controls.groundAt(h.point.x, h.point.z, h.point.y);
       if (g === null || Math.abs(g - h.point.y) > 0.6) continue;

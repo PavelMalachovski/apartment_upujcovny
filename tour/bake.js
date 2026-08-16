@@ -641,9 +641,12 @@ const Baker = (() => {
       }
       // WINDING. `pts` below emits a fixed triangle order, so a quad's
       // geometric front face follows uVec x vVec whatever `n` says, and
-      // MeshBasicMaterial is FrontSide, so culling is live. Eight of the
-      // twelve grid() calls per wall piece disagree with their own normal:
-      // all six of an along-z piece, plus top and bottom of an along-x one.
+      // MeshBasicMaterial is FrontSide, so culling is live. Eight of this
+      // file's twelve grid() calls for a wall disagree with their own normal
+      // -- six run per piece, from one of the two branches below: all six of
+      // an along-z piece, plus top and bottom of an along-x one. So a given
+      // piece renders six faces of which two (along-x) or six (along-z) are
+      // inside-out.
       // The test below covers all eight and leaves the four correct ones
       // alone. It is NOT a reversal of the else branch -- that would leave
       // top and bottom broken on every wall in every apartment.

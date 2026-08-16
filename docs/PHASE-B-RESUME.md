@@ -150,6 +150,29 @@ branch's and not the session's.
 | serenity | 16.61 → **16.00** | −0.614 | task 1 winding fix −0.201, task 1 paintings −0.080, task 2 **0.000** (reverted in full), task 3 exposure 0.329→0.295 −0.357; sum −0.638 against −0.614 measured, residual +0.025 inside the floor |
 | kings-court | 18.90 → **18.58** | −0.303 | task 1 winding fix −0.081, task 2 **0.000**, task 3 exposure 0.575→0.52 −0.228; sum −0.309 against −0.303 measured, residual +0.006 |
 
+> **The winding fix had one side effect nobody looked for: it broke the
+> dollhouse tape.** Found by the final whole-branch review 2026-08-16, fixed
+> the same day in `doll.js` (`?v=113`). **Task 1's report had stated the
+> opposite** — that the tape and the m² badges "cannot detect this change."
+> The m² half is right; the tape half is exactly backwards, and that sentence
+> is why five task reviews never drove it. `Doll.floorPoint()` accepted the
+> first visible hit whose face normal pointed up, and `h.face.normal` is the
+> **winding** normal with FrontSide culling live — so while the winding was
+> wrong a wall's top quad was culled and the ray fell through to the floor by
+> accident, and once it was right the top quad was returned first. Driving the
+> real `floorPoint` on both arms: a serenity bay of a true 2.65 m read
+> **2.650 at `b39a99a`** and **3.719 at `6214d00`** (+40%), marker 2.6 m in
+> the air. **`teleport` was affected too, on kings-court** — the review
+> believed its ground-proximity guard covered it, and on serenity it does, but
+> kings-court's upper ground zones (2.98 / 3.10) sit within 0.6 of its
+> 2.80 m wall tops, so 12 of 28 ground-floor wall centrelines passed that
+> guard and a cutaway click put the player on the **upper** floor (ground 3.10
+> where `b39a99a` gave 0.00). The fix skips the merged wall meshes by
+> `userData.doll` in both readers — not a height test, which is the thing
+> kings-court just disproved, and not a different normal, since a wall top's
+> true normal really is +y. **No published figure moves:** `measure.js`
+> renders from photo-spot cameras and never calls `floorPoint`.
+
 **Do not read kings-court's movement as entirely a better render.** Task 3's
 exposure re-fit was made on the mandated **all-spot** population where plan 3
 task 4 had fitted on `poseVerified`, and that convention change moved the
