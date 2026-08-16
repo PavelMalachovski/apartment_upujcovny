@@ -505,32 +505,45 @@ const Baker = (() => {
   //
   // Walls do NOT take the visibility-scaled ambient: they pass sampled=false
   // to lightAt and keep the flat constant. That is a measured decision, not
-  // an oversight. It was tried, and it broke on two defects in THIS function
-  // that the flat constant had been hiding, neither of them in the ambient
-  // term itself:
+  // an oversight, and it has now been measured TWICE. It was first tried in
+  // plan 3 task 2, where it broke on two defects in THIS function that the
+  // flat constant had been hiding, neither of them in the ambient term
+  // itself. Defect 1 is fixed; defect 2 is still live, and it is why plan 4a
+  // task 2 tried the switch a second time and returned NO-GO:
   //
-  //   1. WINDING -- FIXED, plan 4a task 1. Kept here because the reasoning
-  //      is what stops the wrong fix being re-derived. `pts` below emits one
-  //      fixed triangle order, so a quad's geometric winding follows
-  //      uVec x vVec whatever `n` says, and the renderer (MeshBasicMaterial,
-  //      FrontSide) obeys the winding. Working through all twelve grid()
-  //      calls:
-  //        else branch (walls along z): ALL SIX faces are reversed -- both
+  //   1. WINDING -- FIXED, plan 4a task 1 (b767b4b). History, not an open
+  //      bug. The whole derivation is kept because it is the only thing that
+  //      stops the WRONG fix being re-derived -- that wrong fix has now been
+  //      proposed twice in this project's life, once in the deferred-item
+  //      write-up in docs/PHASE-B-RESUME.md and once in review, and it would
+  //      leave wall top and bottom faces broken in every apartment.
+  //      What was wrong: `pts` below emits one fixed triangle order, so a
+  //      quad's geometric winding follows uVec x vVec whatever `n` says, and
+  //      the renderer (MeshBasicMaterial, FrontSide) obeys the winding.
+  //      Working through all twelve grid() calls, 8 of 12 faces disagreed:
+  //        else branch (walls along z): ALL SIX faces were reversed -- both
   //          large faces, both end reveals, top and bottom.
-  //        alongX branch: the four vertical faces agree, but TOP AND BOTTOM
-  //          are reversed as well.
-  //      So the fix is not "reverse the else branch": that would leave top
-  //      and bottom broken on every wall in every apartment. Reverse the
-  //      quad when (uVec x vVec) . n < 0, which covers all eight cases and
-  //      leaves the four correct ones alone -- that is the `flip` test in
-  //      grid() below.
-  //      Measured on the unmodified tip, standing 1 m off each wall's
+  //        alongX branch: the four vertical faces agreed, but TOP AND BOTTOM
+  //          were reversed as well.
+  //      SO THE FIX IS A SIGN TEST, NOT A REVERSAL OF THE else BRANCH:
+  //      reversing the else branch fixes the six along-z faces and leaves top
+  //      and bottom broken on every along-x wall in every apartment. What
+  //      shipped instead reverses the quad when (uVec x vVec) . n < 0, which
+  //      covers all eight disagreeing cases and leaves the four correct ones
+  //      alone -- that is the `flip` test in grid() below. Do not "simplify"
+  //      it back into a branch reversal.
+  //      Measured on the pre-fix tip, standing 1 m off each wall's
   //      centreline and raycasting at it: EVERY along-x wall showed the near
   //      face and no far face, and EVERY along-z wall the far face and no
   //      near face -- serenity 4/4 and 5/5, kings-court 19/19 and 23/23,
   //      horkyone-10 6/6 and 9/9. (The older 6/6, 14/16, 8/8, 17/18 figures
   //      counted a different population and are superseded; the probe that
   //      produced these is docs/superpowers/harnesses/2026-08-15-b4a-task1.)
+  //      One along-z wall did also report a near hit -- horkyone-10 wall 3,
+  //      1 of 9 -- and it is coincident geometry, not a counter-example: it
+  //      sits 0.15 m from wall 7, so the two walls' faces fall inside the
+  //      probe's own tolerance and each reads the other's. The committed
+  //      summary.alongZShowingNear says 1/9 and this line used to imply 0/9.
   //      So the surface a visitor looked at was shaded
   //      from a sample point 14 cm away on the OTHER side of that wall --
   //      outside the building, for a shell wall. Under a flat ambient the
@@ -538,22 +551,51 @@ const Baker = (() => {
   //      Under a visibility-scaled one the outdoor sample sees a hedge 20 cm
   //      away and returns ~0: serenity's living-room wall band rendered at
   //      pixel value 1 where it had been 85.
-  //   2. RESOLUTION. Quads are shaded from their four geometric corners and
-  //      Gouraud-interpolated at 0.45 m, and each end reveal, top and bottom
-  //      is a single quad however large. Corners that sit on hidden surfaces
-  //      -- a reveal butted into the wall it meets, an underside buried in
-  //      the floor slab -- returned 0.32 under the constant and ~0 now, and
-  //      that zero is smeared 0.45 m across wall a visitor is looking
-  //      straight at. 14% of serenity's wall vertices went to a true zero.
+  //      The same probe re-run after the fix finds no wall on any of the
+  //      three apartments still presenting its far face, and the walls that
+  //      report neither face are all accounted for mechanically (an opening
+  //      on the probe line, a parallel wall inside the 1 m standoff, a taller
+  //      ground-floor wall screening an upper one, a neighbour's end quad, or
+  //      correctly-absent geometry above the attic slope).
+  //   2. RESOLUTION -- STILL LIVE, and it is what makes vertex shading the
+  //      wrong instrument here. Quads are shaded from their four geometric
+  //      corners and Gouraud-interpolated at SEG, and each end reveal, top
+  //      and bottom is a single 1x1 quad however large and whatever SEG
+  //      says -- refining SEG cannot subdivide them. Corners that sit on
+  //      hidden surfaces -- a reveal butted into the wall it meets, an
+  //      underside buried in the floor slab -- returned 0.32 under the
+  //      constant and ~0 sampled, and that zero is smeared SEG metres across
+  //      wall a visitor is looking straight at. 14% of serenity's wall
+  //      vertices went to a true zero.
+  //      Measured, plan 4a task 2: walls switched to sampled=true and SEG
+  //      swept 0.45 / 0.30 / 0.22 / 0.15, against a pre-agreed exit
+  //      criterion of serenity linear-domain contrast >= 4.32. Best of eight
+  //      readings 3.9347 -- NO-GO, reverted in full. The sweep's own shape is
+  //      the finding: contrast was HIGHEST at the coarsest SEG (3.90 at 0.45,
+  //      decaying to 3.37-3.44 at 0.22-0.15) because the statistic was being
+  //      moved by this defect's smeared near-zeros, not by walls being
+  //      correctly shaded. Buying the criterion would have meant shipping the
+  //      artefact that produced it. With the artefact suppressed as far as
+  //      the sweep could suppress it (SEG 0.15, true-zero fraction 7.7% ->
+  //      4.8%), the surviving real effect is 3.2062 -> 3.4380: about +0.23 of
+  //      the +1.11 the criterion asked for, roughly a fifth.
   //
-  // Defect 1 had to be fixed before walls could take any position-sensitive
-  // shading at all, including the plan's task 4 atlas -- an atlas baked onto
-  // inside-out walls records the wrong side. It is now fixed; defect 2 is
-  // still open, and is precisely what that atlas replaces. Walls therefore
-  // still pass sampled=false here, and until defect 2 is closed the honest
-  // state is the one CLAUDE.md already records: floors and furniture carry
-  // occlusion, walls do not, and a floor-to-wall corner darkens on the floor
-  // side only.
+  // READ THAT NO-GO AT ITS OWN SCOPE. It says VERTEX-SHADED walls taking the
+  // sampled ambient cannot reach that bar. It does NOT say walls are not
+  // worth lighting, and 3.4380 is NOT an upper bound on a wall lightmap
+  // atlas: an atlas samples per texel ON the surface and produces real
+  // gradients, where this shades from four geometric corners and, on the
+  // unrefinable quads above, from corners buried inside adjoining solids.
+  // The atlas remains the open path and defect 1's fix UNBLOCKED it -- an
+  // atlas baked onto inside-out walls records the wrong side, which is why
+  // plan 3 task 2 split it out. Its remaining cost is a from-scratch atlas
+  // rasteriser: three.js's UVUnwrapper is a thin wrapper over the xatlas-web
+  // WASM module, so there is nothing here to reuse for the packing.
+  //
+  // Until defect 2 is closed, walls therefore still pass sampled=false here,
+  // and the honest state is the one CLAUDE.md records: floors and furniture
+  // carry occlusion, walls do not, and a floor-to-wall corner darkens on the
+  // floor side only.
   function bakeWalls(scene, data) {
     // two buckets: lower- and upper-level walls — for the dollhouse cutaway
     const buckets = { low: { pos: [], nrm: [], col: [] }, high: { pos: [], nrm: [], col: [] } };

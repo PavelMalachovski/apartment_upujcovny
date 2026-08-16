@@ -498,6 +498,37 @@ exposure itself is.
 
 ### horkyone-10: fitted, and it passes the ±10 luminance check
 
+> **Superseded values — the method below is still the live one, every number
+> in it is not.** Added 2026-08-15 by plan 4a task 5. This section fits
+> horkyone-10 to **0.45** against siblings at serenity **0.326** /
+> kings-court **0.56**, and its sibling-band arithmetic (window
+> [139.66, 148.36], the ±5-ish diffs, the 1.05 comparison) is computed from
+> those three. All three have since moved twice: plan 3 task 4 →
+> 0.329 / 0.575 / 0.46, then plan 4a task 3 → **0.295 / 0.52 / 0.42**, which
+> is what ships on `phaseB-plan4a-winding` (`?v=110`; `main` still carries
+> plan 3 task 4's set until that branch merges). **Read this section for the
+> criterion and the procedure — "mean sRGB luminance within ±10 of both
+> fitted flats, every `spawns[]` entry at 480×300 through the full post
+> chain, pooled" — and for nothing else.** The live band and the live sweep
+> are in plan 4a task 3's harness
+> (`docs/superpowers/harnesses/2026-08-15-b4a-task3/`, `session.json` →
+> `spawnPooledLuminance`): serenity 140.27, kings-court 148.19, acceptance
+> window **[138.19, 150.27]**, and horkyone-10 at 0.42 reads 145.44 pooled
+> over three loads, +5.17 from serenity and −2.75 from kings-court.
+>
+> **And the criterion had lapsed unnoticed.** The 0.46 this section's
+> successor fitted **was already failing the same ±10 test before plan 4a
+> touched anything** — at +11.07 from serenity, measured on the sweep above.
+> Nothing broke it directly: plan 4a task 1's winding fix brightened all
+> three apartments, serenity's own re-fit came down further than
+> horkyone-10's, and the band moved out from under a value nobody re-checked.
+> That is a structural gap, not a slip. **horkyone-10's exposure is defined
+> relative to two other apartments' exposures and no check re-runs when
+> either of them moves**, so it can fall out of its band silently and stay
+> there. Plan 4a task 3's refit to 0.42 was therefore mandatory rather than
+> cosmetic. Carried into `docs/PHASE-B-RESUME.md`'s deferred table so it is
+> owned by a plan rather than only recorded here.
+
 **Correction (review fix wave).** The pass this section originally described
 measured horkyone-10 failing the ±10 check at its untouched default (1.05)
 and stopped there, reasoning that picking an exposure purely to land inside
@@ -797,6 +828,15 @@ either direction. A margin this size is a statement about today, not a
 guarantee about tomorrow.
 
 ### horkyone-10: the luminance criterion, reconfirmed
+
+> **Reconfirmed then, superseded twice since.** Added 2026-08-15 by plan 4a
+> task 5. The exposures in the table below (0.326 / 0.56 / 0.45) are two
+> generations old — plan 3 task 4 moved them to 0.329 / 0.575 / 0.46 and plan
+> 4a task 3 to **0.295 / 0.52 / 0.42**. The criterion and the method are
+> unchanged and still current; only the values are history. See the marker
+> under "horkyone-10: fitted, and it passes the ±10 luminance check" above
+> for the live band, and for why this criterion went unenforced between the
+> two moves.
 
 Task 7 fitted horkyone-10 to exposure 0.45 on the criterion task 6 set —
 mean sRGB luminance within ±10 of the two fitted flats. Re-measured fresh
@@ -1208,6 +1248,17 @@ one; the decision about it belongs to whoever owns the merge.
 spawn-pooled mean sRGB luminance **143.6** against serenity 138.7 and
 kings-court 149.0 — inside ±10 of both, and 0.25 off the siblings'
 midpoint.
+
+> **This pass expired, and nothing noticed for a while.** Added 2026-08-15 by
+> plan 4a task 5. The 0.46 fitted here stopped satisfying its own ±10
+> criterion once plan 4a task 1's winding fix brightened all three
+> apartments: re-measured on the post-winding render it reads **+11.07 from
+> serenity**, outside the band. It was not broken by anything done to
+> horkyone-10 — serenity's own re-fit came down further and the band moved
+> out from under it. Plan 4a task 3 refit horkyone-10 to **0.42** (pooled
+> mean 145.44, +5.17 / −2.75 against the siblings' 140.27 / 148.19). The
+> measurement is a paragraph up in this section's own terms; the reading of
+> record is `docs/superpowers/harnesses/2026-08-15-b4a-task3/session.json`.
 
 **This fit expires.** It was made against a render carrying the deferred
 `grid()` winding defect (8 of 12 wall faces backwards, `bake.js`),
@@ -1781,6 +1832,30 @@ that produced the No-Go, and nothing survived the revert. Following the
 (`"shipped": "NOTHING…"`), not in the all-spot files themselves — so read the
 two together.
 
+> **Read task 2's NO-GO at its own scope — it is about vertex shading, not
+> about walls.** Added 2026-08-15 by plan 4a task 5, because this verdict is
+> the single most over-generalisable finding on the branch. What the data
+> supports: ***vertex-shaded*** walls taking the visibility-scaled ambient
+> cannot reach a linear contrast of 4.32. What it does **not** support:
+> "walls are not worth lighting". The sweep's own shape is the reason —
+> contrast was **highest at the coarsest `SEG`** and fell as `SEG` refined
+> (3.90 → 3.64 → 3.37 → 3.44), because the statistic was being moved by
+> defect 2's smeared near-zero vertices rather than by walls being correctly
+> shaded, and buying the criterion would have meant shipping the artefact
+> that produced it. Suppress that artefact as far as the sweep can (`SEG`
+> 0.15, true-zero fraction 7.7% → 4.8%) and the surviving real effect is
+> 3.2062 → **3.4380: about +0.23 of the +1.11 the criterion asked for,
+> roughly a fifth.** **3.4380 is not an upper bound on a wall lightmap
+> atlas.** An atlas samples per texel *on* the surface and produces real
+> gradients; this shades from four geometric corners, and on the reveals,
+> tops and bottoms — single 1×1 quads whatever `SEG` says, which is why
+> refining `SEG` cannot fix them — some of those corners sit inside adjoining
+> solids. Plan 4a task 1 **unblocked** that atlas (it could not be baked onto
+> inside-out walls at all); its remaining cost is a from-scratch atlas
+> rasteriser, since three.js's `UVUnwrapper` is a thin wrapper over the
+> `xatlas-web` WASM module. Whoever writes plan 4c or 5 owns that decision on
+> these terms, not on the headline 3.9347.
+
 **Four of the twenty-three are `b4a-task3`, and they are a FOURTH render again —
 do not fold them into the plan-4a row above.** Task 3 re-fitted every
 apartment's `exposure` against the post-winding render (serenity 0.329 →
@@ -1921,6 +1996,22 @@ headline in serenity's case:
 Neither fact changes a baseline — the gate is all-spot by rule 5 and both
 readings stand — but neither should be discovered by a later reader rather than
 read here.
+
+> **The honest bound on everything plan 4a measured.** Added 2026-08-15 by
+> plan 4a task 5. This branch's verification chain is machine-checked **from
+> `sweep.json` (and the other committed harness JSON) outward**: `write_metrics.py
+> --check` proves the metrics files are derived from the raw readings rather
+> than typed, `check_metrics_readme.py` proves this README's figures match
+> those files, and `check_metrics_readme_selftest.py` proves that checker can
+> actually fail. **None of that reaches the first hop.** The raw readings were
+> **hand-transcribed out of a browser console into `sweep.json` and into the
+> task harnesses' `session.json`.** No harness here verifies that step, and
+> none could without re-running the capture — a checker can only confirm that
+> the document agrees with the file, never that the file agrees with what the
+> browser printed. Two committed checkers guard this README; neither guards
+> that. Treat the transcription as the weakest link in every number on this
+> branch, and re-capture rather than re-read if a figure ever has to be
+> defended.
 
 ### The plan's own claim: blacks, before and after
 

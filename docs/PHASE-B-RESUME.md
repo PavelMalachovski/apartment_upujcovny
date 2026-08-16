@@ -74,7 +74,11 @@ everything.)
 re-fitted every exposure against the post-winding render: serenity **0.295**,
 kings-court **0.52**, horkyone-10 **0.42**; bloom unchanged at threshold
 **1.8** / strength **0.1**; `?v=110`. The baseline table below is measured
-against that tip.
+against that tip. (Plan 4a task 5 then bumped the tree to **`?v=111`** for a
+comment-only rewrite in `tour/bake.js`. No shader, constant or config value
+moved with it, so every baseline below still stands unremeasured — the bump
+follows the precedent that any edit to a shipped file bumps the cache tag,
+`?v=100 → 101` for a `post.js` header pointer.)
 
 ## The gate, restated 2026-08-15
 
@@ -304,8 +308,46 @@ free:
    exposure anywhere buys 0.0057 of the 0.03. A fit chasing the remainder
    would be fitting toward ΔE, which this phase forbids outright.
 3. **Accept the 0.03 and restate the gate.** **Taken.**
-4. **Fix the wall-winding defect first and re-measure.** Not taken now, but
-   not dropped — it stays deferred to plan 4 or 5 with its own entry below.
+4. **Fix the wall-winding defect first and re-measure.** Not taken at the
+   time — it was deferred to plan 4 or 5 with its own entry below.
+   **Superseded: it was taken, and it closed the shortfall outright.** See
+   the block immediately below.
+
+#### Option 4 was executed after all, and the 0.03 is gone
+
+**Written 2026-08-15 by plan 4a task 5.** The paragraphs above are true of
+the moment they describe and are kept as the record of that decision. They
+have stopped describing the current state, and a reader who stops at "we
+accepted a 0.03 miss" will carry away something that is no longer the case.
+
+Plan 4a was written to do option 4 and did it. Task 1 fixed the `grid()`
+winding with the sign test (`b767b4b`) and un-buried two paintings that had
+been inside a wall; **serenity's all-spot legacy reading moved 16.60 →
+16.32**, which is **0.26 *under* the old 16.58 ceiling**, not 0.03 over it.
+Task 3 then re-fitted exposure against the post-winding render (0.329 →
+0.295) and it reached **16.00**. kings-court moved the same way, 18.90 →
+**18.58**. Both movements are attributed per rule 2 and are recorded in the
+baseline table above; the 0.03 shortfall that this whole section exists to
+explain **does not exist in the current tree.**
+
+Two things follow, and the second matters more than the first:
+
+- **The shortfall was closed by fixing a real rendering defect, not by
+  tuning and not by moving a threshold.** Option 2 — re-fit exposure against
+  the old render — remains rejected and was proved impossible before it was
+  offered; the exposure re-fit that did happen (task 3) came *after* the
+  render changed, which is a different act.
+- **The restatement of the gate still stands, and it was re-confirmed on the
+  new numbers.** After task 1's readings were verified, the merge owner made
+  a **second ruling on 2026-08-15**: keep the restated gate — baselines plus
+  attribution plus the 0.5 hard stop — rather than reinstating the old
+  absolute ceilings now that serenity would pass them. The grounds are
+  unchanged and never depended on the 0.03: this metric is dominated by pose
+  and content mismatch, so it cannot arbitrate lighting at that resolution,
+  and serenity's ΔE is expected to move by whole points once plan 4 fixes the
+  living-room opening, the missing shower and the mis-pointed spots. Passing
+  a ceiling once is not a reason to re-adopt an instrument that was retired
+  for being the wrong instrument.
 
 The restatement did **not** rest on "the threshold is one noisy historical
 reading", which is the weak form of this argument and is the shape of moving
@@ -341,6 +383,13 @@ eight readings before the decision was put.
   `info.autoReset` handled); a bare `renderer.render()` undercounts by ~15.
 - Bump `?v=` on the **single** module tag in `index.html`, after the last code
   edit.
+- **Know where the machine-checking stops.** Every committed checker in this
+  repo verifies the chain *from the raw JSON outward* — metrics files derived
+  from `sweep.json`, README figures matching the metrics files, the checker's
+  own failure path exercised. The first hop, **browser console → JSON, is
+  hand-transcribed and nothing verifies it**, and nothing could without
+  re-running the capture. If a number ever has to be defended, re-capture it;
+  do not re-read it.
 - Execution method: `superpowers:subagent-driven-development` — a fresh
   implementer per task, a review after each, a whole-branch review at the end.
   Ledgers live in `.superpowers/sdd/<plan-basename>/progress.md` and carry the
@@ -353,9 +402,11 @@ eight readings before the decision was put.
 | `vercel.json` still caches the deleted `/three.min.js`; the version-stamped `tour/lib/` gets the generic `max-age=300` | any plan touching deploy |
 | No explicit `Cache-Control` on the HTML entry point — now the single point of failure, since one tag versions everything | plan 5 |
 | `serve.py`: `%00` in a path raises instead of returning 400; realpath check is TOCTOU-racy in principle | deferred, dev-only, fails closed |
+| `serve.py:90`: `base64.b64decode(body)` is unguarded in `do_POST`, so a malformed save body raises, `socketserver` prints the traceback and **kills that handler thread**. Sibling to the `%00` row above, and it matters more than it looks: **every** measurement recipe in this repo goes through `/save/`, and the failure mode next door is a sandboxed `serve.py` answering HTTP 200 while writing nothing. Two independent ways for a capture to be silently absent, and neither announces itself — probe for the file on disk, never trust the response | deferred, dev-only; found by plan 4a |
+| The horkyone-10 ±10 luminance criterion **went unenforced for some time**: the shipped `exposure` 0.46 was already failing it before plan 4a started (+11.07 from serenity against a ±10 band), because plan 4a task 1 brightened all three apartments and serenity's re-fit came down further, moving the band out from under horkyone-10. Found in passing by plan 4a task 3, whose refit to 0.42 was therefore **mandatory, not cosmetic**. The criterion has no automated check and nothing re-runs it when a sibling's exposure moves — that is the actual gap | plan 5 |
 | `CLAUDE.md` beyond the two rows already corrected | plan 5 |
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
-| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **fixed** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
+| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
 
 ### The wall-winding defect, deferred deliberately — and since fixed
@@ -390,20 +441,54 @@ Not a reversal of the `else` branch: that would leave top and bottom broken
 everywhere, and an earlier draft of this write-up said exactly that before it
 was corrected.
 
-Three consequences were accepted knowingly when this was deferred:
+Three consequences were accepted knowingly when this was deferred. **All three
+have now played out; here is each one's disposal, added 2026-08-15 by plan 4a
+task 5.**
 
 - **It blocks any wall lightmap atlas.** An atlas baked onto inside-out walls
   records the wrong side. Plan 3 task 2 split that atlas out for this reason,
   and most of that task's intended effect went with it — walls carry most of a
   first-person frame's darkest 5%.
+  → **UNBLOCKED, and still unbuilt.** Task 1 removed this obstacle. Plan 4a
+  task 2 then tried the *cheap* substitute — vertex-shaded walls taking the
+  visibility-scaled ambient, `SEG` swept 0.45/0.30/0.22/0.15 — and returned
+  **NO-GO** (serenity linear-domain contrast 3.9347 against a required ≥4.32,
+  reverted in full, `tour/` carries none of it). **Do not over-read that
+  verdict.** It says *vertex-shaded* walls cannot reach the bar; it does not
+  say walls are not worth lighting. With the smearing artefact suppressed as
+  far as the sweep could, the surviving real effect is **+0.23 of the +1.11
+  required — about a fifth** — and 3.4380 is **not** a ceiling on a per-texel
+  atlas, which samples on the surface and produces real gradients where this
+  shades from four geometric corners, some of them buried inside adjoining
+  solids. The atlas remains the open path, and its known cost is a
+  **from-scratch atlas rasteriser**: three.js's `UVUnwrapper` is a thin
+  wrapper over the `xatlas-web` WASM module, so there is nothing in the
+  vendored tree to reuse for the packing. Whoever writes plan 4c or 5 must
+  meet that distinction rather than plan 4a task 2's headline number.
 - **It is why GTAO was rejected.** GTAO is the first thing in this pipeline to
   read scene normals; with them pointing away from the viewer it closes the
   hemisphere and multiplies walls to black (plan 3 task 3). That rejection has
   a second, independent ground — a mobile draw-call breach — so it survives
   this fix, but the black walls do not.
+  → **The black walls are CURED; GTAO stays rejected anyway.** The normals now
+  face the viewer, so that specific failure cannot recur. The surviving ground
+  is the one that never depended on the winding: GTAO's G-buffer prepass takes
+  kings-court from **150 to 282 mobile draw calls against a ≤250 budget**.
+  Re-adopting GTAO means solving that, not re-testing the walls.
 - **It expires plan 3 task 4's exposure fit.** That fit is correct for the
   render as it ships today; fixing the winding changes the render and forces a
   re-fit.
+  → **Came true, and was discharged.** Plan 4a task 3 re-fitted all three
+  against the post-winding render: serenity 0.329 → **0.295**, kings-court
+  0.575 → **0.52**, horkyone-10 0.46 → **0.42**. It also found that the
+  shipped horkyone-10 0.46 had *already* fallen out of its own ±10 band
+  (+11.07 from serenity) once serenity's fit came down — see the deferred
+  table above.
 
 Whoever fixes it owns a verification pass of its own: moving those faces moves
-apparent room dimensions.
+apparent room dimensions. → **It did, exactly as predicted and on the axis the
+original note got wrong.** Every measurable **x** span in all three apartments
+shrank by exactly **0.280**, every **z** span by exactly 0.000; the reversed
+faces belong to walls *running* along z, which bound a room in **x**. Each room
+now measures its configured centreline distance minus the 0.14 wall thickness
+exactly.
