@@ -80,7 +80,7 @@
       "openings": [
         {
           "at": 0.25,
-          "w": 1.4,
+          "w": 1.8,
           "type": "door",
           "terrace": true,
           "daylight": true,
