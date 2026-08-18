@@ -17,7 +17,10 @@ information.
 
 Every `compare`-flagged photo spot was classified by whether its render
 and its photograph show the *same room content* — subject, not lens, not
-exposure. Most do not: ~~**serenity 2 of 11 pass**~~, **kings-court 8 of 14**
+exposure. Most do not: ~~**serenity 2 of 11 pass**~~, ~~**kings-court 8 of
+14**~~ **kings-court 10 of 13** (corrected 2026-08-19, plan 4b task 4 fix
+round 1 — struck in place per repo convention rather than deleted; the
+population also changed, see the 2026-08-19 note below)
 (classification and evidence:
 `.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`).
 The failures are camera-pose and modelling defects, not lens ones, and

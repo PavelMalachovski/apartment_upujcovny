@@ -116,8 +116,10 @@ metrics record as the measurements they were.
 **The all-spot legacy ΔE reading is a regression tripwire, not a quality
 ceiling.** It was never able to be the latter. ΔE2000 against these
 photographs is dominated by pose and content mismatch rather than by
-shading — 9 of serenity's 11 compare spots and 6 of kings-court's 14 fail
-pose verification, serenity's living room is modelled with a punched window
+shading — 9 of serenity's 11 compare spots and ~~6 of kings-court's 14~~
+**3 of kings-court's 13** (corrected 2026-08-19, plan 4b task 4 fix round 1
+— see the baseline table below for the population change this reflects)
+fail pose verification, serenity's living room is modelled with a punched window
 where the flat has a sliding door, kings-court's Bathroom 2 has no shower at
 all, and two of serenity's worst spots photograph a real swimming pool
 against a flat abstraction of one. `metrics/README.md` already states the
@@ -150,6 +152,22 @@ applied), `?v=110`:
 | serenity | **16.00** | plan 4a task 4; three-round mean 15.9973, readings 15.9891 / 16.0055 / 15.9973 |
 | kings-court | **18.58** | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
 | horkyone-10 | — | no photographs; accepted on luminance proximity only |
+
+> **Corrected 2026-08-19, plan 4b task 4 fix round 1 — read this before
+> comparing anything to kings-court's 18.58.** That baseline is on the
+> **14-spot** population, recorded before plan 4b touched kings-court at
+> all. Two plan 4b commits have moved it since, the second of which also
+> changed the population itself: `c1a7329` (task 3's marble un-inversion) to
+> **18.46**; then task 4's pose re-pointing to **18.16** (−0.30, same 14
+> spots, attributed — task 4's report §3); then task 4's B4 ruling dropped
+> `4.webp` from `compare`, moving the population to **13** and the reading
+> to the shipped **17.60** (−0.56, arithmetic only, not a render change).
+> Sum: 18.58 → 17.60 is −0.98, composed of −0.12 (marble, partly
+> attributed) + −0.30 (pose, attributed) + −0.56 (population arithmetic).
+> **A future kings-court reading is not comparable to 18.58 on sight — check
+> both the commit and the population first.** Full per-spot and per-step
+> numbers: `docs/superpowers/metrics/README.md` ("Pose verification") and
+> `.superpowers/sdd/2026-08-16-phase-b4b-content-poses/task-4-report.md` §3.
 
 The outgoing rows read *serenity **16.61** — plan 3 task 7; eight readings
 spanning 16.59–16.62* and *kings-court **18.90** — plan 3 tasks 4 and 7*,
@@ -313,7 +331,14 @@ automated trail of the defects they expose.
 > mis-aimed — Bathroom 2's shower sits west of the bath where the photograph
 > puts it east and has no divider glass, and the entry-hall wardrobe crosses
 > the `x = 23` wall 0.80 m into the Guest WC and stands 0.16 m in front of the
-> vanity. Both are 4c's.
+> vanity — **and also projects ~0.73 m past the building's own `x = 23.8`
+> exterior wall (0.80 m past its centreline), the more visible half of the
+> defect since it shows in dollhouse mode from outside** (added 2026-08-19,
+> fix round 1, from the task 4 report — the `tour/apartments/kings-court.json`
+> `poseNote` itself still only names the Guest WC intrusion; this is a
+> documentation-only round and cannot touch `tour/`, so the `poseNote` needs
+> its own edit under `tour/` before 4c starts, which reads the routed record,
+> not the report). Both are 4c's.
 >
 > **Two instrument changes in that one commit, and they compound.**
 > (1) The denominator: the merge owner ruled `4.webp`'s coffee corner will not
@@ -321,8 +346,9 @@ automated trail of the defects they expose.
 > population is 13, not 14** from that commit on. Any before/after pair that
 > straddles it compares two different populations. Dropping a spot that scored
 > 25.47 against a 14-spot mean of 18.16 moves the mean to 17.60 **by
-> arithmetic alone** — that −0.57 is not a rendering change and must never be
-> reported as one.
+> arithmetic alone** — that ~~−0.57~~ **−0.56** (corrected 2026-08-19, fix
+> round 1: `(25.47 − 18.16) / 13 = 0.5623`, not 0.57) is not a rendering
+> change and must never be reported as one.
 > (2) The `luminance.py` population above: kings-court went from **8 spots to
 > 10**, and the committed `exposure: 0.52` was fitted against the 8.
 
