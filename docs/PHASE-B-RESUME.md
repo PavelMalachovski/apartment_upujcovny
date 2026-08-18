@@ -422,7 +422,7 @@ eight readings before the decision was put.
   element and take a Playwright screenshot.
 - `?check=1` runs the layout validator; `window.__issues` must be empty on all
   three apartments before every commit.
-- `?compare=1` opens the render-versus-photograph divider — the only
+- The render-versus-photograph divider is opened from the console, **not** by a URL parameter — `?compare=1` never existed, and this line claimed it did until 2026-08-18. It loads on demand behind a button gated on `poseVerified !== false`; load `compare.js` by hand and call `window.__compare(file)`, which ignores that flag. `window.__compareAll()` walks every `compare` spot. It is the divider — the only
   instrument that sees geometry errors. `window.__compare(file)`.
 - Draw calls go through the post chain (`a.post.render(0)` with
   `info.autoReset` handled); a bare `renderer.render()` undercounts by ~15.
