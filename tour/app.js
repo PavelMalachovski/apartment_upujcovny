@@ -347,10 +347,11 @@ window.initApp = function () {
 
   // ---------- Render-vs-photograph compare control ----------
   // Only spots BOTH flagged for comparison AND whose render is confirmed to
-  // show the same subject as the photograph -- serenity has 9 of 11 compare
-  // spots where it does not (a punched window rendered where the photo
-  // shows a sliding door, a bedroom rendered where the photo is the
-  // bathroom, and so on -- see each spot's poseNote), kings-court 6 of 14.
+  // show the same subject as the photograph. Serenity had 9 of 11 compare
+  // spots where it did not; plan 4b task 2 re-pointed six of them and moved
+  // the one attached to the bathroom photograph into the bathroom, leaving
+  // **2 of 11** -- both the pool vista (2.webp, 10.webp), which no camera can
+  // fix because there is no pool geometry and no sky. kings-court 6 of 14.
   // Showing a visitor a side-by-side of two different rooms would be worse
   // than showing nothing: the same contamination CLAUDE.md's palette note
   // already rejected once for the metric, now for a human instead of a
