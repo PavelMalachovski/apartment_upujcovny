@@ -35,6 +35,26 @@ its size**, not its kind: a `door` is `DOOR_H` 2.05 high and this one is 1.4 m
 wide, where the photograph shows a floor-to-ceiling slider. So B1 is half
 closed, and the half that remains is geometry, not opening type.
 
+> **Correction 1a, added 2026-08-18 by task 1 — "floor-to-ceiling slider" is
+> wrong, and only the width was ever wrong.** The sentence above inherited B1's
+> premise without measuring it. `9.webp` is the only frame with the leaf slid
+> open, and reading upward from the opening it shows a crisp head line, then
+> plain wall, then the curtain rod, then more wall, then the air-conditioner:
+> there is real wall above the head, so the opening cannot be floor-to-ceiling.
+> Measured inside that one photograph with the air-conditioner as the ruler
+> (235 px wide against 545 px head-to-floor, a wall-split indoor unit being
+> 0.78–0.92 m), the **head sits at 1.95–2.10 m — `DOOR_H` 2.05 is already
+> right**, and heightening the opening would move the model *away* from the
+> building. Task 1 therefore widened it 1.4 → 1.8 m and deliberately left the
+> height alone; the review upheld that. **Tasks 2+ must not heighten this
+> opening.** Its shipped world extent is in the task 1 report.
+>
+> One thing the same measurement exposed and did **not** fix: `mainCeilH: 2.6`
+> is ~0.3–0.4 m too short (two independent routes off `4.webp` put the real
+> ceiling at 2.86–2.92 m and 3.1–3.2 m). Deferred with an owner — see
+> `docs/PHASE-B-RESUME.md`, "Deferred, with owners". Task 2 re-points cameras
+> inside that short shell knowingly.
+
 **Correction 2 — the wrong-wall spots are a pose defect, not that geometry
 defect.** Their `poseNote`s say the terrace door "never appears" at any yaw.
 The door exists. The cameras face away from it. Fixing the opening's height

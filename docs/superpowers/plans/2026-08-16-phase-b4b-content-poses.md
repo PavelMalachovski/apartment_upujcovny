@@ -26,6 +26,7 @@
 - **`?compare=1` is not a thing.** The divider loads on demand from a button gated on `poseVerified !== false` — i.e. gated *against* every spot this plan touches. Load `compare.js` by hand (task 1 step 2) and call `window.__compare(file)`, which finds the spot by filename and does not check `poseVerified`.
 - **Flipping `poseVerified` to `true` makes a spot visitor-visible in the compare UI.** That is a product change, not just a bookkeeping one: `app.js`'s `compareEligible` is what decides whether a visitor is offered the render-versus-photograph view for that spot. Only flip it where you would be content for a visitor to open it.
 - Angles in apartment JSON are **degrees**. Yaw 0 looks north (−z), 90 west, 180 south, 270 east.
+- **Harness frames were once silently unstageable, and are not any more — `.gitignore` line 15.** `.gitignore` carries `*.jpg` *and* `*.JPG`, and the match is case-insensitive on this filesystem, so a `.jpg` frame written by CLAUDE.md's own screenshot recipe (`fetch('/save/shot.jpg', …)`) was dropped by `git add` with **no error at all** — the evidence just never landed. Task 1 hit this and worked around it by filing `.webp`; task 1's fix round added `!docs/superpowers/harnesses/**` so either extension now commits. Frames outside that directory are still swallowed. **Whichever extension you use, `git status` the harness directory after saving and confirm the frame is listed before you claim it was filed.**
 - Commit your own files explicitly. Never `git add -A`.
 
 ## File structure

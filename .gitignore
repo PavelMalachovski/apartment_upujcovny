@@ -6,6 +6,14 @@
 *.heic
 *.HEIC
 
+# ...except harness evidence frames, which are committed proof, not source
+# photographs. On a case-insensitive filesystem the rules above swallow both
+# `.jpg` and `.JPG`, so without this negation a harness frame written by
+# CLAUDE.md's own screenshot recipe (`fetch('/save/shot.jpg', …)`) is silently
+# unstageable: git reports no error, the evidence simply never lands. Keep this
+# above the "Служебное" block so .DS_Store & co. stay ignored in here too.
+!docs/superpowers/harnesses/**
+
 # Vercel
 .vercel
 

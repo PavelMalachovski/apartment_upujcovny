@@ -118,13 +118,41 @@ fixed on the strength of a number that never described it.
 
 | # | What looks wrong | Which feature would fix it | Can the metric see it? | Acceptance criterion if not |
 |---|---|---|---|---|
-| B1 | **serenity's living room does not match its own photograph.** The flat has a floor-to-ceiling sliding door with sheer curtains; the model has a punched window (sill 0.85, head 2.45). No curtains, no rug, no air-conditioner, and the artwork is a radial-gradient blob. A yaw sweep at spot 3 finds *no* camera angle that reproduces the photograph. Sheets 03, 04 | Fix the opening in `serenity.json`; add curtains, rug and A/C as furniture; real artwork textures | **No.** Spot 3 scores 16.25 — mid-pack, better than average — while the two frames are visibly of different rooms | A human A/B at spot 3 must show the same opening shape and the same three objects present. This is a geometry bug found by eye and only fixable by eye |
+| B1 | **[SUPERSEDED IN PART — see the note under this table]** **serenity's living room does not match its own photograph.** The flat has a floor-to-ceiling sliding door with sheer curtains; the model has a punched window (sill 0.85, head 2.45). No curtains, no rug, no air-conditioner, and the artwork is a radial-gradient blob. A yaw sweep at spot 3 finds *no* camera angle that reproduces the photograph. Sheets 03, 04 | Fix the opening in `serenity.json`; add curtains, rug and A/C as furniture; real artwork textures | **No.** Spot 3 scores 16.25 — mid-pack, better than average — while the two frames are visibly of different rooms | A human A/B at spot 3 must show the same opening shape and the same three objects present. This is a geometry bug found by eye and only fixable by eye |
 | B2 | serenity's outdoors is three flat bands — sky, hedge, pool — with a smeared blob on the water. Spot 10 is the worst frame in the catalogue at **ΔE 29.02** and the pool is the property's headline feature. Sheets 01, 05 | HDRI sky, real planting and pool geometry, a water material | **Yes** — spot 10 is the largest single outlier in serenity's residual table | — |
 | B3 | kings-court's black-marble bathrooms render as near-white blank walls; the feature material is simply absent. Spots 13 and 14, **ΔE 33.22 and 33.38** — the two worst in that flat. Sheet 08 | PBR texture sets (albedo + normal + roughness) | **Yes** | — |
 | B4 | kings-court spot 4, "Coffee corner", **ΔE 33.21**, is a product detail photograph — a coffee machine on marble. The model has no coffee corner; the render is a blank wall. Sheet 08 | Either model the props, or remove the spot from the compare set | **Yes, but it measures the wrong thing** — a missing object, not a material or a light | Decide explicitly whether detail-shot photographs belong in a resemblance metric at all. Whichever way, record the decision, because dropping it moves the mean and that must not read as an improvement |
 | B5 | Every window in kings-court and horkyone-10 is a white or flat-blue void — there is no exterior geometry. The dollhouse shows the building floating in blue nothing, with no ground plane and casting no shadow. Sheets 06, 07, 09 | HDRI environment, a ground plane, a sun that casts | **Partially** — windows occupy grid cells, so the ΔE will move, but it cannot tell "sky through a window" from "white wall" | A dollhouse screenshot must show the building standing on ground with a cast shadow |
 | B6 | Furniture is boxes throughout — the residual the phase A decomposition already identified as dominant | Real GLTF furniture | **Yes** | — |
 | B7 | Procedural textures read as artefacts up close: marble is white scribbles, the bedroom feature wall is camouflage blobs, the quilted headboard is a flat grid of rectangles, string lights are dots on a straight line, artwork is a radial gradient. Sheets 02, 06, 07, 09 | Scanned CC0 PBR texture sets (Poly Haven, ambientCG) | **Weakly.** They carry roughly the right average colour, which is all an 8×8 cell mean sees | A screenshot at 1 m from each named surface must read as the material it claims to be, A/B against the photograph |
+
+> **B1 is superseded in part, 2026-08-18 (phase B plan 4b, task 1).** Kept in
+> place rather than deleted, because the parts of it that still stand are what
+> 4b and 4c are executed against.
+>
+> **Dead — both halves of "punched window vs. floor-to-ceiling slider".** The
+> model had already stopped being a punched window before 4b started: it is a
+> `type: "door"` opening in `serenity.json` wall 4 (plan-4b spec, Correction 1).
+> And the photograph was never a floor-to-ceiling slider either. Task 1
+> measured `9.webp` — the only frame with the leaf slid open — and it shows,
+> reading upward from the opening: head line, wall, curtain rod, wall,
+> air-conditioner. Using that air-conditioner as a ruler inside that one
+> photograph (235 px wide against 545 px head-to-floor; a wall-split indoor
+> unit is 0.78–0.92 m), the **head is at 1.95–2.10 m**, which `DOOR_H` 2.05
+> already builds. B1's premise inverted the error: the opening was never too
+> short, only too narrow. Task 1 widened it 1.4 → 1.8 m and left the height
+> alone; the review upheld that and re-derived the head independently.
+>
+> **Still live:** no curtains (`builder.js` builds `o.curtain` only for
+> `type: "win"`, so the key on this opening is inert), no rug, no
+> air-conditioner, radial-gradient artwork, and B1's acceptance criterion —
+> a human A/B at spot 3 — which task 1 could not meet because spot 3's camera
+> faces the wrong wall. That is a pose defect (spec Correction 2) and belongs
+> to task 2; the missing objects belong to 4c.
+>
+> **New, found while disproving B1:** `mainCeilH: 2.6` is ~0.3–0.4 m too short.
+> Deferred with an owner — `docs/PHASE-B-RESUME.md`, "Deferred, with owners".
+
 
 ### C — The measurement harness itself
 
@@ -187,3 +215,16 @@ Three things the walk changes about the handoff's suggested sequencing.
    the photograph side by side. That argues for making the render-versus-
    photograph comparison a routine step with a fixed camera, rather than a
    feature to ship later.
+
+   **2026-08-18:** the "punched window into a sliding door" framing here is
+   superseded along with B1 itself — see the note under the B table. The
+   opening was already a door and the photograph is not a floor-to-ceiling
+   slider; what was actually wrong was its width, fixed by plan 4b task 1.
+   **The paragraph's argument survives its own example intact**, and this is
+   the part worth keeping: the error was still config geometry, still
+   invisible to every automated gate (`window.__issues` was empty throughout,
+   before the fix and after it), and it still surfaced only because someone
+   put the render and the photograph side by side. What the correction adds is
+   that the side-by-side is not sufficient either — B1 read the door's *height*
+   off the same photographs by eye and got it backwards. It took pixel
+   measurement against a known-size object in the frame to settle.
