@@ -39,10 +39,21 @@ half would not wait on its human half. 4a shipped; 4b is written; 4c waits on
 a decision about who curates the assets.
 
 **Ten tasks are written and unstarted** (5 in 4b, 5 in plan 5), plus 4c
-whenever it is written. **4b is the one that matters most**: nine of serenity's
-eleven `compare` spots and six of kings-court's fourteen fail pose
+whenever it is written. **4b is the one that matters most**: ~~nine of
+serenity's eleven `compare` spots~~ and six of kings-court's fourteen fail pose
 verification, and that — not lighting — is what dominates the metric every
 other plan has been judged by.
+
+> **Superseded for serenity, 2026-08-19 by plan 4b task 2** (`1e0d4e5`): six
+> mis-pointed spots were re-pointed and the one attached to the bathroom
+> photograph was moved into the bathroom, so **serenity now fails 2 of 11, not
+> 9** — `2.webp` and `10.webp`, the pool vista, which is a content defect
+> (no pool geometry, no sky) owned by 4c. kings-court's six are untouched and
+> the sentence still stands for it. The paragraph's *thesis* is unchanged and
+> was confirmed, not weakened: re-pointing those seven moved serenity's
+> all-spot legacy gate 15.97 → 15.49 without a line of renderer code, which is
+> the largest single movement in phase B and exactly the "pose dominates the
+> metric" claim being made here.
 
 **Nothing in plan 3 is "in progress", and it no longer leaves anything open.**
 The one thing it did leave open was a decision rather than a task — what to do
@@ -275,10 +286,24 @@ restored** — `--all-spots` on `delta_e.py` and the `?fov=legacy` branch in
 ## What the metric can and cannot see
 
 `poseVerified` marks spots whose render shows a **different subject** than
-their photograph. **serenity passes 2 of 11, kings-court 8 of 14,
+their photograph. ~~**serenity passes 2 of 11**~~, **kings-court 8 of 14,
 horkyone-10 has no scorable spots at all.** The scorers skip the failures; the
 spots stay in the config with a `poseNote`, because they are the only
 automated trail of the defects they expose.
+
+> **serenity now passes 9 of 11**, 2026-08-19, plan 4b task 2 (`1e0d4e5`).
+> Only `2.webp` and `10.webp` still fail, and they keep their `poseNote`s.
+> **This is not only a bookkeeping change — it silently re-defines an
+> instrument.** `tools/luminance.py` filters its population through
+> `delta_e.scorable`, which requires `poseVerified`, and unlike `delta_e.py` it
+> has **no `--all-spots` escape hatch**. So serenity's luminance-fitting
+> population went from **2 spots to 9** the moment those flags flipped. Any
+> future `exposure` re-fit — including the one the `mainCeilH` row below
+> mandates — therefore runs on a different, and much better-founded,
+> population than the one that produced the committed 0.295. It is an
+> improvement, not a defect, but it is **not** comparable to the old fit, and
+> the horkyone-10 ±10 luminance criterion is derived from serenity's number,
+> so it moves too. Re-derive both; do not carry the old figures across.
 
 Those defects are plan 4's work:
 - serenity's living room is modelled with a **punched window** where the flat
@@ -453,7 +478,7 @@ eight readings before the decision was put.
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
 | ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
-| **serenity's furniture is on the wrong walls in two rooms, and no camera can fix it.** Found by plan 4b task 2 while re-pointing the seven mis-pointed spots — it is what remains after every pose is correct. (a) **Living room:** `3.webp`, `4.webp` and `9.webp` all put the sofa against the *same* long wall as the dining table, with the terrace door beyond it; `serenity.json` puts the sofa against the **west** wall (backing onto x 3.1) and the dining table against the **east** (x ≈ 5.2), so any camera that frames the terrace door correctly renders the sofa on the opposite side of the frame from the photograph. (b) **Bedroom:** `6.webp` and `11.webp` between them show the window wall and the bed-head wall to be **perpendicular**; the config puts both on the **same** wall (z 6.65) — the bed head at x ≈ 1.0 and the window opening at x 0.95–2.25, i.e. the window is partly *behind* the headboard. Both are content defects, not pose defects, and both survive at the poses this task shipped. They are also the reason serenity's living-room ΔE barely moves while the bedroom's falls by 2.7. **Whoever takes it:** this is a furniture-layout rewrite against the photographs, and it moves the metric — pair it same-session like any other change | **plan 4c** |
+| **serenity's furniture is on the wrong walls in two rooms, and no camera can fix it.** Found by plan 4b task 2 while re-pointing the seven mis-pointed spots — it is what remains after every pose is correct. (a) **Living room:** `3.webp`, `4.webp` and `9.webp` all put the sofa against the *same* long wall as the dining table, with the terrace door beyond it; `serenity.json` puts the sofa against the **west** wall (backing onto x 3.1) and the dining table against the **east** (x ≈ 5.2), so any camera that frames the terrace door correctly renders the sofa on the opposite side of the frame from the photograph. (b) **Bedroom:** `6.webp` and `11.webp` between them show the window wall and the bed-head wall to be **perpendicular**; the config puts both on the **same** wall (z 6.65) — the bed is centred at x 1.0 and the window opening spans **x 1.6–2.9** (`at` is the opening's **start** offset along the wall, not its centre: `builder.js` splits pieces at `from: o.at, to: o.at + o.w`), while `F.bed`'s headboard is drawn `w + 0.5` = **2.1 m** wide, so it runs to x 2.05 and buries roughly **0.45 m of the window's left edge** behind it. Both are content defects, not pose defects, and both survive at the poses this task shipped. They are also the reason serenity's living-room ΔE barely moves while the bedroom's falls by 2.7. **Whoever takes it:** this is a furniture-layout rewrite against the photographs, and it moves the metric — pair it same-session like any other change | **plan 4c** |
 | **serenity's `mainCeilH` is 2.6 and the photographs say ~2.9–3.2 — the shell is 0.3–0.4 m too short.** Found by plan 4b task 1 while disproving the "floor-to-ceiling slider" premise, and confirmed independently by its reviewer with **two routes off `4.webp`**, the only frame carrying both the ceiling junction and the floor of that wall: the **curtain rod** at (448−157)/(448−70) = 0.770 of ceiling height, which at a normal 2.20–2.25 m rod gives a ceiling of **2.86–2.92 m**; and the **air-conditioner** at 102 px against 378 px floor-to-ceiling (0.261 after perspective correction), which for a 0.78–0.92 m wall-split unit gives **3.1–3.2 m**. **2.6 falls outside both.** At 2.6 the same unit would have to be 0.68–0.70 m wide, narrower than any common split. Deferring was right — `mainCeilH` feeds every wall `h`, the ceiling plates, the terrace-level relationship, the bake geometry and the fitted `exposure`, so changing it inside a task whose gate is read for one opening's width would have destroyed the attribution. But it is now **live debt task 2 executes on top of**: six serenity cameras get re-pointed inside this short shell, and their poses do not become wrong when the ceiling is corrected — the *numbers* do. **Whoever takes it: re-fitting serenity's `exposure` is part of the task, not a follow-up, and all eleven spots must be re-baselined afterward.** Do not fold it into a pose task. Caveat carried with it: the reviewer could not establish whether `4.webp` and `9.webp` are the same physical unit (different floors, sofas and prints), so the ceiling routes rest on `4.webp` alone | **plan 4c, as its own task** — not 4b, and not inside any pose or furniture task |
 
 ### The wall-winding defect, deferred deliberately — and since fixed

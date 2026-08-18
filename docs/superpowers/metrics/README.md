@@ -17,7 +17,7 @@ information.
 
 Every `compare`-flagged photo spot was classified by whether its render
 and its photograph show the *same room content* — subject, not lens, not
-exposure. Most do not: **serenity 2 of 11 pass, kings-court 8 of 14**
+exposure. Most do not: ~~**serenity 2 of 11 pass**~~, **kings-court 8 of 14**
 (classification and evidence:
 `.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`).
 The failures are camera-pose and modelling defects, not lens ones, and
@@ -27,6 +27,32 @@ pixels are the same surface. Scoring through a mismatched spot measures
 the mismatch, not the render — the exact contamination the palette task
 already showed makes a metric *worse* than doing nothing (`CLAUDE.md`,
 the `palette` config key).
+
+> **serenity is now 9 of 11, 2026-08-19** (plan 4b task 2, `1e0d4e5`). Six
+> mis-pointed cameras were re-pointed and `8.webp` — a photograph of the
+> bathroom attached to a spot standing in the bedroom — was moved into the
+> bathroom. Only the pool vista (`2.webp`, `10.webp`) still fails; it is a
+> content defect owned by 4c. kings-court's 8 of 14 is unchanged.
+>
+> **If you are here to re-fit `exposure`, read this before you run anything.**
+> `tools/luminance.py` builds its population with `delta_e.scorable`, which
+> requires `poseVerified`, and it has **no `--all-spots` flag** — there is no
+> way to ask it for the all-spot population the ΔE gate uses. So the flip
+> above changed serenity's luminance-fitting population **from 2 spots to 9**
+> without anyone editing `luminance.py`. Consequences, in order of how easily
+> they are missed:
+>
+> 1. The committed `exposure: 0.295` was fitted against the **2-spot**
+>    population. Any new fit runs against **9**. The two numbers are not
+>    comparable, and a change between them is not evidence that anything about
+>    the lighting moved.
+> 2. The 9-spot population is the better instrument — it is nine frames that
+>    actually photograph what they render, instead of two — so this is an
+>    improvement. It is recorded here because it is silent, not because it is
+>    wrong.
+> 3. **horkyone-10's ±10 luminance criterion is derived from serenity's
+>    mean-scene-luminance**, so it moves when serenity's population changes.
+>    Re-derive the band; do not check horkyone-10 against the old one.
 
 The verdict is recorded as data: `photoSpots[].poseVerified`
 (`true`/`false`) in `serenity.json` and `kings-court.json`, with a
