@@ -1,0 +1,82 @@
+{
+  "apartment": "kings-court",
+  "phase": "b4b-task3-legacy-allspots",
+  "population": "all-spot",
+  "mean": 18.58,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "deltaE": 18.14
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "deltaE": 10.25
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "deltaE": 14.1
+    },
+    {
+      "file": "4.webp",
+      "name": "Coffee corner",
+      "deltaE": 25.44
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "deltaE": 11.02
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "deltaE": 21.84
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "deltaE": 18.71
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "deltaE": 25.32
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "deltaE": 12.76
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "deltaE": 21.17
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "deltaE": 15.72
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "deltaE": 18.51
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "deltaE": 26.58
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "deltaE": 20.51
+    }
+  ],
+  "scored": 14,
+  "compareTotal": 14,
+  "skippedPoseVerification": 0,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}
