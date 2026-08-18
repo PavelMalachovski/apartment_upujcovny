@@ -286,8 +286,9 @@ restored** — `--all-spots` on `delta_e.py` and the `?fov=legacy` branch in
 ## What the metric can and cannot see
 
 `poseVerified` marks spots whose render shows a **different subject** than
-their photograph. ~~**serenity passes 2 of 11**~~, **kings-court 8 of 14,
-horkyone-10 has no scorable spots at all.** The scorers skip the failures; the
+their photograph. ~~**serenity passes 2 of 11**~~, ~~**kings-court 8 of 14**~~
+**kings-court 10 of 13** (see the 2026-08-19 note below), **horkyone-10 has no
+scorable spots at all.** The scorers skip the failures; the
 spots stay in the config with a `poseNote`, because they are the only
 automated trail of the defects they expose.
 
@@ -304,6 +305,26 @@ automated trail of the defects they expose.
 > improvement, not a defect, but it is **not** comparable to the old fit, and
 > the horkyone-10 ±10 luminance criterion is derived from serenity's number,
 > so it moves too. Re-derive both; do not carry the old figures across.
+
+> **kings-court now passes 10 of 13**, 2026-08-19, plan 4b task 4. Four
+> mis-pointed cameras were re-pointed: `2.webp` and `10.webp` flipped to
+> `true`; `14.webp` and `17.webp` stayed `false` and kept (rewritten)
+> `poseNote`s, because their subjects are defective in the model rather than
+> mis-aimed — Bathroom 2's shower sits west of the bath where the photograph
+> puts it east and has no divider glass, and the entry-hall wardrobe crosses
+> the `x = 23` wall 0.80 m into the Guest WC and stands 0.16 m in front of the
+> vanity. Both are 4c's.
+>
+> **Two instrument changes in that one commit, and they compound.**
+> (1) The denominator: the merge owner ruled `4.webp`'s coffee corner will not
+> be modelled, so its `compare` flag was removed and **kings-court's compare
+> population is 13, not 14** from that commit on. Any before/after pair that
+> straddles it compares two different populations. Dropping a spot that scored
+> 25.47 against a 14-spot mean of 18.16 moves the mean to 17.60 **by
+> arithmetic alone** — that −0.57 is not a rendering change and must never be
+> reported as one.
+> (2) The `luminance.py` population above: kings-court went from **8 spots to
+> 10**, and the committed `exposure: 0.52` was fitted against the 8.
 
 Those defects are plan 4's work:
 - serenity's living room is modelled with a **punched window** where the flat

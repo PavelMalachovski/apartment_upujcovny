@@ -32,7 +32,19 @@ the `palette` config key).
 > mis-pointed cameras were re-pointed and `8.webp` — a photograph of the
 > bathroom attached to a spot standing in the bedroom — was moved into the
 > bathroom. Only the pool vista (`2.webp`, `10.webp`) still fails; it is a
-> content defect owned by 4c. kings-court's 8 of 14 is unchanged.
+> content defect owned by 4c. ~~kings-court's 8 of 14 is unchanged.~~
+>
+> **kings-court is now 10 of 13, 2026-08-19** (plan 4b task 4). Four
+> mis-pointed cameras were re-pointed; `2.webp` and `10.webp` flipped to
+> `poseVerified: true`, `14.webp` and `17.webp` stayed `false` because their
+> subjects are defective in the model, not mis-aimed (see their `poseNote`s).
+> **The denominator changed too:** the merge owner ruled that `4.webp`'s
+> coffee corner will not be modelled, so its `compare` flag was removed and
+> **kings-court's compare population is 13, not 14, from that commit on** —
+> any before/after pair that straddles it is on two different populations.
+> The same `luminance.py` warning below applies: kings-court's
+> luminance-fitting population went from **8 spots to 10** in that commit,
+> and the committed `exposure: 0.52` was fitted against the 8.
 >
 > **If you are here to re-fit `exposure`, read this before you run anything.**
 > `tools/luminance.py` builds its population with `delta_e.scorable`, which

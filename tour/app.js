@@ -351,7 +351,11 @@ window.initApp = function () {
   // spots where it did not; plan 4b task 2 re-pointed six of them and moved
   // the one attached to the bathroom photograph into the bathroom, leaving
   // **2 of 11** -- both the pool vista (2.webp, 10.webp), which no camera can
-  // fix because there is no pool geometry and no sky. kings-court 6 of 14.
+  // fix because there is no pool geometry and no sky. kings-court was 6 of 14;
+  // plan 4b task 4 re-pointed four of them and the merge owner dropped the
+  // coffee-corner spot from the compare set, leaving **3 of 13** -- 14.webp
+  // (shower/bath mirrored, no divider glass), 17.webp (the entry-hall wardrobe
+  // stands in front of the vanity) and 18.webp (no rattan set), all content.
   // Showing a visitor a side-by-side of two different rooms would be worse
   // than showing nothing: the same contamination CLAUDE.md's palette note
   // already rejected once for the metric, now for a human instead of a
