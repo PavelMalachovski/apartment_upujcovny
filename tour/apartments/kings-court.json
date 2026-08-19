@@ -1106,7 +1106,7 @@
    "x": 10.1,
    "z": 2.5,
    "w": 2.5,
-   "mat": "black",
+   "mat": "white",
    "lvl": "main"
   },
   {
@@ -1123,7 +1123,7 @@
    "x": 11.3,
    "z": 1.3,
    "w": 2.5,
-   "mat": "white",
+   "mat": "black",
    "rot": 90,
    "lvl": "main"
   },
@@ -1135,6 +1135,15 @@
    "d": 0.8,
    "lvl": "main",
    "rot": 90
+  },
+  {
+   "type": "shower",
+   "x": 10.075,
+   "z": 2.005,
+   "w": 0.95,
+   "d": 1.05,
+   "rot": 180,
+   "lvl": "main"
   },
   {
    "type": "vanity",
@@ -1171,8 +1180,8 @@
   },
   {
    "type": "bathMat",
-   "x": 9.7,
-   "z": 1.5,
+   "x": 9.25,
+   "z": 1.9,
    "lvl": "main"
   },
   {
@@ -2317,13 +2326,13 @@
   {
    "file": "2.webp",
    "name": "Living room",
-   "x": 14.5,
-   "z": 5.4,
+   "x": 17.5,
+   "z": 4.6,
    "g": 0,
-   "yaw": 99,
+   "yaw": 95,
    "compare": true,
-   "poseVerified": false,
-   "poseNote": "Renders a curtain wall with the TV wall at a steep angle at every fov 80-130 deg; not the photo's composition."
+   "poseVerified": true,
+   "poseNote": "Re-pointed 2026-08-19 (task 4): curtain wall left, TV wall centre, stair opening right, dining table at the right edge -- the photograph's own left-to-right order. Residual, not a pose fault: meta.photoFovLong 120 renders this frame at 120 deg horizontal where the photograph measures ~58 deg, so every object reads smaller and further away than in the photograph."
   },
   {
    "file": "7.webp",
@@ -2352,9 +2361,8 @@
    "z": 1.8,
    "g": 0,
    "yaw": 0,
-   "compare": true,
    "poseVerified": false,
-   "poseNote": "Renders a featureless beige wall -- the recorded camera isn't aimed at the counter at any zoom (observation B4)."
+   "poseNote": "Renders a featureless beige wall -- the recorded camera isn't aimed at the counter at any zoom (observation B4). Merge-owner ruling 2026-08-19 (plan 4b task 4): the photograph is a product detail shot of a coffee machine on marble and the model has no coffee corner; the props will NOT be modelled, so the `compare` flag was removed and this spot left in place with its note. kings-court's compare population is 13 from this commit on, not 14 -- readings either side of it are on different populations."
   },
   {
    "file": "8.webp",
@@ -2390,23 +2398,23 @@
    "file": "14.webp",
    "name": "Bathroom 2",
    "x": 9.3,
-   "z": 1.35,
+   "z": 1.2,
    "g": 0,
-   "yaw": 270,
+   "yaw": 200,
    "compare": true,
    "poseVerified": false,
-   "poseNote": "Renders a full ceiling-to-floor room shot of the tub and both walls; the photo is a tight shower-fixture crop, and none of the config's four shower entries fall inside Bathroom 2's bounds (8.8-11.4, 0-2.6) -- the shower was never modelled here."
+   "poseNote": "Re-pointed 2026-08-19 (task 4) at the shower task 3 built: the rain head reads against the white marble fixture wall, with the glass, the tray and the bath against the black wall all in frame. poseVerified stays FALSE for three reasons no camera fixes. (1) The model puts the shower WEST of the bath where the photograph puts it EAST, so the composition is mirrored left-to-right and no yaw can undo it. (2) F.shower builds no glass divider between shower and bath -- the photograph's defining element. (3) F.shower builds no thermostatic valve plate and no handheld, both prominent in the photograph. (1) is a layout question for 4c; (2) and (3) need a constructor change."
   },
   {
    "file": "17.webp",
    "name": "Guest WC",
    "x": 21.6,
-   "z": 2.6,
+   "z": 2.7,
    "g": 0,
-   "yaw": 180,
+   "yaw": 280,
    "compare": true,
    "poseVerified": false,
-   "poseNote": "Renders a blank marble wall at every fov 50-170 deg -- no value shows the mirror or sink; a pose problem, not fov."
+   "poseNote": "Re-pointed 2026-08-19 (task 4) from the blank south wall to the vanity on the east wall; the basin, tap and mirror now frame. poseVerified stays FALSE and the old note's \"a pose problem, not fov\" was wrong: the entry-hall wardrobe (world x 22.20-24.60, z 1.78-2.53) crosses the x=23 wall 0.80 m into the Guest WC and stands 0.16 m in front of the vanity face at x=22.37, hiding the middle 0.75 m of its 1.30 m run and all but a sliver of the mirror. No legal camera clears it. It ALSO projects out of the building: its far end at x=24.60 clears the x=23.8 exterior wall (wall 1, ext) by 0.80 m past the centreline and ~0.73 m past its outer face at x=23.87, so the unit hangs in mid-air outside the shell and shows in dollhouse mode from outside -- the more visible half of the defect, and the half a camera inside the Guest WC never reveals. Added 2026-08-19 by task 5: this note named only the Guest WC intrusion until then, while docs/PHASE-B-RESUME.md carried both halves, so 4c -- which reads this config -- was inheriting the smaller half. Content defect, routed to 4c."
   },
   {
    "file": "19.webp",
@@ -2431,13 +2439,13 @@
   {
    "file": "10.webp",
    "name": "Upper bedroom",
-   "x": 12.6,
-   "z": 5.6,
+   "x": 13.8,
+   "z": 5.3,
    "g": 3.1,
-   "yaw": 178,
+   "yaw": 10,
    "compare": true,
-   "poseVerified": false,
-   "poseNote": "Renders a blank wall at every fov tested."
+   "poseVerified": true,
+   "poseNote": "Re-pointed 2026-08-19 (task 4): the old camera faced 180 deg away from the subject. Now frames the photograph's four elements in its own order -- open door with the lit corridor at the left, the wardrobe/TV wall with the TV, the bed foot bottom-left, the blue armchair bottom-right. Residual, not a pose fault: the door-to-TV angle measured inside the photograph is ~57 deg vertical-equivalent against meta.photoFovLong's 120, so the wall reads much smaller here than in the photograph."
   },
   {
    "file": "13.webp",
@@ -2648,9 +2656,9 @@
   },
   {
    "name": "Bathroom 2",
-   "x": 9.4,
-   "z": 1.5,
-   "yaw": 270,
+   "x": 9.2,
+   "z": 1.15,
+   "yaw": 225,
    "g": 0
   },
   {

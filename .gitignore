@@ -6,6 +6,14 @@
 *.heic
 *.HEIC
 
+# ...except harness evidence frames, which are committed proof, not source
+# photographs. On a case-insensitive filesystem the rules above swallow both
+# `.jpg` and `.JPG`, so without this negation a harness frame written by
+# CLAUDE.md's own screenshot recipe (`fetch('/save/shot.jpg', …)`) is silently
+# unstageable: git reports no error, the evidence simply never lands. Keep this
+# above the "Служебное" block so .DS_Store & co. stay ignored in here too.
+!docs/superpowers/harnesses/**
+
 # Vercel
 .vercel
 
@@ -22,5 +30,10 @@ node_modules/
 # Offscreen renders captured by tour/measure.js — build output, not source
 tools/shots/
 
-# Python bytecode from the measurement tools
-tools/__pycache__/
+# Python bytecode from the measurement tools.
+# `tools/**/__pycache__/` alone covers both `tools/__pycache__/` itself and
+# nested directories such as `tools/checks/__pycache__/` — created by every
+# run of stale_claims.py, which plan 4b added — so a separate top-level rule
+# is redundant. The general "no generic __pycache__ rule" row is still
+# deferred; this covers the directories this branch created.
+tools/**/__pycache__/

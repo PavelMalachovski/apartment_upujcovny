@@ -182,8 +182,19 @@ git worktree add ../airbnb-base b39a99a
 #   then sed 8742 -> 8743 in ../airbnb-base/tools/serve.py and run that too
 ```
 
-Sandboxed, `POST /save/` answers 200 and writes nothing — probe for the file on
-disk before trusting any capture. This session probed both ports with a
+Sandboxed, `POST /save/` answers 200 and writes nothing — ~~probe for the file on
+disk before trusting any capture~~ **probe for the file on disk AND check it is
+non-empty** (corrected 2026-08-19 by plan 4b task 5; the canonical statement is
+in `docs/PHASE-B-RESUME.md`, "Deferred, with owners", `serve.py:90` row). **A
+presence probe alone is not sufficient**, because `serve.py:90` truncates the
+destination into existence *before* it decodes the body: a malformed body
+leaves a **zero-byte file that exists**, and one of the two reproduced failure
+shapes returns HTTP 200 with no traceback anywhere. This is imperative standing
+advice rather than a recorded measurement, which is why it is corrected here
+even though the rest of this dated harness directory is left as written. **What
+this session actually did was already the stronger check** — the next sentence
+says it confirmed *real bytes* landed, not merely that files existed — so no
+measurement in this directory is in doubt. This session probed both ports with a
 throwaway body first and confirmed real bytes landed in both trees.
 
 Then, per page load, at `http://localhost:<port>/?apt=<id>&measure=1&fov=legacy`:

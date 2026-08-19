@@ -80,7 +80,7 @@
       "openings": [
         {
           "at": 0.25,
-          "w": 1.4,
+          "w": 1.8,
           "type": "door",
           "terrace": true,
           "daylight": true,
@@ -839,79 +839,73 @@
     {
       "file": "3.webp",
       "compare": true,
-      "poseVerified": false,
-      "poseNote": "Renders the west wall with two gray-blue paintings; the photo's terrace sliding door and daylight never appear (observation B1: punched window vs. sliding door).",
+      "poseVerified": true,
       "name": "Living Room",
-      "x": 4.9,
+      "x": 4.3,
       "z": 2.4,
-      "g": 0,
-      "yaw": 168
-    },
-    {
-      "file": "4.webp",
-      "compare": true,
-      "poseVerified": false,
-      "poseNote": "Same wrong-wall defect as 3.webp -- one of three nearby camera positions (~168-176 deg yaw) that all face away from the terrace door.",
-      "name": "Living Room",
-      "x": 5.5,
-      "z": 2.45,
-      "g": 0,
-      "yaw": 172
-    },
-    {
-      "file": "5.webp",
-      "compare": true,
-      "poseVerified": false,
-      "poseNote": "Renders a bathroom-like corner with closet doors, not the corridor/fridge/dining-table the photo shows.",
-      "name": "Kitchen & Hall",
-      "x": 4.7,
-      "z": 2.55,
-      "g": 0,
-      "yaw": 12
-    },
-    {
-      "file": "6.webp",
-      "compare": true,
-      "poseVerified": false,
-      "poseNote": "Renders the wardrobe wall; the photo's window wall never appears.",
-      "name": "Bedroom",
-      "x": 1.5,
-      "z": 3.1,
       "g": 0,
       "yaw": 175
     },
     {
+      "file": "4.webp",
+      "compare": true,
+      "poseVerified": true,
+      "name": "Living Room",
+      "x": 4.2,
+      "z": 2.0,
+      "g": 0,
+      "yaw": 178
+    },
+    {
+      "file": "5.webp",
+      "compare": true,
+      "poseVerified": true,
+      "name": "Kitchen & Hall",
+      "x": 4.85,
+      "z": 4.85,
+      "g": 0,
+      "yaw": 5
+    },
+    {
+      "file": "6.webp",
+      "compare": true,
+      "poseVerified": true,
+      "name": "Bedroom",
+      "x": 2.15,
+      "z": 5.3,
+      "g": 0,
+      "yaw": 172
+    },
+    {
       "file": "7.webp",
       "compare": true,
-      "poseVerified": false,
-      "poseNote": "Renders the wardrobe plus a peek into the bathroom; the photo's bed-foreground composition never appears.",
+      "poseVerified": true,
       "name": "Bedroom",
-      "x": 1.3,
-      "z": 4.05,
+      "x": 2.55,
+      "z": 5.15,
       "g": 0,
-      "yaw": 356
+      "yaw": 46
     },
     {
       "file": "8.webp",
       "compare": true,
-      "poseVerified": false,
-      "poseNote": "Renders a bedroom; the photograph this spot is meant to match is actually the bathroom.",
-      "name": "Bedroom",
-      "x": 2.5,
-      "z": 4.6,
+      "poseVerified": true,
+      "name": "Bathroom",
+      "x": 1.88,
+      "z": 1.2,
       "g": 0,
-      "yaw": 352
+      "yaw": 335
     },
     {
       "file": "9.webp",
       "compare": true,
-      "poseVerified": false,
-      "poseNote": "Same wrong-wall cluster as 3.webp/4.webp -- dining table and sofa partly visible, but the terrace door (the photo's dominant element) never appears.",
+      "poseVerified": true,
       "name": "Living Room",
-      "x": 4.35,
-      "z": 2.5,
+      "x": 4.4,
+      "z": 2.2,
       "g": 0,
-      "yaw": 176
+      "yaw": 180,
+      "vfov": 65
     },
     {
       "file": "10.webp",

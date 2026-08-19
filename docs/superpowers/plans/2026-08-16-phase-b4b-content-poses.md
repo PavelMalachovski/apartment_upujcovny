@@ -23,7 +23,10 @@
 - **Start `python tools/serve.py` with the sandbox disabled.** Its `POST /save/` returns HTTP 200 and silently writes nothing when sandboxed. Probe for the file on disk before trusting a capture. `serve.py:90`'s unguarded `base64.b64decode` kills a handler thread on a malformed body — known, deferred, do not fix.
 - Playwright MCP is available; Playwright is **not** npm-installed here.
 - **Furniture must clear doorways by ≥ 0.5 m** (CLAUDE.md rule 2a — passages have been blocked five times). **Furniture against a wall is placed by raycasting the wall face, never by arithmetic from the centreline** (rule 2h — that arithmetic buried two paintings inside a wall, which plan 4a had to dig out).
+- **`?compare=1` is not a thing.** The divider loads on demand from a button gated on `poseVerified !== false` — i.e. gated *against* every spot this plan touches. Load `compare.js` by hand (task 1 step 2) and call `window.__compare(file)`, which finds the spot by filename and does not check `poseVerified`.
+- **Flipping `poseVerified` to `true` makes a spot visitor-visible in the compare UI.** That is a product change, not just a bookkeeping one: `app.js`'s `compareEligible` is what decides whether a visitor is offered the render-versus-photograph view for that spot. Only flip it where you would be content for a visitor to open it.
 - Angles in apartment JSON are **degrees**. Yaw 0 looks north (−z), 90 west, 180 south, 270 east.
+- **Harness frames were once silently unstageable, and are not any more — `.gitignore` line 15.** `.gitignore` carries `*.jpg` *and* `*.JPG`, and the match is case-insensitive on this filesystem, so a `.jpg` frame written by CLAUDE.md's own screenshot recipe (`fetch('/save/shot.jpg', …)`) was dropped by `git add` with **no error at all** — the evidence just never landed. Task 1 hit this and worked around it by filing `.webp`; task 1's fix round added `!docs/superpowers/harnesses/**` so either extension now commits. Frames outside that directory are still swallowed. **Whichever extension you use, `git status` the harness directory after saving and confirm the frame is listed before you claim it was filed.**
 - Commit your own files explicitly. Never `git add -A`.
 
 ## File structure
@@ -66,11 +69,23 @@ Expected today: `(3.1,5.25)–(5.75,5.25)`, `h 2.6`, one opening `{"at": 0.25, "
 python tools/serve.py
 ```
 
-Open `http://localhost:8742/?apt=serenity&compare=1`, then in the console:
+Open `http://localhost:8742/?apt=serenity`, then in the console:
+
+**The compare divider is opened from the console, not by a URL parameter.** `?compare=1` does not exist — that claim in `docs/PHASE-B-RESUME.md` was wrong and is corrected in the same commit as this one. The divider is normally opened by a button whose eligibility test is `s.compare === true && s.poseVerified !== false`, so **every spot this plan needs to look at is exactly the set the button refuses**, and its lazy loader never runs. Load it by hand, mirroring `app.js:370-382`:
 
 ```js
-await window.__bakeReady; await window.__compare('3.webp');
+await window.__bakeReady;
+if (!window.__compare) await new Promise((res, rej) => {
+  const v = new URL(document.querySelector('script[src*="main.js"]').src).searchParams.get('v');
+  const el = document.createElement('script');
+  el.src = 'compare.js' + (v ? '?v=' + v : '');
+  el.onload = res; el.onerror = () => rej(new Error('compare.js failed to load'));
+  document.head.appendChild(el);
+});
+await window.__compare('3.webp');     // finds the spot by file; ignores poseVerified
 ```
+
+`window.__compareAll()` steps through every `compare` spot regardless of `poseVerified`, which is the fastest way to see the whole set at once.
 
 That is the render-versus-photograph divider — the only instrument in this repo that sees geometry errors. File the frame. **Note what you see**: per the spec, spot 3's camera faces away from this door, so the before frame is expected to show the wrong wall entirely. That is task 2's problem, not task 1's — you are capturing the opening's own appearance, so also take a frame from a camera that does face it.
 
@@ -153,6 +168,8 @@ Decide which is wrong: the spot's position or its `file`. Open the photograph an
 - [ ] **Step 3: Re-point the six pose defects, one at a time, by looking**
 
 For each of 3, 4, 9 (the terrace-door cluster), 5 (renders a closet corner, should be corridor/fridge/dining) and 6, 7 (render the wardrobe, should be the window wall and the bed):
+
+Load the harness as in task 1 step 2, then:
 
 ```js
 await window.__compare('3.webp');
