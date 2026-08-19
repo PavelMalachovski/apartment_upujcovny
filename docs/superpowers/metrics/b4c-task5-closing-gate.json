@@ -1,0 +1,44 @@
+{
+  "phase": "plan 4c task 5 -- closing gate",
+  "date": "2026-08-19",
+  "pairing": "SAME SESSION. BASE b78ebd3 served from a worktree on :8743, HEAD on :8742, both up simultaneously, the same scripts pointed at each. The gate restated 2026-08-15 forbids cross-session pairs and plan 4b's own resume-doc entry had to be corrected for exactly that.",
+  "camera": "legacy (fov=legacy, 72 deg vertical) -- the camera every gate figure in this project is measured with",
+  "population": "all-spot. serenity 11, kings-court 13. skippedPoseVerification 0 on every reading.",
+  "readings": {
+    "serenity":    { "BASE": [15.48, 15.47], "HEAD": [14.34, 14.34], "delta": -1.135 },
+    "kings-court": { "BASE": [17.59, 17.61], "HEAD": [17.58, 17.62], "delta": 0.0 }
+  },
+  "withinSideSpread": {
+    "serenity": { "BASE": 0.01, "HEAD": 0.00 },
+    "kings-court": { "BASE": 0.02, "HEAD": 0.04 },
+    "note": "These are spreads of the 11- and 13-spot MEAN, not per-spot spreads, and must not be quoted against the per-spot noise floor. The per-spot floor question (0.35 vs 0.75, with 11.webp the outlier) is plan 5's and this session neither settles nor disturbs it."
+  },
+  "serenityPerSpot": {
+    "10.webp": [25.35, 12.84], "2.webp": [18.09, 15.87], "11.webp": [13.47, 12.52],
+    "7.webp": [12.94, 12.85], "6.webp": [9.81, 9.80], "5.webp": [10.54, 10.54],
+    "8.webp": [10.92, 11.04], "1.webp": [18.97, 19.36],
+    "3.webp": [15.71, 16.52], "9.webp": [17.75, 18.56], "4.webp": [16.70, 17.80]
+  },
+  "attribution": {
+    "-12.51 on 10.webp": "task 1's pool basin, planting, fence and sky, then task 1b's pitch. The pool alone made it WORSE (25.35 -> 26.37); the pitch turned that into 13.32. Measured separately and reported separately.",
+    "-2.22 on 2.webp": "same two changes plus task 2's lounger and terrace re-placement",
+    "-0.95 on 11.webp": "task 2's window bench",
+    "+0.81 to +1.10 on 3, 4, 9": "the three living-room spots frame the terrace door. Two causes, both content: the terrace furniture behind that door changed (cream F.bench -> rattan F.lounger, re-placed), and task 4 raised exposure 0.295 -> 0.31. The living room itself carries NO change from this branch.",
+    "+0.39 on 1.webp": "task 4's exposure alone"
+  },
+  "honesty": "Most of serenity's -1.14 is an INSTRUMENT correction, not a rendering improvement. Task 1b taught the capture harness to reproduce a downward camera tilt it had always pinned to zero; nothing about how the scene is lit, shaded or drawn changed with it. The content work (pool, sky, bench, lounger) is real and visible, but on this metric it was worth roughly +0.2 the wrong way until the camera was fixed.",
+  "structural": {
+    "issues": { "serenity": 0, "kings-court": 0, "horkyone-10": 0 },
+    "drawCallsThroughPostChain": {
+      "budget": "<=400 desktop, <=250 mobile",
+      "serenity":    { "entrance": [72, 78], "terrace": [42, 50], "bedroom": [52, 59] },
+      "kings-court": { "entry": [46, 46], "hall": [164, 164], "bathroom2": [106, 107] },
+      "horkyone-10": { "start": [null, 83], "note": "BASE not paired -- this apartment carries no change from the branch and its config is byte-identical" },
+      "reading": "BASE first, HEAD second. serenity gains 6-8 calls from the new exterior geometry; kings-court gains 1 from the divider panel. Everything inside budget."
+    },
+    "ceilingRays": "Upward ray from inside every serenity room finds a ceiling -- living 0.20 m, bedroom 0.20 m, bathroom 0.20 m, kitchen 0.90 m. No sky leaks from the reshaped ground.",
+    "walks": "Living room to terrace door reaches the terrace at ground -0.05. Walking south from the terrace stops at its south edge rather than entering the basin. Bathroom 2 entered from its door.",
+    "bakeMs": { "serenity": 340 }
+  },
+  "shipped": { "serenity": 0.31, "kings-court": 0.52, "horkyone-10": 0.42, "cacheTag": 135 }
+}
