@@ -2800,7 +2800,8 @@ set does not exist — 4c), `14.webp` (Bathroom 2's layout is the photograph's
 mirror image and `F.shower` builds no divider glass — a `builder.js` change,
 **genuinely blocked** for 4b) and `17.webp` (the entry-hall wardrobe crosses a
 wall into the Guest WC **and hangs 0.73 m outside the building's exterior
-wall** — ~~4c~~).
+wall** — ~~4c~~ **plan 5**, re-routed 2026-08-19: a coordinate error, not
+asset curation).
 
 **Owners corrected 2026-08-19 by the whole-branch review: two of these five
 were routed to a plan that cannot act on them.** 4c is on record in

@@ -31,10 +31,9 @@ node_modules/
 tools/shots/
 
 # Python bytecode from the measurement tools.
-# The nested rule is needed as well: `tools/__pycache__/` matches that one
-# directory only, so `tools/checks/__pycache__/` — created by every run of
-# stale_claims.py, which plan 4b added — was left untracked and dirtying the
-# tree. The general "no generic __pycache__ rule" row is still deferred; this
-# covers the directory this branch created.
-tools/__pycache__/
+# `tools/**/__pycache__/` alone covers both `tools/__pycache__/` itself and
+# nested directories such as `tools/checks/__pycache__/` — created by every
+# run of stale_claims.py, which plan 4b added — so a separate top-level rule
+# is redundant. The general "no generic __pycache__ rule" row is still
+# deferred; this covers the directories this branch created.
 tools/**/__pycache__/
