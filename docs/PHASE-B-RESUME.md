@@ -119,7 +119,10 @@ bumped it to 107 and the resume doc was not updated with it. Verified against
 `tour/index.html:254`, which is the single module tag that versions
 everything.)
 
-**On branch `phaseB-plan4a-winding` (`f0315ea`, unmerged)** plan 4a task 3
+**On branch `phaseB-plan4a-winding` (`f0315ea`, ~~unmerged~~ **merged — PR
+#30, `feac92a`; `f0315ea` is an ancestor of `origin/main`, corrected
+2026-08-19 by plan 4b task 5 fix round 2 after checking the merge base
+directly**)** plan 4a task 3
 re-fitted every exposure against the post-winding render: serenity **0.295**,
 kings-court **0.52**, horkyone-10 **0.42**; bloom unchanged at threshold
 **1.8** / strength **0.1**; `?v=110`. The baseline table below is measured
@@ -402,9 +405,27 @@ of 18.8079, **+0.656** — that is plan 4a task 2's trial state, which failed it
 exit criterion and was **reverted in full**; `tour/` carries none of it, and
 the hard stop is about what a task leaves in the tree.
 
-**These baselines are recorded from an unmerged branch tip.** `main` is still
+~~**These baselines are recorded from an unmerged branch tip.** `main` is still
 at `c2bb0bd` and the `b39a99a` values above are what a checkout of `main`
-measures. If plan 4a is not merged, the outgoing baselines stand.
+measures. If plan 4a is not merged, the outgoing baselines stand.~~
+
+> **Struck 2026-08-19 by plan 4b task 5, fix round 2 — this paragraph's
+> condition resolved and it now says the opposite of the truth.** **Plan 4a
+> is merged** (PR #30, `feac92a`), `origin/main` is at **`5963ddd`**, not
+> `c2bb0bd`, and it carries serenity `exposure` **0.295**, kings-court
+> **0.52**, horkyone-10 **0.42** at `?v=113`. Verified by reading
+> `origin/main:tour/apartments/*.json` and `origin/main:tour/index.html`
+> directly. So the conditional's antecedent is false and its conclusion —
+> "the outgoing baselines stand" — must **not** be acted on: the plan-4a
+> baselines are the merged ones, and they are in turn superseded by plan
+> 4b's, in the live table above.
+>
+> **This is a live conditional whose antecedent went false, which is the
+> hardest staleness shape to catch** — every individual sentence in it was
+> true when written, and it reads as cautious rather than wrong. Sibling
+> instances corrected in the same round: the `f0315ea, unmerged` label
+> above, the `grid()` row's "still open on `main`", and the
+> wall-winding section's "Still present on `main`".
 
 **This loosens serenity by 0.03 and tightens kings-court by about 3.5.** The
 old 22.44 was kings-court's pre-migration score and the apartment had by then
@@ -729,7 +750,7 @@ eight readings before the decision was put.
 | The horkyone-10 ±10 luminance criterion **went unenforced for some time**: the shipped `exposure` 0.46 was already failing it before plan 4a started (+11.07 from serenity against a ±10 band), because plan 4a task 1 brightened all three apartments and serenity's re-fit came down further, moving the band out from under horkyone-10. Found in passing by plan 4a task 3, whose refit to 0.42 was therefore **mandatory, not cosmetic**. The criterion has no automated check and nothing re-runs it when a sibling's exposure moves — that is the actual gap | plan 5 |
 | `CLAUDE.md` beyond the two rows already corrected | plan 5 |
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
-| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
+| ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; ~~still open on `main`, closed on `phaseB-plan4a-winding`~~ **closed on `main` as well — `b767b4b` is an ancestor of `origin/main` via PR #30 (corrected 2026-08-19, plan 4b task 5 fix round 2)**. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
 | **serenity's furniture is on the wrong walls in two rooms, and no camera can fix it.** Found by plan 4b task 2 while re-pointing the seven mis-pointed spots — it is what remains after every pose is correct. (a) **Living room:** `3.webp`, `4.webp` and `9.webp` all put the sofa against the *same* long wall as the dining table, with the terrace door beyond it; `serenity.json` puts the sofa against the **west** wall (backing onto x 3.1) and the dining table against the **east** (x ≈ 5.2), so any camera that frames the terrace door correctly renders the sofa on the opposite side of the frame from the photograph. (b) **Bedroom:** `6.webp` and `11.webp` between them show the window wall and the bed-head wall to be **perpendicular**; the config puts both on the **same** wall (z 6.65) — the bed is centred at x 1.0 and the window opening spans **x 1.6–2.9** (`at` is the opening's **start** offset along the wall, not its centre: `builder.js` splits pieces at `from: o.at, to: o.at + o.w`), while `F.bed`'s headboard is drawn `w + 0.5` = **2.1 m** wide, so it runs to x 2.05 and buries roughly **0.45 m of the window's left edge** behind it. Both are content defects, not pose defects, and both survive at the poses this task shipped. They are also the reason serenity's living-room ΔE barely moves while the bedroom's falls by 2.7. **Whoever takes it:** this is a furniture-layout rewrite against the photographs, and it moves the metric — pair it same-session like any other change | **plan 4c** |
 | **serenity's `mainCeilH` is 2.6 and the photographs say ~2.9–3.2 — the shell is 0.3–0.4 m too short.** Found by plan 4b task 1 while disproving the "floor-to-ceiling slider" premise, and confirmed independently by its reviewer with **two routes off `4.webp`**, the only frame carrying both the ceiling junction and the floor of that wall: the **curtain rod** at (448−157)/(448−70) = 0.770 of ceiling height, which at a normal 2.20–2.25 m rod gives a ceiling of **2.86–2.92 m**; and the **air-conditioner** at 102 px against 378 px floor-to-ceiling (0.261 after perspective correction), which for a 0.78–0.92 m wall-split unit gives **3.1–3.2 m**. **2.6 falls outside both.** At 2.6 the same unit would have to be 0.68–0.70 m wide, narrower than any common split. Deferring was right — `mainCeilH` feeds every wall `h`, the ceiling plates, the terrace-level relationship, the bake geometry and the fitted `exposure`, so changing it inside a task whose gate is read for one opening's width would have destroyed the attribution. But it is now **live debt task 2 executes on top of**: six serenity cameras get re-pointed inside this short shell, and their poses do not become wrong when the ceiling is corrected — the *numbers* do. **Whoever takes it: re-fitting serenity's `exposure` is part of the task, not a follow-up, and all eleven spots must be re-baselined afterward.** Do not fold it into a pose task. Caveat carried with it: the reviewer could not establish whether `4.webp` and `9.webp` are the same physical unit (different floors, sofas and prints), so the ceiling routes rest on `4.webp` alone — **and that caveat is load-bearing: both photographic routes rest on `4.webp` alone, so the 2.86–2.92 / 3.1–3.2 band must be RE-MEASURED before anyone edits the constant.** Do not treat "~2.9–3.2" as a measurement ready to be applied | ~~**plan 4c, as its own task**~~ **plan 5, as its own task** (re-routed 2026-08-19 by plan 4b task 5) — not 4b, and not inside any pose or furniture task. **Why it moved:** 4c is on record above as *deliberately not written*, because its critical path is human asset curation that nobody has scheduled — so the row was owned by a plan that cannot act on it, and a ceiling height would have sat blocked behind a photographer's calendar. **`mainCeilH` is a constant**, and plan 5 (`2026-08-16-phase-b5-revalidate-and-docs.md`) is written, unblocked, and opens by re-validating every documented constant, which is exactly this row's shape. Everything else in the cell stands unchanged — including that the re-fit of serenity's `exposure` and the re-baselining of all eleven spots are **part of the task, not a follow-up** |
@@ -738,7 +759,9 @@ eight readings before the decision was put.
 
 > **Status, 2026-08-15:** fixed on branch `phaseB-plan4a-winding` by plan 4a
 > task 1 (`b767b4b`), with the sign test this section prescribes rather than
-> the `else`-branch reversal it warns against. Still present on `main`. The
+> the `else`-branch reversal it warns against. ~~Still present on `main`.~~
+> **Fixed on `main` too — `b767b4b` is an ancestor of `origin/main` via PR
+> #30 (corrected 2026-08-19, plan 4b task 5 fix round 2).** The
 > third consequence below — that the fix expires plan 3 task 4's exposure fit —
 > came true and was discharged by plan 4a task 3; plan 4a task 4 then
 > re-measured the gate and rebaselined both apartments. Everything below is

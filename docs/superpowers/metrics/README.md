@@ -457,9 +457,36 @@ the same caveat this section just applied to plan 1's numbers.
 > **Superseded in part — see "Phase B3 plan 3 task 4" at the end of this
 > file.** The three fitted exposures below (serenity 0.326, kings-court
 > 0.56, horkyone-10 0.45) were re-fitted after plan 3 task 2 changed the
-> radiances, and ship today as 0.329 / 0.575 / 0.46. Both bloom constants
+> radiances, and ~~ship today as 0.329 / 0.575 / 0.46~~ **were superseded
+> again before they ever reached `main`: plan 4a task 3 re-fitted all three
+> against the post-winding render, and `origin/main` ships serenity
+> **0.295**, kings-court **0.52**, horkyone-10 **0.42*** (corrected
+> 2026-08-19 by plan 4b task 5, fix round 2 — verified by reading
+> `origin/main:tour/apartments/*.json` directly, not inferred). Both bloom
+> constants
 > were re-measured and held. The method described here is unchanged and
 > still current; only the values and the gate reading moved.
+>
+> **This line is the subtlest instance of the sweep failure this file
+> documents, and it is worth understanding rather than just fixing.** Note
+> where it sat: **inside a narrated supersede-marker.** The marker correctly
+> retires one generation of values (0.326 / 0.56 / 0.45) and then, in the
+> same sentence, asserts the *next* generation as current — and that
+> generation was itself superseded four days later. **A marker that
+> supersedes one claim and then makes a live claim about its successor is a
+> trap, and it is more dangerous than a bare stale sentence, not less**,
+> because the marker has already bought the reader's trust by the time the
+> live claim arrives. Three of this plan's sweeps read past it. **Rule for
+> the next sweeper: a claim inside a supersede-marker still needs checking.
+> Markers are not immune; they are where staleness hides best.**
+>
+> It also survived because of a *second* wrong belief, filed in this task's
+> own report and corrected here: that the line was "correct for `main`,
+> where plan 4a is unmerged". **Plan 4a is merged** — PR #30, `feac92a`, an
+> ancestor of `origin/main` — so the line was stale everywhere, and the
+> report's claim to have "flagged" it described text that was never written.
+> **Check the merge status of the branch you are reasoning about; do not
+> infer it from a document that predates the merge.**
 
 The task the whole plan exists for. Three things happened in order, per the
 phase's own rule that exposure and bloom are coupled through the same buffer
@@ -1369,6 +1396,19 @@ crosses at 0.575 — and the luminance value was taken, costing **+0.06**
 > cannot arbitrate lighting at that resolution, and serenity's ΔE is
 > expected to move by whole points once plan 4 fixes the living-room
 > opening, the missing shower and the mis-pointed spots.
+> **[That forecast resolved, and it was right — 2026-08-19, plan 4b task 5,
+> fix round 2. Plan 4b corrected all three named defects, though the
+> living-room opening was not too short, only too narrow, and the
+> "floor-to-ceiling slider" premise was disproved photographically.
+> serenity moved 16.00 → 15.49 and kings-court 18.59 → 18.17 on a fixed
+> 14-spot population — half a point rather than "whole points", so the
+> magnitude overshot, but the direction, the cause and the ruling drawn
+> from them are all confirmed. **No renderer, bake, post-processing,
+> material or shader code changed anywhere in plan 4b**, so this is not
+> evidence that the lighting improved. Full note at the twin of this
+> paragraph in `docs/PHASE-B-RESUME.md`, "How the 0.03 was resolved".
+> Added here because fix round 1's report claimed both twins were
+> annotated and only the `PHASE-B-RESUME.md` one was.]**
 > **Provenance, stated because it is thinner than the first ruling's:** a
 > merge-owner decision taken **in session on 2026-08-15** and recorded by
 > the controller, made conversationally after task 1's numbers were
@@ -2646,9 +2686,16 @@ Two things follow, and the second is a live disagreement inside this branch:
    in `4.webp`'s `compare` flag, which cannot affect how any other spot
    renders. **Stated carefully, because the count matters:** these are **two**
    independent observations of a ~0.3 swing, not four — the seven *pairwise*
-   comparisons among these six captures yield 0.32/0.30/0.29/0.15/0.15/0.14/
-   0.13, but pairings of the same captures are not independent samples and
-   counting them as such would overstate the evidence.
+   `11.webp` comparisons among these six captures yield
+   **0.32 / 0.30 / 0.29 / 0.15 / 0.15 / 0.14 / 0.01**, but pairings of the
+   same captures are not independent samples and
+   counting them as such would overstate the evidence. (The last figure read
+   **0.13** until 2026-08-19, fix round 2: 0.13 is real but is `3.webp`'s
+   value for that same pairing, carried across and mislabelled as
+   `11.webp`'s. Recomputed from the committed `spots[]`. It changes no
+   conclusion and slightly strengthens the argument — a 0.01 makes the
+   pairwise spread *wider*, not narrower, and shows the swing is not a
+   uniform per-capture jitter.)
 
    **Two conclusions, and the second is the more useful one.**
    - **Magnitude: kings-court's per-spot floor is around 0.3, not 0.14.**
@@ -2657,12 +2704,25 @@ Two things follow, and the second is a live disagreement inside this branch:
      unreplicated extreme and **wrong to infer that the floor is therefore
      small** — nothing here reaches 0.75, but nothing supports 0.14 either.
    - **It is one spot, not a uniform floor.** `11.webp` is the worst spot in
-     six of the seven pairwise comparisons, and the second-worst spot never
+     **five** of the seven pairwise comparisons and tied-worst in a sixth,
+     while the second-worst spot in any pairing never
      exceeds **0.16**. So kings-court's "floor" is better described as *most
      spots ≈0.15, and `11.webp` ≈0.3* — which is a lead on the mechanism,
      not just a number. **`11.webp` (Bedroom 1, desk) is where plan 5 should
      start looking**, and it is also the spot task 4 declined to attribute a
      0.25 movement to, correctly.
+   - **The seventh pairing is the useful one, and it points at a capture
+     rather than a spot.** In `tip13 r1 vs r2` — the only pairing where
+     `11.webp` is *not* worst — it reads **21.61 / 21.60, a 0.01 spread**.
+     Across the four tip captures it reads 21.75 / 21.90 / 21.61 / 21.60, so
+     the whole 0.30 tip range is carried by **one capture (`tip14 r2`, at
+     21.90)** rather than by a spot that jitters on every load. Combined
+     with the BASE group's 21.73 / 22.05, the shape is *occasional
+     high excursions on one spot*, not continuous noise. **That is a
+     testable hypothesis for plan 5** — and it is consistent with task 3's
+     "one-frame anomaly" reading of the committed 0.75 while still refuting
+     the small floor task 3 inferred from it, because these excursions
+     recur.
 
    Serenity's 0.08/0.09 is why its committed 0.14 is credible, and why the
    0.21 margin above is thin but probably real.
