@@ -86,7 +86,30 @@ function loadClassic(src) {
   cfg.start.yaw = rad(cfg.start.yaw);
   for (const f of cfg.furniture) if (f.rot !== undefined) f.rot = rad(f.rot);
   for (const s of cfg.spawns) s.yaw = rad(s.yaw);
-  for (const p of cfg.photoSpots || []) p.yaw = rad(p.yaw);
+  for (const p of cfg.photoSpots || []) {
+    p.yaw = rad(p.yaw);
+    // Optional downward camera tilt, degrees, positive = looking down (plan
+    // 4c task 1b). The capture harness pinned pitch to 0, so a photograph
+    // shot looking down could not be reproduced at any yaw or fov -- and two
+    // of serenity's eleven compare spots are exactly that. 10.webp puts the
+    // pool's far edge at 0.41 of frame height, which is ABOVE the horizon and
+    // therefore unreachable by a level camera. Absent or malformed -> 0,
+    // which is every spot that has never had one.
+    // The sign is flipped here on purpose. `controls.pitch` feeds
+    // `camera.rotation.x` directly, where POSITIVE looks UP -- verified by
+    // sweep, not assumed; the first draft of this had it backwards and moved
+    // the horizon the wrong way. In the config, `pitch: 22` reads as "tilted
+    // 22 degrees down", which is what someone writing a photo spot means.
+    if (p.pitch !== undefined) {
+      if (typeof p.pitch === 'number' && isFinite(p.pitch)) {
+        p.pitch = -rad(p.pitch);
+      } else {
+        console.warn('[main] photoSpot', p.file, 'pitch must be a finite number of degrees, got',
+          JSON.stringify(p.pitch), '-- using 0');
+        p.pitch = 0;
+      }
+    }
+  }
 
   // Per-photograph field of view. The capture camera's fov was fixed at 72
   // vertical while only the aspect changed, so 16:9 photographs were scored

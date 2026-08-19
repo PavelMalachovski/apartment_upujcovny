@@ -1,0 +1,46 @@
+{
+  "apartment": "serenity",
+  "phase": "b4c-task1b-pitch-derivation",
+  "question": "What downward camera tilt do 2.webp and 10.webp need, and how was it chosen?",
+  "why": "measure.js and compare.js both pinned c.pitch = 0, so the harness could not reproduce any photograph shot looking down. 10.webp puts the pool's far edge at 0.41 of frame height -- above the horizon -- which a level camera cannot produce at any yaw or fov.",
+  "criterion": "Alignment of the MEASURED water-band rows between render and photograph (longest contiguous cyan run per column). Explicitly NOT dE2000: dE was recorded at every step and used to choose nothing.",
+  "signCorrection": "controls.pitch feeds camera.rotation.x, where POSITIVE looks UP. Established by sweep, not assumed -- the first draft had it backwards and moved the horizon away from the photograph. main.js negates, so a positive config value reads as 'tilted N degrees down'.",
+  "sweeps": {
+    "10.webp": {
+      "photoWaterBand": [0.392, 0.763],
+      "column": 0.35,
+      "candidates": [
+        { "pitch": 0, "waterBand": null, "note": "at pitch 0 the longest cyan run is the SKY, 0.0-0.373; the water is 0.62-1.0" },
+        { "pitch": 14, "waterBand": [0.473, 0.893] },
+        { "pitch": 18, "waterBand": [0.424, 0.835] },
+        { "pitch": 22, "waterBand": [0.374, 0.780], "chosen": true },
+        { "pitch": 26, "waterBand": [0.324, 0.728] }
+      ],
+      "analyticCrossCheck": "Solving 0.5 - 0.5*(Y/Z)/tan(36) = 0.41 for the far coping edge at 11.20 m along-axis and 1.91 m below the eye gives 17.1 degrees. The swept answer is 22. The gap is expected and is NOT noise: the analytic route assumes the photograph shares the render's 72-degree legacy vertical fov, and serenity's meta.photoFovLong (120) has never been audited -- kings-court's identical 120 measured at ~57-58 by two independent methods and is routed to plan 5. The swept value matches an observable; the analytic one matches a model with an unverified parameter, so the sweep wins."
+    },
+    "2.webp": {
+      "photoGreenBand": [0.043, 0.129],
+      "photoWaterBand": [0.157, 1.0],
+      "column": 0.10,
+      "candidates": [
+        { "pitch": 0, "greenBand": [0.330, 0.661], "waterBand": [0.722, 1.0] },
+        { "pitch": 24, "greenBand": [0.028, 0.368], "waterBand": [0.432, 0.915] },
+        { "pitch": 32, "greenBand": [0.0, 0.260], "waterBand": [0.330, 0.830] },
+        { "pitch": 40, "greenBand": [0.0, 0.139], "waterBand": [0.214, 0.750], "chosen": true },
+        { "pitch": 48, "waterBand": [0.078, 0.672] }
+      ]
+    }
+  },
+  "result": {
+    "population": "all-spot",
+    "scored": 11,
+    "compareTotal": 11,
+    "skippedPoseVerification": 0,
+    "branchPointMean": 15.46,
+    "afterTask1Mean": 15.66,
+    "afterTask1bMean": 14.27,
+    "perSpot": { "10.webp": [25.35, 26.37, 13.32], "2.webp": [18.09, 18.58, 16.41] }
+  },
+  "honesty": "This is an INSTRUMENT correction, not a rendering improvement. Nothing about how the scene is lit, shaded or drawn changed in task 1b; the harness simply stopped capturing a camera the photographer never used. Report it as such wherever the number appears, the same way plan 4b reported its own movement.",
+  "routed": "The other nine serenity spots and all thirteen kings-court spots are still captured at pitch 0, and every one of them was pose-verified under that constraint. If any of those photographs was shot with tilt, the same correction is available and unclaimed. Not swept here -- that is a second pass over every camera in both flats, which is plan 4b's work redone, and it needs its own before/after. Routed to 4d."
+}

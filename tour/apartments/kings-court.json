@@ -1143,7 +1143,10 @@
    "w": 0.95,
    "d": 1.05,
    "rot": 180,
-   "lvl": "main"
+   "lvl": "main",
+   "divider": "w",
+   "valve": true,
+   "handheld": true
   },
   {
    "type": "vanity",
@@ -2403,7 +2406,7 @@
    "yaw": 200,
    "compare": true,
    "poseVerified": false,
-   "poseNote": "Re-pointed 2026-08-19 (task 4) at the shower task 3 built: the rain head reads against the white marble fixture wall, with the glass, the tray and the bath against the black wall all in frame. poseVerified stays FALSE for three reasons no camera fixes. (1) The model puts the shower WEST of the bath where the photograph puts it EAST, so the composition is mirrored left-to-right and no yaw can undo it. (2) F.shower builds no glass divider between shower and bath -- the photograph's defining element. (3) F.shower builds no thermostatic valve plate and no handheld, both prominent in the photograph. (1) is a layout question for 4c; (2) and (3) need a constructor change."
+   "poseNote": "Updated 2026-08-19 (plan 4c task 3). The 2026-08-19 (task 4) note named three causes; TWO ARE NOW DISCHARGED. F.shower gained an opt-in full-height frameless divider panel with a ceiling brace (divider: 'w', the side facing the bath), a thermostatic valve plate and a rail-mounted handheld -- the photograph's defining element and the two fixtures beside it. All three options default off, so the other six F.shower callers render exactly what they did before; proved by capture, not asserted (see kings-court-b4c-task3-findings.json). poseVerified stays FALSE on the remaining cause, the mirroring, and that one is NOT a defect anyone can fix here. Derived independently rather than taken from the old note: this camera is at (9.3, 1.2) yaw 200, so forward is (0.342, 0.940) and screen-right is cross(forward, up) = (-0.94, 0.342) = WEST -- screen-LEFT is EAST. The photograph puts the shower on the left, so the shower must be EAST and the bath WEST. It does not fit: the room's interior is 2.46 m square, the photographed side-by-side pair needs 1.7 + 0.95 = 2.65 m, and the only variant that would fit puts the bath across this room's own door (west wall, z 1.5-2.35), which CLAUDE.md rule 2a requires be kept clear by 0.5 m. Routed to plan 5 with the shell-dimension items. SEPARATE FINDING, also routed: under the legacy gate camera (72 deg vertical) this spot renders a close-up of bare marble in BOTH trees -- the fixtures are out of frame entirely -- so the all-spot legacy number for 14.webp is scoring a wall, not a bathroom. That is meta.photoFovLong: 120, already routed to plan 5 after measuring at ~57-58 by two independent methods."
   },
   {
    "file": "17.webp",

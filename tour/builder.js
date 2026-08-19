@@ -1205,16 +1205,45 @@ const Builder = (() => {
   };
 
   F.shower = (o, g) => {
-    // glass cabin: tray, pole, head, glass on 2 sides
+    // glass cabin: tray, pole, head, glass on 2 sides.
+    //
+    // Three options added by plan 4c task 3, ALL default off, so every
+    // existing caller renders exactly what it did before:
+    //   divider  'e' | 's'  -- that side carries one full-height frameless
+    //            panel with a ceiling brace instead of the 2.0 m cabin pane.
+    //            14.webp's defining element, and the reason that spot could
+    //            not pass pose verification however the room was arranged.
+    //   valve    thermostatic plate on the head wall
+    //   handheld rail-mounted handset with hose, beside the valve
     box(o.w, 0.04, o.d, M.marbleW, 0, 0.02, 0, g);
-    const gl1 = new T.Mesh(new T.PlaneGeometry(o.w, 2.0), M.glass);
-    gl1.position.set(0, 1.04, o.d / 2); g.add(gl1);
-    const gl2 = new T.Mesh(new T.PlaneGeometry(o.d, 2.0), M.glass);
-    gl2.rotation.y = Math.PI / 2;
-    gl2.position.set(o.w / 2, 1.04, 0); g.add(gl2);
+    const divH = o.glassH || 2.45;
+    function pane(side, planeW, rotY, px, pz) {
+      const full = (o.divider === side);
+      const h = full ? divH : 2.0;
+      const p = new T.Mesh(new T.PlaneGeometry(planeW, h), M.glass);
+      p.rotation.y = rotY;
+      p.position.set(px, h / 2 + 0.04, pz);
+      g.add(p);
+      if (full) cyl(0.012, 0.012, 0.26, M.chrome, px, h + 0.17, pz, g, 8);
+    }
+    pane('s', o.w, 0, 0, o.d / 2);
+    pane('e', o.d, Math.PI / 2, o.w / 2, 0);
+    // 'n' and 'w' have no cabin pane at all -- the constructor has always
+    // assumed those two sides are walls -- so a divider there is a new panel
+    // rather than an upgraded one.
+    if (o.divider === 'n') pane('n', o.w, 0, 0, -o.d / 2);
+    if (o.divider === 'w') pane('w', o.d, Math.PI / 2, -o.w / 2, 0);
     cyl(0.012, 0.012, 1.9, M.chrome, -o.w / 2 + 0.1, 0.99, -o.d / 2 + 0.1, g, 8);
     const head = new T.Mesh(new T.CylinderGeometry(0.11, 0.11, 0.02, 16), M.chrome);
     head.position.set(-o.w / 2 + 0.3, 2.0, -o.d / 2 + 0.25); g.add(head);
+    if (o.valve) {
+      box(0.16, 0.16, 0.03, M.chrome, -o.w / 2 + 0.06, 1.05, -o.d / 2 + 0.32, g);
+    }
+    if (o.handheld) {
+      cyl(0.011, 0.011, 0.62, M.chrome, -o.w / 2 + 0.06, 1.38, -o.d / 2 + 0.32, g, 8);
+      const hs = new T.Mesh(new T.CylinderGeometry(0.05, 0.05, 0.02, 14), M.chrome);
+      hs.position.set(-o.w / 2 + 0.06, 1.66, -o.d / 2 + 0.32); g.add(hs);
+    }
     return { w: o.w, d: o.d };
   };
 
@@ -1325,6 +1354,109 @@ const Builder = (() => {
     return { w: 0.35, d: 0.35 };
   };
 
+  // ---------- Exterior (plan 4c task 1) ----------
+  // serenity's 2.webp and 10.webp were the only two of its eleven compare
+  // spots still failing pose verification, and they failed on the same
+  // thing: the pool was a 0.1 m water slab whose surface sat 0.30 m below
+  // the deck, with no coping, no basin wall and no depth, so it read as a
+  // painted rectangle at every camera height. These three constructors are
+  // additive -- nothing existing changes -- and are driven from `furniture`
+  // entries with lvl: "terrace" so they merge and get bake occluders like
+  // everything else in the scene.
+
+  // Pool: coping band, submerged walls, basin floor, water surface. Built as
+  // a ring rather than a slab because the photographs' defining feature is
+  // the STEP from deck to water.
+  F.poolEdge = (o, g) => {
+    const w = o.w, d = o.d;
+    const cop = o.cop || 0.4;      // coping band width
+    const drop = o.drop || 0.22;   // coping top down to the water surface
+    const deep = o.deep || 1.25;   // water surface down to the basin floor
+    for (const [bw, bd, bx, bz] of [
+      [w + cop * 2, cop, 0, -(d / 2 + cop / 2)],
+      [w + cop * 2, cop, 0, +(d / 2 + cop / 2)],
+      [cop, d, -(w / 2 + cop / 2), 0],
+      [cop, d, +(w / 2 + cop / 2), 0]
+    ]) box(bw, 0.09, bd, M.poolCoping, bx, -0.045, bz, g);
+    for (const [bw, bd, bx, bz] of [
+      [w, 0.08, 0, -d / 2], [w, 0.08, 0, +d / 2],
+      [0.08, d, -w / 2, 0], [0.08, d, +w / 2, 0]
+    ]) box(bw, drop + deep, bd, M.poolWall, bx, -(drop + deep) / 2 - 0.09, bz, g);
+    box(w, 0.05, d, M.poolWall, 0, -(drop + deep) - 0.09, 0, g);
+    box(w, 0.02, d, M.poolWater, 0, -drop - 0.09, 0, g);
+    // A hole in the ground: no collider and no occluder. Giving it an
+    // occluder height would shadow the deck beside it.
+    return { noCollide: true };
+  };
+
+  // Planting mass: a hedge body with crossed fronds above it, so the
+  // silhouette against the sky is broken rather than a flat-topped slab.
+  F.plantMass = (o, g) => {
+    const w = o.w, d = o.d, h = o.h || 2.2;
+    box(w, h, d, M.hedgeDark, 0, h / 2, 0, g);
+    const n = Math.max(3, Math.round(w / 1.2));
+    const crown = o.crown === undefined ? 1.5 : o.crown;
+    for (let i = 0; i < n && crown > 0; i++) {
+      const px = -w / 2 + (i + 0.5) * (w / n);
+      const scale = crown * (0.72 + 0.28 * ((i * 7) % 3) / 2);
+      const lift = h + scale * 0.62;
+      for (let k = 0; k < 3; k++) {
+        const fr = new T.Mesh(new T.PlaneGeometry(scale * 1.6, scale * 1.6), M.frond);
+        fr.position.set(px, lift, ((i * 5) % 3 - 1) * d * 0.3);
+        fr.rotation.y = k * (Math.PI / 3) + (i % 2) * 0.4;
+        g.add(fr);
+      }
+    }
+    return { w, d };
+  };
+
+  // Boundary fence: horizontal slats on posts. The white one behind the pool
+  // in 10.webp, which the config had no geometry for at all.
+  F.slatFence = (o, g) => {
+    const w = o.w, h = o.h || 2.0;
+    const rows = Math.max(4, Math.round(h / 0.22));
+    for (let i = 0; i < rows; i++) {
+      box(w, 0.14, 0.05, M.fenceWhite, 0, 0.12 + i * (h / rows), 0, g);
+    }
+    const nPosts = Math.max(2, Math.round(w / 2.2) + 1);
+    for (let i = 0; i < nPosts; i++) {
+      box(0.1, h, 0.1, M.fenceWhite, -w / 2 + i * (w / (nPosts - 1)), h / 2, 0, g);
+    }
+    return { w, d: 0.14 };
+  };
+
+  // Built-in window seat: drawer base, seat slab, cushion (plan 4c task 2).
+  // 6.webp and 11.webp both show one under the bedroom window; the model had
+  // none, and F.bench -- a plain cream box -- was standing in for it.
+  F.windowBench = (o, g) => {
+    const w = o.w, d = o.d || 0.5, h = o.h || 0.44;
+    box(w, h - 0.06, d, M.white, 0, (h - 0.06) / 2, 0, g);
+    box(w, 0.06, d + 0.04, M.white, 0, h - 0.03, 0.02, g);
+    const n = Math.max(2, Math.round(w / 0.7));
+    for (let i = 0; i < n; i++) {
+      box(w / n - 0.05, h - 0.18, 0.02, M.ashV, -w / 2 + (i + 0.5) * (w / n), (h - 0.08) / 2, d / 2 + 0.012, g);
+    }
+    box(w - 0.08, 0.10, d - 0.06, M.cream, 0, h + 0.05, 0, g);
+    return { w, d };
+  };
+
+  // Sun lounger: rattan frame, cushion, inclined backrest at the head end
+  // (local -z). 2.webp is centred on one; F.bench was standing in for it and
+  // reads as a plain white box at every camera.
+  F.lounger = (o, g) => {
+    const w = o.w || 0.72, L = o.d || 1.95;
+    box(w, 0.10, L, M.rattan, 0, 0.34, 0, g);
+    box(w - 0.06, 0.11, L - 0.08, M.cream, 0, 0.44, 0, g);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      cyl(0.022, 0.022, 0.29, M.metalBlack, sx * (w / 2 - 0.07), 0.145, sz * (L / 2 - 0.12), g, 8);
+    }
+    const back = box(w, 0.09, 0.62, M.rattan, 0, 0.55, -L / 2 + 0.26, g);
+    back.rotation.x = -0.85;
+    const cus = box(w - 0.06, 0.10, 0.56, M.cream, 0, 0.63, -L / 2 + 0.23, g);
+    cus.rotation.x = -0.85;
+    return { w, d: L };
+  };
+
   // Furniture heights for light occlusion (shadows bake into the floor)
   const OCC_H = {
     bed: 0.65, sofaL: 0.8, sofa: 0.8, armchair: 0.85, roundTable: 0.45,
@@ -1332,7 +1464,7 @@ const Builder = (() => {
     wardrobe: 2.5, wardrobeTv: 2.5, barStool: 0.8, tub: 0.6, vanity: 1.0,
     wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
     deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
-    planter: 1.2
+    planter: 1.2, plantMass: 2.2, slatFence: 2.0, windowBench: 0.5, lounger: 0.5
   };
   const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
 

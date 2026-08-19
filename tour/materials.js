@@ -406,6 +406,72 @@ const Materials = (() => {
     M.rattan = new T.MeshStandardMaterial({ map: woodTex('#5a452e', 'rgba(30,20,10,0.6)', false), roughness: 0.95 });
     M.fenceWood = new T.MeshStandardMaterial({ map: woodTex('#a58757', 'rgba(60,45,25,0.4)', false), roughness: 0.95 });
     M.plantGreen = new T.MeshStandardMaterial({ color: 0x4f7042, roughness: 0.95, side: T.DoubleSide });
+    // Exterior: pool basin and the planting/fence mass behind it (plan 4c
+    // task 1). New keys only -- no existing entry above or below is touched,
+    // because task 4 re-fits `exposure` and a silently altered old colour
+    // would land inside that fit and be unattributable.
+    M.poolCoping = new T.MeshStandardMaterial({ color: col('poolCoping', 0xcfc9bd), roughness: 0.88 });
+    M.poolWall = new T.MeshStandardMaterial({ color: col('poolWall', 0xd8eff1), roughness: 0.35 });
+    // Ripple, not a flat fill. 10.webp's water is the largest single surface
+    // in that frame and a constant colour reads as painted concrete at any
+    // exposure -- the caustic banding is what makes it read as water.
+    const ripple = canvasTex(256, 256, (g, w, h) => {
+      g.fillStyle = '#0fe6ff'; g.fillRect(0, 0, w, h);
+      g.globalAlpha = 0.16;
+      for (let i = 0; i < 90; i++) {
+        const y = (i * 37) % h;
+        g.strokeStyle = i % 3 ? '#7df4ff' : '#00a8c8';
+        g.lineWidth = 1 + (i % 4);
+        g.beginPath();
+        for (let x = 0; x <= w; x += 8) {
+          const yy = y + Math.sin((x / w) * Math.PI * (2 + (i % 5)) + i) * (3 + (i % 6));
+          if (x === 0) g.moveTo(x, yy); else g.lineTo(x, yy);
+        }
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+    }, 6, 6);
+    M.poolWater = new T.MeshStandardMaterial({ map: ripple, color: col('poolWater', 0xffffff), roughness: 0.10, metalness: 0.20 });
+    M.hedgeDark = new T.MeshStandardMaterial({ color: col('hedgeDark', 0x3f5f3a), roughness: 0.95 });
+    // Canopy fronds. These are crossed quads, and with an opaque material
+    // they read as a green skyline of rectangles -- measured, not guessed:
+    // the first build of this exterior did exactly that. The alpha cut-out
+    // is what turns them into planting. alphaTest rather than transparent,
+    // so they need no depth sorting against the water plane behind them.
+    const frondAlpha = canvasTex(256, 256, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      for (let s = 0; s < 19; s++) {
+        const a = (-0.5 + s / 18) * 2.5;                 // fan of leaf blades
+        const len = h * (0.40 + 0.10 * Math.cos(a * 1.6));
+        g.save();
+        g.translate(cx, h * 0.96);
+        g.rotate(a);
+        const grd = g.createLinearGradient(0, 0, 0, -len);
+        grd.addColorStop(0, '#3d6b39');
+        grd.addColorStop(1, '#7fb45f');
+        g.fillStyle = grd;
+        g.beginPath();
+        g.moveTo(0, 0);
+        g.quadraticCurveTo(-len * 0.30, -len * 0.55, 0, -len);
+        g.quadraticCurveTo(len * 0.30, -len * 0.55, 0, 0);
+        g.fill();
+        g.strokeStyle = 'rgba(30,55,28,0.85)';
+        g.lineWidth = 2;
+        for (let t = 0.15; t < 1; t += 0.12) {           // leaflet notches
+          g.beginPath();
+          g.moveTo(0, -len * t);
+          g.lineTo((s % 2 ? 1 : -1) * len * 0.13, -len * (t + 0.05));
+          g.stroke();
+        }
+        g.restore();
+      }
+    });
+    frondAlpha.wrapS = frondAlpha.wrapT = T.ClampToEdgeWrapping;
+    M.frond = new T.MeshStandardMaterial({
+      map: frondAlpha, alphaTest: 0.45, roughness: 0.95, side: T.DoubleSide
+    });
+    M.fenceWhite = new T.MeshStandardMaterial({ color: col('fenceWhite', 0xe4e1d8), roughness: 0.9 });
     M.pot = new T.MeshStandardMaterial({ color: 0xefefec, roughness: 0.8 });
     M.curtainBeige = new T.MeshStandardMaterial({ color: 0xc4b49e, roughness: 1, side: T.DoubleSide });
     M.curtainGreen = new T.MeshStandardMaterial({ color: 0x2f5044, roughness: 1, side: T.DoubleSide });

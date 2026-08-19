@@ -2,8 +2,9 @@
 
 Mean CIEDE2000 (ΔE2000) between the render and the real photograph, over
 an 8×8 grid of cell-mean colours, at the 11 Serenity photo spots flagged
-`compare` (of which ~~2 currently pass~~ **9 currently pass** pose
-verification — corrected 2026-08-19 by plan 4b task 5; kings-court is
+`compare` (of which ~~2 currently pass~~ ~~**9 currently pass**~~ **10 currently pass** pose
+verification — corrected 2026-08-19 by plan 4b task 5, then again the same day by **plan 4c task 5** after task 1b
+flipped `10.webp`; kings-court is
 **10 of 13**, its population having changed from 14. See "Pose
 verification" below, this restriction postdates everything in "The
 trend"). Raw data for every run is the sibling `*.json` files in this
@@ -19,7 +20,7 @@ information.
 
 Every `compare`-flagged photo spot was classified by whether its render
 and its photograph show the *same room content* — subject, not lens, not
-exposure. Most do not: ~~**serenity 2 of 11 pass**~~ **serenity 9 of 11**,
+exposure. Most do not: ~~**serenity 2 of 11 pass**~~ ~~**serenity 9 of 11**~~ **serenity 10 of 11** (plan 4c task 5),
 ~~**kings-court 8 of
 14**~~ **kings-court 10 of 13** (corrected 2026-08-19, plan 4b task 4 fix
 round 1 — struck in place per repo convention rather than deleted; the
@@ -2826,3 +2827,83 @@ Every mean above was re-derived from each file's own `spots[]` rather than
 read off its `mean` field. serenity's files carry no `-popN` suffix because
 serenity's population is 11 on both sides of the branch and never moved; the
 suffix exists on kings-court's precisely because its did.
+
+## Plan 4c: the pool, the sky, and a camera the harness could not point
+
+Written 2026-08-19 by plan 4c task 5.
+
+**Closing gate, both flats paired same-session** (BASE `b78ebd3` in a worktree
+on `:8743`, HEAD on `:8742`, up simultaneously, the same scripts pointed at
+each, legacy camera, all-spot):
+
+| Apartment | BASE | HEAD | Δ |
+|---|---|---|---|
+| serenity (11 spots) | 15.48 / 15.47 | **14.34 / 14.34** | **−1.14** |
+| kings-court (13 spots) | 17.59 / 17.61 | **17.58 / 17.62** | **0.00** |
+
+Shipped: serenity `exposure` **0.31**, kings-court **0.52**, horkyone-10
+**0.42**, `?v=135`.
+
+**Read the −1.14 correctly: most of it is an instrument correction.** The
+branch did two separable things to serenity's two pool spots and measured them
+separately, which is the only reason this can be said at all.
+
+1. **Content** (task 1): the pool became a real basin — coping band, submerged
+   wall, basin floor, rippled water 0.31 m below the deck — with a planting
+   mass, alpha-cut canopy fronds, a boundary fence and a gradient sky, and the
+   hedge slab standing between the terrace and the water and the hedge cube
+   standing *inside* the water both went. The render is unambiguously better.
+   **The metric got worse: 15.46 → 15.66, carried by `10.webp` 25.35 → 26.37.**
+2. **Instrument** (task 1b): `measure.js` and `compare.js` had both pinned
+   `c.pitch = 0`, so no photograph shot looking down could be reproduced at any
+   yaw or fov — and `10.webp` puts the pool's far edge at **0.41 of frame
+   height, above the horizon**, which a level camera cannot produce. Adding an
+   optional per-spot `pitch` took the same tree to **14.27**, and `10.webp`
+   from 26.37 to 13.32.
+
+So the bands had been in the right order and the wrong place, and **saturated
+colour in a misaligned cell scores worse than the flat grey it replaced.** That
+is worth keeping in front of anyone who reads this file: this metric will
+punish correct content that is misaligned harder than it punishes blandness,
+and the correct response is to fix the alignment, not to remove the content.
+
+**What that says about this instrument, again.** This document already states
+that a lighting change moving the metric by 0.05 is not evidence the lighting
+got worse. Plan 4b then showed pose and content dominate shading. Plan 4c adds
+a third term above both: **what the capture harness is able to represent.** One
+line of `c.pitch = 0` was worth −12.51 ΔE on a single spot — larger than any
+lighting, content or pose change in the record — and it was invisible for the
+whole of phases A and B because nothing ever compared the render's framing to
+the photograph's numerically.
+
+**The exposure re-fit, and the population trap it walks into.** serenity went
+0.295 → 0.31, fitted toward luminance (render mean 0.2939 against the
+photographs' 0.2924). ΔE was recorded at every swept value and chose nothing —
+it falls monotonically toward the *dark* end (0.27 → 14.21, 0.295 → 14.23,
+0.31 → 14.32) while luminance says the render is too dark at 0.295, so obeying
+the rule cost 0.11. **The new fit is not comparable to 0.295**, because
+`luminance.py` filters through `delta_e.scorable` and has no `--all-spots`
+escape hatch, so the population moved 9 → 10 the moment task 1b flipped a flag.
+Every future `exposure` figure in this file needs its population stated beside
+it.
+
+**Two things measured and deliberately not fixed.**
+
+- At 0.31 the render's p5 is **0.0760** against the photographs' **0.0379** —
+  shadows twice as light — and raising exposure to match the mean makes it
+  worse. Exposure is a global multiplier; this is plan 3's reachable-blacks
+  problem, still open and still unowned.
+- The sky **cannot reach** the photographs' brightness: every channel saturates
+  around **176/255** for any source colour at this exposure, so `10.webp`'s
+  (167, 211, 239) zenith is out of range. The shipped gradient is the closest
+  reachable, not a match.
+
+**A note on "byte-identical", which nothing here is.** The `sky` key is opt-in,
+and the claim that an apartment without it is unaffected was measured rather
+than asserted: kings-court rendered from both trees puts BASE-vs-HEAD at mean
+abs pixel diff **0.2549**, *inside* the **0.2447** between two loads of the
+*same* BASE tree. The right word is **indistinguishable**. The same probe on
+horkyone-10 gives a same-tree spread of **2.01** — roughly eight times
+kings-court's, on one machine in one session — so plan 5's open "what varies
+across a page load" is not uniform across apartments, and a single-apartment
+probe would have concluded otherwise.

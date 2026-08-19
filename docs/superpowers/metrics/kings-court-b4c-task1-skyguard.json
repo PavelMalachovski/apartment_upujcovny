@@ -1,0 +1,16 @@
+{
+  "apartment": "kings-court",
+  "phase": "b4c-task1-skyguard",
+  "question": "Does adding the optional `sky` key to app.js change an apartment that does not set it?",
+  "method": "Same camera (22.6, 5.0, ground 0, yaw 178), 1280x820, pixelRatio 1, through the post chain, POSTed to each tree's own save endpoint. BASE = b78ebd3 in a worktree on :8743, HEAD = plan 4c task 1 on :8742, both served simultaneously in one session.",
+  "control": "Two independent page loads of the SAME BASE tree, compared to each other. Without this control the BASE-vs-HEAD figure is uninterpretable.",
+  "readings": [
+    { "pair": "BASE load1 vs BASE load2", "identical": false, "maxAbsDiff": 9, "meanAbsDiff": 0.2447, "pixelsDiffering": 185461 },
+    { "pair": "BASE load1 vs HEAD", "identical": false, "maxAbsDiff": 9, "meanAbsDiff": 0.2549, "pixelsDiffering": 197500 },
+    { "pair": "BASE load2 vs HEAD", "identical": false, "maxAbsDiff": 11, "meanAbsDiff": 0.1649, "pixelsDiffering": 139019 }
+  ],
+  "totalPixels": 1049600,
+  "conclusion": "BASE-vs-HEAD is INSIDE the same-tree reload spread, and on one of the two pairings it is smaller than the control. The absent-`sky` path is indistinguishable from BASE at this instrument's resolution. The claim this file supports is 'indistinguishable', NOT 'byte-identical' -- nothing about this scene is byte-identical across two loads of one tree, which is itself the finding.",
+  "routed": "docs/PHASE-B-RESUME.md routes 'what varies across a page load' to plan 5 with `captureEnvironment` as the untested suspect. This is the first quantification of it: max 9/255, mean 0.24, ~18% of pixels on kings-court at 1280x820. Part of that is JPEG quantisation at q0.92 of a slightly different framebuffer, so it is an upper bound on the framebuffer difference, not a measurement of it.",
+  "consoleWarnings": "none -- an apartment with no `sky` key prints no [app] warning, as designed"
+}

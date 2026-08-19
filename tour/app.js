@@ -103,8 +103,48 @@ window.initApp = function () {
   // without) -- nothing, slightly the wrong way. Removed. Left as a
   // recorded, accepted difference; see docs/superpowers/metrics/
   // r128-reference.md for the measurement.
-  scene.background = new THREE.Color(0xbcd5e8);
-  scene.fog = new THREE.Fog(0xbcd5e8, 40, 90);
+  // Optional per-apartment sky (plan 4c task 1). Absent -> the flat
+  // 0xbcd5e8 clear this scene has always had, byte-identical, which is why
+  // kings-court and horkyone-10 do not move at all in that branch. Present
+  // -> a vertical gradient, because the two serenity spots that still fail
+  // pose verification carry ~10% real sky in 10.webp and a flat fill cannot
+  // read as one. Opt-in on purpose: a global change would have moved three
+  // fitted exposures and two photographed apartments' baselines for the
+  // sake of one flat's two spots.
+  const SKY_FALLBACK = 0xbcd5e8;
+  function skyColor(v, fallback) {
+    if (typeof v !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(v)) {
+      if (v !== undefined) console.warn('[app] APT.sky colour must be "#rrggbb", got', JSON.stringify(v), '-- falling back');
+      return fallback;
+    }
+    return parseInt(v.slice(1), 16);
+  }
+  const skyCfg = (APT.sky && typeof APT.sky === 'object' && !Array.isArray(APT.sky)) ? APT.sky : null;
+  if (APT.sky !== undefined && !skyCfg) {
+    console.warn('[app] APT.sky must be an object, got', JSON.stringify(APT.sky), '-- falling back to the flat background');
+  }
+  if (skyCfg) {
+    const top = skyColor(skyCfg.top, 0x3f8fd0);
+    const bot = skyColor(skyCfg.bottom, SKY_FALLBACK);
+    const hex = (n) => '#' + n.toString(16).padStart(6, '0');
+    const cv = document.createElement('canvas');
+    cv.width = 8; cv.height = 256;
+    const cx = cv.getContext('2d');
+    const grad = cx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, hex(top));
+    grad.addColorStop(0.78, hex(bot));
+    grad.addColorStop(1, hex(bot));
+    cx.fillStyle = grad;
+    cx.fillRect(0, 0, 8, 256);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.mapping = THREE.EquirectangularReflectionMapping;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    scene.background = tex;
+    scene.fog = new THREE.Fog(skyColor(skyCfg.fog, bot), 40, 90);
+  } else {
+    scene.background = new THREE.Color(SKY_FALLBACK);
+    scene.fog = new THREE.Fog(SKY_FALLBACK, 40, 90);
+  }
 
   const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 120);
 
