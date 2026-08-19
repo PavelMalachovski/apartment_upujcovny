@@ -38,7 +38,11 @@ window.__measure = function () {
     c.pos.z = spot.z;
     c.ground = spot.g || 0;
     c.yaw = spot.yaw;          // main.js has already converted to radians
-    c.pitch = 0;
+    // Optional per-spot downward tilt, also already in radians. This was a
+    // hard 0 until plan 4c task 1b, which made the harness unable to
+    // reproduce any photograph shot looking down -- see main.js's note where
+    // the conversion happens. Spots with no `pitch` are unchanged.
+    c.pitch = spot.pitch || 0;
     c.update(0.001);
     // initApp sets renderer.setPixelRatio(min(devicePixelRatio, 2)), so on
     // a DPR-2 (retina) machine setSize(W, H, false) leaves

@@ -267,7 +267,11 @@ window.__compare = (function () {
       if (a.doll && a.doll.on) a.doll.exit();
       c.enabled = true;
       c.pos.x = s.x; c.pos.z = s.z; c.ground = s.g || 0;
-      c.yaw = s.yaw; c.pitch = 0; c.keys = {};
+      // c.pitch was a hard 0 here too until plan 4c task 1b. It must track
+      // measure.js exactly: the divider is what a reviewer looks at to decide
+      // poseVerified, and a divider showing a different camera from the one
+      // the scorer uses is worse than no divider.
+      c.yaw = s.yaw; c.pitch = s.pitch || 0; c.keys = {};
       c.update(0.001);
 
       a.renderer.setPixelRatio(1);
