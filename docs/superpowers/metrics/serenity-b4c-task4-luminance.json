@@ -1,0 +1,62 @@
+{
+  "apartment": "serenity",
+  "phase": "b4c-task4-exposure-refit",
+  "rule": "Fit toward luminance, never toward dE. dE2000 was recorded at every swept value and used to choose nothing; the gap it would have chosen instead is stated below.",
+  "instrument": "tools/luminance.py -- linear-light Rec.709 relative luminance, mean and p5, over the pose-verified compare spots. Renders captured at the legacy 72 deg camera with each spot's own pitch, 1024 wide.",
+  "populationChange": {
+    "before": "9 spots (2.webp and 10.webp both failed pose verification)",
+    "now": "10 spots (10.webp flipped true in task 1b; 2.webp is still false)",
+    "warning": "luminance.py filters through delta_e.scorable and has NO --all-spots escape hatch, so this fit is NOT comparable to the committed 0.295, which was fitted on a different population. It is also not comparable to the 2-spot population that produced the figure before plan 4b."
+  },
+  "photographs": { "meanLuminance": 0.2924, "p5": 0.0379 },
+  "sweep": [
+    { "exposure": 0.20,  "meanLuminance": 0.1835, "p5": 0.0394 },
+    { "exposure": 0.24,  "meanLuminance": 0.2261, "p5": 0.0521 },
+    { "exposure": 0.27,  "meanLuminance": 0.2563, "p5": 0.0622 },
+    { "exposure": 0.295, "meanLuminance": 0.2801, "p5": 0.0708, "note": "the value shipping before this task" },
+    { "exposure": 0.30,  "meanLuminance": 0.2848, "p5": 0.0726 },
+    { "exposure": 0.305, "meanLuminance": 0.2893, "p5": 0.0743 },
+    { "exposure": 0.31,  "meanLuminance": 0.2939, "p5": 0.0760, "chosen": true },
+    { "exposure": 0.315, "meanLuminance": 0.2983, "p5": 0.0778 },
+    { "exposure": 0.32,  "meanLuminance": 0.3028, "p5": 0.0795 },
+    { "exposure": 0.36,  "meanLuminance": 0.3365, "p5": 0.0939 },
+    { "exposure": 0.40,  "meanLuminance": 0.3674, "p5": 0.1089 },
+    { "exposure": 0.45,  "meanLuminance": 0.4024, "p5": 0.1273 }
+  ],
+  "chosen": {
+    "exposure": 0.31,
+    "luminanceResidual": 0.0015,
+    "why": "closest mean to the photographs' 0.2924 of any swept value; 0.305 undershoots by 0.0031, 0.31 overshoots by 0.0015"
+  },
+  "whatTheWrongCriterionWouldHaveChosen": {
+    "dEMinimumInRange": { "exposure": 0.27, "allSpotLegacy": 14.21 },
+    "atChosen": { "exposure": 0.31, "allSpotLegacy": 14.32 },
+    "alsoMeasured": { "0.295": 14.23, "0.32": 14.41, "0.36": 14.93 },
+    "costOfObeyingTheRule": 0.11,
+    "note": "dE falls monotonically toward the DARK end of the swept range while luminance says the render is too dark at 0.295. That is the direction-blindness metrics/README.md warns about, visible in one table."
+  },
+  "p5Tension": {
+    "observed": "At the chosen 0.31 the render's p5 is 0.0760 against the photographs' 0.0379 -- twice as light. Raising exposure to match the mean makes this worse, not better.",
+    "reading": "The render's shadows are not as deep as the photographs'. This is the 'reachable blacks' problem plan 3 spent seven tasks on and did not close; exposure cannot fix it, because it is a global multiplier. Recorded here so nobody reads the mean match as a full exposure match.",
+    "routed": "unowned, same as the wall lightmap atlas"
+  },
+  "horkyone10Band": {
+    "criterion": "spawn-pooled sRGB luminance (0-255), mean over every spawns[] entry rendered at 480x300 through the full post chain at pixelRatio 1, Rec.709 weights, no linearisation. Same domain as plan 3 task 4's file, NOT comparable to luminance.py's linear scale.",
+    "harnessDifference": "Plan 3 task 4 used Playwright headless Chromium with forced ANGLE/D3D11. This re-derivation ran in the session browser instead, with post.js's chain confirmed live (postOn true on all three). Same method, different host -- treat the absolute numbers as this session's, and the comparison between the three as the result.",
+    "reDerived": {
+      "serenity": { "exposure": 0.31, "meanL": 142.18, "p5L": 78.1 },
+      "kings-court": { "exposure": 0.52, "meanL": 148.81, "p5L": 70.6 },
+      "acceptWindow": [138.81, 152.18],
+      "windowIs": "the intersection of the two flats' own +-10 bands, which is how plan 3 task 4 computed [139.0, 148.7] from serenity 138.7 and kings-court 149.0"
+    },
+    "horkyone10Sweep": [
+      { "exposure": 0.36, "meanL": 134.88, "p5L": 91.7 },
+      { "exposure": 0.40, "meanL": 141.92, "p5L": 98.4 },
+      { "exposure": 0.42, "meanL": 145.14, "p5L": 101.6, "shipped": true },
+      { "exposure": 0.44, "meanL": 148.19, "p5L": 104.7 },
+      { "exposure": 0.46, "meanL": 151.08, "p5L": 107.6 },
+      { "exposure": 0.50, "meanL": 156.42, "p5L": 113.3 }
+    ],
+    "verdict": "horkyone-10's shipped 0.42 gives 145.14, inside the re-derived [138.81, 152.18] and 0.36 off its midpoint of 145.50. NOT CHANGED, and checked rather than assumed -- plan 4a task 3 found the then-shipped 0.46 had silently fallen out of its own band, which is why this check is mandatory rather than optional."
+  }
+}
