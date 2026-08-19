@@ -1205,16 +1205,45 @@ const Builder = (() => {
   };
 
   F.shower = (o, g) => {
-    // glass cabin: tray, pole, head, glass on 2 sides
+    // glass cabin: tray, pole, head, glass on 2 sides.
+    //
+    // Three options added by plan 4c task 3, ALL default off, so every
+    // existing caller renders exactly what it did before:
+    //   divider  'e' | 's'  -- that side carries one full-height frameless
+    //            panel with a ceiling brace instead of the 2.0 m cabin pane.
+    //            14.webp's defining element, and the reason that spot could
+    //            not pass pose verification however the room was arranged.
+    //   valve    thermostatic plate on the head wall
+    //   handheld rail-mounted handset with hose, beside the valve
     box(o.w, 0.04, o.d, M.marbleW, 0, 0.02, 0, g);
-    const gl1 = new T.Mesh(new T.PlaneGeometry(o.w, 2.0), M.glass);
-    gl1.position.set(0, 1.04, o.d / 2); g.add(gl1);
-    const gl2 = new T.Mesh(new T.PlaneGeometry(o.d, 2.0), M.glass);
-    gl2.rotation.y = Math.PI / 2;
-    gl2.position.set(o.w / 2, 1.04, 0); g.add(gl2);
+    const divH = o.glassH || 2.45;
+    function pane(side, planeW, rotY, px, pz) {
+      const full = (o.divider === side);
+      const h = full ? divH : 2.0;
+      const p = new T.Mesh(new T.PlaneGeometry(planeW, h), M.glass);
+      p.rotation.y = rotY;
+      p.position.set(px, h / 2 + 0.04, pz);
+      g.add(p);
+      if (full) cyl(0.012, 0.012, 0.26, M.chrome, px, h + 0.17, pz, g, 8);
+    }
+    pane('s', o.w, 0, 0, o.d / 2);
+    pane('e', o.d, Math.PI / 2, o.w / 2, 0);
+    // 'n' and 'w' have no cabin pane at all -- the constructor has always
+    // assumed those two sides are walls -- so a divider there is a new panel
+    // rather than an upgraded one.
+    if (o.divider === 'n') pane('n', o.w, 0, 0, -o.d / 2);
+    if (o.divider === 'w') pane('w', o.d, Math.PI / 2, -o.w / 2, 0);
     cyl(0.012, 0.012, 1.9, M.chrome, -o.w / 2 + 0.1, 0.99, -o.d / 2 + 0.1, g, 8);
     const head = new T.Mesh(new T.CylinderGeometry(0.11, 0.11, 0.02, 16), M.chrome);
     head.position.set(-o.w / 2 + 0.3, 2.0, -o.d / 2 + 0.25); g.add(head);
+    if (o.valve) {
+      box(0.16, 0.16, 0.03, M.chrome, -o.w / 2 + 0.06, 1.05, -o.d / 2 + 0.32, g);
+    }
+    if (o.handheld) {
+      cyl(0.011, 0.011, 0.62, M.chrome, -o.w / 2 + 0.06, 1.38, -o.d / 2 + 0.32, g, 8);
+      const hs = new T.Mesh(new T.CylinderGeometry(0.05, 0.05, 0.02, 14), M.chrome);
+      hs.position.set(-o.w / 2 + 0.06, 1.66, -o.d / 2 + 0.32); g.add(hs);
+    }
     return { w: o.w, d: o.d };
   };
 

@@ -1,0 +1,36 @@
+{
+  "apartment": "kings-court",
+  "phase": "b4c-task3",
+  "delivered": "F.shower gained three opt-in options -- divider ('n'|'s'|'e'|'w', a full-height frameless panel with a ceiling brace instead of that side's 2.0 m cabin pane; 'n' and 'w' had no pane at all before, so a divider there is a new panel), valve, handheld. Bathroom 2 sets divider 'w' (the side facing the bath), valve and handheld.",
+  "regressionGuard": {
+    "callers": "7 F.shower callers across three apartments; exactly one changed.",
+    "argument": "With `divider` absent the refactor is provably identical: pane('s') resolves to PlaneGeometry(w, 2.0) at (0, 2.0/2 + 0.04, d/2) = (0, 1.04, d/2), and pane('e') to PlaneGeometry(d, 2.0) rotY PI/2 at (w/2, 1.04, 0) -- the same two meshes the old gl1/gl2 built.",
+    "measured": "Argument not trusted on its own. horkyone-10 -- an apartment this branch does not touch at all -- rendered at its shower (5.55, 4.6, yaw 180, 900x700, through the post chain) on BASE b78ebd3 (:8743) and HEAD (:8742), served simultaneously in one session.",
+    "readings": [
+      { "pair": "BASE load1 vs BASE load2", "maxAbsDiff": 15, "meanAbsDiff": 2.0059, "pixelsDiffering": 560252 },
+      { "pair": "BASE load1 vs HEAD", "maxAbsDiff": 19, "meanAbsDiff": 1.3412, "pixelsDiffering": 516008 },
+      { "pair": "BASE load2 vs HEAD", "maxAbsDiff": 17, "meanAbsDiff": 1.9084, "pixelsDiffering": 538506 }
+    ],
+    "conclusion": "BASE-vs-HEAD is SMALLER than the same-tree reload control on both pairings. Indistinguishable.",
+    "sideFinding": "horkyone-10's per-page-load spread at this camera is mean 2.01, against kings-court's 0.24 at its entry hall -- roughly eight times larger on the same machine in the same session. Plan 5 owns 'what varies across a page load'; this says the answer is not uniform across apartments, which a single-apartment probe would have missed."
+  },
+  "gate": {
+    "population": "all-spot", "scored": 13, "compareTotal": 13, "skippedPoseVerification": 0,
+    "pairing": "same session, BASE b78ebd3 on :8743 and HEAD on :8742",
+    "BASE": 17.59, "HEAD": 17.58, "delta": -0.01,
+    "perSpotWorstMove": 0.15,
+    "14.webp": [21.61, 21.71],
+    "reading": "Metric-neutral, and that is expected rather than disappointing: the divider is transparent glass and the valve and handheld are small chrome parts. Every spot moved less than kings-court's ~0.35 per-spot noise floor."
+  },
+  "notDelivered": {
+    "item": "the mirroring -- cause (1) of 14.webp's three",
+    "derivation": "Camera (9.3, 1.2) yaw 200 -> forward (0.342, 0.940); screen-right = cross(forward, up) = (-0.94, 0.342) = WEST; so screen-LEFT is EAST. The photograph puts the shower on the left, therefore EAST, and the bath WEST. The config has shower x 9.6-10.55 and bath x 10.55-11.35, i.e. the other way round. The old poseNote's claim is CONFIRMED by independent derivation.",
+    "whyNotFixed": "Room interior is 2.46 x 2.46 m. The photographed side-by-side arrangement needs 1.7 (bath) + 0.95 (shower) = 2.65 m along one wall. Shortening the bath to 1.5 m makes 2.45 fit -- but the only orientation that then puts the shower east places the bath against the WEST wall, which carries this room's own door (opening at z 1.5-2.35), and CLAUDE.md rule 2a requires 0.5 m clear. Every remaining variant either buries the camera or blocks the door.",
+    "routed": "plan 5, with serenity's sofa and mainCeilH. Same question in all three: whether the configured room is the right size, not where the fixture goes."
+  },
+  "separateFinding": {
+    "item": "14.webp's gate reading is scoring a wall",
+    "detail": "Under the legacy gate camera (72 deg vertical, the population every gate number in this project is measured with) this spot renders a close-up of bare marble in BOTH trees -- no bath, no shower tray, no fixtures in frame. At the per-spot fov the same camera frames the room. So 14.webp's all-spot legacy dE2000 is not measuring the bathroom, which is worth knowing before anyone attributes a movement there to bathroom work.",
+    "routed": "plan 5, folded into the existing meta.photoFovLong row (configured 120, measured ~57-58 by two independent methods)."
+  }
+}
