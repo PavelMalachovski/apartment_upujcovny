@@ -2414,7 +2414,7 @@
    "yaw": 280,
    "compare": true,
    "poseVerified": false,
-   "poseNote": "Re-pointed 2026-08-19 (task 4) from the blank south wall to the vanity on the east wall; the basin, tap and mirror now frame. poseVerified stays FALSE and the old note's \"a pose problem, not fov\" was wrong: the entry-hall wardrobe (world x 22.20-24.60, z 1.78-2.53) crosses the x=23 wall 0.80 m into the Guest WC and stands 0.16 m in front of the vanity face at x=22.37, hiding the middle 0.75 m of its 1.30 m run and all but a sliver of the mirror. No legal camera clears it. Content defect, routed to 4c."
+   "poseNote": "Re-pointed 2026-08-19 (task 4) from the blank south wall to the vanity on the east wall; the basin, tap and mirror now frame. poseVerified stays FALSE and the old note's \"a pose problem, not fov\" was wrong: the entry-hall wardrobe (world x 22.20-24.60, z 1.78-2.53) crosses the x=23 wall 0.80 m into the Guest WC and stands 0.16 m in front of the vanity face at x=22.37, hiding the middle 0.75 m of its 1.30 m run and all but a sliver of the mirror. No legal camera clears it. It ALSO projects out of the building: its far end at x=24.60 clears the x=23.8 exterior wall (wall 1, ext) by 0.80 m past the centreline and ~0.73 m past its outer face at x=23.87, so the unit hangs in mid-air outside the shell and shows in dollhouse mode from outside -- the more visible half of the defect, and the half a camera inside the Guest WC never reveals. Added 2026-08-19 by task 5: this note named only the Guest WC intrusion until then, while docs/PHASE-B-RESUME.md carried both halves, so 4c -- which reads this config -- was inheriting the smaller half. Content defect, routed to 4c."
   },
   {
    "file": "19.webp",

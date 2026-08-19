@@ -28,9 +28,9 @@ its own yet.
 | 2 — `2026-08-13-phase-b2-measurement-exposure.md` | Fix the metric's camera, re-fit exposure | **Done**, 9 tasks, reviewed, final fix wave applied |
 | 3 — `2026-08-13-phase-b3-light.md` | Reachable blacks: source fix, BVH sampler, GTAO, lightmap pilot | **Closed.** All 7 tasks done and reviewed, plus a whole-branch review and its fix wave. Two of its three bets measured and **rejected** on their own criteria — GTAO (task 3) and offline lightmaps (task 6). Plan 3 pushed serenity out of the then-current merge gate; that gate was **restated on 2026-08-15** and the 0.03 accepted — see "The gate, restated 2026-08-15" |
 | 4a — `2026-08-15-phase-b4a-winding-walls.md` | Wall winding, walls taking their own light, the re-fit both force | **Done**, 5 tasks, reviewed, whole-branch review and its fix wave applied. Fixed a shipped rendering bug older than phase B; the wall-shading trial returned **NO-GO** and reverted |
-| 4b — `2026-08-16-phase-b4b-content-poses.md` | serenity's terrace opening, kings-court's missing shower, the mis-pointed and mis-mapped `photoSpots` | **Written, not started.** 5 tasks |
+| 4b — `2026-08-16-phase-b4b-content-poses.md` | serenity's terrace opening, kings-court's missing shower, the mis-pointed and mis-mapped `photoSpots` | **Done**, 5 tasks, each reviewed with a fix round. Branch `phaseB-plan4b-content` off `5963ddd`, `?v=113 → 121`, no PR yet. **The largest metric movement in phase B and not one line of rendering code:** serenity 16.00 → **15.49**, kings-court 18.59 → **18.17** on a fixed 14-spot population, shipping **17.59** on 13. `poseVerified` 2 of 11 → 9 of 11 and 8 of 14 → 10 of 13. Task 1's "floor-to-ceiling slider" premise was **disproved** and only the width widened |
 | 4c — not yet written | HDRI and exterior, GLTF furniture, PBR/KTX2 | **Deliberately not written.** Its critical path is human asset curation, and a plan whose bottleneck is someone else's time is better written when that is settled |
-| 5 — `2026-08-16-phase-b5-revalidate-and-docs.md` | Re-validate every constant, rewrite `CLAUDE.md` and `docs/PROMPT.md`, close the deploy caching hole | **Written, not started.** 5 tasks |
+| 5 — `2026-08-16-phase-b5-revalidate-and-docs.md` | Re-validate every constant, rewrite `CLAUDE.md` and `docs/PROMPT.md`, close the deploy caching hole | **Written, not started.** 5 tasks. **Plan 4b routed three items into it** and none is in its written scope yet: serenity's `mainCeilH: 2.6` (re-pointed here from 4c — see "Deferred, with owners"), kings-court's `meta.photoFovLong: 120` measured at ~57–58°, and the unsettled per-spot noise floor (0.35 vs 0.75) |
 
 **"Plan 4" was one line and three different kinds of work** — engine code,
 config geometry, and an asset-curation effort the design spec budgets at a day
@@ -38,9 +38,11 @@ or more of *human* work per property. It was split on 2026-08-15 so its code
 half would not wait on its human half. 4a shipped; 4b is written; 4c waits on
 a decision about who curates the assets.
 
-**Ten tasks are written and unstarted** (5 in 4b, 5 in plan 5), plus 4c
+~~**Ten tasks are written and unstarted** (5 in 4b, 5 in plan 5)~~ **Five are:
+plan 5's. 4b's five are done** (updated 2026-08-19 by plan 4b task 5), plus 4c
 whenever it is written. **4b is the one that matters most**: ~~nine of
-serenity's eleven `compare` spots~~ and six of kings-court's fourteen fail pose
+serenity's eleven `compare` spots~~ and ~~six of kings-court's fourteen~~
+**three of kings-court's thirteen** fail pose
 verification, and that — not lighting — is what dominates the metric every
 other plan has been judged by.
 
@@ -48,12 +50,27 @@ other plan has been judged by.
 > mis-pointed spots were re-pointed and the one attached to the bathroom
 > photograph was moved into the bathroom, so **serenity now fails 2 of 11, not
 > 9** — `2.webp` and `10.webp`, the pool vista, which is a content defect
-> (no pool geometry, no sky) owned by 4c. kings-court's six are untouched and
-> the sentence still stands for it. The paragraph's *thesis* is unchanged and
+> (no pool geometry, no sky) owned by 4c. ~~kings-court's six are untouched and
+> the sentence still stands for it.~~ The paragraph's *thesis* is unchanged and
 > was confirmed, not weakened: re-pointing those seven moved serenity's
 > all-spot legacy gate 15.97 → 15.49 without a line of renderer code, which is
 > the largest single movement in phase B and exactly the "pose dominates the
 > metric" claim being made here.
+>
+> **Superseded for kings-court too, 2026-08-19 by plan 4b task 4** (`d7a643b`).
+> The struck sentence above was written by task 2 and was true then; task 4
+> falsified it four commits later. Four kings-court cameras were re-pointed
+> and `4.webp` left the `compare` set on the merge owner's ruling, so
+> **kings-court fails 3 of 13, not 6 of 14** — `14.webp` and `17.webp`
+> (defective subjects in the model, not mis-aimed cameras) and `18.webp` (the
+> rattan set does not exist). **Across both flats: 10 of 25 spots passed at
+> the merge-base; 19 of 24 pass now.** Closing-gate figures, measured by task
+> 5 against `5963ddd` in one session: serenity **16.00 → 15.49**;
+> kings-court **18.59 → 18.17 on one fixed 14-spot population**, shipping at
+> **17.59** on 13. **No renderer, bake, post-processing, material or shader
+> code changed anywhere in this branch** — the numbers moved because the
+> metric began comparing like with like and because two objects that were
+> missing or wrong got fixed.
 
 **Nothing in plan 3 is "in progress", and it no longer leaves anything open.**
 The one thing it did leave open was a decision rather than a task — what to do
@@ -116,13 +133,41 @@ metrics record as the measurements they were.
 **The all-spot legacy ΔE reading is a regression tripwire, not a quality
 ceiling.** It was never able to be the latter. ΔE2000 against these
 photographs is dominated by pose and content mismatch rather than by
-shading — 9 of serenity's 11 compare spots and ~~6 of kings-court's 14~~
+shading — ~~9 of serenity's 11 compare spots~~ **2 of serenity's 11** and
+~~6 of kings-court's 14~~
 **3 of kings-court's 13** (corrected 2026-08-19, plan 4b task 4 fix round 1
 — see the baseline table below for the population change this reflects)
-fail pose verification, serenity's living room is modelled with a punched window
-where the flat has a sliding door, kings-court's Bathroom 2 has no shower at
-all, and two of serenity's worst spots photograph a real swimming pool
-against a flat abstraction of one. `metrics/README.md` already states the
+fail pose verification, ~~serenity's living room is modelled with a punched window
+where the flat has a sliding door~~, ~~kings-court's Bathroom 2 has no shower at
+all~~, and two of serenity's worst spots photograph a real swimming pool
+against a flat abstraction of one.
+
+> **Three clauses of that sentence were falsified by plan 4b and are struck
+> here, 2026-08-19 by task 5 — but its thesis was CONFIRMED, not weakened,
+> and that is why the sentence stays.** Fix round 1 corrected only the
+> kings-court count and left the other three; this is the fourth sweep of
+> these figures in this plan and each earlier one missed sites, so it was done
+> by search this time rather than from memory. What changed: serenity's
+> failures went 9 → **2** (task 2 re-pointed six cameras and re-mapped one);
+> the punched window **never existed** by the time the sentence was written
+> and the photograph is not a floor-to-ceiling slider either (task 1 measured
+> the head at 1.95–2.10 m, which `DOOR_H` 2.05 already builds, and widened
+> only the width); Bathroom 2 **has a shower** (task 3 built it). Only the
+> pool clause survives untouched, and it is 4c's.
+>
+> **Why this strengthens the paragraph.** Its claim is that this metric is
+> dominated by pose and content mismatch rather than by shading. Plan 4b
+> tested exactly that by fixing *only* pose and content: serenity **16.00 →
+> 15.49**, kings-court **18.59 → 18.17** on one fixed population — larger
+> than seven tasks of lighting work achieved — **without changing one line of
+> renderer, bake, post-processing, material or shader code.** The evidence
+> list above got shorter because the work was done, not because the argument
+> failed. And the conclusion still holds: what now dominates the residual is
+> furniture on the wrong walls, missing pool and sky, a mirrored bathroom, a
+> wardrobe through a wall, and a field of view measured at half its configured
+> value — content, still not shading.
+
+`metrics/README.md` already states the
 consequence outright: *a lighting change moving this metric by 0.05 is not
 evidence that the lighting got worse; it is evidence that this metric cannot
 arbitrate lighting.* The old gate asked it to arbitrate anyway, at a
@@ -149,9 +194,65 @@ applied), `?v=110`:
 
 | Apartment | Baseline | Recorded at |
 |---|---:|---|
-| serenity | **16.00** | plan 4a task 4; three-round mean 15.9973, readings 15.9891 / 16.0055 / 15.9973 |
-| kings-court | **18.58** | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
+| serenity | ~~**16.00**~~ | plan 4a task 4; three-round mean 15.9973, readings 15.9891 / 16.0055 / 15.9973 |
+| kings-court | ~~**18.58**~~ | plan 4a task 4; three-round mean 18.5757, readings 18.5864 / 18.5643 / 18.5764 |
 | horkyone-10 | — | no photographs; accepted on luminance proximity only |
+
+### The live baselines, as of plan 4b — read these, not the table above
+
+**Recorded 2026-08-19 by plan 4b task 5** at branch `phaseB-plan4b-content`
+tip, `?v=121`. The table above is kept as the plan-4a record it is; **these
+supersede it.**
+
+| Apartment | Baseline | Population | Recorded at |
+|---|---:|---|---|
+| serenity | **15.49** | 11 (unchanged all branch) | plan 4b task 5; two rounds 15.4982 / 15.4800, spread 0.018. `serenity-b4b-task5-gate-legacy-allspots[-repeat].json` |
+| kings-court | **17.59** | **13** — changed from 14 by `d7a643b` | plan 4b task 5; two rounds 17.5792 / 17.5931, spread 0.014. `kings-court-b4b-task5-gate-legacy-allspots-pop13[-repeat].json` |
+| horkyone-10 | — | — | no photographs; accepted on luminance proximity only |
+
+**Two conditions attached to quoting these, and neither is optional.**
+
+**1. kings-court's 17.59 is on a 13-spot population and is not comparable to
+any earlier kings-court number on sight.** The like-for-like reading — same
+fourteen spots as the merge-base — is **18.17**. The gap between 18.17 and
+17.59 is **−0.56 of pure arithmetic**, re-derived here rather than quoted:
+`(25.55 − 18.1871)/13 = 0.5664` and `(25.46 − 18.1521)/13 = 0.5621` on this
+task's own two rounds. **Nothing about the render produced it.** Check the
+commit *and* the population before comparing anything to 17.59.
+
+**2. The movement is a measurement correction, not a rendering improvement.**
+**No renderer, bake, post-processing, material or shader code changed anywhere
+in plan 4b.** Both numbers moved because eleven cameras across two flats were
+re-pointed at the subjects their photographs actually show — the metric began
+comparing like with like — and because two objects that were missing or wrong
+got fixed (kings-court's Bathroom 2 shower, which had never been modelled at
+all, and that bathroom's inverted marble).
+
+| Apartment | old → new | movement | attribution, all measured same-session against `5963ddd` |
+|---|---|---:|---|
+| serenity | 16.00 → **15.49** | **−0.51** | task 1 widened the terrace opening 1.4 → 1.8 m; task 2 re-pointed six cameras and moved `8.webp` into the bathroom its photograph shows. Carried by `6.webp` −2.65 and `7.webp` −1.38; the four untouched spots all moved ≤0.10 |
+| kings-court (14-spot, like-for-like) | 18.59 → **18.17** | **−0.42** | task 3 built the Bathroom 2 shower and un-inverted its marble; task 4 re-pointed four cameras. Carried by `14.webp` −4.03, `2.webp` −1.54, `10.webp` −1.15, against `17.webp` **+1.00 — a deliberate regression**, because the old pose rendered a blank wall that matched a white-marble photograph better than the vanity does. The nine untouched spots all moved ≤0.10 |
+| kings-court (13-spot, shipped) | — | — | **17.59.** 18.17 less the −0.56 of removal arithmetic above |
+
+**Rules 1–3, checked.** Both movements are far past the noise floor and both
+are **attributed** per rule 2, with a same-session paired A/B on the same
+machine and harness (three trees on ports 8742/8743/8744, one browser
+session, two rounds per leg). The **hard stop is not tripped**: no apartment's
+reading got worse at all. The BASE arm reproduced plan 4a's recorded serenity
+baseline of **16.00 exactly**, which is what licenses reading the movement as
+the branch's rather than the session's.
+
+**And the noise floor itself moved, wider.** Enumerated across *every*
+committed same-state capture set in `docs/superpowers/metrics/` — not one set,
+which is how this branch got it wrong twice — kings-court's widest same-state
+**mean** spread is **0.054** and serenity's **0.026**; the widest **per-spot**
+range is **0.14** on serenity and **0.75** on kings-court. Task 3's fix round
+and task 4's fix round disagree about whether that 0.75 is a floor or a
+one-frame anomaly, and **that disagreement is still open, routed to plan 5.**
+It changes no conclusion here: every attributed movement above is ≥1.00 and
+every unattributed one ≤0.10. Full working:
+`docs/superpowers/metrics/README.md`, "Phase B plan 4b task 5: the closing
+gate".
 
 > **Corrected 2026-08-19, plan 4b task 4 fix round 1 — read this before
 > comparing anything to kings-court's 18.58.** That baseline is on the
@@ -304,9 +405,14 @@ restored** — `--all-spots` on `delta_e.py` and the `?fov=legacy` branch in
 ## What the metric can and cannot see
 
 `poseVerified` marks spots whose render shows a **different subject** than
-their photograph. ~~**serenity passes 2 of 11**~~, ~~**kings-court 8 of 14**~~
-**kings-court 10 of 13** (see the 2026-08-19 note below), **horkyone-10 has no
-scorable spots at all.** The scorers skip the failures; the
+their photograph. ~~**serenity passes 2 of 11**~~ **serenity 9 of 11**,
+~~**kings-court 8 of 14**~~
+**kings-court 10 of 13** (see the 2026-08-19 notes below), **horkyone-10 has no
+scorable spots at all.** (serenity's live figure was added inline here
+2026-08-19 by task 5 — the earlier fix round struck the old number without
+putting the new one beside it, so this sentence read as though only
+kings-court had a current count.) **Across both flats: 10 of 25 passed at
+this branch's merge-base; 19 of 24 pass now.** The scorers skip the failures; the
 spots stay in the config with a `poseNote`, because they are the only
 automated trail of the defects they expose.
 
@@ -353,15 +459,46 @@ automated trail of the defects they expose.
 > 10**, and the committed `exposure: 0.52` was fitted against the 8.
 
 Those defects are plan 4's work:
-- serenity's living room is modelled with a **punched window** where the flat
-  has a floor-to-ceiling sliding door (observation B1). Three spots fail on it.
-- kings-court's **Bathroom 2 shower was never modelled** — none of that
+- ~~serenity's living room is modelled with a **punched window** where the flat
+  has a floor-to-ceiling sliding door (observation B1). Three spots fail on it.~~
+  **Both halves disproved, 2026-08-19 by plan 4b task 1.** The model was already
+  a `type: "door"`, and the photograph was never a floor-to-ceiling slider
+  either — measured inside `9.webp`, the head sits at 1.95–2.10 m, which
+  `DOOR_H` 2.05 already builds. Only the **width** was ever wrong; task 1
+  widened it 1.4 → 1.8 m and deliberately left the height alone. **Do not
+  heighten this opening.**
+- ~~kings-court's **Bathroom 2 shower was never modelled** — none of that
   config's four `type: "shower"` entries fall inside the room's bounds
-  (8.8, 0)–(11.4, 2.6).
-- Ten spots across both flats are simply pointed wrong.
+  (8.8, 0)–(11.4, 2.6).~~ **Built, 2026-08-19 by plan 4b task 3** (`d9672c3`),
+  whose fix round also un-inverted that bathroom's marble (`c1a7329`).
+  `14.webp` moved 25.78 → 21.75, the largest single-spot movement on the
+  branch. It still fails pose verification, for reasons no camera fixes — see
+  the routing list below.
+- ~~Ten spots across both flats are simply pointed wrong.~~ **All ten
+  re-pointed, 2026-08-19 by plan 4b tasks 2 and 4**, plus one *mis-mapped*
+  spot (serenity's `8.webp`, a bathroom photograph attached to a spot standing
+  in the bedroom) moved into the room its photograph shows — eleven cameras in
+  total. **`poseVerified` went 2 of 11 → 9 of 11 on serenity and 8 of 14 → 10
+  of 13 on kings-court.**
 - horkyone-10 has **zero** photographic anchors; its exposure rests entirely
   on luminance proximity to two flats, one of which sits at its own noise-floor
-  margin.
+  margin. **Still true, and it moved:** serenity's luminance-fitting population
+  went from 2 spots to 9 in `1e0d4e5`, so the ±10 band derived from serenity's
+  mean-scene-luminance must be **re-derived**, not carried across.
+
+### What plan 4b left open, routed so nothing is dropped
+
+Written 2026-08-19 by plan 4b task 5, closing the branch. Every item below was
+found or confirmed by this branch and none of them is a pose defect any more.
+
+| Open item | Why 4b could not close it | Owner |
+|---|---|---|
+| **serenity's sofa is on the wrong wall**, and the bedroom's bed head shares the window wall where the photographs show them perpendicular (the headboard buries ~0.45 m of the window). | A furniture-layout rewrite against the photographs, not a camera fix. It moves the metric — pair it same-session. Full measurement in the deferred table below | **4c** |
+| **kings-court's Bathroom 2 is the photograph's mirror image** (shower west of the bath where the photograph puts it east) and **has no divider glass** — the photograph's defining element | `F.shower` builds glass on two adjacent sides and assumes the other two are walls. This is a `builder.js` constructor change, which 4b forbids outright, so it is **genuinely blocked** rather than deferred by choice. The mirroring is a layout question on top of it | **4c** (constructor), layout question with it |
+| **kings-court's entry-hall wardrobe passes through a wall** — world box x 22.20–24.60, so 0.80 m of it stands inside the Guest WC, 0.16 m in front of the vanity, **and its far end clears the x = 23.8 exterior wall by 0.80 m past the centreline / ~0.73 m past its outer face**, hanging outside the building where dollhouse mode shows it | Content defect; no legal camera clears it. Task 5 added the exterior half to the config's own `poseNote`, which had carried only the Guest WC half | **4c** |
+| **`meta.photoFovLong: 120` is wrong for kings-court** — measured ~57° and ~58° by two independent methods on two different photographs (angular separation of identified features on `10.webp`; object size on `2.webp`) | **Deliberately shipped uncorrected.** It is one per-apartment constant governing all thirteen frames; correcting four spots per-spot would split the compare set in a way the gate cannot see and a visitor can. The right fix is to re-derive the constant from the apartment's own photographs as one change. Only two of thirteen frames were measured, so the derivation is not finished | **plan 5** (a documented constant) |
+| **The per-spot noise floor is unsettled: 0.35 or 0.75?** Task 3's fix round calls the committed 0.75 swing on `10.webp` a one-frame capture anomaly; task 4's fix round carries 0.35 forward. Both figures are committed in `docs/superpowers/metrics/` | Neither task's conclusion depended on it and this one's does not either, so nobody has had to settle it. It is the last open question about this instrument | **plan 5** |
+| **What varies across a page load** — ruled out per-frame grain and capture jitter; `captureEnvironment` is the untested suspect, `AO_DIRS` is a fixed table | Never isolated | **plan 5** |
 
 ## Immediately next: plan 3 closed, and it did not do what it set out to do
 
@@ -488,8 +625,13 @@ eight readings before the decision was put.
 
 - Server: `python tools/serve.py`, then `http://localhost:8742/?apt=<id>`.
   **Agents must start it with the sandbox disabled** or its `/save/` endpoint
-  returns HTTP 200 while the files silently vanish. Probe for a file on disk
-  before trusting any capture.
+  returns HTTP 200 while the files silently vanish. ~~Probe for a file on disk
+  before trusting any capture.~~ **Probe for the file on disk _and check it is
+  non-empty_** — corrected 2026-08-19 by plan 4b task 5. A presence probe alone
+  is not enough: `serve.py:90` truncates the destination into existence before
+  it decodes the body, so a malformed capture leaves a **zero-byte file** that
+  a presence probe happily passes. See the `serve.py:90` row in "Deferred, with
+  owners" for both reproduced failure shapes.
 - The in-app Browser pane will not composite. Render into a full-viewport
   element and take a Playwright screenshot.
 - `?check=1` runs the layout validator; `window.__issues` must be empty on all
@@ -519,14 +661,14 @@ eight readings before the decision was put.
 | `vercel.json` still caches the deleted `/three.min.js`; the version-stamped `tour/lib/` gets the generic `max-age=300` | any plan touching deploy |
 | No explicit `Cache-Control` on the HTML entry point — now the single point of failure, since one tag versions everything | plan 5 |
 | `serve.py`: `%00` in a path raises instead of returning 400; realpath check is TOCTOU-racy in principle | deferred, dev-only, fails closed |
-| `serve.py:90`: `base64.b64decode(body)` is unguarded in `do_POST`, so a malformed save body raises, `socketserver` prints the traceback and **kills that handler thread**. Sibling to the `%00` row above, and it matters more than it looks: **every** measurement recipe in this repo goes through `/save/`, and the failure mode next door is a sandboxed `serve.py` answering HTTP 200 while writing nothing. Two independent ways for a capture to be silently absent, and neither announces itself — probe for the file on disk, never trust the response | deferred, dev-only; found by plan 4a |
+| `serve.py:90`: `base64.b64decode(body)` is unguarded in `do_POST`, so a malformed save body raises, `socketserver` prints the traceback and **kills that handler thread**. Sibling to the `%00` row above, and it matters more than it looks: **every** measurement recipe in this repo goes through `/save/`, and the failure mode next door is a sandboxed `serve.py` answering HTTP 200 while writing nothing. Two independent ways for a capture to be silently absent, and neither announces itself — ~~probe for the file on disk, never trust the response~~ **probe for the file on disk AND check it is non-empty** (corrected 2026-08-19 by plan 4b task 5, after reproducing the bug directly against a running `serve.py`). **The old advice does not survive this very bug.** `f.write(base64.b64decode(body))` at `:90` evaluates the decode *after* `open(dest, 'wb')` has already truncated the file into existence, so a bad body leaves a **zero-byte file that exists** — a presence probe passes and proves nothing. Both failure shapes were reproduced: a body of `!!!` raises nothing at all (`b64decode` discards non-alphabet characters, so it decodes to `b''`), returns **HTTP 200**, and writes 0 bytes; a body of `QUJDQ` raises `binascii.Error`, kills the handler thread so the client sees a dropped connection — and still leaves the same 0-byte file. Non-emptiness is the only check that catches either | deferred, dev-only; found by plan 4a, advice corrected by plan 4b |
 | The horkyone-10 ±10 luminance criterion **went unenforced for some time**: the shipped `exposure` 0.46 was already failing it before plan 4a started (+11.07 from serenity against a ±10 band), because plan 4a task 1 brightened all three apartments and serenity's re-fit came down further, moving the band out from under horkyone-10. Found in passing by plan 4a task 3, whose refit to 0.42 was therefore **mandatory, not cosmetic**. The criterion has no automated check and nothing re-runs it when a sibling's exposure moves — that is the actual gap | plan 5 |
 | `CLAUDE.md` beyond the two rows already corrected | plan 5 |
 | 5th-percentile shadow luminance never closes | **this is plan 3's whole subject** |
 | ~~**`grid()` winds 8 of 12 wall faces backwards**~~ — **discharged** by plan 4a task 1 (`b767b4b`) with the sign test the section below prescribes; still open on `main`, closed on `phaseB-plan4a-winding`. **What it cost:** one task, plus the exposure re-fit it forced (task 3) and the rebaselining that followed (task 4) — and a real dimensional change, every **x** span in all three apartments shrinking by exactly 0.280 to its configured size, which is a correction rather than a regression. **What it bought:** serenity 16.60 → 16.32 all-spot legacy on task 1 alone, closing the 0.03 shortfall this document spends a section explaining. **What it unblocked: the per-texel wall lightmap atlas**, which could not be built onto inside-out walls at all — that is now the open path for whoever writes plan 4c or 5, and plan 4a task 2's NO-GO does **not** close it (see the atlas bullet below). The section below is kept as the diagnosis that produced the fix, not as an outstanding item | plan 4a, done |
 | `.gitignore` covers only `tools/__pycache__/`, not a generic `__pycache__/` rule | any plan touching tooling |
 | **serenity's furniture is on the wrong walls in two rooms, and no camera can fix it.** Found by plan 4b task 2 while re-pointing the seven mis-pointed spots — it is what remains after every pose is correct. (a) **Living room:** `3.webp`, `4.webp` and `9.webp` all put the sofa against the *same* long wall as the dining table, with the terrace door beyond it; `serenity.json` puts the sofa against the **west** wall (backing onto x 3.1) and the dining table against the **east** (x ≈ 5.2), so any camera that frames the terrace door correctly renders the sofa on the opposite side of the frame from the photograph. (b) **Bedroom:** `6.webp` and `11.webp` between them show the window wall and the bed-head wall to be **perpendicular**; the config puts both on the **same** wall (z 6.65) — the bed is centred at x 1.0 and the window opening spans **x 1.6–2.9** (`at` is the opening's **start** offset along the wall, not its centre: `builder.js` splits pieces at `from: o.at, to: o.at + o.w`), while `F.bed`'s headboard is drawn `w + 0.5` = **2.1 m** wide, so it runs to x 2.05 and buries roughly **0.45 m of the window's left edge** behind it. Both are content defects, not pose defects, and both survive at the poses this task shipped. They are also the reason serenity's living-room ΔE barely moves while the bedroom's falls by 2.7. **Whoever takes it:** this is a furniture-layout rewrite against the photographs, and it moves the metric — pair it same-session like any other change | **plan 4c** |
-| **serenity's `mainCeilH` is 2.6 and the photographs say ~2.9–3.2 — the shell is 0.3–0.4 m too short.** Found by plan 4b task 1 while disproving the "floor-to-ceiling slider" premise, and confirmed independently by its reviewer with **two routes off `4.webp`**, the only frame carrying both the ceiling junction and the floor of that wall: the **curtain rod** at (448−157)/(448−70) = 0.770 of ceiling height, which at a normal 2.20–2.25 m rod gives a ceiling of **2.86–2.92 m**; and the **air-conditioner** at 102 px against 378 px floor-to-ceiling (0.261 after perspective correction), which for a 0.78–0.92 m wall-split unit gives **3.1–3.2 m**. **2.6 falls outside both.** At 2.6 the same unit would have to be 0.68–0.70 m wide, narrower than any common split. Deferring was right — `mainCeilH` feeds every wall `h`, the ceiling plates, the terrace-level relationship, the bake geometry and the fitted `exposure`, so changing it inside a task whose gate is read for one opening's width would have destroyed the attribution. But it is now **live debt task 2 executes on top of**: six serenity cameras get re-pointed inside this short shell, and their poses do not become wrong when the ceiling is corrected — the *numbers* do. **Whoever takes it: re-fitting serenity's `exposure` is part of the task, not a follow-up, and all eleven spots must be re-baselined afterward.** Do not fold it into a pose task. Caveat carried with it: the reviewer could not establish whether `4.webp` and `9.webp` are the same physical unit (different floors, sofas and prints), so the ceiling routes rest on `4.webp` alone | **plan 4c, as its own task** — not 4b, and not inside any pose or furniture task |
+| **serenity's `mainCeilH` is 2.6 and the photographs say ~2.9–3.2 — the shell is 0.3–0.4 m too short.** Found by plan 4b task 1 while disproving the "floor-to-ceiling slider" premise, and confirmed independently by its reviewer with **two routes off `4.webp`**, the only frame carrying both the ceiling junction and the floor of that wall: the **curtain rod** at (448−157)/(448−70) = 0.770 of ceiling height, which at a normal 2.20–2.25 m rod gives a ceiling of **2.86–2.92 m**; and the **air-conditioner** at 102 px against 378 px floor-to-ceiling (0.261 after perspective correction), which for a 0.78–0.92 m wall-split unit gives **3.1–3.2 m**. **2.6 falls outside both.** At 2.6 the same unit would have to be 0.68–0.70 m wide, narrower than any common split. Deferring was right — `mainCeilH` feeds every wall `h`, the ceiling plates, the terrace-level relationship, the bake geometry and the fitted `exposure`, so changing it inside a task whose gate is read for one opening's width would have destroyed the attribution. But it is now **live debt task 2 executes on top of**: six serenity cameras get re-pointed inside this short shell, and their poses do not become wrong when the ceiling is corrected — the *numbers* do. **Whoever takes it: re-fitting serenity's `exposure` is part of the task, not a follow-up, and all eleven spots must be re-baselined afterward.** Do not fold it into a pose task. Caveat carried with it: the reviewer could not establish whether `4.webp` and `9.webp` are the same physical unit (different floors, sofas and prints), so the ceiling routes rest on `4.webp` alone — **and that caveat is load-bearing: both photographic routes rest on `4.webp` alone, so the 2.86–2.92 / 3.1–3.2 band must be RE-MEASURED before anyone edits the constant.** Do not treat "~2.9–3.2" as a measurement ready to be applied | ~~**plan 4c, as its own task**~~ **plan 5, as its own task** (re-routed 2026-08-19 by plan 4b task 5) — not 4b, and not inside any pose or furniture task. **Why it moved:** 4c is on record above as *deliberately not written*, because its critical path is human asset curation that nobody has scheduled — so the row was owned by a plan that cannot act on it, and a ceiling height would have sat blocked behind a photographer's calendar. **`mainCeilH` is a constant**, and plan 5 (`2026-08-16-phase-b5-revalidate-and-docs.md`) is written, unblocked, and opens by re-validating every documented constant, which is exactly this row's shape. Everything else in the cell stands unchanged — including that the re-fit of serenity's `exposure` and the re-baselining of all eleven spots are **part of the task, not a follow-up** |
 
 ### The wall-winding defect, deferred deliberately — and since fixed
 

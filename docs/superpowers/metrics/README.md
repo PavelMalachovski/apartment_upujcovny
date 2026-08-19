@@ -17,10 +17,18 @@ information.
 
 Every `compare`-flagged photo spot was classified by whether its render
 and its photograph show the *same room content* — subject, not lens, not
-exposure. Most do not: ~~**serenity 2 of 11 pass**~~, ~~**kings-court 8 of
+exposure. Most do not: ~~**serenity 2 of 11 pass**~~ **serenity 9 of 11**,
+~~**kings-court 8 of
 14**~~ **kings-court 10 of 13** (corrected 2026-08-19, plan 4b task 4 fix
 round 1 — struck in place per repo convention rather than deleted; the
-population also changed, see the 2026-08-19 note below)
+population also changed, see the 2026-08-19 note below. **serenity's live
+figure was added inline 2026-08-19 by task 5**: fix round 1 struck the old
+serenity number without putting the new one beside it, so this sentence read
+as though only kings-court had a current count. The correction below was
+always there; a reader who stopped at this line could not see it. As of this
+branch **most spots now DO pass** — 19 of 24 across the two flats — so the
+sentence's own "Most do not" is itself historical, and that is the single
+largest thing plan 4b changed)
 (classification and evidence:
 `.superpowers/sdd/2026-08-13-phase-b2-measurement-exposure/task-3-report.md`).
 The failures are camera-pose and modelling defects, not lens ones, and
@@ -78,12 +86,32 @@ an apartment nobody has classified yet (horkyone-10) keeps scoring every
 `tools/luminance.py` and `tools/residual.py` all skip `poseVerified: false`
 spots by construction and print how many they skipped.
 
-**Serenity's number now rests on 2 spots (`1.webp`, `11.webp`). Kings-court's
-rests on 8 (`3, 7, 8, 11, 12, 13, 19, 20`). These are not equally
+~~**Serenity's number now rests on 2 spots (`1.webp`, `11.webp`). Kings-court's
+rests on 8 (`3, 7, 8, 11, 12, 13, 19, 20`).**~~ **Serenity's rests on 9 of 11
+(all but `2.webp` and `10.webp`); kings-court's on 10 of 13 (all but `14.webp`,
+`17.webp` and `18.webp`)** — corrected in place 2026-08-19 by plan 4b task 5.
+**These are not equally
 trustworthy and must never be read as comparable to each other, or to the
-trend table below** — a 2-spot mean swings on a single frame; an 8-spot
-mean is only somewhat steadier; no error bar accompanies either. Proof run
-that the filter is live, 2026-08-13 (`serenity-b2-poseverified.json`,
+trend table below** — ~~a 2-spot mean swings on a single frame; an 8-spot
+mean is only somewhat steadier~~ the populations are now 9 and 10, which is
+a real improvement in both, but **no error bar accompanies either** and that
+was always the load-bearing half of this sentence.
+
+> **Why this sentence was corrected rather than scoped, 2026-08-19 (task 5).**
+> It is the one genuinely ambiguous site in this file's stale-count sweep. It
+> could be read as scoped to the dated proof run immediately below it, in
+> which case 2/8 would be right and untouchable. It is not: the word **"now"**
+> and the present tense make it a **live status claim** about what the
+> `poseVerified` population currently is, and it sits above the table rather
+> than inside it. So it was corrected. **The table below it was not** — that
+> is a dated 2026-08-13 measurement and its 2/11 and 8/14 are the populations
+> that run actually had. The distinction is the whole point: a claim about
+> today gets corrected, a record of a measurement gets left alone.
+
+Proof run
+that the filter is live, **2026-08-13 — a dated record, deliberately NOT
+updated; its 2/11 and 8/14 are the populations this run scored**
+(`serenity-b2-poseverified.json`,
 `kings-court-b2-poseverified.json` — a filter check, not a new baseline;
 task 5 draws that line):
 
@@ -1346,7 +1374,13 @@ numbers in `serenity-b3-task5-luminance.json` and the two
 population is **2 of serenity's 11 `compare` spots** (`tools/luminance.py`
 filters through `delta_e.scorable`, which requires `poseVerified`) — and
 those two, Bathroom and Bedroom, are the two rooms with the *highest* p5
-in the flat. Repeats are independent captures of the same state:
+in the flat. **[Scoped, not corrected, 2026-08-19 by plan 4b task 5: "2 of
+11" is the population *this plan-3 task-6 run* had, and every number in the
+table below was measured on it. serenity is 9 of 11 today, so `luminance.py`
+would build a different population now and these rows must not be re-run and
+compared against. The mechanism sentence — that `luminance.py` filters
+through `delta_e.scorable` — is still live and still has no `--all-spots`
+escape.]** Repeats are independent captures of the same state:
 
 | set | n | mean | p5 | contrast |
 |---|---:|---:|---:|---:|
@@ -1824,6 +1858,32 @@ lighting got worse; it is evidence that this metric cannot arbitrate lighting.
 But the merge condition is the merge condition, and against it serenity is now
 on the wrong side of it.
 
+> **This paragraph is HISTORICAL and is scoped, not corrected — 2026-08-19,
+> plan 4b task 5.** Read it as plan 4a's account of plan 3's position, not as
+> current status. Four of its clauses have since been falsified, and changing
+> the digits in place would have destroyed the argument the paragraph was
+> making, which is why it was left standing instead:
+> - "9 of serenity's 11 … are not pose-verified" — **2 of 11 now** fail
+>   (plan 4b task 2). "6 of kings-court's 14" — **3 of 13 now** (task 4;
+>   the denominator moved too).
+> - "serenity's living-room geometry is wrong (observation B1)" — B1's
+>   opening premise was **disproved** by 4b task 1 and the pose half closed by
+>   task 2. What survives is the sofa-on-the-wrong-wall defect, which B1
+>   never named. See `docs/PHASE-B-OBSERVATIONS.md`.
+> - "kings-court's Bathroom 2 has no shower" — **it has one** (4b task 3).
+> - "serenity is now on the wrong side of [the merge condition]" — the 0.03
+>   shortfall was closed by plan 4a task 1, and the absolute ceilings were
+>   retired on 2026-08-15 for the restated baseline-plus-attribution gate.
+>
+> **The paragraph's actual thesis was not falsified — it was confirmed, and
+> then acted on.** It says this metric is dominated by pose and content
+> mismatch rather than shading. Plan 4b tested that by fixing only pose and
+> content, and moved serenity **16.00 → 15.49** and kings-court **18.59 →
+> 18.17 on one fixed 14-spot population** — larger than anything seven tasks
+> of lighting work achieved — **without changing one line of renderer, bake,
+> post-processing, material or shader code.** That is this paragraph's claim
+> being proved, not withdrawn.
+
 #### Plan 4a's readings are a third render, and one of them is a reverted trial
 
 Plan 4a (`b4a-task1`, `b4a-task2`, `b4a-task3`, `b4a-task4`)
@@ -2179,6 +2239,16 @@ Linear domain, `tools/luminance.py`'s own estimator at full precision via
 apartments. **Population on every row, because that tool hard-codes the
 `poseVerified` filter:**
 
+> **These populations are a dated record and are deliberately NOT updated —
+> 2026-08-19, plan 4b task 5.** "2 of 11" and "8 of 14" are what
+> `luminance.py` actually built when this plan-4a run was taken, and every
+> figure in the table was measured on them. **They are 9 of 11 and 10 of 13
+> today** (plan 4b tasks 2 and 4), so the same script re-run now would score a
+> different, larger and better-founded population. **Do not re-run this table
+> and compare it against these rows.** The mechanism note above stays live:
+> `luminance.py` still hard-codes the `poseVerified` filter and still has no
+> `--all-spots` escape.
+
 | Apartment (population) | linear mean | linear p5 | contrast |
 |---|---|---|---|
 | serenity BASE (2 of 11) | 0.285408 | 0.089938 | 3.1734 |
@@ -2309,8 +2379,176 @@ the two-tree setup it needs:
 `docs/superpowers/harnesses/2026-08-13-b3-task7/`.
 
 The poseVerified population was also read during this task (serenity 16.02 on
-2 of 11, kings-court 17.55 on 8 of 14) and is **deliberately not committed**:
+2 of 11, kings-court 17.55 on 8 of 14 — **dated populations, left as measured;
+they are 9 of 11 and 10 of 13 as of 2026-08-19, plan 4b**) and is
+**deliberately not committed**:
 this task's own rule is that every committed ΔE file be all-spot, and a
 pose-verified file sitting next to the gate files is precisely the invitation
 to misread that the "What this means for the merge condition" section above
 exists to prevent.
+
+---
+
+## Phase B plan 4b task 5: the closing gate — the largest movement in phase B, and no rendering code produced it
+
+Written 2026-08-19. Branch `phaseB-plan4b-content`, merge-base `5963ddd`
+(`?v=113`) → tip `?v=121`. Read the paragraph in bold before the numbers, not
+after them.
+
+> **No renderer, bake, post-processing, material or shader code changed
+> anywhere in plan 4b.** Every number below moved for exactly two reasons:
+> **the metric began comparing like with like** — eleven cameras across two
+> flats were re-pointed at the subjects their photographs actually show — and
+> **two objects that were missing or wrong got fixed** (kings-court's Bathroom
+> 2 shower, which had never been modelled, and that bathroom's inverted
+> marble). This is a **measurement correction**, not a rendering improvement,
+> and it must not be quoted as one anywhere.
+
+### Method: three trees, one session
+
+The gate was read on three servers running simultaneously in one browser
+session, so before and after cannot differ by machine, session or harness:
+
+| Port | Tree | What it is |
+|---|---|---|
+| 8742 | repo working tree, `?v=121` | the branch tip — the **shipped** reading |
+| 8743 | `git archive 5963ddd` extraction, `?v=113` | the merge-base — the **BASE** reading |
+| 8744 | `git archive HEAD` extraction with `4.webp`'s `compare` flag restored, `?v=121` | the tip on the BASE's **14-spot** population |
+
+Each tree ran its **own** `tools/delta_e.py`, because that script resolves its
+config, photographs and shots directory from its own location — pointing one
+script at another tree would have scored the wrong config. Both halves of the
+gate were verified present first (`?fov=legacy` in `measure.js`,
+`--all-spots` in `delta_e.py`); both have been deleted once in this project's
+history. Every capture was probed on disk **and checked non-empty**, for the
+reason recorded in `PHASE-B-RESUME.md`'s deferred table. Two full rounds per
+leg, each from a fresh page load.
+
+### The third tree exists because the population changed under the branch
+
+kings-court's `compare` set was **14** at the merge-base and is **13** at the
+tip: the merge owner ruled `4.webp`'s coffee corner would not be modelled and
+task 4 removed its flag. **A raw before/after across that boundary is not a
+like-for-like comparison**, so both are reported.
+
+| Reading | Population | Round 1 | Round 2 | Mean | Spread |
+|---|---|---:|---:|---:|---:|
+| serenity BASE `5963ddd` | 11 | 16.0045 | 15.9864 | **16.00** | 0.018 |
+| serenity tip | 11 | 15.4982 | 15.4800 | **15.49** | 0.018 |
+| kings-court BASE `5963ddd` | **14** | 18.5614 | 18.6093 | **18.59** | 0.048 |
+| kings-court tip, same population | **14** | 18.1871 | 18.1521 | **18.17** | 0.035 |
+| **kings-court tip, as shipped** | **13** | 17.5792 | 17.5931 | **17.59** | 0.014 |
+
+- **serenity: 16.00 → 15.49, −0.51.** Population 11 on both sides, unchanged
+  by this branch. The BASE arm reproduces plan 4a task 4's recorded 16.00
+  baseline **exactly**, which is what licenses reading the movement as the
+  branch's rather than the session's.
+- **kings-court, like-for-like: 18.59 → 18.17, −0.42.** Same fourteen spots
+  both sides. This is the figure that isolates what the work did.
+- **kings-court, as shipped: 17.59** on thirteen spots.
+- **The removal's arithmetic effect, re-derived rather than quoted.** Dropping
+  one spot scoring far above the mean moves the mean by
+  `(dE4 - mean14) / 13`. On this task's own two rounds:
+  `(25.55 - 18.1871)/13 = 0.5664` and `(25.46 - 18.1521)/13 = 0.5621` —
+  **−0.56**, agreeing with task 4's corrected figure. **This is arithmetic.
+  Nothing about the render changed to produce it.**
+
+### Attribution, per rule 2
+
+Only spots whose camera or content this branch actually touched moved. The
+untouched spots are the control, and they are quiet:
+
+| Apartment | Largest movement on an **untouched** spot | Widest documented same-state per-spot range |
+|---|---:|---:|
+| serenity | **0.10** (`1.webp`) | 0.14 |
+| kings-court | **0.10** (`13.webp`) | 0.35, or 0.75 — see below |
+
+serenity, two-round per-spot means, BASE → tip:
+
+| Spot | BASE | tip | Δ | Attribution |
+|---|---:|---:|---:|---|
+| 6.webp | 12.46 | 9.81 | **−2.65** | task 2 — camera re-pointed off the wardrobe onto the bed and window wall |
+| 7.webp | 14.36 | 12.97 | **−1.38** | task 2 — same room, same cause |
+| 5.webp | 11.14 | 10.58 | **−0.56** | task 2 — was rendering a closet corner instead of the corridor |
+| 9.webp | 18.17 | 17.74 | **−0.43** | tasks 1+2 — re-pointed at the terrace door, which task 1 widened 1.4 → 1.8 m |
+| 3.webp | 15.99 | 15.71 | **−0.29** | tasks 1+2 — same pair |
+| 8.webp | 11.16 | 10.91 | **−0.25** | task 2 — the **mapping** fix: a bathroom photograph was attached to a spot standing in the bedroom, and the spot moved into the bathroom. The `name` field changes with it, Bedroom → Bathroom |
+| 4.webp | 16.48 | 16.69 | **+0.21** | tasks 1+2 — re-pointed, and it moved the wrong way |
+| 1, 2, 10, 11 | — | — | ≤0.10 | **untouched — nothing attributed** |
+
+kings-court, two-round per-spot means, BASE → tip, on the fixed 14-spot
+population:
+
+| Spot | BASE | tip | Δ | Attribution |
+|---|---:|---:|---:|---|
+| 14.webp | 25.78 | 21.75 | **−4.03** | tasks 3+4 — **the shower that had never been modelled**, plus the marble un-inversion, plus a whole-room shot re-pointed to a fixture shot |
+| 2.webp | 18.13 | 16.59 | **−1.54** | task 4 — camera moved 3.1 m and now frames the TV wall |
+| 10.webp | 18.07 | 16.93 | **−1.15** | task 4 — the camera had been facing 180° away from its subject |
+| 17.webp | 12.77 | 13.77 | **+1.00** | task 4 — **a deliberate regression.** The old pose rendered a featureless wall, which is a better colour match to a white-marble photograph than the vanity is. Aiming the camera correctly made the number worse, on purpose |
+| 4.webp | 25.48 | 25.51 | +0.03 | untouched (and dropped from the shipped set) |
+| 3, 7, 8, 11, 12, 13, 18, 19, 20 | — | — | ≤0.10 | **untouched — nothing attributed** |
+
+**Hard stop (rule 3): not tripped.** No apartment's reading got worse at all.
+The only per-spot regression is `17.webp`'s +1.00, chosen with the number in
+front of the implementer.
+
+### The noise floors, enumerated across every committed same-state set
+
+Task 4's brief and two of its own passes each estimated this from one set and
+each undershot. Enumerated properly, over every group of committed captures of
+an identical config in this directory:
+
+| Apartment | Widest committed same-state **mean** spread | Widest committed same-state **per-spot** range |
+|---|---:|---:|
+| serenity | **0.026** (`b4a-task3-final` pair) | **0.14** (`b3-task4-final` triple, `8.webp`) |
+| kings-court | **0.054** (`b4b-task3` AFTER pair) | **0.75** (same pair, `10.webp`) |
+
+Two things follow, and the second is a live disagreement inside this branch:
+
+1. **kings-court's mean band is wider than the ±0.03/±0.039 floor
+   `r128-reference.md` documents, and wider than the 0.033 task 4 settled
+   on.** This task's own BASE arm independently spread **0.048** across two
+   loads of one config, which corroborates 0.054 rather than 0.033. Anyone
+   attributing a kings-court mean movement under ~0.06 should measure their
+   own band first.
+2. **The 0.75 per-spot swing is real, committed, and the two tasks in this
+   branch that met it disagree about it.** Task 3's fix round argued it is a
+   one-frame capture anomaly rather than a floor — 98.7% of that pair's mean
+   spread is that single spot, and `10.webp` reads 17.53 four times running in
+   `b3-task7`'s four repeats. Task 4's fix round, having enumerated a
+   different subset of sets, carried **0.35** forward. **This task takes no
+   side, because it does not have to:** every movement attributed above is
+   ≥1.00 and every unattributed one is ≤0.10, so the conclusions hold under
+   0.14, 0.35 and 0.75 alike. **Plan 5 should settle it** — it is the only
+   open question about this instrument, and both figures are sitting in this
+   directory.
+
+### Pose verification, which is what actually changed
+
+| Apartment | merge-base `5963ddd` | tip |
+|---|---|---|
+| serenity | **2 of 11** | **9 of 11** |
+| kings-court | **8 of 14** | **10 of 13** |
+
+Read together: **10 of 25 spots showed their photograph's subject at the
+merge-base; 19 of 24 do now.** That is the change this plan was written to
+make, and every ΔE movement above is downstream of it.
+
+Still failing, all routed and none of them pose defects: serenity `2.webp` and
+`10.webp` (no pool geometry, no sky — 4c); kings-court `18.webp` (the rattan
+set does not exist — 4c), `14.webp` (Bathroom 2's layout is the photograph's
+mirror image and `F.shower` builds no divider glass — a `builder.js` change,
+**genuinely blocked** for 4b) and `17.webp` (the entry-hall wardrobe crosses a
+wall into the Guest WC **and hangs 0.73 m outside the building's exterior
+wall** — 4c).
+
+### Files
+
+Ten `tools/delta_e.py` native all-spot files, every one carrying
+`population: all-spot`, `scored == compareTotal`, `skippedPoseVerification: 0`,
+and naming both the camera and the population in its filename:
+`{serenity,kings-court}-b4b-task5-{BASE-5963ddd,gate}-legacy-allspots[-pop13|-pop14][-repeat].json`.
+Every mean above was re-derived from each file's own `spots[]` rather than
+read off its `mean` field. serenity's files carry no `-popN` suffix because
+serenity's population is 11 on both sides of the branch and never moved; the
+suffix exists on kings-court's precisely because its did.
