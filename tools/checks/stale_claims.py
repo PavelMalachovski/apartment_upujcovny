@@ -4,28 +4,51 @@ Greps for the CLAIM, not for the number. Every sweep in plan 4b that searched
 for digit patterns ('2 of 11', '8 of 14') missed sites, six times running,
 because the survivors state the fact in prose and contain no digit pattern.
 
-A hit is OK when a dated marker, a strikethrough or a historical-scoping word
-appears in the SAME paragraph, or in the paragraph immediately before it.
-Otherwise it is reported as UNMARKED.
+A hit is OK only when a dated marker, a strikethrough or a historical-scoping
+word appears in the claim's OWN block -- the contiguous run of non-blank lines
+containing it. Neighbouring paragraphs do not count. Otherwise it is UNMARKED.
 
-Scope is deliberately paragraph-tight rather than a line window. An earlier
-draft used a 90-line lookback and, on a document as densely annotated as
-PHASE-B-RESUME.md now is, every hit found some marker above it and the check
-passed trivially -- it could not fail. That was caught by exercising the
-failure path (below) rather than by reading the code.
+That scope has been wrong twice, in the same direction, and both bugs made the
+check pass rather than fail:
+
+  1. A 90-line lookback. PHASE-B-RESUME.md is now annotated densely enough
+     that every hit found some marker above it, so nothing could ever fail.
+  2. Own paragraph plus the ones either side, searched as one string. A marker
+     on an unrelated neighbour then laundered a genuinely unmarked claim --
+     and it leaked precisely where new staleness accumulates, next to existing
+     annotations, which is the one place it must not.
+
+Neither was found by reading the code; both were found by mutating a document
+and watching the check stay green. Hence two self-test mutations, not one --
+see self_test().
+
+What this costs authors, and it matches the repo's convention anyway: **every
+stale claim needs its own inline marker**. A narrated blockquote beside a
+claim is still the right thing to write for a human, but it does not satisfy
+this check on its own -- the claim itself needs a strikethrough or a bracketed
+pointer, which is what a reader landing mid-document needs too.
 
 Known limits, so nobody reads a pass as more than it is:
-  - It finds only the claims listed in CLAIMS. A NEW false claim in new
-    wording is invisible until someone adds its pattern.
-  - It cannot tell a correct marker from a wrong one. It checks that a claim
-    is marked, never that the marking is true.
+  - It finds only the claims listed in CLAIMS. A new false claim in new
+    wording is invisible until someone adds a pattern. This is not
+    hypothetical: 'merge status in prose' was added only after CLAUDE.md:96
+    ("`main` still carries the older three until it merges") was found by
+    hand, having survived every sweep and the first three versions of this
+    file, because it names no commit, no branch and no count.
+  - It checks that a claim is MARKED, never that the marking is TRUE. A wrong
+    claim inside a correct-looking marker passes -- that is exactly what
+    metrics/README.md:460 was. No grep closes this; only reading does.
+  - Merge-status claims go stale with nobody editing the file, so a green run
+    means nothing once `origin/main` moves. The real check is resolving the
+    SHAs: `git merge-base --is-ancestor <sha> origin/main`. Routed to plan 5
+    in docs/PHASE-B-RESUME.md, "Deferred, with owners".
   - It is a backstop for a sweep, not a substitute for one.
 
 Run:  python tools/checks/stale_claims.py
 Exit: 0 clean, 1 if any unmarked site remains.
 
-Failure path (run this whenever you change the patterns -- a checker that
-cannot fail is worse than none):
+Failure path (run this whenever you change the patterns or the scope -- a
+checker that cannot fail is worse than none):
     python tools/checks/stale_claims.py --self-test
 """
 import os
@@ -59,6 +82,16 @@ CLAIMS = {
     'main is at c2bb0bd':  r'`main` is still\s*\n?\s*at `c2bb0bd`',
     'still on main':       r'(Still present on `main`|still open on `main`)',
     'stale exposures':     r'ship today as 0\.329',
+    # Merge status asserted in prose. This shape is why CLAUDE.md:96 ("`main`
+    # still carries the older three until it merges") survived every earlier
+    # sweep AND the first three versions of this checker: it names no commit,
+    # no count and no branch, so nothing pattern-matched it. It also goes stale
+    # SILENTLY -- a merge elsewhere falsifies it with nobody editing the file.
+    # Kept deliberately broad; a false positive costs one marker, a miss costs
+    # a fresh session reading a wrong fact out of the first file it opens.
+    'merge status in prose': (r'(still carries|until it merges|once (it|4a|4b|this) '
+                              r'(merges|lands)|when 4[abc] merges|not yet merged|'
+                              r'awaiting merge|unmerged branch tip)'),
 }
 
 MARKERS = ('2026-08-19', 'SUPERSEDED', '~~', 'historical', 'dated record',
@@ -75,30 +108,30 @@ def _para_bounds(lines, i):
 
 
 def scope(lines, ln):
-    """The paragraph containing line `ln` (1-based), plus the ones either side.
+    """The claim's OWN block only -- the contiguous run of non-blank lines
+    containing line `ln` (1-based).
 
-    Paragraphs are separated by blank lines. Tight on purpose -- see the module
-    docstring for what a line-window scope did wrong. The FOLLOWING paragraph
-    is included because this repo's convention puts the narrated marker
-    *beside* what it supersedes, and in practice that usually means directly
-    under it (the B1/B3/B4 notes sit below their table, not above it).
+    Neighbouring paragraphs are deliberately NOT included. An earlier draft
+    concatenated the previous and following paragraphs and searched the lot,
+    so a marker on an unrelated neighbour laundered an actually-unmarked
+    claim -- and it leaked exactly where new staleness accumulates, next to
+    existing annotations. A marker now only counts for the block it is in.
+
+    Consequence for authors, and it is the repo's convention anyway: every
+    stale claim carries its OWN inline marker. A narrated blockquote beside a
+    claim is still the right thing to write for a human, but it does not by
+    itself satisfy this check -- the claim needs a strikethrough or a
+    bracketed pointer of its own, which is what a reader landing mid-document
+    needs too. A multi-line blockquote counts as one block, so a dated marker
+    at the top of a `>` block covers that whole block.
     """
     i = ln - 1
-    start, end = _para_bounds(lines, i)
-
-    prev_end = start - 1
-    while prev_end > 0 and not lines[prev_end].strip():
-        prev_end -= 1
-    prev_start, _ = _para_bounds(lines, prev_end) if prev_end >= 0 else (start, end)
-
-    next_start = end + 1
-    while next_start < len(lines) and not lines[next_start].strip():
-        next_start += 1
-    next_end = end
-    if next_start < len(lines):
-        _, next_end = _para_bounds(lines, next_start)
-
-    return '\n'.join(lines[prev_start:next_end + 1])
+    start = end = i
+    while start > 0 and lines[start - 1].strip():
+        start -= 1
+    while end < len(lines) - 1 and lines[end + 1].strip():
+        end += 1
+    return '\n'.join(lines[start:end + 1])
 
 
 # A stale count stated next to its corrected value is a transition ('before ->
@@ -131,23 +164,67 @@ def sweep():
     return unmarked
 
 
-def self_test():
-    """Prove the checker can fail: inject a known-stale claim, expect a hit."""
-    target = os.path.join(ROOT, FILES[0])
-    original = open(target, encoding='utf-8').read()
-    probe = '\n\nThe model has a punched window, and serenity passes 2 of 11.\n'
+def _mutate(target, original, mutated, want):
+    """Write `mutated`, sweep, restore, and report whether `want` was caught."""
     try:
-        open(target, 'w', encoding='utf-8').write(original + probe)
+        open(target, 'w', encoding='utf-8').write(mutated)
         hits = sweep()
     finally:
         open(target, 'w', encoding='utf-8').write(original)
-    caught = [h for h in hits if h[2] in ('punched window', 'pose counts')]
-    print('self-test: injected 1 stale paragraph, checker reported %d matching '
-          'hit(s) -- %s' % (len(caught), 'PASS' if caught else 'FAIL'))
+    caught = [h for h in hits if h[2] in want]
     restored = open(target, encoding='utf-8').read() == original
+    return caught, restored
+
+
+def self_test():
+    """Prove the checker can fail, and fail WHERE failures actually occur.
+
+    Two mutations, because they guarantee different things:
+
+      1. at file end -- proves the failure path executes at all. This is what
+         caught the original 90-line-window bug.
+      2. immediately after an existing marked blockquote -- proves it executes
+         where new staleness accumulates, which is next to existing
+         annotations. Mutation 1 passed while mutation 2 leaked for a whole
+         fix round: `scope()` was concatenating the neighbouring paragraphs,
+         so a marker on an unrelated neighbour laundered an unmarked claim.
+         Mutation 1 could never have found that. Keep both.
+    """
+    target = os.path.join(ROOT, FILES[0])
+    original = open(target, encoding='utf-8').read()
+    ok = True
+
+    caught, restored = _mutate(
+        target, original,
+        original + '\n\nThe model has a punched window, and serenity passes 2 of 11.\n',
+        ('punched window', 'pose counts'))
+    print('self-test 1 (claim at file end): %d hit(s) -- %s'
+          % (len(caught), 'PASS' if caught else 'FAIL'))
+    ok &= bool(caught) and restored
+
+    # Find a marked blockquote and plant an unmarked claim directly after it.
+    lines = original.split('\n')
+    anchor = next((i for i, l in enumerate(lines)
+                   if l.startswith('>') and '2026-08-19' in l), None)
+    if anchor is None:
+        print('self-test 2 (claim adjacent to a marker): FAIL -- no marked '
+              'blockquote found to anchor the mutation')
+        return 1
+    end = anchor
+    while end < len(lines) - 1 and lines[end + 1].strip():
+        end += 1
+    adjacent = '\n'.join(lines[:end + 1]
+                         + ['', 'Still present on `main`.', '']
+                         + lines[end + 1:])
+    caught, restored2 = _mutate(target, original, adjacent, ('still on main',))
+    print('self-test 2 (claim adjacent to a marker): %d hit(s) -- %s'
+          % (len(caught), 'PASS' if caught else 'FAIL'))
+    ok &= bool(caught) and restored2
+
+    restored_final = open(target, encoding='utf-8').read() == original
     print('self-test: file restored byte-for-byte -- %s'
-          % ('PASS' if restored else 'FAIL'))
-    return 0 if (caught and restored) else 1
+          % ('PASS' if restored_final else 'FAIL'))
+    return 0 if (ok and restored_final) else 1
 
 
 def main():

@@ -678,8 +678,13 @@ exposure itself is.
 > 0.329 / 0.575 / 0.46, then plan 4a task 3 → **0.295 / 0.52 / 0.42**, which
 > is what ships on `phaseB-plan4a-winding` (fitted and measured at `?v=110`;
 > the tree is at **`?v=112`** after two comment-only bumps that moved no
-> value — `main` still carries plan 3 task 4's set until that branch
-> merges). **Read this section for the
+> value — ~~`main` still carries plan 3 task 4's set until that branch
+> merges~~ **and `main` carries 0.295 / 0.52 / 0.42 too: plan 4a merged as
+> PR #30 (`feac92a`) and `origin/main` ships them at `?v=113` — corrected
+> 2026-08-19 by plan 4b task 5 fix round 3, verified by reading
+> `origin/main:tour/apartments/*.json`. Found by widening the checker's
+> patterns to catch merge status asserted in prose, which is the shape that
+> names no commit and no branch and so matched nothing before**). **Read this section for the
 > criterion and the procedure — "mean sRGB luminance within ±10 of both
 > fitted flats, every `spawns[]` entry at 480×300 through the full post
 > chain, pooled" — and for nothing else.** The live band and the live sweep
@@ -1975,6 +1980,10 @@ defines the ±0.03 / ±0.039 floor from same-session, same-page-session repeats.
 The BASE row is the best available estimate of a cross-session one and puts it
 at **≈0.03, comparable to the same-session floor**, not at 0.3.
 
+**[HISTORICAL — four of this paragraph's clauses were falsified by plan 4b;
+see the dated block directly below it. Inline tag added 2026-08-19, fix round
+3: the block below was the only marker, so a reader landing on this paragraph
+met four false claims with no signal.]**
 **Read this the right way round.** ΔE2000 against these photographs is
 dominated by pose and content mismatch, not by shading — 9 of serenity's 11
 compare spots and 6 of kings-court's 14 are not pose-verified, serenity's
@@ -2377,7 +2386,7 @@ apartments. **Population on every row, because that tool hard-codes the
 > `luminance.py` still hard-codes the `poseVerified` filter and still has no
 > `--all-spots` escape.
 
-| Apartment (population) | linear mean | linear p5 | contrast |
+| Apartment (population — **historical**, dated 2026-08-15; live counts are 9 of 11 / 10 of 13) | linear mean | linear p5 | contrast |
 |---|---|---|---|
 | serenity BASE (2 of 11) | 0.285408 | 0.089938 | 3.1734 |
 | serenity HEAD (2 of 11) | 0.281739 | 0.083283 | **3.3829** |
