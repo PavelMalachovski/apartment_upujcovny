@@ -185,6 +185,10 @@ window.__compare = (function () {
       root.style.display = 'none';
       const app = window.__app;
       if (!app) return;
+      // Restored on every exit path, including the dollhouse one below,
+      // because a spot's `pitch` is the capture camera's and never the
+      // visitor's -- see where wasPitch is captured.
+      if (typeof ui.wasPitch === 'number') app.controls.pitch = ui.wasPitch;
       if (ui.wasDoll && app.doll) {
         app.doll.enter();
         return;
@@ -264,6 +268,13 @@ window.__compare = (function () {
       // keeps in app.js).
       u.wasDoll = !!(a.doll && a.doll.on);
       u.wasControlsEnabled = c.enabled;
+      // Snapshot the pitch too, from plan 4c task 1b on. Before that this
+      // function always set pitch to 0, so closing the divider happened to
+      // leave the walking camera level whatever it did. Now a spot can carry
+      // a real tilt -- serenity's 10.webp is pose-verified at 22 degrees
+      // down, so a visitor can open it -- and without this the visitor gets
+      // their camera back stuck looking at the floor.
+      u.wasPitch = c.pitch;
       if (a.doll && a.doll.on) a.doll.exit();
       c.enabled = true;
       c.pos.x = s.x; c.pos.z = s.z; c.ground = s.g || 0;

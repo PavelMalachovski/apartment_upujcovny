@@ -111,6 +111,12 @@ window.__measure = function () {
 
   return (async () => {
     const out = [];
+    // Captured before the loop and put back in the same finally that
+    // restores the live view. renderAt() leaves controls.pitch at the LAST
+    // spot's value, which since plan 4c task 1b can be a real tilt; today
+    // the last serenity spot happens to have none, and relying on that is
+    // exactly the kind of luck this project has been bitten by before.
+    const prevPitch = a.controls.pitch;
     try {
       for (const s of spots) {
         const img = await loadImage(base + s.file);
@@ -123,6 +129,7 @@ window.__measure = function () {
         out.push({ file: s.file, w: W, h: H });
       }
     } finally {
+      a.controls.pitch = prevPitch;
       restoreLiveView();
     }
     console.log('[measure] captured ' + out.length + ' spots');
