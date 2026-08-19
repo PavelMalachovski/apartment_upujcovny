@@ -57,6 +57,19 @@ other plan has been judged by.
 > the largest single movement in phase B and exactly the "pose dominates the
 > metric" claim being made here.
 >
+> **Two corrections to that last sentence, 2026-08-19 by task 5 fix round 1 —
+> the conclusion survives both.** (1) **`15.97 → 15.49` is a cross-session
+> pair**, which is the exact shape the restated gate's rule 2 forbids: 15.97
+> is task 2's own session BEFORE-figure, while 15.49 is task 5's tip reading
+> from a different session. Task 5's own same-session BASE is **16.00**, so
+> the properly-paired branch movement is **16.00 → 15.49, −0.51**. The
+> difference is 0.03 and changes nothing, but a cross-session pair should not
+> stand in this document unlabelled. (2) **The movement is not all task 2's.**
+> Task 5's per-spot data shows `3.webp` (−0.29) and `9.webp` (−0.43) are
+> shared with **task 1's** terrace widening, which task 2's cameras were
+> pointed at. Task 2's own share is carried by `6.webp` (−2.65) and `7.webp`
+> (−1.38), which is more than the whole movement on its own.
+>
 > **Superseded for kings-court too, 2026-08-19 by plan 4b task 4** (`d7a643b`).
 > The struck sentence above was written by task 2 and was true then; task 4
 > falsified it four commits later. Four kings-court cameras were re-pointed
@@ -232,7 +245,7 @@ all, and that bathroom's inverted marble).
 |---|---|---:|---|
 | serenity | 16.00 → **15.49** | **−0.51** | task 1 widened the terrace opening 1.4 → 1.8 m; task 2 re-pointed six cameras and moved `8.webp` into the bathroom its photograph shows. Carried by `6.webp` −2.65 and `7.webp` −1.38; the four untouched spots all moved ≤0.10 |
 | kings-court (14-spot, like-for-like) | 18.59 → **18.17** | **−0.42** | task 3 built the Bathroom 2 shower and un-inverted its marble; task 4 re-pointed four cameras. Carried by `14.webp` −4.03, `2.webp` −1.54, `10.webp` −1.15, against `17.webp` **+1.00 — a deliberate regression**, because the old pose rendered a blank wall that matched a white-marble photograph better than the vanity does. The nine untouched spots all moved ≤0.10 |
-| kings-court (13-spot, shipped) | — | — | **17.59.** 18.17 less the −0.56 of removal arithmetic above |
+| kings-court (13-spot, shipped) | — | — | **17.59.** 18.17 less the −0.56 of removal arithmetic above. **The chain leaves 0.02 over — 18.17 − 0.56 = 17.61, not 17.59 — and that residual is cross-load, not unexplained** (added 2026-08-19, fix round 1). The −0.56 is derived *same-load* from the pop14 legs, which put mean₁₃ at 17.6054; the separately-measured pop13 legs read 17.5862. The 0.019 gap is two different page loads of one render state, inside these legs' own 0.014–0.048 mean band. The same-load derivation is the one to trust — it is the only one with no load noise in it — and the shipped figure is the one actually measured on the shipped population |
 
 **Rules 1–3, checked.** Both movements are far past the noise floor and both
 are **attributed** per rule 2, with a same-session paired A/B on the same
@@ -249,8 +262,37 @@ which is how this branch got it wrong twice — kings-court's widest same-state
 range is **0.14** on serenity and **0.75** on kings-court. Task 3's fix round
 and task 4's fix round disagree about whether that 0.75 is a floor or a
 one-frame anomaly, and **that disagreement is still open, routed to plan 5.**
-It changes no conclusion here: every attributed movement above is ≥1.00 and
-every unattributed one ≤0.10. Full working:
+
+**This task's own legs narrow it, and plan 5 should start from them** (added
+2026-08-19, fix round 1 — the first pass mined only the *committed
+historical* sets and left its own fresh data unexamined). Six kings-court
+captures in two independent same-state groups put **`11.webp` at a range of
+0.32 (BASE, 2 captures) and 0.30 (tip, 4 captures)**, while the
+second-worst spot in any pairing never exceeds **0.16**. So kings-court's
+per-spot floor is **around 0.3, not 0.14** — corroborating task 4's 0.35 —
+but it is better described as *most spots ≈0.15 with `11.webp` ≈0.3*, which
+is a lead on the mechanism rather than only a number. Serenity's equivalent
+is **0.08–0.09**, which is why its committed 0.14 is credible.
+
+**It changes no conclusion here, but the reason differs by apartment and
+must be stated that way** (corrected 2026-08-19, fix round 1 — the sentence
+here previously gave only kings-court's reason and over-reached by applying
+it to both):
+
+- **kings-court:** smallest attributed movement **+1.00**, largest
+  unattributed **0.10**. Every candidate floor — 0.033, 0.14, 0.30, 0.35,
+  0.75 — falls in that gap, so no value of the disputed constant changes an
+  attribution.
+- **serenity:** ~~every attributed movement is ≥1.00~~ — **false here.**
+  Five of its seven attributed movements are 0.21, 0.25, 0.29, 0.43 and
+  0.56. What carries serenity is that **its own floor is settled at 0.14**
+  (the disputed figures are kings-court's), so its smallest attributed
+  movement, `4.webp`'s **+0.21**, clears it by 1.5×. `8.webp`'s −0.25 is
+  independently safe on mechanism — its `name` field changes inside the
+  committed data, Bedroom → Bathroom. **`4.webp`'s +0.21 rests on the
+  margin alone and should not be leaned on.**
+
+Full working:
 `docs/superpowers/metrics/README.md`, "Phase B plan 4b task 5: the closing
 gate".
 
@@ -263,6 +305,12 @@ gate".
 > spots, attributed — task 4's report §3); then task 4's B4 ruling dropped
 > `4.webp` from `compare`, moving the population to **13** and the reading
 > to the shipped **17.60** (−0.56, arithmetic only, not a render change).
+> **(Task 5 measured this same shipped state at 17.59 on its own two legs,
+> 2026-08-19 — the 0.01 is between-session noise, well inside the band, and
+> neither figure is wrong. The live baseline table above carries 17.59
+> because it is the reading taken with a same-session BASE control beside
+> it; "the shipped 17.60" in this blockquote is task 4's own session
+> reading and is left as measured.)**
 > Sum: 18.58 → 17.60 is −0.98, composed of −0.12 (marble, partly
 > attributed) + −0.30 (pose, attributed) + −0.56 (population arithmetic).
 > **A future kings-court reading is not comparable to 18.58 on sight — check
@@ -497,7 +545,7 @@ found or confirmed by this branch and none of them is a pose defect any more.
 | **kings-court's Bathroom 2 is the photograph's mirror image** (shower west of the bath where the photograph puts it east) and **has no divider glass** — the photograph's defining element | `F.shower` builds glass on two adjacent sides and assumes the other two are walls. This is a `builder.js` constructor change, which 4b forbids outright, so it is **genuinely blocked** rather than deferred by choice. The mirroring is a layout question on top of it | **4c** (constructor), layout question with it |
 | **kings-court's entry-hall wardrobe passes through a wall** — world box x 22.20–24.60, so 0.80 m of it stands inside the Guest WC, 0.16 m in front of the vanity, **and its far end clears the x = 23.8 exterior wall by 0.80 m past the centreline / ~0.73 m past its outer face**, hanging outside the building where dollhouse mode shows it | Content defect; no legal camera clears it. Task 5 added the exterior half to the config's own `poseNote`, which had carried only the Guest WC half | **4c** |
 | **`meta.photoFovLong: 120` is wrong for kings-court** — measured ~57° and ~58° by two independent methods on two different photographs (angular separation of identified features on `10.webp`; object size on `2.webp`) | **Deliberately shipped uncorrected.** It is one per-apartment constant governing all thirteen frames; correcting four spots per-spot would split the compare set in a way the gate cannot see and a visitor can. The right fix is to re-derive the constant from the apartment's own photographs as one change. Only two of thirteen frames were measured, so the derivation is not finished | **plan 5** (a documented constant) |
-| **The per-spot noise floor is unsettled: 0.35 or 0.75?** Task 3's fix round calls the committed 0.75 swing on `10.webp` a one-frame capture anomaly; task 4's fix round carries 0.35 forward. Both figures are committed in `docs/superpowers/metrics/` | Neither task's conclusion depended on it and this one's does not either, so nobody has had to settle it. It is the last open question about this instrument | **plan 5** |
+| **The per-spot noise floor is unsettled: 0.35 or 0.75?** Task 3's fix round calls the committed 0.75 swing on `10.webp` a one-frame capture anomaly; task 4's fix round carries 0.35 forward. Both figures are committed in `docs/superpowers/metrics/` | Neither task's conclusion depended on it and this one's does not either, so nobody has had to settle it. It is the last open question about this instrument. **Start from ~0.3, not from scratch** (added 2026-08-19, fix round 1): task 5's own six kings-court captures form two independent same-state groups and put **`11.webp` at 0.32 and 0.30**, with the second-worst spot in any pairing never above 0.16. That corroborates **0.35** and refutes 0.14, and it localises the problem — **`11.webp` (Bedroom 1, desk) is where to look**, since the floor is really "most spots ≈0.15, `11.webp` ≈0.3" rather than a uniform band. serenity's equivalent is 0.08–0.09. Working: `metrics/README.md`, "The noise floors" | **plan 5** |
 | **What varies across a page load** — ruled out per-frame grain and capture jitter; `captureEnvironment` is the untested suspect, `AO_DIRS` is a fixed table | Never isolated | **plan 5** |
 
 ## Immediately next: plan 3 closed, and it did not do what it set out to do
@@ -613,6 +661,22 @@ defects that dominate it are precisely what plan 4 exists to fix. Holding a
 today's 0.03 was settled — serenity's ΔE is expected to move by whole points
 once the living-room opening, the missing shower and the mis-pointed spots
 are corrected.
+
+> **That forecast resolved, and it was right — 2026-08-19, plan 4b task 5.**
+> This paragraph and its twin in `metrics/README.md` are dated 2026-08-15
+> records of a ruling and are left as written; the prediction inside them is
+> now settled, so it is recorded here rather than left for a reader to
+> wonder about. Plan 4b corrected all three named defects — though not as
+> predicted in one case: **the living-room opening was not too short, only
+> too narrow**, and the "floor-to-ceiling slider" premise was disproved
+> photographically (task 1). serenity moved **16.00 → 15.49** and
+> kings-court **18.59 → 18.17** on a fixed 14-spot population. "Whole
+> points" overshot — the movement is half a point on serenity — but the
+> *direction*, the *cause* and the *conclusion drawn from it* are all
+> confirmed, and the ruling would have been right at any magnitude.
+> **Crucially, this is not evidence that the lighting improved: no
+> renderer, bake, post-processing, material or shader code changed anywhere
+> in plan 4b.** It is the metric beginning to compare like with like.
 
 What replaced it is in "The gate, restated 2026-08-15" above. Note that it
 tightens kings-court by about 3.5 points while loosening serenity by 0.03.

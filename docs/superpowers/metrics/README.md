@@ -2,7 +2,9 @@
 
 Mean CIEDE2000 (ΔE2000) between the render and the real photograph, over
 an 8×8 grid of cell-mean colours, at the 11 Serenity photo spots flagged
-`compare` (of which 2 currently pass pose verification — see "Pose
+`compare` (of which ~~2 currently pass~~ **9 currently pass** pose
+verification — corrected 2026-08-19 by plan 4b task 5; kings-court is
+**10 of 13**, its population having changed from 14. See "Pose
 verification" below, this restriction postdates everything in "The
 trend"). Raw data for every run is the sibling `*.json` files in this
 directory; `tools/delta_e.py` produces them, `tools/residual.py` produces
@@ -129,26 +131,94 @@ line between that series and the pose-verified one.
 
 ### What the failing spots exposed
 
+> **SUPERSEDED IN PLACE, 2026-08-19 by plan 4b task 5 — every defect this
+> section names has since been fixed, disproved or re-routed, and the
+> section is written in the present tense throughout.** Kept rather than
+> deleted, because it is the diagnosis plan 4b was built from and because
+> the tested-fov ranges recorded in it are not written down anywhere else.
+> **Read every "is", "needs" and "Plan 4 owns" below as "was", as of
+> 2026-08-13.** Bullet by bullet:
+>
+> - **serenity's living-room cluster — the premise was wrong, not just
+>   stale.** The model was already a `type: "door"` before plan 4b started,
+>   and **the photograph is not a floor-to-ceiling slider either**: task 1
+>   measured `9.webp`, the only frame with the leaf slid open, and put the
+>   head at **1.95–2.10 m**, which `DOOR_H` 2.05 already builds. Only the
+>   **width** was ever wrong; task 1 widened it 1.4 → 1.8 m and deliberately
+>   left the height alone. **"No camera angle reproduces the photograph" was
+>   also false** — it was true of the camera *position* it was swept from,
+>   not of the room. Task 2 moved those spots as well as turning them, and
+>   all three now pass. What actually survives is a defect this section never
+>   named: **the sofa is on the wrong wall**, routed to 4c.
+> - **kings-court's `14.webp` — the shower exists now.** Task 3 built it
+>   (`d9672c3`); the spot moved **25.78 → 21.75**, the largest single-spot
+>   movement on the branch. **And the marble exculpation in that bullet is
+>   now wrong.** It says task 3 "checked and ruled out" B3's marble defect
+>   "for this spot specifically" — task 3's own fix round then found
+>   Bathroom 2's marble **inverted** (fixture wall black where the
+>   photograph is white, bath wall the reverse) and swapped it (`c1a7329`).
+>   Both defects were present; the ruling-out was mistaken. The spot still
+>   fails, for reasons no camera fixes: the room is the photograph's mirror
+>   image and `F.shower` builds no divider glass — a `builder.js` change,
+>   genuinely blocked.
+> - **kings-court's `4.webp` — decided, not fixed.** The merge owner ruled
+>   the coffee corner will not be modelled; task 4 removed its `compare`
+>   flag. **kings-court's compare population is 13, not 14, from that commit
+>   on.**
+> - **"These need position/yaw recalibration" — all ten got it.** Tasks 2
+>   and 4 re-pointed every spot in that list, plus serenity's `8.webp`,
+>   which was a *mapping* defect rather than a pose one (a bathroom
+>   photograph attached to a spot standing in the bedroom). Six of the ten
+>   now pass; the four that do not — serenity `2.webp`/`10.webp`,
+>   kings-court `18.webp`, and `17.webp` — fail on **content that does not
+>   exist or is wrong in the model**, not on aim.
+> - **"Plan 4 fixes the geometry defects above" — plan 4b did.** `poseVerified`
+>   went **2 of 11 → 9 of 11** on serenity and **8 of 14 → 10 of 13** on
+>   kings-court: **10 of 25 spots showed their photograph's subject when this
+>   section was written, and 19 of 24 do now.**
+>
+> **And the thing that must travel with those numbers:** serenity moved
+> **16.00 → 15.49** and kings-court **18.59 → 18.17** on one fixed 14-spot
+> population, shipping **17.59** on 13. **No renderer, bake,
+> post-processing, material or shader code changed anywhere in plan 4b.**
+> The metric began comparing like with like, and two objects that were
+> missing or wrong got fixed. It is a **measurement correction, not a
+> rendering improvement.**
+>
+> **Why this block exists at all, for whoever sweeps next.** This section
+> survived *five* consecutive stale-record sweeps in this plan, including
+> task 5's own. Every earlier sweep — this one included — searched for
+> **digit patterns** (`2 of 11`, `8 of 14`, `9 of serenity's 11`). Not one
+> phrase in this section contains a digit pattern: "the model has a punched
+> window", "the geometry itself is missing", "these need position/yaw
+> recalibration". **Sweep for the claim, not for the number**, and read the
+> abstract of every document you touch — an abstract restates counts in
+> prose.
+
 Marked `poseVerified: false` with a `poseNote`, not deleted and not left
 unflagged — deleting them would make these defects invisible to the
 metric, and a future regression there would go undetected:
 
-- **Serenity's Living Room cluster (`3.webp`, `4.webp`, `9.webp`)** —
+- **[SUPERSEDED — premise disproved; see the block above]** **Serenity's
+  Living Room cluster (`3.webp`, `4.webp`, `9.webp`)** —
   observation B1 (`docs/PHASE-B-OBSERVATIONS.md`): the flat has a
   floor-to-ceiling sliding door with sheer curtains; the model has a
   punched window. No camera angle reproduces the photograph. Plan 4 owns
   the fix.
-- **Kings-court's `14.webp` (Bathroom 2)** — none of the config's four
+- **[SUPERSEDED — shower built; marble exculpation later withdrawn; see the
+  block above]** **Kings-court's `14.webp` (Bathroom 2)** — none of the config's four
   `type: "shower"` furniture entries fall inside Bathroom 2's bounds
   (x 8.8–11.4, z 0–2.6); the photograph's actual subject was never
   modelled here. Not the same defect as observation B3's near-blank
   marble walls — task 3 checked and ruled that out for this spot
   specifically (the render is a fully lit tub, just the wrong subject) —
   the geometry itself is missing, not the material.
-- **Kings-court's `4.webp` (Coffee corner)** — observation B4: a
+- **[SUPERSEDED — ruled on, not modelled; spot left the `compare` set]**
+  **Kings-court's `4.webp` (Coffee corner)** — observation B4: a
   product-detail shot of a coffee machine the model never built; the
   render is a plain wall regardless of fov.
-- **Spots whose recorded pose is simply wrong** — no fov value
+- **[SUPERSEDED — all ten re-pointed by tasks 2 and 4]** **Spots whose
+  recorded pose is simply wrong** — no fov value
   reconciles them with their photograph at any tested zoom (each swept
   across three or more widely-spaced values; most spanned 50°–170°
   vertical, kings-court's `2.webp` specifically 80°–130° — see each
@@ -160,6 +230,11 @@ metric, and a future regression there would go undetected:
 
 Plan 4 fixes the geometry defects above and re-verifies against them;
 this plan only stops measuring through them in the meantime.
+**[It did — plan 4b, 2026-08-19. `poseVerified` 2 of 11 → 9 of 11 on
+serenity and 8 of 14 → 10 of 13 on kings-court. See the block at the top of
+this section for what happened to each defect, and note that no renderer,
+bake, post-processing, material or shader code changed to produce any of
+it.]**
 
 ## horkyone-10: decided, not left open (task 6)
 
@@ -941,13 +1016,26 @@ stepped through `?compare=1`:
   present exactly as documented: the photograph shows the dining nook
   against a wall; the render shows the sofa and a wardrobe wall from the
   same room. Different content, not a lens or exposure problem. Plan 4's
-  job; not chased here.
+  job; not chased here. **[Plan 4 did it — 2026-08-19, task 5. This bullet
+  is a dated eyeball record and is left as observed, but the defect is not
+  live: task 2 re-pointed `3.webp` and it passes pose verification now.
+  What this bullet actually saw — sofa where the photograph has the dining
+  nook — turned out to be **two** defects, and only one was pose: the sofa
+  really is on the wrong wall in the config, which no camera fixes and
+  which is routed to 4c.]**
 - **Kings-court `7.webp` (Dining room)** — one of the eight poseVerified
   spots — matches well: same table, chairs, pendant lights, kitchen beyond.
 - **Kings-court `14.webp` (Bathroom 2)** — the missing-shower defect,
   confirmed still present: photograph shows a marble shower with a
   rain-head and glass door, render shows a bathtub wall with no shower
-  geometry at all. Matches task 3's finding exactly. Plan 4's job.
+  geometry at all. Matches task 3's finding exactly. Plan 4's job. **[Plan
+  4 did it — 2026-08-19, task 5. Dated record, left as observed. Plan 4b
+  task 3 built the shower (`d9672c3`) and the spot moved 25.78 → 21.75.
+  Note this bullet named the **glass door** as part of the photograph's
+  subject and it is still absent: `F.shower` builds no divider between
+  shower and bath, a `builder.js` change that 4b forbade, so `14.webp`
+  still fails pose verification — for that and because the room is the
+  photograph's mirror image.]**
 
 Nothing observed here changes the numeric decision above — the metric was
 already known to be blind to this defect class, and this pass exists to
@@ -2517,11 +2605,67 @@ Two things follow, and the second is a live disagreement inside this branch:
    spread is that single spot, and `10.webp` reads 17.53 four times running in
    `b3-task7`'s four repeats. Task 4's fix round, having enumerated a
    different subset of sets, carried **0.35** forward. **This task takes no
-   side, because it does not have to:** every movement attributed above is
-   ≥1.00 and every unattributed one is ≤0.10, so the conclusions hold under
-   0.14, 0.35 and 0.75 alike. **Plan 5 should settle it** — it is the only
+   side, because it does not have to** — but the reason must be stated **per
+   apartment**, because it is not the same reason on both, and an earlier
+   draft of this sentence over-reached by giving only kings-court's
+   (corrected 2026-08-19, fix round 1):
+   - **kings-court: unassailable.** Its smallest attributed movement is
+     `17.webp`'s **+1.00** and its largest unattributed movement is **0.10**.
+     Every candidate floor — 0.033, 0.14, 0.30, 0.35, 0.75 — falls inside
+     that gap, so **no value of the disputed constant changes a single
+     attribution.**
+   - **serenity: it holds, but thinly, and the margin should be said out
+     loud.** ~~every movement attributed above is ≥1.00~~ — **false for
+     serenity**, five of whose seven attributed movements are 0.21, 0.25,
+     0.29, 0.43 and 0.56. What actually carries serenity is that its own
+     floor is **settled at 0.14** (the disputed 0.35/0.75 figures are
+     kings-court's, and serenity's fresh same-state worst-spot swings this
+     session were 0.08 and 0.09), and its smallest attributed movement,
+     `4.webp`'s **+0.21**, clears 0.14 by **1.5×** — not the 10× the
+     kings-court framing implies. `8.webp`'s −0.25 is independently safe on
+     mechanism (its `name` field changes inside the committed data, Bedroom
+     → Bathroom); **`4.webp`'s +0.21 rests on the margin alone and should
+     not be leaned on.**
+
+   **Plan 5 should settle it** — it is the only
    open question about this instrument, and both figures are sitting in this
-   directory.
+   directory. **Start from ~0.3 rather than re-deriving it.** This task's own
+   legs are *fresh* same-state captures on current hardware, and mining them
+   — which the first pass did not do, having enumerated only the committed
+   historical sets — settles the magnitude even though it does not settle
+   the mechanism. Its six kings-court captures fall into **two independent
+   same-state groups**:
+
+   | Same-state group | captures | `11.webp` readings | range |
+   |---|---:|---|---:|
+   | BASE `5963ddd`, pop14 | 2 | 21.73, 22.05 | **0.32** |
+   | tip, all four legs — one render state on the 13 shared spots | 4 | 21.75, 21.90, 21.61, 21.60 | **0.30** |
+   | serenity BASE / serenity tip (worst spot, either group) | 2 + 2 | — | **0.08 / 0.09** |
+
+   The four tip legs are legitimately one state: pop14 and pop13 differ only
+   in `4.webp`'s `compare` flag, which cannot affect how any other spot
+   renders. **Stated carefully, because the count matters:** these are **two**
+   independent observations of a ~0.3 swing, not four — the seven *pairwise*
+   comparisons among these six captures yield 0.32/0.30/0.29/0.15/0.15/0.14/
+   0.13, but pairings of the same captures are not independent samples and
+   counting them as such would overstate the evidence.
+
+   **Two conclusions, and the second is the more useful one.**
+   - **Magnitude: kings-court's per-spot floor is around 0.3, not 0.14.**
+     This corroborates task 4's **0.35**. It also shows task 3's reading of
+     the committed 0.75 was right about the *magnitude* being an
+     unreplicated extreme and **wrong to infer that the floor is therefore
+     small** — nothing here reaches 0.75, but nothing supports 0.14 either.
+   - **It is one spot, not a uniform floor.** `11.webp` is the worst spot in
+     six of the seven pairwise comparisons, and the second-worst spot never
+     exceeds **0.16**. So kings-court's "floor" is better described as *most
+     spots ≈0.15, and `11.webp` ≈0.3* — which is a lead on the mechanism,
+     not just a number. **`11.webp` (Bedroom 1, desk) is where plan 5 should
+     start looking**, and it is also the spot task 4 declined to attribute a
+     0.25 movement to, correctly.
+
+   Serenity's 0.08/0.09 is why its committed 0.14 is credible, and why the
+   0.21 margin above is thin but probably real.
 
 ### Pose verification, which is what actually changed
 
