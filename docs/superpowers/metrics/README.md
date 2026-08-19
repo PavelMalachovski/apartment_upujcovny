@@ -2536,11 +2536,21 @@ exists to prevent.
 
 ---
 
-## Phase B plan 4b task 5: the closing gate — the largest movement in phase B, and no rendering code produced it
+## Phase B plan 4b task 5: the closing gate — both apartments moved, and no rendering code produced it
 
 Written 2026-08-19. Branch `phaseB-plan4b-content`, merge-base `5963ddd`
 (`?v=113`) → tip `?v=121`. Read the paragraph in bold before the numbers, not
 after them.
+
+**This heading used to read "the largest movement in phase B", and the
+superlative was struck 2026-08-19 by the whole-branch review** — dropped, not
+restated. ~~The largest movement in phase B~~ is false per apartment: plan 4a
+moved serenity **−0.614** against this branch's **−0.51**. 4b is the larger
+only on kings-court (−0.42 against −0.303), and leads overall only on a
+two-flat sum nobody declared — 0.93 against 0.917, a **0.013** margin far
+inside the noise floors enumerated two sections below (serenity mean spread
+0.026, kings-court 0.048–0.054). The size of the movement was never the point;
+that it is a measurement correction rather than a rendering improvement is.
 
 > **No renderer, bake, post-processing, material or shader code changed
 > anywhere in plan 4b.** Every number below moved for exactly two reasons:
@@ -2628,10 +2638,10 @@ population:
 
 | Spot | BASE | tip | Δ | Attribution |
 |---|---:|---:|---:|---|
-| 14.webp | 25.78 | 21.75 | **−4.03** | tasks 3+4 — **the shower that had never been modelled**, plus the marble un-inversion, plus a whole-room shot re-pointed to a fixture shot |
+| 14.webp | 25.78 | 21.75 | **−4.03** | tasks 3+4 — **the shower that had never been modelled**, plus the marble un-inversion, plus a whole-room shot re-pointed to a fixture shot. **This spot is still `poseVerified: false` and its flag never moved on this branch** (added 2026-08-19 by the whole-branch review): the render shows Bathroom 2 as the photograph's mirror image, with no divider glass. The branch's largest single improvement is on a spot that still does not compare like with like |
 | 2.webp | 18.13 | 16.59 | **−1.54** | task 4 — camera moved 3.1 m and now frames the TV wall |
 | 10.webp | 18.07 | 16.93 | **−1.15** | task 4 — the camera had been facing 180° away from its subject |
-| 17.webp | 12.77 | 13.77 | **+1.00** | task 4 — **a deliberate regression.** The old pose rendered a featureless wall, which is a better colour match to a white-marble photograph than the vanity is. Aiming the camera correctly made the number worse, on purpose |
+| 17.webp | 12.77 | 13.77 | **+1.00** | task 4 — **a deliberate regression.** The old pose rendered a featureless wall, which is a better colour match to a white-marble photograph than the vanity is. Aiming the camera correctly made the number worse, on purpose. **Also still `poseVerified: false`** (added 2026-08-19 by the whole-branch review) — the wardrobe defect below is why |
 | 4.webp | 25.48 | 25.51 | +0.03 | untouched (and dropped from the shipped set) |
 | 3, 7, 8, 11, 12, 13, 18, 19, 20 | — | — | ≤0.10 | **untouched — nothing attributed** |
 
@@ -2755,7 +2765,34 @@ Two things follow, and the second is a live disagreement inside this branch:
 
 Read together: **10 of 25 spots showed their photograph's subject at the
 merge-base; 19 of 24 do now.** That is the change this plan was written to
-make, and every ΔE movement above is downstream of it.
+make. ~~And every ΔE movement above is downstream of it.~~ **That last clause
+was false for kings-court and is struck, 2026-08-19 by the whole-branch
+review**, which computed both apartments independently from the committed
+`spots[]` (two-round means, kings-court on pop14) against `poseVerified` in
+the shipped configs. The split has to be stated per apartment, because the two
+apartments are not alike:
+
+- **serenity — the claim holds. 97.8%** of its movement comes from spots that
+  now pass pose verification. Summed across the eleven spots the two-round
+  movement is **−5.570** (mean −0.5064, the −0.51 above); the two that still
+  fail, `2.webp` and `10.webp`, contribute **−0.055 and −0.070**, together
+  **−0.125 — 2.2%** of it. (Figures added 2026-08-19 with the correction
+  above, re-derived from the four committed
+  `serenity-b4b-task5-{BASE-5963ddd,gate}-legacy-allspots[-repeat].json`.)
+- **kings-court — the claim is false. 51.9%** of its like-for-like movement
+  comes from spots that are *still* `poseVerified: false`. Summed across the
+  fourteen spots the movement is **−5.820** (mean −0.4157, the −0.42 above);
+  the still-false spots net **−3.020** of it — `14.webp` **−4.025** and
+  `17.webp` **+1.005**, with `18.webp` −0.025 and the dropped `4.webp` +0.025
+  cancelling each other. **69% comes from `14.webp` alone** (−4.025 of
+  −5.820) — a spot whose flag never moved and whose own `poseNote` still
+  records the room as the photograph's mirror image with the divider glass
+  unmodelled. The largest single ΔE movement on this branch is downstream of
+  **building a shower that had never existed**, at a spot that still does not
+  compare like with like — not downstream of the pose-verification change.
+  (Figures added 2026-08-19 with the correction above, re-derived from the
+  four committed `kings-court-b4b-task5-*-legacy-allspots-pop14[-repeat].json`
+  against `poseVerified` in `tour/apartments/kings-court.json`.)
 
 Still failing, all routed and none of them pose defects: serenity `2.webp` and
 `10.webp` (no pool geometry, no sky — 4c); kings-court `18.webp` (the rattan
@@ -2763,7 +2800,20 @@ set does not exist — 4c), `14.webp` (Bathroom 2's layout is the photograph's
 mirror image and `F.shower` builds no divider glass — a `builder.js` change,
 **genuinely blocked** for 4b) and `17.webp` (the entry-hall wardrobe crosses a
 wall into the Guest WC **and hangs 0.73 m outside the building's exterior
-wall** — 4c).
+wall** — ~~4c~~).
+
+**Owners corrected 2026-08-19 by the whole-branch review: two of these five
+were routed to a plan that cannot act on them.** 4c is on record in
+`docs/PHASE-B-RESUME.md` as *deliberately not written*, because its critical
+path is human asset curation nobody has scheduled — and only three of the five
+are asset work. `14.webp`'s **divider glass** is an `F.shower` constructor
+change and `17.webp`'s **wardrobe** is a coordinate error in
+`kings-court.json` (`x 23.4, d 2.4, rot -90` → x-extent 22.20–24.60); neither
+needs a photographer, and both now belong to **plan 5**, by the identical
+argument this branch already accepted when it re-routed `mainCeilH` off 4c.
+Staying with **4c**: the pool vista (`2`/`10`, no pool geometry and no sky),
+the rattan set (`18`), and `14.webp`'s **mirroring**, which is a genuine
+layout question against the photographs.
 
 ### Files
 
