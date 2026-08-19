@@ -1396,6 +1396,38 @@ const Builder = (() => {
     return { w, d: 0.14 };
   };
 
+  // Built-in window seat: drawer base, seat slab, cushion (plan 4c task 2).
+  // 6.webp and 11.webp both show one under the bedroom window; the model had
+  // none, and F.bench -- a plain cream box -- was standing in for it.
+  F.windowBench = (o, g) => {
+    const w = o.w, d = o.d || 0.5, h = o.h || 0.44;
+    box(w, h - 0.06, d, M.white, 0, (h - 0.06) / 2, 0, g);
+    box(w, 0.06, d + 0.04, M.white, 0, h - 0.03, 0.02, g);
+    const n = Math.max(2, Math.round(w / 0.7));
+    for (let i = 0; i < n; i++) {
+      box(w / n - 0.05, h - 0.18, 0.02, M.ashV, -w / 2 + (i + 0.5) * (w / n), (h - 0.08) / 2, d / 2 + 0.012, g);
+    }
+    box(w - 0.08, 0.10, d - 0.06, M.cream, 0, h + 0.05, 0, g);
+    return { w, d };
+  };
+
+  // Sun lounger: rattan frame, cushion, inclined backrest at the head end
+  // (local -z). 2.webp is centred on one; F.bench was standing in for it and
+  // reads as a plain white box at every camera.
+  F.lounger = (o, g) => {
+    const w = o.w || 0.72, L = o.d || 1.95;
+    box(w, 0.10, L, M.rattan, 0, 0.34, 0, g);
+    box(w - 0.06, 0.11, L - 0.08, M.cream, 0, 0.44, 0, g);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      cyl(0.022, 0.022, 0.29, M.metalBlack, sx * (w / 2 - 0.07), 0.145, sz * (L / 2 - 0.12), g, 8);
+    }
+    const back = box(w, 0.09, 0.62, M.rattan, 0, 0.55, -L / 2 + 0.26, g);
+    back.rotation.x = -0.85;
+    const cus = box(w - 0.06, 0.10, 0.56, M.cream, 0, 0.63, -L / 2 + 0.23, g);
+    cus.rotation.x = -0.85;
+    return { w, d: L };
+  };
+
   // Furniture heights for light occlusion (shadows bake into the floor)
   const OCC_H = {
     bed: 0.65, sofaL: 0.8, sofa: 0.8, armchair: 0.85, roundTable: 0.45,
@@ -1403,7 +1435,7 @@ const Builder = (() => {
     wardrobe: 2.5, wardrobeTv: 2.5, barStool: 0.8, tub: 0.6, vanity: 1.0,
     wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
     deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
-    planter: 1.2, plantMass: 2.2, slatFence: 2.0
+    planter: 1.2, plantMass: 2.2, slatFence: 2.0, windowBench: 0.5, lounger: 0.5
   };
   const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
 

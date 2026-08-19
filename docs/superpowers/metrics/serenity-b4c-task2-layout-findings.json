@@ -1,0 +1,39 @@
+{
+  "apartment": "serenity",
+  "phase": "b4c-task2-layout",
+  "delivered": [
+    "Bedroom: F.windowBench replaces the plain F.bench under the south window -- drawer base, seat slab and cushion, which is what 6.webp and 11.webp both show. 11.webp 13.49 -> 12.87.",
+    "Terrace: F.lounger replaces F.bench, a rattan frame with an inclined backrest instead of a cream box, and the terrace seating was re-placed clear of both terrace cameras and 0.76 m clear of the sliding door. 2.webp 16.41 -> 15.95, 10.webp 13.32 -> 13.07."
+  ],
+  "notDelivered": {
+    "item": "serenity's sofa is on the wrong wall (plan 4b's deferred finding, re-confirmed here against 9.webp)",
+    "confirmed": "9.webp puts the sofa on screen-LEFT with the terrace door beyond it. Camera 9 is at (4.4, 2.2) yaw 180, so screen-left is +x = EAST. The config puts the sofa against the WEST wall. The finding is real.",
+    "whyNotFixed": "It does not fit. Measured, not estimated -- these are the live collider boxes read out of Builder.colliders, not arithmetic from the JSON.",
+    "arithmetic": {
+      "roomInteriorWidth": "x 3.17 to 5.68 = 2.51 m",
+      "sofaDepth": 0.80,
+      "diningTableColliderWidth": "1.10 (F.diningTable returns a footprint INCLUDING chairs: measured collider 3.60,1.92 - 4.70,3.88, i.e. 1.10 x 1.96, against a w/d of 0.9 x 0.85 in the config -- reading the JSON alone gets this wrong)",
+      "playerDiameter": 0.48,
+      "sum": "0.80 + 1.10 + 0.48 = 2.38 <= 2.51, so sofa and table CAN sit side by side with a legal corridor",
+      "whatBreaks": "The TV console then has nowhere legal. Its collider is 0.42 x 0.90. On the west wall it must avoid the bedroom passage at x 3.1, z 1.55-2.60 by the 0.5 m of CLAUDE.md rule 2a, which leaves only z < 1.05 -- already occupied by tallUnits at (3.17, 0.38) -- or z > 3.10, which is inside the dining table's new z range 2.60-4.56. On the east wall it collides with kitchenRun (collider 5.05,0.68 - 5.67,2.30) to the north and the sofa to the south.",
+      "alsoBinding": "The three living-room cameras sit at z 2.0-2.4, so the table's collider must start at z >= 2.5; and the terrace door needs 0.5 m, so it must end by z <= 4.68. That fixes the table's z to 2.60-4.56 with no slack."
+    },
+    "evidence": "Both failing arrangements were built and run, not reasoned about: the first gave 7 validator issues (4 photo spots inside furniture, 3 rooms unreachable), the second gave 8 including 'opening narrowed: 0.09 m free of 1.05 m' at the bedroom passage. Reverted in full; tour/ carries none of it.",
+    "routed": "plan 5, with the shell-dimension items. This is the same class as mainCeilH: the room as configured cannot hold the arrangement the photographs show, and the question is whether the room is the right size, not where the sofa goes. Do not retry the furniture move alone -- it has now failed twice with the circulation measured."
+  },
+  "bedroomNote": {
+    "claim": "Plan 4b recorded that 6.webp and 11.webp 'between them show the window wall and the bed-head wall to be perpendicular', and that F.bed's 2.1 m headboard buries ~0.45 m of the 1.3 m window.",
+    "headboardArithmetic": "CONFIRMED and unfixable on this wall. The south wall is 3.1 m long. F.bed draws its headboard w + 0.5 = 2.1 m wide, and the window is 1.3 m. 2.1 + 1.3 = 3.4 > 3.1, so a bed with its head on that wall CANNOT clear that window at any x.",
+    "perpendicularArrangement": "TRIED AND REJECTED on evidence. The bedroom's only two exterior walls are west (x=0) and south (z=6.65), so 'perpendicular' means bed head west. A bed with its head at the west wall face (x 0.07) and its 2.05 m length running east occupies x 0.195-2.245, and camera 11 stands at (1.35, 3.9) -- inside it at every z that also clears the window bench. Built and run: the validator returned 'photo spot inside furniture' for 6.webp and a bed z that avoids camera 11 collides with the window bench. Task 2's own rule forbids moving a camera to rescue a layout.",
+    "routed": "plan 5, with the sofa row above. Both are the same question: the room's configured dimensions against the photographs."
+  },
+  "gate": {
+    "population": "all-spot", "scored": 11, "compareTotal": 11, "skippedPoseVerification": 0,
+    "beforeTask2": 14.27, "afterTask2": 14.24,
+    "perSpot": {
+      "improved": { "2.webp": [16.41, 15.95], "10.webp": [13.32, 13.07], "11.webp": [13.49, 12.87], "7.webp": [12.94, 12.90] },
+      "worse": { "9.webp": [17.91, 18.33], "4.webp": [16.85, 17.23], "3.webp": [16.09, 15.86] },
+      "note": "The three living-room spots moved although the living room was REVERTED and carries no change from this task. The cause is the terrace: all three frame the sliding door, and the cream F.bench that used to stand behind it at (3.55, 6.65) is now a rattan lounger at (4.10, 6.30). Attributed, not mysterious."
+    }
+  }
+}

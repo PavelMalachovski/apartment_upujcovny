@@ -304,20 +304,21 @@
       ]
     },
     {
-      "type": "bench",
-      "x": 2.47,
-      "z": 6.32,
+      "type": "windowBench",
+      "x": 2.36,
+      "z": 6.33,
       "lvl": "main",
-      "w": 0.78,
-      "d": 0.52
+      "w": 1.0,
+      "d": 0.5,
+      "h": 0.44
     },
     {
       "type": "cushions",
-      "x": 2.47,
-      "z": 6.4,
+      "x": 2.36,
+      "z": 6.3,
       "lvl": "main",
       "rot": 180,
-      "h": 0.42,
+      "h": 0.5,
       "set": [
         "blue",
         "olive"
@@ -325,10 +326,10 @@
     },
     {
       "type": "vaseFlowers",
-      "x": 2.3,
-      "z": 6.35,
+      "x": 2.0,
+      "z": 6.33,
       "lvl": "main",
-      "h": 0.42
+      "h": 0.5
     },
     {
       "type": "painting",
@@ -581,43 +582,33 @@
       "light": true
     },
     {
-      "type": "bench",
-      "x": 3.55,
-      "z": 6.65,
+      "type": "lounger",
+      "x": 4.1,
+      "z": 6.3,
       "lvl": "terrace",
-      "rot": 4,
-      "w": 0.68,
+      "rot": 90,
+      "w": 0.72,
       "d": 1.95
     },
     {
-      "type": "cushions",
-      "x": 3.55,
-      "z": 6.05,
-      "lvl": "terrace",
-      "h": 0.42,
-      "set": [
-        "dots"
-      ]
-    },
-    {
       "type": "terraceChair",
-      "x": 5.25,
-      "z": 5.95,
+      "x": 3.4,
+      "z": 7.2,
       "lvl": "terrace",
-      "rot": 188
+      "rot": 160
     },
     {
       "type": "terraceTable",
-      "x": 4.82,
-      "z": 6.6,
+      "x": 3.95,
+      "z": 6.95,
       "lvl": "terrace",
       "w": 0.45,
       "d": 0.45
     },
     {
       "type": "lantern",
-      "x": 5.45,
-      "z": 7.25,
+      "x": 5.6,
+      "z": 7.5,
       "lvl": "terrace"
     },
     {
