@@ -145,8 +145,8 @@ line between that series and the pose-verified one.
 >   measured `9.webp`, the only frame with the leaf slid open, and put the
 >   head at **1.95–2.10 m**, which `DOOR_H` 2.05 already builds. Only the
 >   **width** was ever wrong; task 1 widened it 1.4 → 1.8 m and deliberately
->   left the height alone. **"No camera angle reproduces the photograph" was
->   also false** — it was true of the camera *position* it was swept from,
+>   left the height alone. **~~"No camera angle reproduces the photograph"~~
+>   was also false** — it was true of the camera *position* it was swept from,
 >   not of the room. Task 2 moved those spots as well as turning them, and
 >   all three now pass. What actually survives is a defect this section never
 >   named: **the sofa is on the wrong wall**, routed to 4c.
@@ -165,14 +165,14 @@ line between that series and the pose-verified one.
 >   the coffee corner will not be modelled; task 4 removed its `compare`
 >   flag. **kings-court's compare population is 13, not 14, from that commit
 >   on.**
-> - **"These need position/yaw recalibration" — all ten got it.** Tasks 2
+> - **~~"These need position/yaw recalibration"~~ — all ten got it.** Tasks 2
 >   and 4 re-pointed every spot in that list, plus serenity's `8.webp`,
 >   which was a *mapping* defect rather than a pose one (a bathroom
 >   photograph attached to a spot standing in the bedroom). Six of the ten
 >   now pass; the four that do not — serenity `2.webp`/`10.webp`,
 >   kings-court `18.webp`, and `17.webp` — fail on **content that does not
 >   exist or is wrong in the model**, not on aim.
-> - **"Plan 4 fixes the geometry defects above" — plan 4b did.** `poseVerified`
+> - **~~"Plan 4 fixes the geometry defects above"~~ — plan 4b did.** `poseVerified`
 >   went **2 of 11 → 9 of 11** on serenity and **8 of 14 → 10 of 13** on
 >   kings-court: **10 of 25 spots showed their photograph's subject when this
 >   section was written, and 19 of 24 do now.**
@@ -185,7 +185,7 @@ line between that series and the pose-verified one.
 > missing or wrong got fixed. It is a **measurement correction, not a
 > rendering improvement.**
 >
-> **Why this block exists at all, for whoever sweeps next.** This section
+> **Why this block exists at all, for whoever sweeps next — 2026-08-19.** This section
 > survived *five* consecutive stale-record sweeps in this plan, including
 > task 5's own. Every earlier sweep — this one included — searched for
 > **digit patterns** (`2 of 11`, `8 of 14`, `9 of serenity's 11`). Not one
@@ -481,8 +481,8 @@ the same caveat this section just applied to plan 1's numbers.
 > Markers are not immune; they are where staleness hides best.**
 >
 > It also survived because of a *second* wrong belief, filed in this task's
-> own report and corrected here: that the line was "correct for `main`,
-> where plan 4a is unmerged". **Plan 4a is merged** — PR #30, `feac92a`, an
+> own report and corrected here (2026-08-19): that the line was "correct for
+> `main`, where plan 4a is unmerged". **Plan 4a is merged** — PR #30, `feac92a`, an
 > ancestor of `origin/main` — so the line was stale everywhere, and the
 > report's claim to have "flagged" it described text that was never written.
 > **Check the merge status of the branch you are reasoning about; do not
@@ -2000,8 +2000,8 @@ on the wrong side of it.
 > current status. Four of its clauses have since been falsified, and changing
 > the digits in place would have destroyed the argument the paragraph was
 > making, which is why it was left standing instead:
-> - "9 of serenity's 11 … are not pose-verified" — **2 of 11 now** fail
->   (plan 4b task 2). "6 of kings-court's 14" — **3 of 13 now** (task 4;
+> - ~~"9 of serenity's 11 … are not pose-verified"~~ — **2 of 11 now** fail
+>   (plan 4b task 2). ~~"6 of kings-court's 14"~~ — **3 of 13 now** (task 4;
 >   the denominator moved too).
 > - "serenity's living-room geometry is wrong (observation B1)" — B1's
 >   opening premise was **disproved** by 4b task 1 and the pose half closed by
@@ -2385,15 +2385,25 @@ apartments. **Population on every row, because that tool hard-codes the
 > and compare it against these rows.** The mechanism note above stays live:
 > `luminance.py` still hard-codes the `poseVerified` filter and still has no
 > `--all-spots` escape.
+>
+> **Why every row carries its own `historical` and the header no longer does —
+> 2026-08-19, plan 4b task 5 fix round 4.** Fix round 3 put the scoping word
+> in the header cell "so it travels with the rows". It travelled to rows
+> nobody had written: the re-review smuggled a brand-new false claim into this
+> table as a plain row and `stale_claims.py` accepted it silently, because the
+> header and every row are one contiguous block. The checker now scopes a
+> table row to itself, so a marker in a header covers nothing below it, and
+> each dated row says so on its own face. **Do not re-consolidate these into
+> the header.**
 
-| Apartment (population — **historical**, dated 2026-08-15; live counts are 9 of 11 / 10 of 13) | linear mean | linear p5 | contrast |
+| Apartment (dated 2026-08-15; live counts are 9 of 11 / 10 of 13) | linear mean | linear p5 | contrast |
 |---|---|---|---|
-| serenity BASE (2 of 11) | 0.285408 | 0.089938 | 3.1734 |
-| serenity HEAD (2 of 11) | 0.281739 | 0.083283 | **3.3829** |
-| *serenity photographs (2 of 11)* | *0.299289* | *0.048274* | *6.1998* |
-| kings-court BASE (8 of 14) | 0.341176 | 0.113214 | 3.0142 |
-| kings-court HEAD (8 of 14) | 0.342882 | 0.107727 | **3.1844** |
-| *kings-court photographs (8 of 14)* | *0.347877* | *0.024653* | *14.1109* |
+| serenity BASE (2 of 11, historical) | 0.285408 | 0.089938 | 3.1734 |
+| serenity HEAD (2 of 11, historical) | 0.281739 | 0.083283 | **3.3829** |
+| *serenity photographs (2 of 11, historical)* | *0.299289* | *0.048274* | *6.1998* |
+| kings-court BASE (8 of 14, historical) | 0.341176 | 0.113214 | 3.0142 |
+| kings-court HEAD (8 of 14, historical) | 0.342882 | 0.107727 | **3.1844** |
+| *kings-court photographs (8 of 14, historical)* | *0.347877* | *0.024653* | *14.1109* |
 | horkyone-10 | — | — | — |
 
 serenity n=2 per side, kings-court n=4 per side (its per-run spread is an
