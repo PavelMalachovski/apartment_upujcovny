@@ -359,6 +359,31 @@ git commit -m "serenity's pool is a basin now, and the sky is a sky"
 
 ---
 
+### Task 1b: the capture harness cannot look down — ADDED MID-FLIGHT, 2026-08-19
+
+**Not in the plan as written.** Task 1 built a correct pool and the metric got
+*worse* (15.46 → 15.66, `10.webp` 25.35 → 26.37). The cause was measured
+rather than guessed: `measure.js:70` and `compare.js:270` both pinned
+`c.pitch = 0`, and both pool photographs are shot looking down. `10.webp` puts
+the pool's far edge at **0.41 of frame height — above the horizon**, which a
+level camera cannot produce at any yaw or fov. So the bands were in the right
+order and the wrong place, and saturated colour in a misaligned cell scores
+worse than the flat grey it replaced.
+
+This is an **instrument** change, so it is its own task with its own
+before/after and is never summed into task 1's content number. That separation
+is the lesson from plan 4b task 4, which shipped two instrument changes in one
+commit and had to record the compounding as a defect.
+
+**Done** (`3909af4`): optional `pitch` on `photoSpots`, degrees, positive =
+looking down, honoured identically by `measure.js` and `compare.js`. Values
+derived by sweeping and matching the measured water-band rows — `10.webp` 22,
+`2.webp` 40 — never by ΔE. All-spot legacy **15.66 → 14.27**. `10.webp` flips
+to `poseVerified`; `2.webp` stays false on a content reason routed to task 2.
+Working: `docs/superpowers/metrics/serenity-b4c-task1b-pitch-derivation.json`.
+
+---
+
 ### Task 2: serenity's living room and bedroom, re-laid against the photographs
 
 **Files:**
