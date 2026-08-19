@@ -8,7 +8,8 @@ A hit is OK only when a dated marker, a strikethrough or a historical-scoping
 word appears in the claim's OWN scope. Otherwise it is UNMARKED.
 
 WHAT COUNTS AS THE SCOPE, exactly -- read this before trusting a green run.
-The scope is the smallest unit that RENDERS as its own visual element:
+A claim's scope is the LEAF BLOCK it renders inside, as a CommonMark/GFM
+renderer defines that -- not as this file's author guesses it:
 
   a table row      -> that row alone
   a list item      -> that item alone, at any nesting depth
@@ -20,6 +21,17 @@ covers NO other bullet. A marker in one paragraph of a long narrated
 blockquote covers NO other paragraph of it. A marker in a hard-wrapped
 paragraph DOES cover that whole paragraph -- it renders as one paragraph, and
 splitting it per source line would be wrong rather than stricter.
+
+The boundary is not a list of cases patched one at a time as reviewers found
+them; that is how six fail-opens happened. It is the BOUNDARY table below,
+which records what a renderer emits for each construct and is asserted
+against scope() by self-test 6. COVERED as separate scopes: `-`/`+`/`*`
+bullets, `1.`/`1)` ordered items, nested items, GFM table rows, and each
+paragraph of a blockquote. NOT separate scopes, because a renderer does not
+separate them either: `a)`, `(a)`, `i)` and `a.` enumerations (all ONE
+paragraph -- see self-test 7), hard-wrapped prose, and the contents of a
+fenced or HTML block. If you think one of those is wrong, add a row to
+BOUNDARY and re-derive it against a parser; do not widen the regexes.
 
 That scope has been wrong three times, always in the same direction, and every
 one of the three made the check pass rather than fail:
@@ -46,9 +58,10 @@ in the middle of it, so no pattern matched it. Matching now runs over a
 de-quoted copy of the file with whitespace-tolerant patterns (_flatten,
 _tolerant), while line numbers still point at the real source line.
 
-Hence five self-test mutations, one per position that has actually leaked --
-see self_test(). Three of the five fail against the previous revision of this
-file; that is the only evidence any of them mean anything.
+Hence five self-test mutations, one per position that has actually leaked,
+plus two that assert the BOUNDARY rather than a failure -- see self_test().
+Three of the five mutations fail against the previous revision of this file;
+that is the only evidence any of them mean anything.
 
 What this costs authors: **every stale claim needs its own inline marker**. A
 narrated blockquote beside a claim is still the right thing to write for a
@@ -89,6 +102,10 @@ a green run says nothing about any of them:
 
 Run:  python tools/checks/stale_claims.py
 Exit: 0 clean, 1 if any unmarked site remains.
+
+Census (every site, its scope kind and the marker covering it -- the
+evidence behind a green run, site by site):
+    python tools/checks/stale_claims.py --census
 
 Failure path (run this whenever you change the patterns or the scope -- a
 checker that cannot fail is worse than none, and this one has been that three
@@ -138,11 +155,61 @@ CLAIMS = {
                               r'awaiting merge|unmerged branch tip)'),
 }
 
+# ---------------------------------------------------------------------------
+# THE STATED BOUNDARY.
+#
+# Six fail-opens have been found in this tool, four of them by someone
+# inventing a mutation at a position nobody had thought of. That kept
+# happening because the tool's scope was defined by what it happened to
+# handle. It is now defined by what a CommonMark/GFM renderer produces: a
+# claim's scope is the LEAF BLOCK it renders inside. Every row below records a
+# construct, what a renderer emits for it, and therefore how many scopes
+# scope() must produce. self_test() asserts the agreement, so this boundary is
+# checkable rather than merely asserted -- and a construct that is not in this
+# table is not covered by anything, which is the point of writing it down.
+#
+# Re-derive the counts with any CommonMark parser:
+#     from markdown_it import MarkdownIt
+#     print(MarkdownIt('default').render(src))
+# Recorded 2026-08-19 against markdown_it's 'default' preset -- CommonMark plus
+# GFM tables, which is how GitHub renders these files.
+#
+#   name, source, scopes scope() must produce, what the renderer does
+BOUNDARY = [
+    ('bullet list', '- one\n- two\n', 2,
+     'renders <ul><li>one</li><li>two</li></ul> -- two elements'),
+    ('ordered list', '1. one\n2. two\n', 2,
+     'renders <ol> with two <li> -- two elements'),
+    ('ordered with paren', '1) one\n2) two\n', 2,
+     'CommonMark accepts ) as an ordered marker, so this is a real list'),
+    ('nested bullet', '- one\n  - two\n', 2,
+     'the nested item is its own <li>'),
+    ('table', '| h |\n|---|\n| a |\n| b |\n', 4,
+     'GFM emits one <tr> per row. The delimiter row renders as nothing but is '
+     'scoped to itself anyway, hence 4 scopes against 3 rendered rows'),
+    ('blockquote paragraphs', '> one\n>\n> two\n', 2,
+     'a bare > is the quote blank line; renders as two <p> in one <blockquote>'),
+    ('alpha enumeration', 'a) one\nb) two\n', 1,
+     'NOT a list in CommonMark or GFM. Renders as ONE <p> containing both '
+     'lines, exactly like two sentences. Identical for (a), i) and a.'),
+    ('hard-wrapped prose', 'one and\ntwo\n', 1,
+     'one <p>; a marker in its first line covers its second, by design'),
+    ('fenced block', '```\none\ntwo\n```\n', 1,
+     'one <pre>; the contents are not parsed, and that is a stated limit'),
+]
+
 MARKERS = ('2026-08-19', 'SUPERSEDED', '~~', 'historical', 'dated record',
            'left as observed', 'corrected 2026', 'Struck 2026')
 
 
 _QUOTE = re.compile(r'^(?:\s*>\s?)*')
+
+# CommonMark's list markers, and deliberately ONLY those: a bullet is `-`, `+`
+# or `*`; an ordered marker is digits followed by `.` or `)`. Nothing else in
+# this regex is a judgement call -- it is the spec's definition, and BOUNDARY
+# below asserts that scope() splits exactly what a renderer splits. Do not
+# widen it to `a)`, `(a)`, `i)` or `a.` without re-deriving BOUNDARY: a
+# renderer emits those as ONE paragraph, not as list items (see BOUNDARY).
 _ITEM = re.compile(r'^(?:\s*>\s?)*\s*(?:[-*+]|\d+[.)])\s+')
 
 
@@ -331,8 +398,11 @@ def _mutate(target, original_bytes, mutated, want):
 def self_test():
     """Prove the checker can fail, and fail WHERE failures actually occur.
 
-    Five mutations, because they guarantee different things and each one
-    corresponds to a bug that shipped green:
+    Seven checks. Five are mutations, one per position that has actually
+    leaked, each corresponding to a bug that shipped green. The last two
+    assert the stated BOUNDARY instead, so the tool answers the "is this
+    construct a scope?" question itself rather than waiting for a reviewer to
+    re-discover it:
 
       1. at file end -- proves the failure path executes at all. This is what
          caught the original 90-line-window bug.
@@ -353,10 +423,17 @@ def self_test():
          the claim. Mutations 1-4 all plant single-line claims and none of
          them could ever have found it.
 
-    Keep all five. Each was invisible to every mutation written before it;
-    that is the only evidence any of them work. 3, 4 and 5 all report zero
-    hits against the previous revision of this file -- check that again if you
-    ever rewrite scope() or sweep().
+      6. every construct in BOUNDARY produces exactly as many scopes as a
+         renderer produces leaf blocks -- the boundary, asserted.
+      7. the alpha-enumeration ruling, both halves: `a) ... b) ...` must NOT
+         be reported (it renders as one paragraph, so the marker really does
+         cover the claim) while a bullet list in the identical position MUST
+         be. A re-reviewer's mutation of exactly this shape is answered here.
+
+    Keep all seven. Each mutation was invisible to every mutation written
+    before it; that is the only evidence any of them work. 3, 4 and 5 all
+    report zero hits against the previous revision of this file -- check that
+    again if you ever rewrite scope() or sweep().
     """
     target = os.path.join(ROOT, FILES[0])
     with open(target, 'rb') as f:
@@ -457,6 +534,48 @@ def self_test():
           '%d hit(s) -- %s' % (len(caught), 'PASS' if len(caught) == 2 else 'FAIL'))
     ok &= len(caught) == 2 and restored5
 
+    # 6. The stated boundary, asserted rather than described. Every construct
+    #    in BOUNDARY must produce exactly as many scopes as a renderer produces
+    #    leaf blocks. This is what replaces the previous habit of discovering
+    #    one position at a time: a reviewer who thinks the scope is wrong for
+    #    some construct can add a row here and see the tool agree or disagree,
+    #    instead of inventing a document mutation and guessing.
+    wrong = []
+    for name, sample, want, _why in BOUNDARY:
+        sl = sample.split('\n')
+        got = len({scope(sl, i + 1) for i, l in enumerate(sl) if not _is_break(l)})
+        if got != want:
+            wrong.append('%s: %d scopes, boundary says %d' % (name, got, want))
+    print('self-test 6 (scope matches the stated BOUNDARY, %d constructs): %s'
+          % (len(BOUNDARY), 'PASS' if not wrong else 'FAIL -- ' + '; '.join(wrong)))
+    ok &= not wrong
+
+    # 7. The alpha-enumeration ruling, pinned so it cannot silently drift.
+    #    A re-reviewer planted `a) marker / b) fresh claim` and the checker did
+    #    not flag it. That is NOT a fail-open: `a)` is not a list marker in
+    #    CommonMark or GFM, so the two lines render as ONE paragraph and the
+    #    claim genuinely does sit in the marker's own scope -- the same ruling
+    #    this file already makes for two sentences of hard-wrapped prose.
+    #    Widening _ITEM to catch it would make the tool disagree with the
+    #    renderer, which is the thing BOUNDARY exists to prevent.
+    #
+    #    Both halves are asserted, because the ruling only means something if
+    #    the control still fires: the alpha form must NOT be reported, and a
+    #    real bullet list in the identical position MUST be.
+    alpha = ('\n\na) A dated note, 2026-08-19, about the living room.\n'
+             'b) The model has a punched window.\n')
+    caught, restored6 = _mutate(target, original_bytes, original + alpha,
+                                ('punched window',))
+    bullets = ('\n\n- A dated note, 2026-08-19, about the living room.\n'
+               '- The model has a punched window.\n')
+    caught2, restored7 = _mutate(target, original_bytes, original + bullets,
+                                 ('punched window',))
+    good = (not caught) and bool(caught2)
+    print('self-test 7 (alpha `a)` enumeration is one paragraph, bullets are '
+          'not): alpha %d hit(s) / bullet control %d hit(s) -- %s'
+          % (len(caught), len(caught2), 'PASS' if good else 'FAIL'))
+    ok &= good and restored6 and restored7
+
     with open(target, 'rb') as f:
         restored_final = f.read() == original_bytes
     print('self-test: file restored byte-for-byte -- %s'
@@ -464,9 +583,62 @@ def self_test():
     return 0 if (ok and restored_final) else 1
 
 
+def _scope_kind(lines, ln):
+    if _is_row(lines[ln - 1]):
+        return 'table row'
+    i = ln - 1
+    lo = i
+    start = i
+    while start > 0 and not _is_break(lines[start - 1]):
+        start -= 1
+    while lo > start and not _is_item(lines[lo]) and not _is_row(lines[lo]):
+        lo -= 1
+    return 'list item' if _is_item(lines[lo]) else 'paragraph'
+
+
+def census():
+    """List every claim site with the marker that covers it, and where it sits.
+
+    sweep() returning 0 already proves that each site's marker lies inside the
+    site's OWN scope under the current rule -- that is the whole of what it
+    checks. This prints the evidence per site so the proof can be read rather
+    than taken on trust: 21 sites were marked by hand in fix round 4 and a
+    reviewer sampled three of them. It does NOT show the marking is correct in
+    substance. Nothing here can: the tool verifies a marker token is present,
+    never that what it says is true. That is the gap round 2's item 1 fell
+    into -- a false claim sitting inside a correct-looking marker -- and only
+    reading closes it.
+    """
+    rows = 0
+    for rel in FILES:
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        lines = open(path, encoding='utf-8').read().split('\n')
+        flat, owner = _flatten(lines)
+        for name, pat in CLAIMS.items():
+            for m in re.finditer(_tolerant(pat), flat):
+                ln = owner[m.start()] + 1
+                if is_transition(lines[ln - 1]):
+                    print('%-34s %-12s %s:%d' % (name, 'transition', rel, ln))
+                    rows += 1
+                    continue
+                sc = scope(lines, ln)
+                found = [k for k in MARKERS if k in sc]
+                print('%-34s %-12s %s:%d  <- %s'
+                      % (name, _scope_kind(lines, ln), rel, ln,
+                         ', '.join(found) if found else 'NO MARKER'))
+                rows += 1
+    print('%d claim site(s); each marker shown is inside that site\'s own scope'
+          % rows)
+    return 0
+
+
 def main():
     if '--self-test' in sys.argv:
         return self_test()
+    if '--census' in sys.argv:
+        return census()
     unmarked = sweep()
     for rel, ln, name, txt in unmarked:
         print('UNMARKED  %-20s %s:%d  %s' % (name, rel, ln, txt))
