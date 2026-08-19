@@ -1325,6 +1325,77 @@ const Builder = (() => {
     return { w: 0.35, d: 0.35 };
   };
 
+  // ---------- Exterior (plan 4c task 1) ----------
+  // serenity's 2.webp and 10.webp were the only two of its eleven compare
+  // spots still failing pose verification, and they failed on the same
+  // thing: the pool was a 0.1 m water slab whose surface sat 0.30 m below
+  // the deck, with no coping, no basin wall and no depth, so it read as a
+  // painted rectangle at every camera height. These three constructors are
+  // additive -- nothing existing changes -- and are driven from `furniture`
+  // entries with lvl: "terrace" so they merge and get bake occluders like
+  // everything else in the scene.
+
+  // Pool: coping band, submerged walls, basin floor, water surface. Built as
+  // a ring rather than a slab because the photographs' defining feature is
+  // the STEP from deck to water.
+  F.poolEdge = (o, g) => {
+    const w = o.w, d = o.d;
+    const cop = o.cop || 0.4;      // coping band width
+    const drop = o.drop || 0.22;   // coping top down to the water surface
+    const deep = o.deep || 1.25;   // water surface down to the basin floor
+    for (const [bw, bd, bx, bz] of [
+      [w + cop * 2, cop, 0, -(d / 2 + cop / 2)],
+      [w + cop * 2, cop, 0, +(d / 2 + cop / 2)],
+      [cop, d, -(w / 2 + cop / 2), 0],
+      [cop, d, +(w / 2 + cop / 2), 0]
+    ]) box(bw, 0.09, bd, M.poolCoping, bx, -0.045, bz, g);
+    for (const [bw, bd, bx, bz] of [
+      [w, 0.08, 0, -d / 2], [w, 0.08, 0, +d / 2],
+      [0.08, d, -w / 2, 0], [0.08, d, +w / 2, 0]
+    ]) box(bw, drop + deep, bd, M.poolWall, bx, -(drop + deep) / 2 - 0.09, bz, g);
+    box(w, 0.05, d, M.poolWall, 0, -(drop + deep) - 0.09, 0, g);
+    box(w, 0.02, d, M.poolWater, 0, -drop - 0.09, 0, g);
+    // A hole in the ground: no collider and no occluder. Giving it an
+    // occluder height would shadow the deck beside it.
+    return { noCollide: true };
+  };
+
+  // Planting mass: a hedge body with crossed fronds above it, so the
+  // silhouette against the sky is broken rather than a flat-topped slab.
+  F.plantMass = (o, g) => {
+    const w = o.w, d = o.d, h = o.h || 2.2;
+    box(w, h, d, M.hedgeDark, 0, h / 2, 0, g);
+    const n = Math.max(3, Math.round(w / 1.2));
+    const crown = o.crown === undefined ? 1.5 : o.crown;
+    for (let i = 0; i < n && crown > 0; i++) {
+      const px = -w / 2 + (i + 0.5) * (w / n);
+      const scale = crown * (0.72 + 0.28 * ((i * 7) % 3) / 2);
+      const lift = h + scale * 0.62;
+      for (let k = 0; k < 3; k++) {
+        const fr = new T.Mesh(new T.PlaneGeometry(scale * 1.6, scale * 1.6), M.frond);
+        fr.position.set(px, lift, ((i * 5) % 3 - 1) * d * 0.3);
+        fr.rotation.y = k * (Math.PI / 3) + (i % 2) * 0.4;
+        g.add(fr);
+      }
+    }
+    return { w, d };
+  };
+
+  // Boundary fence: horizontal slats on posts. The white one behind the pool
+  // in 10.webp, which the config had no geometry for at all.
+  F.slatFence = (o, g) => {
+    const w = o.w, h = o.h || 2.0;
+    const rows = Math.max(4, Math.round(h / 0.22));
+    for (let i = 0; i < rows; i++) {
+      box(w, 0.14, 0.05, M.fenceWhite, 0, 0.12 + i * (h / rows), 0, g);
+    }
+    const nPosts = Math.max(2, Math.round(w / 2.2) + 1);
+    for (let i = 0; i < nPosts; i++) {
+      box(0.1, h, 0.1, M.fenceWhite, -w / 2 + i * (w / (nPosts - 1)), h / 2, 0, g);
+    }
+    return { w, d: 0.14 };
+  };
+
   // Furniture heights for light occlusion (shadows bake into the floor)
   const OCC_H = {
     bed: 0.65, sofaL: 0.8, sofa: 0.8, armchair: 0.85, roundTable: 0.45,
@@ -1332,7 +1403,7 @@ const Builder = (() => {
     wardrobe: 2.5, wardrobeTv: 2.5, barStool: 0.8, tub: 0.6, vanity: 1.0,
     wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
     deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
-    planter: 1.2
+    planter: 1.2, plantMass: 2.2, slatFence: 2.0
   };
   const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
 

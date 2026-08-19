@@ -3,6 +3,11 @@
   "mainCeilH": 2.6,
   "terraceY": -0.05,
   "exposure": 0.295,
+  "sky": {
+    "top": "#b5e2ff",
+    "bottom": "#e0f4ff",
+    "fog": "#e0f4ff"
+  },
   "palette": {
     "floorWood": "#fdffff",
     "wall": "#fffffc",
@@ -219,49 +224,40 @@
   ],
   "surroundings": [
     {
-      "x": 4.4,
-      "z": 8.3,
-      "w": 14.0,
-      "d": 1.3,
-      "h": 0.12,
+      "x": 0.6,
+      "z": 7.7,
+      "w": 20.0,
+      "d": 1.1,
+      "mat": "stone",
       "y": -0.17,
-      "mat": "stone"
-    },
-    {
-      "x": 4.4,
-      "z": 11.2,
-      "w": 16.0,
-      "d": 4.9,
-      "h": 0.1,
-      "y": -0.45,
-      "mat": "water"
-    },
-    {
-      "x": 4.4,
-      "z": 14.9,
-      "w": 16.0,
-      "d": 0.9,
-      "h": 2.2,
-      "y": -0.4,
-      "mat": "hedge"
+      "h": 0.12
     },
     {
       "x": 0.6,
-      "z": 8.05,
-      "w": 3.2,
-      "d": 0.5,
-      "h": 1.5,
-      "y": -0.1,
-      "mat": "hedge"
+      "z": 15.0,
+      "w": 20.0,
+      "d": 0.9,
+      "mat": "stone",
+      "y": -0.17,
+      "h": 0.12
     },
     {
-      "x": -2.6,
-      "z": 10.5,
-      "w": 2.0,
-      "d": 2.0,
-      "h": 2.2,
-      "y": -0.4,
-      "mat": "hedge"
+      "x": -7.1,
+      "z": 11.4,
+      "w": 1.2,
+      "d": 6.4,
+      "mat": "stone",
+      "y": -0.17,
+      "h": 0.12
+    },
+    {
+      "x": 8.3,
+      "z": 11.4,
+      "w": 1.2,
+      "d": 6.4,
+      "mat": "stone",
+      "y": -0.17,
+      "h": 0.12
     },
     {
       "x": 8.1,
@@ -274,8 +270,8 @@
       "occ": true
     },
     {
-      "x": -2.4,
-      "z": 6.6,
+      "x": -9.5,
+      "z": 4.2,
       "w": 4.2,
       "d": 2.8,
       "h": 2.7,
@@ -623,6 +619,56 @@
       "x": 5.45,
       "z": 7.25,
       "lvl": "terrace"
+    },
+    {
+      "type": "poolEdge",
+      "x": 0.6,
+      "z": 11.4,
+      "lvl": "terrace",
+      "w": 13.0,
+      "d": 5.6,
+      "cop": 0.4,
+      "drop": 0.22,
+      "deep": 1.25
+    },
+    {
+      "type": "plantMass",
+      "x": -2.4,
+      "z": 12.4,
+      "lvl": "terrace",
+      "w": 3.2,
+      "d": 1.5,
+      "h": 0.5,
+      "crown": 1.0
+    },
+    {
+      "type": "plantMass",
+      "x": 0.6,
+      "z": 15.9,
+      "lvl": "terrace",
+      "w": 20.0,
+      "d": 0.9,
+      "h": 1.35,
+      "crown": 3.0
+    },
+    {
+      "type": "plantMass",
+      "x": -8.3,
+      "z": 11.4,
+      "lvl": "terrace",
+      "rot": 90,
+      "w": 8.0,
+      "d": 0.9,
+      "h": 1.35,
+      "crown": 2.8
+    },
+    {
+      "type": "slatFence",
+      "x": 0.6,
+      "z": 16.7,
+      "lvl": "terrace",
+      "w": 20.0,
+      "h": 2.6
     }
   ],
   "lights": [
@@ -829,7 +875,7 @@
       "file": "2.webp",
       "compare": true,
       "poseVerified": false,
-      "poseNote": "Renders hedge blocks and a sliver of pool at every fov 50-170 deg; the photo's open pool vista never appears.",
+      "poseNote": "Re-shot against real geometry 2026-08-19 (plan 4c task 1): the pool is now a basin with a coping band, a submerged wall and a rippled water surface 0.31 m below the deck, the hedge slab that stood between this camera and the water is gone, and the neighbouring block that occluded the pool's west end has been moved out of the view. The frame now reads as the photograph's subject -- pool on the left, terrace and building on the right. poseVerified stays FALSE for one reason no content change can fix: measure.js hard-codes c.pitch = 0, and this photograph is shot looking DOWN. In the photograph the deck fills the lower half; a level camera cannot produce that framing at any yaw or fov. Routed to task 1b, which adds an optional per-spot pitch.",
       "name": "Pool Terrace",
       "x": 5.45,
       "z": 6.6,
@@ -911,7 +957,7 @@
       "file": "10.webp",
       "compare": true,
       "poseVerified": false,
-      "poseNote": "Same hedge/pool-sliver defect as 2.webp; the photo's open pool vista never appears.",
+      "poseNote": "Re-shot against real geometry 2026-08-19 (plan 4c task 1): basin, coping, rippled water, a planting mass with alpha-cut canopy fronds and a boundary fence behind it, and a gradient sky in place of the flat 0xbcd5e8 fill. The green cube that stood inside the water is gone. poseVerified stays FALSE for the same reason as 2.webp and it is measurable here: the photograph puts the pool's far edge at 0.41 of frame height, which is ABOVE the horizon -- impossible for a camera at pitch 0. The render puts it at 0.62. The bands are in the right order and the wrong place, which is also why this spot's all-spot legacy dE2000 moved 25.35 -> 26.37 while the render got unambiguously better: saturated colour in a misaligned cell scores worse than the flat grey it replaced. Routed to task 1b.",
       "name": "Pool Terrace",
       "x": 4.6,
       "z": 7.3,
