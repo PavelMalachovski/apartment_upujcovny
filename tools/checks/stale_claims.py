@@ -33,6 +33,23 @@ paragraph -- see self-test 7), hard-wrapped prose, and the contents of a
 fenced or HTML block. If you think one of those is wrong, add a row to
 BOUNDARY and re-derive it against a parser; do not widen the regexes.
 
+NEITHER LIST IS COMPLETE, and the sentence above should not be read as saying
+they are (corrected 2026-08-19 by the whole-branch review). BOUNDARY is nine
+constructs an author chose and self-test 6 checks; it is what has been
+VERIFIED, not what CommonMark contains. Constructs a renderer separates that
+this file does NOT separate, each demonstrated by mutation against the live
+document set: an ATX heading (`## ...`) glued to the claim below it, a setext
+heading, a thematic break (`***`/`---`), and a fence delimiter glued to
+adjacent prose. In every one of those a marker on the far side of the boundary
+launders the claim beside it and the run stays green -- the exact mechanism of
+fix round 3's bug, unfixed for four further constructs. Three matching gaps of
+a different class sit beside them: CLAIMS matching is case-sensitive, inline
+emphasis inside a claim (`**punched window**`) defeats every pattern, and a
+struck-through claim launders a live twin on the SAME line. All seven are
+routed to plan 5, whose first job is this checker; see docs/PHASE-B-RESUME.md,
+"Deferred, with owners". Until then, a green run is weaker evidence than the
+paragraphs above imply.
+
 That scope has been wrong three times, always in the same direction, and every
 one of the three made the check pass rather than fail:
 
@@ -60,8 +77,20 @@ _tolerant), while line numbers still point at the real source line.
 
 Hence five self-test mutations, one per position that has actually leaked,
 plus two that assert the BOUNDARY rather than a failure -- see self_test().
-Three of the five mutations fail against the previous revision of this file;
-that is the only evidence any of them mean anything.
+Three of the five mutations report zero hits against **fix round 3's revision
+of this file, `d302401`** -- that, and not "the previous revision", is the
+evidence any of them mean anything. (Corrected 2026-08-19 by the whole-branch
+review, which diffed it. This sentence said "the previous revision" and was
+true when round 4 wrote it; fix round 5 then changed what that phrase points
+at and left the sentence standing. `8c7f753..ef8a898` touches only the
+docstring, BOUNDARY, _ITEM's comment, self-tests 6-7, _scope_kind, census and
+main -- CLAIMS, MARKERS, _is_break, _is_row, _is_item, scope(), _flatten,
+_tolerant and sweep() are byte-identical across it, so the immediately
+previous revision catches all five and the claim was false as written. A stale
+claim inside the stale-claim checker, of exactly the class it exists to catch,
+in a file its own FILES list does not scan.) Round 4 (`8c7f753`) is where
+scope(), _flatten and _tolerant reached their present form; re-derive against
+a revision older than that, never against HEAD~1, whenever you rewrite either.
 
 What this costs authors: **every stale claim needs its own inline marker**. A
 narrated blockquote beside a claim is still the right thing to write for a
@@ -106,6 +135,14 @@ Exit: 0 clean, 1 if any unmarked site remains.
 Census (every site, its scope kind and the marker covering it -- the
 evidence behind a green run, site by site):
     python tools/checks/stale_claims.py --census
+
+  What --census is NOT, stated 2026-08-19 by the whole-branch review: it is a
+  reading aid, not a CI signal. It ALWAYS exits 0, including when it prints
+  NO MARKER on a site the check mode fails on; its site count is pattern
+  matches, not distinct file:line pairs, so one line can be counted several
+  times; it skips a missing file silently where the check mode prints
+  MISSING FILE; and rows labelled `transition` are counted but never checked.
+  Routed to plan 5 with the scope and matching gaps above.
 
 Failure path (run this whenever you change the patterns or the scope -- a
 checker that cannot fail is worse than none, and this one has been that three
@@ -164,9 +201,24 @@ CLAIMS = {
 # handle. It is now defined by what a CommonMark/GFM renderer produces: a
 # claim's scope is the LEAF BLOCK it renders inside. Every row below records a
 # construct, what a renderer emits for it, and therefore how many scopes
-# scope() must produce. self_test() asserts the agreement, so this boundary is
-# checkable rather than merely asserted -- and a construct that is not in this
-# table is not covered by anything, which is the point of writing it down.
+# scope() must produce. self_test() asserts the agreement, so each row here is
+# checkable rather than merely asserted.
+#
+# WHAT THIS TABLE IS NOT (corrected 2026-08-19 by the whole-branch review; the
+# framing it replaces -- "a construct that is not in this table is not covered
+# by anything" -- read as derived coverage and was not): it is the NINE
+# constructs verified so far, chosen by hand, and self-test 6 asserts scope()
+# against precisely those nine. A construct absent from it is not merely
+# uncovered, it is actively mis-scoped: scope() breaks on blank lines, table
+# rows and list-item markers and on NOTHING ELSE, so every other block
+# boundary a renderer emits -- ATX heading, setext heading, thematic break,
+# fence delimiter glued to prose -- is invisible, and a marker on the far side
+# of one launders the claim beside it. That was demonstrated by mutation, not
+# by reading, and it is the same mechanism as fix round 3's bug. The 'fenced
+# block -> 1 scope' row is likewise true only while the fence contains no
+# bullet and no `|` row; _is_row and _is_item do not know they are inside one.
+# Adding rows here does not close any of that -- fixing scope() does. Routed
+# to plan 5, which opens on this checker.
 #
 # Re-derive the counts with any CommonMark parser:
 #     from markdown_it import MarkdownIt
@@ -432,8 +484,12 @@ def self_test():
 
     Keep all seven. Each mutation was invisible to every mutation written
     before it; that is the only evidence any of them work. 3, 4 and 5 all
-    report zero hits against the previous revision of this file -- check that
-    again if you ever rewrite scope() or sweep().
+    report zero hits against **fix round 3's revision, `d302401`** -- NOT
+    against the immediately previous commit, whose detection half is
+    byte-identical to this one's and therefore catches all five (corrected
+    2026-08-19 by the whole-branch review; the module docstring carries the
+    diff). If you rewrite scope() or sweep(), re-derive this against a
+    revision older than round 4 (`8c7f753`), never against HEAD~1.
     """
     target = os.path.join(ROOT, FILES[0])
     with open(target, 'rb') as f:
