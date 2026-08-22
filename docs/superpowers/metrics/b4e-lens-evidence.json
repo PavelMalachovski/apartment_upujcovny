@@ -1,30 +1,79 @@
 {
   "purpose": "A list of frames no tilt could reconcile, gathered for plan 5 -- a SYMPTOM, not a per-frame lens measurement. This plan's pre-flight already showed that fitting a lens (fov) alongside pitch is degenerate on real frames (see sensitivityDegPerDegRef), so no single conversion coefficient is offered here and none should be inferred from this file. Nobody acts on this in plan 4e -- meta.photoFovLong is not edited by either task 3 or task 4.",
+  "fixRound": "REWRITTEN 2026-08-22 in task 4's fix round. The version this replaces was built on kings-court's discarded derivation and carried two problems. (1) It reported willNotConvergeCount 0 for both apartments. That was true of the record as it then stood, but the record was wrong: all four of kings-court's tilt-confirmed spots had been fitted between two DIFFERENT physical objects, and re-deriving them produced this plan's first two genuine will-not-converge spots, which are the strongest lens evidence it has. (2) It gave kings-court 3.webp a bestResidualRows of 0.0932 for a landmark the same file said was never confidently identified -- a bare number that invites a reader to treat it as a measurement. It is removed; every bestResidualRows below is either a real same-object measurement or null.",
   "willNotConvergeCount": {
-    "kings-court": 0,
+    "kings-court": 2,
     "serenity": 0,
-    "note": "MEASURED, not assumed: zero spots in either apartment's derivation carry the outcome will-not-converge (see each apartment's own -derivation.json outcomeTally.willNotConverge, both []). Every spot with an identifiable landmark converged to either tilt-confirmed or level-confirmed once swept. The `spots` array below is therefore built from the outcome no-usable-landmark instead -- a step-1 finding made BEFORE any tilt was tried ('there was nothing in both frames to point a tilt at'), which is what this plan actually has to offer as lens-adjacent evidence. Only the subset whose own written reason is consistent with an FOV/scale symptom (a real but too-weak or absent gradient, not a different object or missing furniture asset) is included; the excluded furniture/content-mismatch spots are listed in `excludedNotLensRelated` for completeness."
+    "note": "MEASURED, from each apartment's own -derivation.json outcomeTally.willNotConverge. kings-court: 2.webp and 20.webp. serenity: none -- every serenity spot with an identifiable landmark converged to tilt-confirmed or level-confirmed once swept, and that is reported as it stands rather than forced into this schema. The kings-court pair is a NEW and stronger kind of evidence than a bare non-convergence: on each of those two spots, TWO landmarks were named and crop-confirmed as the same physical object in both frames, measured at the SAME column across the SAME nine captures, and each has a clean interior minimum -- and the two minima are 9 degrees apart on 2.webp and 6-9 degrees apart on 20.webp. A single camera has one tilt. Two same-object landmarks in one frame demanding different tilts cannot be explained by tilt at all, and the residual scales with distance from the principal point, which is the signature of a focal-length difference. Solving 2.webp's two rows simultaneously in angle space needs a focal-length factor of roughly 2.2-2.4 between render and photograph. THAT IS STILL NOT A LENS MEASUREMENT -- it is a two-point estimate from one frame, it assumes the render's own geometry is right, and the pre-flight already showed a two-parameter fit is degenerate. It is offered as a direction and a magnitude class, nothing more."
   },
   "spots": [
     {
       "apt": "kings-court",
-      "file": "3.webp",
+      "file": "2.webp",
+      "outcome": "will-not-converge",
       "frameShape": "landscape 3:2 (photograph 1200x800, render 1024x683)",
-      "landmark": "attempted: the wall-mounted TV screen's bottom edge",
-      "bestResidualRows": 0.0932,
-      "sweptRange": "0deg only -- the render-side candidate (strength <=8.0 across 8 columns tried: 0.20, 0.28, 0.50, 0.75, 0.80, 0.85, 0.90, 0.95) never reached the strength (23.4 in the photograph) needed to justify sweeping a tilt against it"
+      "landmark": "TWO, both crop-confirmed the same physical object in both frames, both at column 0.50: (A) the TV wall's ceiling-to-wall junction; (B) the TV screen's top edge",
+      "bestResidualRows": {
+        "A_at_18deg": 0.0072,
+        "B_at_9deg": 0.0033
+      },
+      "crossResidualRows": {
+        "A_at_Bs_optimum_9deg": 0.1377,
+        "B_at_As_optimum_18deg": 0.1162
+      },
+      "impliedTiltDeg": {
+        "A": 18,
+        "B": 9
+      },
+      "sweptRange": "-3, 0, 3, 6, 9, 12, 15, 18, 21 deg -- both landmarks tracked across all nine captures; both minima interior (each turns back up on the far side)",
+      "note": "This is the cleanest single piece of lens evidence in the plan: same frame, same column, same captures, two architecturally unambiguous lines, 9 degrees apart."
+    },
+    {
+      "apt": "kings-court",
+      "file": "20.webp",
+      "outcome": "will-not-converge",
+      "frameShape": "landscape 3:2 (photograph 1200x800, render 1024x683)",
+      "landmark": "TWO, both crop-confirmed the same physical object in both frames, both at column 0.60: (A) the ceiling-mounted extractor hood's lowest front edge, tracked twice because the render's hood is a deep box where the photograph's is a flat slab (A = housing bottom, A2 = inset underside panel bottom); (B) the kitchen island counter top's far edge",
+      "bestResidualRows": {
+        "A_at_12deg": 0.0078,
+        "A2_at_9deg": 0.0005,
+        "B_at_3deg": 0.0111
+      },
+      "crossResidualRows": {
+        "B_at_A2s_optimum_9deg": 0.0829,
+        "A2_at_Bs_optimum_3deg": 0.0934
+      },
+      "impliedTiltDeg": {
+        "A": 12,
+        "A2": 9,
+        "B": 3
+      },
+      "sweptRange": "-3, 0, 3, 6, 9, 12, 15, 18, 21 deg -- all three curves from the same captures; A and A2 lose their candidates above 15 because the hood exits the top of frame, which is the object leaving, not the grid being too narrow",
+      "note": "Weaker than 2.webp as evidence, and honestly so: the hood models differ in form (which is why A and A2 differ by 3 degrees between themselves) and B is a fixture rather than architecture. Even taking the loosest bracket, A2's 9 against B's 3 is a 6-degree gap."
+    },
+    {
+      "apt": "kings-court",
+      "file": "3.webp",
+      "outcome": "no-usable-landmark",
+      "frameShape": "landscape 3:2 (photograph 1200x800, render 1024x683)",
+      "landmark": "attempted: the wall-mounted TV screen's bottom edge. Withdrawn -- the two televisions are mounted at different heights in the world (photograph: on a wood-panelled wall, screen rows 0.229-0.449; render: a panel on a low media cabinet, rows 0.512-0.657) and at different horizontal positions, so their bottom edges are not a landmark pair",
+      "bestResidualRows": null,
+      "bestResidualRowsNote": "deliberately null. The version of this file being replaced carried 0.0932 here for a landmark it also described as never confidently identified. There is no same-object measurement for this spot, so there is no number to report.",
+      "sweptRange": "none. RESTATED this fix round: the earlier claim that no render-side candidate at any of eight columns exceeded strength 8.0 is FALSE -- column 0.50 returns 28.2 and 27.7. The spot is no-usable-landmark on object identity, not on candidate weakness."
     },
     {
       "apt": "kings-court",
       "file": "14.webp",
+      "outcome": "no-usable-landmark",
       "frameShape": "portrait (photograph 1200x1800, render 1024x1536)",
-      "landmark": "none -- render is an essentially flat wall (max candidate strength 0.8, against the photograph's 25.5) under the legacy 72deg gate camera",
+      "landmark": "none -- under the legacy 72deg gate camera the render is an essentially flat marble wall (max candidate strength 0.8 at column 0.50, against the photograph's 25.5); the divider at fov 120.0 confirms it by eye",
       "bestResidualRows": null,
-      "sweptRange": "none -- no candidate existed to sweep toward; the spot's own poseNote in tour/apartments/kings-court.json already names meta.photoFovLong: 120 as the routed cause, measured at ~57-58deg by two independent methods"
+      "sweptRange": "none -- no candidate existed to sweep toward. This spot's own poseNote in tour/apartments/kings-court.json already names meta.photoFovLong: 120 as the routed cause, measured at ~57-58deg by two independent methods."
     },
     {
       "apt": "serenity",
       "file": "3.webp",
+      "outcome": "no-usable-landmark",
       "frameShape": "landscape 16:9 (render height 576)",
       "landmark": "none confidently named after five-plus column attempts",
       "bestResidualRows": null,
@@ -33,7 +82,10 @@
   ],
   "documented": 120,
   "documentedRef": "tour/apartments/kings-court.json meta.photoFovLong and tour/apartments/serenity.json meta.photoFovLong both ship 120",
-  "priorMeasurements": [57, 58],
+  "priorMeasurements": [
+    57,
+    58
+  ],
   "priorMeasurementsRef": "tour/apartments/kings-court.json photoSpots poseNotes: 2.webp measures the photograph at ~58deg horizontal against the documented 120, and 10.webp measures ~57deg vertical-equivalent against the documented 120 -- two independent methods, both well under half the documented value.",
   "sensitivityDegPerDeg": {
     "median": 0.15,
@@ -42,14 +94,53 @@
   },
   "sensitivityDegPerDegRef": "docs/superpowers/metrics/b4e-preflight-method-rejection.json fovCoupling.dPitchPerDegFov -- how much a fitted pitch shifts per degree of assumed vfov, measured across both apartments' spots before this plan ran a single browser capture. The pre-flight's own reading: 'too inconsistent to hand plan 5 a conversion coefficient. A tilt fitted under an assumed vfov is not convertible to another vfov by a shared constant.'",
   "excludedNotLensRelated": {
-    "note": "Also outcome no-usable-landmark, but excluded from `spots` above because their own written reason names a furniture-model, layout, or missing-asset mismatch instead -- a different defect class, most of it already routed to plan 5 through each spot's own poseNote. Listed for completeness, not as lens evidence.",
+    "note": "Also outcome no-usable-landmark, but excluded from `spots` above because their own written reason names a furniture-model, layout, missing-asset or camera-standoff mismatch instead -- a different defect class, most of it already routed to plan 5 through each spot's own poseNote. Listed for completeness, not as lens evidence. Two entries were restated in this fix round because their original wording rested on a false claim about candidate strength; the exclusions themselves are unchanged.",
     "spots": [
-      {"apt": "serenity", "file": "1.webp", "reason": "the photograph's real round mirror and the render's rectangular mirror-proxy sit 0.26 of frame height apart -- a furniture-model placement/scale difference, not a camera-pose or lens one"},
-      {"apt": "kings-court", "file": "8.webp", "reason": "the photograph's TV+shelf+window wall has no counterpart in the render, which shows a wardrobe and headboard instead -- a furniture-layout mismatch"},
-      {"apt": "kings-court", "file": "11.webp", "reason": "the photograph's desk/bookshelf/wallpaper wall has no counterpart in the render, which shows curtains and a window instead -- a furniture-layout mismatch"},
-      {"apt": "kings-court", "file": "17.webp", "reason": "the render shows no mirror, sink or archway at all -- the spot's own poseNote attributes this to the entry-hall wardrobe intruding into the frame, a content defect already routed to plan 5"},
-      {"apt": "kings-court", "file": "18.webp", "reason": "the render camera sees a close attic-roofline/hedge corner instead of the open rooftop deck the photograph shows -- reads as a camera-position/geometry mismatch specific to this spot, not a lens-wide symptom"},
-      {"apt": "kings-court", "file": "19.webp", "reason": "the render shows two plain white boxes with no washer/dryer geometry (doors, dials, drum) at all -- a missing-asset/content mismatch"}
+      {
+        "apt": "serenity",
+        "file": "1.webp",
+        "reason": "the photograph's real round mirror and the render's rectangular mirror-proxy sit 0.26 of frame height apart -- a furniture-model placement/scale difference, not a camera-pose or lens one"
+      },
+      {
+        "apt": "kings-court",
+        "file": "7.webp",
+        "reason": "RECLASSIFIED in this fix round from level-confirmed. The recorded landmark paired the photograph's place-setting napkin (row 0.7625, strength 2.6) against the render's dining table far edge (0.7131) -- two different objects -- and no replacement could be named: the photograph's table far edge is out of frame, the render's near edge runs off the bottom, the pendants differ in count, and the framed art is on opposite sides. A furniture/framing mismatch. No shipped value changed."
+      },
+      {
+        "apt": "kings-court",
+        "file": "8.webp",
+        "reason": "the photograph looks ACROSS the bed at a shelf-and-window wall while the render looks DOWN the bed at its headboard -- a yaw/position mismatch, confirmed at the divider"
+      },
+      {
+        "apt": "kings-court",
+        "file": "11.webp",
+        "reason": "the photograph's desk/bookshelf/wallpaper nook has no counterpart in the render, which shows a green patterned wall panel, curtains and a wardrobe -- a furniture-layout mismatch"
+      },
+      {
+        "apt": "kings-court",
+        "file": "12.webp",
+        "reason": "RECLASSIFIED in this fix round from tilt-confirmed 12deg. Correctly paired headboard-top against headboard-top, the disagreement is 0.4233 of frame (32.7deg at the pinned lens) because the two headboards are different objects: a full-height upholstered wall panel in the photograph, a low panel behind the bed in the render. A furniture-model mismatch, not a lens one."
+      },
+      {
+        "apt": "kings-court",
+        "file": "13.webp",
+        "reason": "RECLASSIFIED in this fix round from tilt-confirmed 12deg. The vessel basin is in both frames but on OPPOSITE sides of frame centre (photograph x ~0.11-0.35 with the shower right; render x ~0.66-0.82 with the shower left), so its row is not a comparable angular quantity. A left-right layout reversal of the same class as the Bathroom-2 mirroring already routed to plan 5, not a lens symptom."
+      },
+      {
+        "apt": "kings-court",
+        "file": "17.webp",
+        "reason": "the render frames a wardrobe corner and a shadowed wall with no mirror, basin or shelving -- the spot's own poseNote attributes this to the entry-hall wardrobe intruding into the frame, a content defect already routed to plan 5. RESTATED: the earlier wording claimed all render candidates at column 0.50 were strength <=0.4; there is one at 6.8 (row 0.8046, the foot of the white corner strip where the counter slab enters frame). The exclusion rests on object identity, not on candidate weakness."
+      },
+      {
+        "apt": "kings-court",
+        "file": "18.webp",
+        "reason": "the render camera sees a close grey wall, a diagonal attic roofline and a slat fence with a hedge mass at the lens, instead of the open rooftop deck the photograph shows -- a camera-position/geometry mismatch specific to this spot, not a lens-wide symptom"
+      },
+      {
+        "apt": "kings-court",
+        "file": "19.webp",
+        "reason": "RESTATED: the earlier wording claimed all render candidates at column 0.50 were strength <=0.4 and that the render 'shows no washer/dryer geometry at all'. Both are false -- there is a candidate at 15.1 (row 0.8217) and it is the top edge of the render's right-hand appliance box. What is true is that the photograph fills its frame with the two machines at close range (rows 0.44-0.95, with doors, drums and control panels) while the render sees the same objects small, far and plain in the bottom sixth of frame -- a camera-standoff and modelling mismatch, not a lens one."
+      }
     ]
   }
 }

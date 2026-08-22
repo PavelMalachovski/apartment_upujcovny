@@ -2,12 +2,12 @@
   "apartment": "kings-court",
   "phase": "b4e-task4",
   "population": "all-spot",
-  "mean": 17.38,
+  "mean": 17.58,
   "spots": [
     {
       "file": "2.webp",
       "name": "Living room",
-      "deltaE": 16.67
+      "deltaE": 16.6
     },
     {
       "file": "7.webp",
@@ -17,27 +17,27 @@
     {
       "file": "20.webp",
       "name": "Kitchen",
-      "deltaE": 13.71
+      "deltaE": 14.06
     },
     {
       "file": "8.webp",
       "name": "Bedroom 1",
-      "deltaE": 11.0
+      "deltaE": 11.03
     },
     {
       "file": "11.webp",
       "name": "Bedroom 1 \u00b7 desk",
-      "deltaE": 21.7
+      "deltaE": 21.53
     },
     {
       "file": "12.webp",
       "name": "Bedroom 2",
-      "deltaE": 19.6
+      "deltaE": 18.78
     },
     {
       "file": "14.webp",
       "name": "Bathroom 2",
-      "deltaE": 21.52
+      "deltaE": 21.74
     },
     {
       "file": "17.webp",
@@ -57,17 +57,17 @@
     {
       "file": "10.webp",
       "name": "Upper bedroom",
-      "deltaE": 16.94
+      "deltaE": 16.91
     },
     {
       "file": "13.webp",
       "name": "Upper bathroom",
-      "deltaE": 23.35
+      "deltaE": 26.51
     },
     {
       "file": "18.webp",
       "name": "Terrace",
-      "deltaE": 20.51
+      "deltaE": 20.48
     }
   ],
   "scored": 13,

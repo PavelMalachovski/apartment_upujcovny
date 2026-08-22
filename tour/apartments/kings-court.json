@@ -2333,10 +2333,9 @@
    "z": 4.6,
    "g": 0,
    "yaw": 95,
-   "pitch": -4,
    "compare": true,
    "poseVerified": true,
-   "poseNote": "Re-pointed 2026-08-19 (task 4): curtain wall left, TV wall centre, stair opening right, dining table at the right edge -- the photograph's own left-to-right order. Residual, not a pose fault: meta.photoFovLong 120 renders this frame at 120 deg horizontal where the photograph measures ~58 deg, so every object reads smaller and further away than in the photograph. Pitch -4 added 2026-08-22 (plan 4e task 4): the TV-wall media console's top edge (col 0.5) lands at photograph row 0.6058 against a level render's 0.5543; -4deg is an interior minimum of that disagreement (residual 0.0032, essentially closed) and reproduced exactly in the confirmation capture."
+   "poseNote": "Re-pointed 2026-08-19 (task 4): curtain wall left, TV wall centre, stair opening right, dining table at the right edge -- the photograph's own left-to-right order. Residual, not a pose fault: meta.photoFovLong 120 renders this frame at 120 deg horizontal where the photograph measures ~58 deg, so every object reads smaller and further away than in the photograph."
   },
   {
    "file": "7.webp",
@@ -2355,10 +2354,8 @@
    "z": 4.6,
    "g": 0,
    "yaw": -27,
-   "pitch": 15,
    "compare": true,
-   "poseVerified": true,
-   "poseNote": "Pitch 15 added 2026-08-22 (plan 4e task 4): the ceiling-mounted range hood's bottom edge (photo col 0.45, render col 0.80 -- the two frames put the hood at different columns) lands at photograph row 0.0989 against a level render's 0.3021; 15deg is an interior minimum of that disagreement (residual 0.0037, inside bandRows) and reproduced exactly in the confirmation capture. The hood exits the top of frame above ~18deg, which bounded the search from one side."
+   "poseVerified": true
   },
   {
    "file": "4.webp",
@@ -2397,10 +2394,8 @@
    "z": 5.8,
    "g": 0,
    "yaw": 8.6,
-   "pitch": 12,
    "compare": true,
-   "poseVerified": true,
-   "poseNote": "Pitch 12 added 2026-08-22 (plan 4e task 4): the bed's tufted headboard top edge (col 0.72) lands at photograph row 0.4118 against a level render's 0.5572; 12deg is an interior minimum of that disagreement (residual 0.0002, essentially exact) and reproduced exactly in the confirmation capture."
+   "poseVerified": true
   },
   {
    "file": "14.webp",
@@ -2462,10 +2457,8 @@
    "z": -0.2,
    "g": 3.1,
    "yaw": 5.7,
-   "pitch": 12,
    "compare": true,
-   "poseVerified": true,
-   "poseNote": "Pitch 12 added 2026-08-22 (plan 4e task 4): the vessel sink's top rim (photo col 0.30, render col 0.85 -- the two frames put the sink at different columns) lands at photograph row 0.6546 against a level render's 0.8079; 12deg is an interior minimum of that disagreement (residual 0.0065, close to bandRows) and reproduced exactly in the confirmation capture."
+   "poseVerified": true
   },
   {
    "file": "18.webp",
