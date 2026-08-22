@@ -1518,7 +1518,13 @@ filters through `delta_e.scorable`, which requires `poseVerified`) — and
 those two, Bathroom and Bedroom, are the two rooms with the *highest* p5
 in the flat. **[Scoped, not corrected, 2026-08-19 by plan 4b task 5: "2 of
 11" is the population *this plan-3 task-6 run* had, and every number in the
-table below was measured on it. serenity is 9 of 11 today, so `luminance.py`
+table below was measured on it. ~~serenity is 9 of 11 today~~ **serenity is 10
+of 11 today — struck and corrected 2026-08-22 by plan 4e task 5 fix round; it
+went 9→10 on 2026-08-19 when plan 4c task 1b flipped `10.webp`, and "today" is
+a live claim however old the bracket around it is. Re-counted out of
+`tour/apartments/serenity.json` this session. The argument here is unaffected:
+it needs only that the population differs from the 2 this table used**, so
+`luminance.py`
 would build a different population now and these rows must not be re-run and
 compared against. The mechanism sentence — that `luminance.py` filters
 through `delta_e.scorable` — is still live and still has no `--all-spots`
@@ -2388,8 +2394,13 @@ apartments. **Population on every row, because that tool hard-codes the
 > **These populations are a dated record and are deliberately NOT updated —
 > 2026-08-19, plan 4b task 5.** "2 of 11" and "8 of 14" are what
 > `luminance.py` actually built when this plan-4a run was taken, and every
-> figure in the table was measured on them. **They are 9 of 11 and 10 of 13
-> today** (plan 4b tasks 2 and 4), so the same script re-run now would score a
+> figure in the table was measured on them. ~~**They are 9 of 11 and 10 of 13
+> today** (plan 4b tasks 2 and 4)~~ **They are 10 of 11 and 10 of 13 — corrected
+> 2026-08-22 by plan 4e task 5 fix round, re-counted out of
+> `tour/apartments/*.json`. The word "today" makes this a live claim, and
+> serenity's half went stale on 2026-08-19 when plan 4c task 1b flipped
+> `10.webp`; the 2026-08-19 date on this block's own first line scopes the
+> *table*, not this sentence**, so the same script re-run now would score a
 > different, larger and better-founded population. **Do not re-run this table
 > and compare it against these rows.** The mechanism note above stays live:
 > `luminance.py` still hard-codes the `poseVerified` filter and still has no
@@ -2405,7 +2416,7 @@ apartments. **Population on every row, because that tool hard-codes the
 > each dated row says so on its own face. **Do not re-consolidate these into
 > the header.**
 
-| Apartment (dated 2026-08-15; live counts are 9 of 11 / 10 of 13) | linear mean | linear p5 | contrast |
+| Apartment (dated 2026-08-15; live counts are ~~9 of 11~~ **10 of 11** / 10 of 13 — **serenity corrected 2026-08-22 by plan 4e task 5 fix round**: it went 9→10 on 2026-08-19 when plan 4c task 1b flipped `10.webp`, and this cell, being its own claim unit, kept the old number for three days. Both figures re-counted out of `tour/apartments/*.json` this session) | linear mean | linear p5 | contrast |
 |---|---|---|---|
 | serenity BASE (2 of 11, historical) | 0.285408 | 0.089938 | 3.1734 |
 | serenity HEAD (2 of 11, historical) | 0.281739 | 0.083283 | **3.3829** |
@@ -2965,7 +2976,27 @@ larger than the "difference".
 kings-court shipping nothing is an honest, allowed outcome: its renders and its
 photographs do not share enough unambiguous common architecture for a tilt to be
 derived from them at the pinned 72° gate lens, and on the two spots where they
-do, two landmarks in one frame demand tilts 6–9° apart. serenity's `10.webp` 22°
+do, two landmarks in one frame demand tilts 6–9° apart.
+
+**And that row's `level-confirmed 1` must not be read across the rest of the
+line — "0 tilts shipped" is NOT "kings-court's cameras are level."** Exactly one
+of its thirteen cameras (`10.webp`) was actually confirmed level. Of the other
+twelve, two (`2`, `20`) were measured and **contradicted themselves** — two
+same-object landmarks in one frame demanding tilts 6–9° apart — and the
+remaining ten were never measured at all, because the sweep could not get a
+landmark into them: **10 of the 13 end `no-usable-landmark`, and 8 of those 10 — `7`, `8`,
+`11`, `12`, `13`, `17`, `18`, `19` — carry a written reason in
+`b4e-lens-evidence.json`'s `excludedNotLensRelated` that names a furniture
+model, a room layout, a missing asset or a camera standoff, not a camera angle**
+(counted out of that file and `kings-court-b4e-derivation.json` this session, in
+plan 4e task 5's fix round). A ninth, `3.webp`, is the same class again — the
+two televisions are mounted at different heights in the world — leaving only
+`14.webp`, whose cause is the lens (`meta.photoFovLong`). **So the kings-court
+result is a measurement this apartment's content blocked, not a finding about
+its cameras. Most of it is content work already routed to plan 5 through the
+individual `poseNote`s; a future pass that fixes the furniture will be able to
+sweep these spots for the first time, and it should not be told they were
+checked.** serenity's `10.webp` 22°
 is not new — it is an **independent re-derivation** that reproduced plan 4c task
 1b's row (0.3737 against 0.374 on record) and residual (0.0183 against 0.018)
 from a different method.
@@ -3026,9 +3057,29 @@ the landmark was right.
 `b4e-preflight-method-rejection.json`, run before the plan spent a single
 browser capture.
 
-- **Two-parameter (tilt + lens) fitting is degenerate.** The fitted fov ran to
-  the 28° grid floor on **5 of 24** spots — the signature of a flat objective,
-  not of a lens.
+- **Two-parameter (tilt + lens) fitting is degenerate.** ~~The fitted fov ran to
+  the 28° grid floor on **5 of 24** spots~~ **Corrected 2026-08-22, plan 4e task
+  5 fix round — the "5 of 24" was quoted verbatim from
+  `b4e-preflight-method-rejection.json`'s `whatThisChanges`, and that summary
+  line disagreed with the `twoParameter` block in the same file. Counted out of
+  that block this session: the fitted fov sits *exactly* on the 28° grid floor
+  on **2 of 24** spots (serenity `1.webp`, kings-court `2.webp`), **4 of 24** at
+  ≤30°, **8 of 24** at ≤34°. The source has been corrected in place too, so it
+  stops disagreeing with itself. And a **third** figure was in the record: the
+  plan (`2026-08-22-phase-b4e-pitch-sweep.md:21`) and its spec
+  (`…-design.md:106`) both say **4 of 24**. That one reconciles — it is the
+  ≤30° count, i.e. "at the floor or within one 1.5° grid step of it", which is a
+  fair reading of "ran to the floor". So of the three numbers in circulation, 4
+  and 2 are the same measurement under two thresholds and only the JSON's 5 was
+  wrong. The plan and the spec are dated planning documents and are left as
+  written.** The degeneracy conclusion does not rest on
+  the floor count and survives it. Counted the same way this session, the 24
+  fitted fovs run **28.0 – 107.5°** against one real gate lens of 72°: **8 pile
+  into the bottom of the grid (28–34°), 9 spread across 45–77.5°, and 7 sit at
+  ≥93°**, with a bare stretch between 34° and 45° where nothing lands. Two
+  frames of the same flat, shot on the same camera, cannot honestly want lenses
+  **3.8× apart** (107.5 ÷ 28.0) — that spread is a flat objective wandering, not
+  a lens being measured.
 - **One-parameter fitting is well posed, but its confidence score does not
   predict correctness.** On serenity `10.webp`, whose captured tilt is known to
   be 22°, the fit returned **21.5°** — and that correct answer carried the
@@ -3064,7 +3115,18 @@ the minima are **9°** apart on `2.webp` and **6–9°** apart on `20.webp`. One
 camera has one tilt, so the gap cannot be tilt, and the residual scales with
 distance from the principal point, which is a focal-length signature. Solving
 `2.webp`'s two rows simultaneously implies a tan-half-angle factor of roughly
-**2.2–2.4** (re-derived independently by the reviewer at about 2.41). **State
+**2.2–2.4** ~~(re-derived independently by the reviewer at about 2.41)~~
+**[parenthetical withdrawn 2026-08-22, plan 4e task 5 fix round. That 2.41 came
+from a reviewer's independent re-derivation whose working lives only under
+`.superpowers/`, which is gitignored (`.gitignore:28`), and it is not
+recoverable from the tree: `b4e-lens-evidence.json` commits the residuals, the
+cross-residuals and the implied tilts, but **not** the landmark row positions
+the solve consumes, so nobody reading this repo can reproduce 2.41. Making it
+derivable would mean re-running task 4's nine-capture sweep, not editing a JSON
+— so it is withdrawn rather than propped up. The load-bearing claim is the
+2.2–2.4 range, it is committed in `b4e-lens-evidence.json`
+(`willNotConvergeCount.note`), and nothing below depends on the withdrawn
+figure.]** **State
 this as direction and magnitude class, not as a measurement**: it is a two-point
 estimate from one frame, it assumes the render's own geometry is right, the
 pre-flight above already showed a two-parameter fit is degenerate, and
@@ -3083,6 +3145,16 @@ through the post chain with `info.autoReset` disabled and reset by hand, three
 runs each: **80** on HEAD and **80** on BASE, same machine, same browser
 session. This plan adds no geometry and the two trees agree, so the 80 is this
 machine and not this branch — the same class of difference already recorded for
-phase A's 69 against plan 4a's 72. `CLAUDE.md`'s budget row still says 78 and
+phase A's 69 against plan 4a's 72. ~~`CLAUDE.md`'s budget row still says 78 and
 was deliberately **not** edited here: this task changed no shipped file, and a
-third machine's reading is not a correction to the second's.
+third machine's reading is not a correction to the second's.~~ **Reversed
+2026-08-22, plan 4e task 5 fix round: `CLAUDE.md` now records the 80, in both
+its budget row and its "Draw calls in a spot" recipe comment. The reasoning
+above was right that 80 is not a correction to 78 and wrong that this meant
+leaving it out — this repository's worst claim class is one that goes stale
+with nobody editing the file, and rule 4's budget paragraph already carries the
+precedent clause for exactly this ("This said 69 from phase A until
+2026-08-16…"). The 80 is written there as that sentence's next clause: a third
+machine's reading of the same recipe on an unchanged tree, not a regression and
+not a new budget figure. The 78 is not struck — it stands as the second
+machine's reading.**

@@ -79,7 +79,7 @@ accepted description style.
 | Walk / run speed | 1.9 / 3.4 m·s⁻¹ | `controls.js` |
 | Reachability grid / max step | 0.25 m / 0.35 m | `validate.js` |
 | HDR headroom `EXP` | 1.7 (= `lightMapIntensity`) | `bake.js` |
-| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures **78** after plan 4c's exterior; 72 at that branch's own BASE, 69 in phase A) | measured, revised in phase A — see rule 4 |
+| Draw-call budget | ≤400 desktop, ≤250 mobile (Serenity entrance measures **78** after plan 4c's exterior; 72 at that branch's own BASE, 69 in phase A. **Added 2026-08-22, plan 4e task 5 fix round: a third machine reads 80** — three runs on plan 4e's HEAD *and* three on its BASE `705ac42`, same machine, same browser session, tree unchanged, recorded in `docs/superpowers/metrics/README.md` "Plan 4e … Structural sweep". Same class as the 69→72 clause in rule 4: **a machine spread, not a regression and not a new budget figure**. Re-measure on your own machine before attributing any of 69/72/78/80 to a branch) | measured, revised in phase A — see rule 4 |
 | Bake time | no fixed ceiling; latest medians (3 runs, one machine, phase B3 task 2): serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms — **ratios, not seconds** | see rule 4a |
 | Dynamic PointLights | ≤8, flagged `dyn` in the config | `builder.js` |
 
@@ -217,7 +217,16 @@ whole-branch review re-ran the recipe verbatim and got 72, three runs in a
 row. The cause is uninvestigated. It is not plan 4a's: the merge-base
 `b39a99a` measures 72 as well, on the same machine in the same browser
 session, so the difference is between the phase-A machine and this one, not
-between the two trees. A triangle-order fix cannot change draw-call count.)** New furniture goes through `F.*` constructors so it merges
+between the two trees. A triangle-order fix cannot change draw-call count.
+**And the next clause of that same sentence, 2026-08-22: a third machine reads
+80.** Plan 4e task 5 ran this recipe verbatim, three times on its HEAD and three
+times on its BASE `705ac42` — 80 on both, same machine, same browser session —
+and plan 4e adds no geometry at all. So the shipped figure has now read 69, 72
+and 80 on three machines for trees that differ by at most one branch's
+furniture; **treat all four numbers in this paragraph as machine-dependent
+readings of the recipe, not as a budget history.** Nothing here is a regression
+and 80 is not a new budget figure. Measurement of record:
+`docs/superpowers/metrics/README.md`, "Plan 4e … Structural sweep".)** New furniture goes through `F.*` constructors so it merges
 automatically and gets a shadow occluder. No new dynamic PointLights —
 light lives in the bake. Markers are `THREE.Points`, one object per
 level; sprites do not batch and 14 photo spots used to cost 14 calls.
@@ -410,7 +419,10 @@ a.renderer.info.autoReset = false;
 a.renderer.info.reset();
 if (a.post && a.post.enabled) a.post.render(0);
 else a.renderer.render(a.scene, a.camera);
-console.log(a.renderer.info.render.calls);   // Serenity entrance: 78 (72 pre-4c, 69 in phase A)
+// Serenity entrance: 78 (72 pre-4c, 69 in phase A) — and 80 on a third machine,
+// 2026-08-22, plan 4e task 5 measuring HEAD *and* BASE. The number this prints is
+// machine-dependent; see rule 4's budget paragraph before calling any delta a regression.
+console.log(a.renderer.info.render.calls);
 a.renderer.info.autoReset = true;
 ```
 
