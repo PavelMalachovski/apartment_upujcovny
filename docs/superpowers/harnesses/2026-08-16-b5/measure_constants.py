@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Plan 5, task 1 harness: measure every source/config constant that
-docs/superpowers/sdd/2026-08-16-phase-b5-revalidate-and-docs/task-1-brief.md
+.superpowers/sdd/2026-08-16-phase-b5-revalidate-and-docs/task-1-brief.md
 asks for, and print the raw values with their file:line provenance.
 
 This script covers everything that can be measured WITHOUT a browser
@@ -101,6 +101,20 @@ def main():
     hit = grep_first(p, r'new THREE\.PerspectiveCamera\(')
     print('camera fov   tour/app.js:%s  %s' % (hit[0] if hit else '?', hit[1].strip() if hit else 'NOT FOUND'))
 
+    section('app.js: exposure fallback constant (1.05) and sky fallback constant (SKY_FALLBACK)')
+    p = os.path.join(TOUR, 'app.js')
+    hit = grep_first(p, r'let exposure = 1\.05;')
+    print('exposure fb  tour/app.js:%s  %s' % (hit[0] if hit else '?', hit[1].strip() if hit else 'NOT FOUND'))
+    hit = grep_first(p, r'const SKY_FALLBACK\s*=')
+    print('SKY_FALLBACK tour/app.js:%s  %s' % (hit[0] if hit else '?', hit[1].strip() if hit else 'NOT FOUND'))
+
+    section('bake.js: EXP mirror check -- does line 498 read EXP, or hardcode its own copy?')
+    p = os.path.join(TOUR, 'bake.js')
+    hit = grep_first(p, r'material\.lightMapIntensity\s*=')
+    print('lightMapIntensity assignment tour/bake.js:%s  %s' % (hit[0] if hit else '?', hit[1].strip() if hit else 'NOT FOUND'))
+    print('  -> compare against the `const EXP` line above by eye: if this does not literally')
+    print('     say "EXP * Math.PI" (or similar), it is an unlinked copy, not a reference.')
+
     section('main.js: __spotFov (the divider lens), pitch sign negation')
     p = os.path.join(TOUR, 'main.js')
     hit = grep_first(p, r'window\.__spotFov\s*=')
@@ -124,6 +138,18 @@ def main():
         print('%-14s exposure=%-6s photoSpots=%-3s mainCeilH=%-6s photoFovLong=%s' % (
             apt, d.get('exposure'), len(d.get('photoSpots', [])),
             d.get('mainCeilH', '-'), (d.get('meta') or {}).get('photoFovLong', '-')))
+
+    section('Shipped apartment config: sky, palette, env.capture, lightmaps (coverage gap in the prior audit)')
+    for apt in ('serenity', 'kings-court', 'horkyone-10'):
+        d = json.load(open(os.path.join(TOUR, 'apartments', '%s.json' % apt), encoding='utf-8'))
+        sky = d.get('sky')
+        palette_keys = list((d.get('palette') or {}).keys())
+        env_capture = (d.get('env') or {}).get('capture')
+        lightmaps = d.get('lightmaps')
+        print('%-14s sky=%-45s palette_keys=%-40s env.capture=%-6s lightmaps=%s' % (
+            apt, sky, palette_keys, env_capture, lightmaps))
+    lm_path = os.path.join(TOUR, 'lightmaps.js')
+    print('tour/lightmaps.js present:', os.path.exists(lm_path))
 
     section('Pose verification (compare-flagged spots only)')
     for apt in ('serenity', 'kings-court', 'horkyone-10'):
