@@ -1,0 +1,228 @@
+{
+  "apartment": "serenity",
+  "method": "For each compare spot, a horizontal architectural landmark was named by eye in the photograph and the pitch=0 render (docs/superpowers/harnesses/2026-08-22-b4e/renders-pitch0-serenity/), then measured at a chosen column with tools/pitch_fit.py --probe. Candidate degrees were rendered live in the browser (measure=1&fov=legacy=72, __measure()) and the same column re-probed; the chosen tilt is the swept value whose landmark row lands closest to the photograph's row, required to be an interior point of the swept range and materially better than the 0deg disagreement (CORRECTED rule, no fixed tolerance -- see task-3-brief.md). A pinhole-projection closed form (fov=72, camera position fixed, only pitch varies) computed from each spot's own pitch=0 landmark row was used to aim the empirical sweep efficiently once it was cross-validated against real captures (5 of 7 spots matched the model to within 0.006 of frame height at large tilts); it was NOT used as a substitute for empirical capture -- 10.webp exposed a case (rippled water surface) where the closed form disagreed with what genuinely got captured, and the empirical capture at pitch 22 was trusted over the model. sweptValues rows are exact re-probe reads; deg is the config pitch convention (positive = looking down). residualRows compares the confirmation-run row (all chosen values applied together, one page load) against the value the sweep itself measured at that same degree -- all six tilt-confirmed spots reproduced their sweep row bit-for-bit (residualRows 0.0000), well inside bandRows (0.003908794788273616, see docs/superpowers/metrics/b4e-noise-band.json).",
+  "bandRowsRef": "docs/superpowers/metrics/b4e-noise-band.json",
+  "proposalsRef": "docs/superpowers/metrics/serenity-b4e-proposals-pitch0.json",
+  "spots": [
+    {
+      "file": "1.webp",
+      "landmark": "the wall-mounted vanity mirror's lower rim",
+      "column": 0.80,
+      "photoRow": 0.7003,
+      "renderRowAtZero": 0.7130,
+      "proposal": 39.25,
+      "sweptValues": [
+        {"deg": 0, "row": 0.7130, "strength": 8.3},
+        {"deg": 1, "row": 0.7061, "strength": 8.2},
+        {"deg": 2, "row": 0.6870, "strength": 8.3}
+      ],
+      "chosen": 1,
+      "renderRowAtChosen": 0.7061,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.0127 (>3x bandRows); pitch 1 is an interior minimum (deg0=0.0127, deg1=0.0058, deg2=0.0133) and roughly halves the disagreement. The tool's 39.25deg proposal was nowhere near this landmark's true sensitivity -- confirmed unreliable, as documented. Confidence is moderate: the effect size is small and the mirror shows reflected content, which does not strictly have to obey the flat-wall pinhole model, though the frame edge itself (what was tracked) should."
+    },
+    {
+      "file": "2.webp",
+      "landmark": "the pool's far bank / water edge line",
+      "column": 0.15,
+      "photoRow": 0.3487,
+      "renderRowAtZero": 0.3461,
+      "proposal": 3.0,
+      "sweptValues": [
+        {"deg": 0, "row": 0.3461, "strength": 7.3}
+      ],
+      "chosen": 0,
+      "renderRowAtChosen": 0.3461,
+      "residualRows": 0.0000,
+      "outcome": "level-confirmed",
+      "poseVerifiedBefore": false,
+      "poseVerifiedAfter": false,
+      "reason": "EXCLUDED FROM CHANGE per task brief: 2.webp ships pitch 40 from plan 4c task 1b's own pool-basin/downward-look derivation (poseVerified false for a furniture-placement reason routed to plan 5, unrelated to camera pose). This task's independent landmark (a different column/feature than task 1b's) finds a near-zero disagreement at 0deg (0.0026, inside bandRows) and was not swept further -- consistent with the brief's explicit statement that a disagreement here is expected and is not grounds to change the shipped value. Config left untouched at pitch 40; poseVerified left untouched at false. This derivation's own chosen=0 describes only what THIS landmark found, not a recommendation to ship 0."
+    },
+    {
+      "file": "3.webp",
+      "landmark": "none could be confidently named in both frames",
+      "column": null,
+      "photoRow": null,
+      "renderRowAtZero": null,
+      "proposal": 51.0,
+      "sweptValues": [
+        {"deg": 0, "row": null, "note": "col 0.05 (wall/ceiling corner idea): render candidates all strength <=1.4, essentially flat wall, no real edge"},
+        {"deg": 1.5, "row": null, "note": "col 0.68 (pool-through-curtain-gap idea): render candidates strength <=3.6 with none near the photo's target row; a column-mismatch error in an earlier pass had compared photo col 0.68 against a render measurement taken at col 0.5 -- caught and discarded once the col-0.68 render baseline was actually probed"},
+        {"deg": 45, "row": null, "note": "round1 offset test at the tool's proposal-6=45deg: no candidate near any plausible target either"}
+      ],
+      "chosen": 0,
+      "renderRowAtChosen": null,
+      "residualRows": null,
+      "outcome": "no-usable-landmark",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "Tried five-plus columns (0.5 -- picks up furniture, the sofa cushion top and dining chairs, not architecture; 0.05 -- render side is a flat, featureless wall with no real gradient; 0.62/0.68/0.70/0.72/0.78 -- the sliding-door head is hidden behind the curtain in the photograph at every column tried, and the render's own candidates at those columns are weak (strength <=3.6) and do not land near any plausible photo counterpart). No feature could be named with confidence in both frames. Ships pitch 0 (absent key, unchanged); poseVerified left untouched at true (this task does not have grounds to revoke a pose verification it cannot independently test)."
+    },
+    {
+      "file": "4.webp",
+      "landmark": "the back wall's skirting/floor line at the frame's left margin",
+      "column": 0.05,
+      "photoRow": 0.8309,
+      "renderRowAtZero": 0.9739,
+      "proposal": 15.5,
+      "sweptValues": [
+        {"deg": 0, "row": 0.9739, "strength": 5.1},
+        {"deg": 8, "row": 0.8470, "strength": 2.0},
+        {"deg": 9, "row": 0.8330, "strength": 1.8},
+        {"deg": 10, "row": 0.8191, "strength": 1.6}
+      ],
+      "chosen": 9,
+      "renderRowAtChosen": 0.8330,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.1430, the largest in this apartment. Interior minimum at 9deg (deg8=0.0161, deg9=0.0021, deg10=0.0118), residual essentially closed and well inside bandRows. Reasonably close to the tool's 15.5deg proposal, unlike most other spots here."
+    },
+    {
+      "file": "5.webp",
+      "landmark": "the kitchen counter's front top edge",
+      "column": 0.65,
+      "photoRow": 0.7181,
+      "renderRowAtZero": 0.7096,
+      "proposal": -3.75,
+      "sweptValues": [
+        {"deg": 0, "row": 0.7096, "strength": 4.7}
+      ],
+      "chosen": 0,
+      "renderRowAtChosen": 0.7096,
+      "residualRows": 0.0000,
+      "outcome": "level-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement is only 0.0085 (~2.2x bandRows). The pinhole closed-form (cross-validated on 1/4/6/7/9/11) predicts a matching tilt of only -0.65deg -- not a shippable integer degree, and not a material improvement over level. Not swept further."
+    },
+    {
+      "file": "6.webp",
+      "landmark": "the built-in window-bench seat's top edge",
+      "column": 0.50,
+      "photoRow": 0.7226,
+      "renderRowAtZero": 0.6435,
+      "proposal": 8.25,
+      "sweptValues": [
+        {"deg": 0, "row": 0.6435, "strength": 6.7},
+        {"deg": -5, "row": 0.7078, "strength": 6.8},
+        {"deg": -6, "row": 0.7217, "strength": 6.8},
+        {"deg": -7, "row": 0.7357, "strength": 6.5}
+      ],
+      "chosen": -6,
+      "renderRowAtChosen": 0.7217,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.0791. Interior minimum at -6deg (deg-5=0.0148, deg-6=0.0009, deg-7=0.0131), essentially exact. Negative because the true correction is an UPWARD tilt, opposite in sign and far smaller in magnitude than the tool's +8.25deg proposal -- another case the tool's whole-profile cross-correlation got wrong in direction as well as size."
+    },
+    {
+      "file": "7.webp",
+      "landmark": "the wardrobe's top edge, near the mirrored sliding door",
+      "column": 0.62,
+      "photoRow": 0.1128,
+      "renderRowAtZero": 0.2887,
+      "proposal": 20.0,
+      "sweptValues": [
+        {"deg": 0, "row": 0.2887, "strength": 11.4},
+        {"deg": 11, "row": 0.1374, "strength": 10.5},
+        {"deg": 12, "row": 0.1217, "strength": 10.1},
+        {"deg": 13, "row": 0.1061, "strength": 9.9},
+        {"deg": 14, "row": 0.0904, "strength": 9.6}
+      ],
+      "chosen": 13,
+      "renderRowAtChosen": 0.1061,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.1759, the second-largest here. Interior minimum at 13deg (deg12=0.0089, deg13=0.0067, deg14=0.0224 -- the jump back up at 14 confirms 13 is the true turn, not an edge artefact of the swept range). An early misread at deg14 (a stronger but wrong candidate row 0.1183) was caught by cross-checking against the pinhole model's predicted row and corrected using the weaker-but-consistent candidate (0.0904) instead -- recorded here as the corrected trajectory."
+    },
+    {
+      "file": "8.webp",
+      "landmark": "the round mirror's top edge",
+      "column": 0.40,
+      "photoRow": 0.1320,
+      "renderRowAtZero": 0.1304,
+      "proposal": 36.5,
+      "sweptValues": [
+        {"deg": 0, "row": 0.1304, "strength": 1.1}
+      ],
+      "chosen": 0,
+      "renderRowAtChosen": 0.1304,
+      "residualRows": 0.0000,
+      "outcome": "level-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement is only 0.0016, smaller than bandRows itself -- level is already the minimum by definition, nothing to sweep toward. The tool's 36.5deg proposal is unrelated to this landmark's real behaviour."
+    },
+    {
+      "file": "9.webp",
+      "landmark": "the back-wall skirting/floor line at the frame's left margin",
+      "column": 0.05,
+      "photoRow": 0.7890,
+      "renderRowAtZero": 0.8024,
+      "proposal": -9.75,
+      "sweptValues": [
+        {"deg": 0, "row": 0.8024, "strength": 9.6},
+        {"deg": 1, "row": 0.7889, "strength": 9.5},
+        {"deg": 2, "row": 0.7754, "strength": 9.4}
+      ],
+      "chosen": 1,
+      "renderRowAtChosen": 0.7889,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.0134. Interior minimum at 1deg (deg0=0.0134, deg1=0.0001, deg2=0.0136), an almost exact fit and roughly symmetric around 1deg. Opposite sign from the tool's -9.75deg proposal."
+    },
+    {
+      "file": "10.webp",
+      "landmark": "the pool coping/water band (task 1b's own landmark, same column)",
+      "column": 0.35,
+      "photoRow": 0.3920,
+      "renderRowAtZero": 0.3820,
+      "proposal": 21.25,
+      "sweptValues": [
+        {"deg": 0, "row": 0.3820, "strength": 6.7},
+        {"deg": 22, "row": 0.3737, "strength": 5.9}
+      ],
+      "chosen": 22,
+      "renderRowAtChosen": 0.3737,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "priorValue": 22,
+      "priorMethod": "plan 4c task 1b, sweeping and matching the water band's measured rows by hand (render 0.374-0.780 vs photograph 0.392-0.763)",
+      "reason": "INDEPENDENT REPLICATION: capturing fresh at pitch 22 and re-probing this task's own column/landmark reproduces task 1b's documented render row (0.3737 here vs 0.374 on record) and residual (0.0183 here vs 0.018 on record) almost exactly -- the two independent derivations agree, which is the strongest evidence available that the method works. Config left unchanged at pitch 22 since it already carries the derived value. CONCERN, recorded not hidden: the automatic 0deg-render candidate this task's probe picked (0.3820) is numerically CLOSER to the photograph's row (0.3920) than the pitch-22 candidate is (disagreement 0.0100 vs 0.0183), i.e. by this narrow automated read alone, level looks better than 22deg. Given the strong agreement with task 1b's independently, carefully hand-derived value at 22deg specifically, the likely explanation is that the pool's rippled/textured water surface offers multiple similarly-strong horizontal gradient bands, and the automatic top-8 picker latched onto a different one at 0deg than the one continuously tracked at higher tilts -- not that 22deg is wrong. Not investigated further within this task's budget."
+    },
+    {
+      "file": "11.webp",
+      "landmark": "the wardrobe's top edge at the frame's left margin",
+      "column": 0.05,
+      "photoRow": 0.3303,
+      "renderRowAtZero": 0.2460,
+      "proposal": 28.5,
+      "sweptValues": [
+        {"deg": 0, "row": 0.2460, "strength": 21.6},
+        {"deg": -5, "row": 0.3122, "strength": 21.8},
+        {"deg": -6, "row": 0.3254, "strength": 22.0},
+        {"deg": -7, "row": 0.3380, "strength": 22.0}
+      ],
+      "chosen": -6,
+      "renderRowAtChosen": 0.3254,
+      "residualRows": 0.0000,
+      "outcome": "tilt-confirmed",
+      "poseVerifiedBefore": true,
+      "poseVerifiedAfter": true,
+      "reason": "0deg disagreement 0.0843. Interior minimum at -6deg (deg-5=0.0181, deg-6=0.0049, deg-7=0.0077), a very strong, consistently-strength (21.6-22.0) candidate across the whole sweep -- the highest-confidence landmark in this apartment. Again opposite sign and far smaller magnitude than the tool's +28.5deg proposal."
+    }
+  ]
+}
