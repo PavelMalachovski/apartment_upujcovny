@@ -1,0 +1,118 @@
+{
+ "apartment": "serenity",
+ "lensPinnedAt": 72.0,
+ "renderDir": "docs/superpowers/harnesses/2026-08-22-b4e/renders-pitch0-serenity",
+ "status": "PROPOSALS ONLY -- a named landmark decides the value. sharpness is reported and is NOT a gate.",
+ "spots": [
+  {
+   "pitch": 39.25,
+   "score": 0.5260897502657471,
+   "overlap": 0.461839530332681,
+   "sharpness": 0.12557466222222657,
+   "file": "1.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 3.0,
+   "score": 0.8353086743090713,
+   "overlap": 0.9471624266144814,
+   "sharpness": 0.056436837541150475,
+   "file": "2.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": 40,
+   "poseVerified": false
+  },
+  {
+   "pitch": 51.0,
+   "score": 0.5129151078544456,
+   "overlap": 0.3150684931506849,
+   "sharpness": 0.07179144208313543,
+   "file": "3.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 15.5,
+   "score": 0.47585638981076983,
+   "overlap": 0.7573385518590998,
+   "sharpness": 0.11337358409479581,
+   "file": "4.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": -3.75,
+   "score": 0.5234897579518927,
+   "overlap": 0.9334637964774951,
+   "sharpness": 0.03781493405144426,
+   "file": "5.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 8.25,
+   "score": 0.45514187983971405,
+   "overlap": 0.863013698630137,
+   "sharpness": 0.05679217324378444,
+   "file": "6.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 20.0,
+   "score": 0.6429791555339391,
+   "overlap": 0.6966731898238747,
+   "sharpness": 0.060685166335067264,
+   "file": "7.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 36.5,
+   "score": 0.44840843449101087,
+   "overlap": 0.4931506849315068,
+   "sharpness": 0.1378826608862888,
+   "file": "8.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": -9.75,
+   "score": 0.48983944933339035,
+   "overlap": 0.8395303326810176,
+   "sharpness": 0.027183435874380435,
+   "file": "9.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  },
+  {
+   "pitch": 21.25,
+   "score": 0.6559048203694372,
+   "overlap": 0.6810176125244618,
+   "sharpness": 0.038745031341509306,
+   "file": "10.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": 22,
+   "poseVerified": true
+  },
+  {
+   "pitch": 28.5,
+   "score": 0.7354257301735595,
+   "overlap": 0.5909980430528375,
+   "sharpness": 0.1662747332781307,
+   "file": "11.webp",
+   "capturedAtPitch": 0.0,
+   "configPitch": null,
+   "poseVerified": true
+  }
+ ]
+}
