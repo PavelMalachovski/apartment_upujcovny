@@ -1,0 +1,17 @@
+{
+  "method": "Pitches actually in effect during the committed docs/superpowers/harnesses/2026-08-22-b4e/renders-confirm-kings-court/ capture, REPLACED 2026-08-22 in task 4's fix round. All four tilts the discarded pass shipped (2.webp -4, 12.webp 12, 13.webp 12, 20.webp 15) were withdrawn after a controller review showed each had been fitted between two different physical objects; tour/apartments/kings-court.json now carries no pitch key at all and is byte-identical to main. Captured by loading http://localhost:8742/index.html?apt=kings-court&measure=1&fov=legacy&cb=confirm2 directly -- the SHIPPED config, no per-spot JS override -- and calling window.__measure() once __bakeReady resolved. Verified in the same console before capture: the loaded script versions all read v=137, the fov=legacy URL flag was present, camera.fov read exactly 72, window.__issues was [], and every compare spot's pitch read literally 'absent' (the key is not in the file, so it is undefined on the object, not 0). All 13 saved files were confirmed non-zero on disk afterwards. pitchDeg values below are therefore all 0 by absence, not by an override.",
+  "everySpotPitch": "absent (0 by absence)",
+  "2.webp": 0,
+  "7.webp": 0,
+  "20.webp": 0,
+  "8.webp": 0,
+  "11.webp": 0,
+  "12.webp": 0,
+  "14.webp": 0,
+  "17.webp": 0,
+  "19.webp": 0,
+  "3.webp": 0,
+  "10.webp": 0,
+  "13.webp": 0,
+  "18.webp": 0
+}

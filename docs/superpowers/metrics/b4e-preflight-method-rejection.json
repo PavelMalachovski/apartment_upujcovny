@@ -1,0 +1,570 @@
+{
+ "phase": "b4e-preflight",
+ "date": "2026-08-22",
+ "question": "Can a row-profile correlation derive photoSpot pitch automatically?",
+ "verdict": "NO. Measured before the plan spent a single browser capture. Two-parameter (pitch, fov) fitting is degenerate; one-parameter fitting is well posed but its confidence score does not predict correctness.",
+ "renderProvenance": "tools/shots/render_<apt>_<n>.jpg as left by plan 4c task 5 closing gate, 2026-08-19 23:10 and 23:19, captured under ?fov=legacy at ?v=136. serenity 2.webp was captured at pitch 40 and 10.webp at 22; every other frame at 0.",
+ "groundTruth": {
+  "10.webp": {
+   "capturedAt": 22.0,
+   "oneParamAtFov72": 21.5,
+   "twoParam": 7.5,
+   "note": "The one-parameter fit lands on the truth. Its sharpness is 0.003 -- the LOWEST of all 24 spots -- so the confidence score cannot be used to tell this correct answer from a wrong one."
+  },
+  "2.webp": {
+   "capturedAt": 40.0,
+   "oneParamAtFov72": 21.25,
+   "twoParam": 23.25,
+   "note": "Fails, and is EXPECTED to: 2.webp is poseVerified false on a furniture-placement reason routed to plan 5, so render and photograph do not show the same subject. Not evidence against the observable."
+  }
+ },
+ "twoParameter": {
+  "serenity": {
+   "1.webp": {
+    "pitch": 9.25,
+    "fov": 28.0,
+    "score": 0.5667,
+    "sharpness": 0.0283
+   },
+   "2.webp": {
+    "pitch": 23.25,
+    "fov": 101.5,
+    "score": 0.5571,
+    "sharpness": 0.0176
+   },
+   "3.webp": {
+    "pitch": 32.75,
+    "fov": 33.5,
+    "score": 0.5207,
+    "sharpness": 0.0331
+   },
+   "4.webp": {
+    "pitch": 16.25,
+    "fov": 31.0,
+    "score": 0.5982,
+    "sharpness": 0.0844
+   },
+   "5.webp": {
+    "pitch": -3.75,
+    "fov": 75.0,
+    "score": 0.5861,
+    "sharpness": 0.0712
+   },
+   "6.webp": {
+    "pitch": 8.0,
+    "fov": 106.5,
+    "score": 0.6812,
+    "sharpness": 0.0617
+   },
+   "7.webp": {
+    "pitch": 25.25,
+    "fov": 55.5,
+    "score": 0.753,
+    "sharpness": 0.0368
+   },
+   "8.webp": {
+    "pitch": -7.0,
+    "fov": 29.5,
+    "score": 0.5655,
+    "sharpness": 0.1724
+   },
+   "9.webp": {
+    "pitch": -7.5,
+    "fov": 94.5,
+    "score": 0.524,
+    "sharpness": 0.0592
+   },
+   "10.webp": {
+    "pitch": 7.5,
+    "fov": 77.5,
+    "score": 0.6306,
+    "sharpness": 0.0146
+   },
+   "11.webp": {
+    "pitch": 30.5,
+    "fov": 49.0,
+    "score": 0.8049,
+    "sharpness": 0.2078
+   }
+  },
+  "kings-court": {
+   "2.webp": {
+    "pitch": 7.5,
+    "fov": 28.0,
+    "score": 0.625,
+    "sharpness": 0.1219
+   },
+   "7.webp": {
+    "pitch": 29.0,
+    "fov": 34.0,
+    "score": 0.6489,
+    "sharpness": 0.1001
+   },
+   "20.webp": {
+    "pitch": 3.0,
+    "fov": 103.0,
+    "score": 0.4975,
+    "sharpness": 0.0767
+   },
+   "8.webp": {
+    "pitch": 21.75,
+    "fov": 107.5,
+    "score": 0.7315,
+    "sharpness": 0.0134
+   },
+   "11.webp": {
+    "pitch": 11.5,
+    "fov": 29.5,
+    "score": 0.7692,
+    "sharpness": 0.1166
+   },
+   "12.webp": {
+    "pitch": 15.75,
+    "fov": 95.5,
+    "score": 0.8749,
+    "sharpness": 0.0268
+   },
+   "14.webp": {
+    "pitch": 4.0,
+    "fov": 47.5,
+    "score": 0.6519,
+    "sharpness": 0.0932
+   },
+   "17.webp": {
+    "pitch": 13.5,
+    "fov": 54.0,
+    "score": 0.5914,
+    "sharpness": 0.0067
+   },
+   "19.webp": {
+    "pitch": -0.5,
+    "fov": 45.0,
+    "score": 0.7456,
+    "sharpness": 0.0705
+   },
+   "3.webp": {
+    "pitch": -13.0,
+    "fov": 33.5,
+    "score": 0.6444,
+    "sharpness": 0.0865
+   },
+   "10.webp": {
+    "pitch": 23.25,
+    "fov": 55.5,
+    "score": 0.7931,
+    "sharpness": 0.1111
+   },
+   "13.webp": {
+    "pitch": -3.0,
+    "fov": 56.0,
+    "score": 0.807,
+    "sharpness": 0.3056
+   },
+   "18.webp": {
+    "pitch": 19.5,
+    "fov": 93.0,
+    "score": 0.7495,
+    "sharpness": 0.0184
+   }
+  }
+ },
+ "oneParameter": {
+  "serenity": {
+   "1.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 23.5,
+     "score": 0.3783,
+     "sharpness": 0.0405
+    },
+    "atFov57": {
+     "pitch": 5.25,
+     "score": 0.3546,
+     "sharpness": 0.0213
+    },
+    "dPitchPerDegFov": 1.217
+   },
+   "2.webp": {
+    "capturedAtPitch": 40.0,
+    "atFov72": {
+     "pitch": 21.25,
+     "score": 0.3651,
+     "sharpness": 0.0204
+    },
+    "atFov57": {
+     "pitch": 24.25,
+     "score": 0.4092,
+     "sharpness": 0.0971
+    },
+    "dPitchPerDegFov": -0.2
+   },
+   "3.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -8.0,
+     "score": 0.3825,
+     "sharpness": 0.0475
+    },
+    "atFov57": {
+     "pitch": -9.75,
+     "score": 0.4027,
+     "sharpness": 0.0201
+    },
+    "dPitchPerDegFov": 0.117
+   },
+   "4.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 15.5,
+     "score": 0.476,
+     "sharpness": 0.1653
+    },
+    "atFov57": {
+     "pitch": 12.0,
+     "score": 0.4968,
+     "sharpness": 0.162
+    },
+    "dPitchPerDegFov": 0.233
+   },
+   "5.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -3.75,
+     "score": 0.5132,
+     "sharpness": 0.1682
+    },
+    "atFov57": {
+     "pitch": -3.0,
+     "score": 0.5255,
+     "sharpness": 0.1656
+    },
+    "dPitchPerDegFov": -0.05
+   },
+   "6.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 8.25,
+     "score": 0.4476,
+     "sharpness": 0.0439
+    },
+    "atFov57": {
+     "pitch": 6.5,
+     "score": 0.4401,
+     "sharpness": 0.0511
+    },
+    "dPitchPerDegFov": 0.117
+   },
+   "7.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 20.0,
+     "score": 0.6405,
+     "sharpness": 0.0511
+    },
+    "atFov57": {
+     "pitch": 16.0,
+     "score": 0.6234,
+     "sharpness": 0.044
+    },
+    "dPitchPerDegFov": 0.267
+   },
+   "8.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 19.5,
+     "score": 0.2595,
+     "sharpness": 0.1115
+    },
+    "atFov57": {
+     "pitch": 14.25,
+     "score": 0.2511,
+     "sharpness": 0.1066
+    },
+    "dPitchPerDegFov": 0.35
+   },
+   "9.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -9.75,
+     "score": 0.4927,
+     "sharpness": 0.2434
+    },
+    "atFov57": {
+     "pitch": -7.25,
+     "score": 0.4799,
+     "sharpness": 0.0831
+    },
+    "dPitchPerDegFov": -0.167
+   },
+   "10.webp": {
+    "capturedAtPitch": 22.0,
+    "atFov72": {
+     "pitch": 21.5,
+     "score": 0.564,
+     "sharpness": 0.003
+    },
+    "atFov57": {
+     "pitch": 21.5,
+     "score": 0.5666,
+     "sharpness": 0.0154
+    },
+    "dPitchPerDegFov": 0.0
+   },
+   "11.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 28.5,
+     "score": 0.7319,
+     "sharpness": 0.2607
+    },
+    "atFov57": {
+     "pitch": 22.0,
+     "score": 0.704,
+     "sharpness": 0.2527
+    },
+    "dPitchPerDegFov": 0.433
+   }
+  },
+  "kings-court": {
+   "2.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 2.0,
+     "score": 0.4657,
+     "sharpness": 0.0894
+    },
+    "atFov57": {
+     "pitch": 0.0,
+     "score": 0.4649,
+     "sharpness": 0.1113
+    },
+    "dPitchPerDegFov": 0.133
+   },
+   "7.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 0.25,
+     "score": 0.4979,
+     "sharpness": 0.0046
+    },
+    "atFov57": {
+     "pitch": 9.5,
+     "score": 0.5143,
+     "sharpness": 0.0184
+    },
+    "dPitchPerDegFov": -0.617
+   },
+   "20.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 9.75,
+     "score": 0.3048,
+     "sharpness": 0.0691
+    },
+    "atFov57": {
+     "pitch": 7.25,
+     "score": 0.2783,
+     "sharpness": 0.0579
+    },
+    "dPitchPerDegFov": 0.167
+   },
+   "8.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 25.75,
+     "score": 0.6606,
+     "sharpness": 0.0107
+    },
+    "atFov57": {
+     "pitch": 20.5,
+     "score": 0.6692,
+     "sharpness": 0.0349
+    },
+    "dPitchPerDegFov": 0.35
+   },
+   "11.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 27.5,
+     "score": 0.4633,
+     "sharpness": 0.1226
+    },
+    "atFov57": {
+     "pitch": 20.75,
+     "score": 0.5192,
+     "sharpness": 0.1848
+    },
+    "dPitchPerDegFov": 0.45
+   },
+   "12.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 20.0,
+     "score": 0.8482,
+     "sharpness": 0.14
+    },
+    "atFov57": {
+     "pitch": 15.25,
+     "score": 0.8336,
+     "sharpness": 0.1176
+    },
+    "dPitchPerDegFov": 0.317
+   },
+   "14.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -2.25,
+     "score": 0.4918,
+     "sharpness": 0.2023
+    },
+    "atFov57": {
+     "pitch": -1.75,
+     "score": 0.4848,
+     "sharpness": 0.1518
+    },
+    "dPitchPerDegFov": -0.033
+   },
+   "17.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 25.25,
+     "score": 0.5576,
+     "sharpness": 0.0484
+    },
+    "atFov57": {
+     "pitch": 20.0,
+     "score": 0.5648,
+     "sharpness": 0.0349
+    },
+    "dPitchPerDegFov": 0.35
+   },
+   "19.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -7.5,
+     "score": 0.7381,
+     "sharpness": 0.1753
+    },
+    "atFov57": {
+     "pitch": -6.25,
+     "score": 0.7334,
+     "sharpness": 0.0684
+    },
+    "dPitchPerDegFov": -0.083
+   },
+   "3.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -12.0,
+     "score": 0.3645,
+     "sharpness": 0.019
+    },
+    "atFov57": {
+     "pitch": -9.5,
+     "score": 0.4428,
+     "sharpness": 0.0861
+    },
+    "dPitchPerDegFov": -0.167
+   },
+   "10.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 27.0,
+     "score": 0.5062,
+     "sharpness": 0.0639
+    },
+    "atFov57": {
+     "pitch": 20.5,
+     "score": 0.5829,
+     "sharpness": 0.1514
+    },
+    "dPitchPerDegFov": 0.433
+   },
+   "13.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": -2.75,
+     "score": 0.7407,
+     "sharpness": 0.5675
+    },
+    "atFov57": {
+     "pitch": -2.0,
+     "score": 0.7531,
+     "sharpness": 0.5097
+    },
+    "dPitchPerDegFov": -0.05
+   },
+   "18.webp": {
+    "capturedAtPitch": 0.0,
+    "atFov72": {
+     "pitch": 13.75,
+     "score": 0.6579,
+     "sharpness": 0.0695
+    },
+    "atFov57": {
+     "pitch": 10.5,
+     "score": 0.6743,
+     "sharpness": 0.0853
+    },
+    "dPitchPerDegFov": 0.217
+   }
+  }
+ },
+ "fovCoupling": {
+  "dPitchPerDegFov": {
+   "median": 0.15,
+   "min": -0.617,
+   "max": 1.217
+  },
+  "reading": "Too inconsistent to hand plan 5 a conversion coefficient. A tilt fitted under an assumed vfov is not convertible to another vfov by a shared constant."
+ },
+ "whatThisChanges": [
+  "The spec's two-parameter shift-and-scale method is REJECTED by measurement, not by opinion. [CORRECTED IN PLACE 2026-08-22 by plan 4e task 5 fix round. This line read 'Fitted fov ran to the 28-degree grid floor on 5 of 24 spots -- the signature of a degenerate objective.' The 5 is WRONG and this file disagreed with itself: counting the twoParameter block in this same file gives 2 of 24 sitting exactly on the 28-degree floor (serenity 1.webp, kings-court 2.webp), 4 of 24 at <=30, 8 of 24 at <=34. Task 5 quoted the wrong figure verbatim into docs/superpowers/metrics/README.md, which obeyed the no-unmeasured-number rule and propagated a self-contradiction; the README is corrected there too. Note that the plan and its spec both say 4 of 24, and that figure RECONCILES -- it is the <=30 count, floor-or-within-one-grid-step, a fair reading of 'ran to the floor'. Only this line's 5 matched nothing. Recount before citing this line again.] What the twoParameter block actually shows, recounted from it this session: the 24 fitted fovs span 28.0 to 107.5 degrees against one real gate lens of 72 -- 8 spots at 28-34, 9 across 45-77.5, 7 at >=93, and nothing at all between 34 and 45. Frames of the same flat shot on the same camera cannot want lenses four times apart. The rejection stands and never depended on the floor count.",
+  "The synthetic tests pass because synthetic profiles are sparse spikes made by the same projection the fit inverts. Passing them says nothing about a photograph. Keep them, but never read them as validation of the method on real frames.",
+  "Automatic derivation is demoted: the fit may PROPOSE a candidate neighbourhood, and a human-identified landmark measured in both frames DECIDES. That is plan 4c task 1b's method, which is the only one with a record of working here."
+ ],
+ "probeValidation": {
+  "what": "The replacement helper -- print the strongest horizontal-gradient rows in a named column so a human can pick their landmark -- was checked against plan 4c task 1b's hand measurements, which are independent of it.",
+  "column": 0.35,
+  "photo10webp": {
+   "probeFoundRows": [
+    0.001,
+    0.133,
+    0.17,
+    0.342,
+    0.368,
+    0.392,
+    0.51,
+    0.999
+   ],
+   "task1bHandMeasured": 0.392,
+   "agrees": true
+  },
+  "render10webpAtPitch22": {
+   "probeFoundRows": [
+    0.001,
+    0.095,
+    0.121,
+    0.152,
+    0.265,
+    0.334,
+    0.374,
+    0.998
+   ],
+   "task1bHandMeasured": 0.374,
+   "agrees": true
+  },
+  "reading": "The probe rediscovers, on both sides, the exact rows task 1b measured by hand for serenity 10.webp. That is the validation the automatic FIT never had: an independent prior measurement to be checked against."
+ },
+ "overlapFloorDefect": {
+  "found": "While writing the tool's tests, 2026-08-22.",
+  "what": "MIN_OVERLAP was set to 0.55. The fraction of a tilted photograph's rows that fall inside a LEVEL render is a pure function of the tilt and the lens: 1.000 at 0 deg, 0.836 at 10, 0.697 at 20, 0.572 at 30, 0.452 at 40, 0.303 at 52 (vfov 72).",
+  "consequence": "A 0.55 floor silently caps the searchable tilt at about 33 degrees. The prediction pass -- photograph against a LEVEL render, which is how every spot is first proposed -- could therefore never propose serenity 2.webp's shipped 40 degrees. The tool would have refused the answer by construction and the refusal would have read as \"no tilt found\".",
+  "fix": "MIN_OVERLAP lowered to 0.25, and overlap reported per spot so a reviewer sees how much frame a proposal actually rests on.",
+  "note": "This did NOT change 2.webp's confirm-pass reading (overlap there is 0.71, so the floor was not binding); it changes what the prediction pass is CAPABLE of returning. Recorded separately from the method rejection because it is a plain bug, not a finding about the method."
+ },
+ "testScenarioNotes": [
+  "A uniformly spaced synthetic edge ladder is periodic and the correlation aliases by exactly one period: a true 40 returned 30. Synthetic fixtures must be irregularly spaced.",
+  "At large tilt a level render and a tilted photograph share little content by geometry alone -- 45 percent of rows at 40 degrees. Proposals degrade exactly where the tilt is largest, which is the opposite of convenient."
+ ]
+}

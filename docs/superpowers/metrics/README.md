@@ -29,7 +29,11 @@ figure was added inline 2026-08-19 by task 5**: fix round 1 struck the old
 serenity number without putting the new one beside it, so this sentence read
 as though only kings-court had a current count. The correction below was
 always there; a reader who stopped at this line could not see it. As of this
-branch **most spots now DO pass** — 19 of 24 across the two flats — so the
+branch **most spots now DO pass** — ~~19 of 24~~ **20 of 24, re-counted out of
+`tour/apartments/*.json` on 2026-08-22 by plan 4e task 5** (the 19 was falsified
+on 2026-08-19 when plan 4c task 1b flipped serenity's `10.webp`, and survived
+that branch's own sweep; plan 4e moved no flag, it only found this stale) —
+across the two flats, so the
 sentence's own "Most do not" is itself historical, and that is the single
 largest thing plan 4b changed)
 (classification and evidence:
@@ -90,9 +94,13 @@ an apartment nobody has classified yet (horkyone-10) keeps scoring every
 spots by construction and print how many they skipped.
 
 ~~**Serenity's number now rests on 2 spots (`1.webp`, `11.webp`). Kings-court's
-rests on 8 (`3, 7, 8, 11, 12, 13, 19, 20`).**~~ **Serenity's rests on 9 of 11
+rests on 8 (`3, 7, 8, 11, 12, 13, 19, 20`).**~~ ~~**Serenity's rests on 9 of 11
 (all but `2.webp` and `10.webp`); kings-court's on 10 of 13 (all but `14.webp`,
-`17.webp` and `18.webp`)** — corrected in place 2026-08-19 by plan 4b task 5.
+`17.webp` and `18.webp`)** — corrected in place 2026-08-19 by plan 4b task 5.~~
+**Serenity's rests on 10 of 11 (all but `2.webp`); kings-court's on 10 of 13
+(all but `14.webp`, `17.webp` and `18.webp`)** — corrected in place again
+2026-08-22 by plan 4e task 5, counted out of `tour/apartments/*.json`: the 9 was
+falsified by plan 4c task 1b flipping `10.webp` and was not swept then.
 **These are not equally
 trustworthy and must never be read as comparable to each other, or to the
 trend table below** — ~~a 2-spot mean swings on a single frame; an 8-spot
@@ -1510,7 +1518,13 @@ filters through `delta_e.scorable`, which requires `poseVerified`) — and
 those two, Bathroom and Bedroom, are the two rooms with the *highest* p5
 in the flat. **[Scoped, not corrected, 2026-08-19 by plan 4b task 5: "2 of
 11" is the population *this plan-3 task-6 run* had, and every number in the
-table below was measured on it. serenity is 9 of 11 today, so `luminance.py`
+table below was measured on it. ~~serenity is 9 of 11 today~~ **serenity is 10
+of 11 today — struck and corrected 2026-08-22 by plan 4e task 5 fix round; it
+went 9→10 on 2026-08-19 when plan 4c task 1b flipped `10.webp`, and "today" is
+a live claim however old the bracket around it is. Re-counted out of
+`tour/apartments/serenity.json` this session. The argument here is unaffected:
+it needs only that the population differs from the 2 this table used**, so
+`luminance.py`
 would build a different population now and these rows must not be re-run and
 compared against. The mechanism sentence — that `luminance.py` filters
 through `delta_e.scorable` — is still live and still has no `--all-spots`
@@ -2380,8 +2394,13 @@ apartments. **Population on every row, because that tool hard-codes the
 > **These populations are a dated record and are deliberately NOT updated —
 > 2026-08-19, plan 4b task 5.** "2 of 11" and "8 of 14" are what
 > `luminance.py` actually built when this plan-4a run was taken, and every
-> figure in the table was measured on them. **They are 9 of 11 and 10 of 13
-> today** (plan 4b tasks 2 and 4), so the same script re-run now would score a
+> figure in the table was measured on them. ~~**They are 9 of 11 and 10 of 13
+> today** (plan 4b tasks 2 and 4)~~ **They are 10 of 11 and 10 of 13 — corrected
+> 2026-08-22 by plan 4e task 5 fix round, re-counted out of
+> `tour/apartments/*.json`. The word "today" makes this a live claim, and
+> serenity's half went stale on 2026-08-19 when plan 4c task 1b flipped
+> `10.webp`; the 2026-08-19 date on this block's own first line scopes the
+> *table*, not this sentence**, so the same script re-run now would score a
 > different, larger and better-founded population. **Do not re-run this table
 > and compare it against these rows.** The mechanism note above stays live:
 > `luminance.py` still hard-codes the `poseVerified` filter and still has no
@@ -2397,7 +2416,7 @@ apartments. **Population on every row, because that tool hard-codes the
 > each dated row says so on its own face. **Do not re-consolidate these into
 > the header.**
 
-| Apartment (dated 2026-08-15; live counts are 9 of 11 / 10 of 13) | linear mean | linear p5 | contrast |
+| Apartment (dated 2026-08-15; live counts are ~~9 of 11~~ **10 of 11** / 10 of 13 — **serenity corrected 2026-08-22 by plan 4e task 5 fix round**: it went 9→10 on 2026-08-19 when plan 4c task 1b flipped `10.webp`, and this cell, being its own claim unit, kept the old number for three days. Both figures re-counted out of `tour/apartments/*.json` this session) | linear mean | linear p5 | contrast |
 |---|---|---|---|
 | serenity BASE (2 of 11, historical) | 0.285408 | 0.089938 | 3.1734 |
 | serenity HEAD (2 of 11, historical) | 0.281739 | 0.083283 | **3.3829** |
@@ -2907,3 +2926,282 @@ horkyone-10 gives a same-tree spread of **2.01** — roughly eight times
 kings-court's, on one machine in one session — so plan 5's open "what varies
 across a page load" is not uniform across apartments, and a single-apartment
 probe would have concluded otherwise.
+
+## Plan 4e: the tilt sweep — ~~six~~ **four** cameras on serenity, none on kings-court
+
+Written 2026-08-22 by plan 4e task 5.
+
+**Closing gate, both flats paired same-session** (BASE `705ac42` in a worktree
+on `:8743`, HEAD on `:8742`, up simultaneously, the same scripts pointed at
+each, `?measure=1&fov=legacy`, `--all-spots`, and the whole thing run **twice**
+because a single reading is not a measurement here):
+
+| Apartment | Population | BASE (run 1 / repeat) | HEAD (run 1 / repeat) | Δ |
+|---|---|---|---|---|
+| serenity | all-spot, 11 | ~~14.32 / 14.32~~ **14.33 / 14.34** | ~~**14.36 / 14.37**~~ **14.33 / 14.34** | ~~**+0.04**~~ **0.00** — re-taken 2026-08-22 by plan 4e's final whole-branch review after `4.webp`'s and `9.webp`'s tilts were withdrawn, BASE `705ac42` on `:8743` and HEAD `?v=138` on `:8742` served simultaneously again, twice again, `--all-spots`; raw `serenity-b4e-final-{fix,BASE}.json` and their `-repeat.json`. BASE moved 14.32→14.33 between sessions on the same machine, which is the reload drift this record keeps warning about — read the paired Δ, never the absolute |
+| kings-court | all-spot, 13 | 17.60 / 17.57 | **17.59 / 17.57** | **0.00** |
+
+Raw: `{serenity,kings-court}-b4e-gate-BASE-legacy-allspots.json` and
+`-repeat.json`, `{serenity,kings-court}-b4e-gate-legacy-allspots.json` and
+`-repeat.json`. ~~Shipped at `?v=137`; the branch's only `tour/` changes are five
+new `pitch` keys on serenity and that one bump.~~
+**Corrected 2026-08-22 by the final whole-branch review: shipped at `?v=138`, and the branch's only `tour/` changes are
+THREE new `pitch` keys on serenity (`6`, `7`, `11`) and that bump. `4`'s and `9`'s keys were written by task 3 and
+withdrawn by this review — see the trap section below.**
+
+**The movement is an instrument correction, and the sign of it is not the
+point.** Nothing about how the scene is lit, shaded or drawn changed on this
+branch — no material, no bake constant, no exposure, no geometry. The harness
+stopped capturing a camera the photographer never used.
+~~serenity's +0.04 lives
+almost entirely in two spots, `7.webp` **+0.37** (tilt 13°) and `4.webp`
+**+0.18** (tilt 9°), against `6.webp` −0.07 and `11.webp` −0.08 (both −6°);
+every other spot moves by ≤0.06.~~ **Re-attributed 2026-08-22 by the final
+whole-branch review, because two of the tilts it attributed the movement to no
+longer ship. serenity's Δ is now 0.00, and the per-spot movement that remains
+is `7.webp` +0.16 / +0.27 (tilt 13°) against `6.webp` −0.13 / −0.12 and
+`11.webp` −0.06 / −0.07 (both −6°); every other spot, `4.webp` and `9.webp`
+included, moves by ≤0.04 and those two are back at their BASE readings because
+they now carry the same level camera BASE does. Both pairings are quoted
+because they differ: `7.webp` alone spans 0.16 to 0.27 across the two, which is
+what a single-reading attribution would have hidden.** This is the same effect plan 4c wrote up one
+section above and it is worth restating in its own words: **saturated colour in
+a misaligned cell scores worse than the flat grey it replaced**, and where a
+spot's divider got visibly better while its ΔE rose, this instrument cannot
+arbitrate between them. It was not asked to: no value on this branch was chosen
+by ΔE.
+
+**kings-court's 0.00 is a same-state reproduction, not a result.** Its config is
+byte-identical to `main`, so BASE and HEAD are the same tree served twice, and
+**that identity — not any per-spot number — is what makes every per-spot
+movement noise by construction.**
+~~Per-spot |HEAD − BASE| reaches at most **0.10** (`11.webp`), against a
+BASE-to-BASE reload spread on that same spot of **0.16** — the reload noise is
+larger than the "difference".~~ **Corrected 2026-08-22 by plan 4e's final
+review (MINOR 4): the 0.10 held only under the run-1↔run-1 pairing, and this
+paragraph never said which pairing it meant. All four pairings, recomputed from
+the four committed gate files: run-1↔run-1 max **0.10** (`11.webp`, against a
+0.16 BASE-to-BASE reload spread on that spot); run-2↔run-2 max **0.19**
+(`14.webp`, against only **0.09** there); and the cross-pairing maximum is
+**0.21** (`13.webp`, HEAD run 2 against BASE run 1, against 0.15 BASE-to-BASE
+and 0.12 HEAD-to-HEAD on that spot). **Quote the 0.21 cross-max**, and note
+what the 14.webp row means: one spot in one pairing does exceed its own reload
+spread, so "every per-spot difference is smaller than the reload noise" was
+never true as a general statement. The conclusion is unaffected because it never
+rested on that comparison — the two trees are the same bytes.**
+
+**What shipped, counted out of the derivation files rather than recalled**
+(`{serenity,kings-court}-b4e-derivation.json`):
+
+| Apartment | tilt-confirmed | level-confirmed | no-usable-landmark | will-not-converge | Ships |
+|---|---|---|---|---|---|
+| serenity | ~~6 (`4`, `6`, `7`, `9`, `10`, `11`)~~ **4 (`6`, `7`, `10`, `11`)** | 3 (`2`, `5`, `8`) | ~~2 (`1`, `3`)~~ **4 (`1`, `3`, `4`, `9`)** | 0 | ~~9°, −6°, 13°, 1°, 22°, −6°~~ **−6°, 13°, 22°, −6°** — plus `2.webp`'s pre-existing 40°, excluded from change by the plan's own carve-out. **Corrected in this row 2026-08-22 by the final whole-branch review: `4`'s 9° and `9`'s 1° were withdrawn after re-cropping showed each measured two different physical objects, and their keys are removed from the config** |
+| kings-court | 0 | 1 (`10`) | 10 | 2 (`2`, `20`) | **nothing** — `tour/apartments/kings-court.json` is byte-identical to `main` |
+
+kings-court shipping nothing is an honest, allowed outcome: its renders and its
+photographs do not share enough unambiguous common architecture for a tilt to be
+derived from them at the pinned 72° gate lens, and on the two spots where they
+do, two landmarks in one frame demand tilts 6–9° apart.
+
+**And that row's `level-confirmed 1` must not be read across the rest of the
+line — "0 tilts shipped" is NOT "kings-court's cameras are level."** Exactly one
+of its thirteen cameras (`10.webp`) was actually confirmed level. Of the other
+twelve, two (`2`, `20`) were measured and **contradicted themselves** — two
+same-object landmarks in one frame demanding tilts 6–9° apart — and the
+remaining ten were never measured at all, because the sweep could not get a
+landmark into them: **10 of the 13 end `no-usable-landmark`, and 8 of those 10 — `7`, `8`,
+`11`, `12`, `13`, `17`, `18`, `19` — carry a written reason in
+`b4e-lens-evidence.json`'s `excludedNotLensRelated` that names a furniture
+model, a room layout, a missing asset or a camera standoff, not a camera angle**
+(counted out of that file and `kings-court-b4e-derivation.json` this session, in
+plan 4e task 5's fix round). A ninth, `3.webp`, is the same class again — the
+two televisions are mounted at different heights in the world — leaving only
+`14.webp`, whose cause is the lens (`meta.photoFovLong`). **So the kings-court
+result is a measurement this apartment's content blocked, not a finding about
+its cameras. Most of it is content work already routed to plan 5 through the
+individual `poseNote`s; a future pass that fixes the furniture will be able to
+sweep these spots for the first time, and it should not be told they were
+checked.** serenity's `10.webp` 22°
+is not new — it is an **independent re-derivation** that reproduced plan 4c task
+1b's row (0.3737 against 0.374 on record) and residual (0.0183 against 0.018)
+from a different method.
+
+**`poseVerified` is unchanged and was re-counted, not recalled:** serenity **10
+of 11** (only `2.webp` fails), kings-court **10 of 13** (`14.webp`, `17.webp`,
+`18.webp`), counted out of `tour/apartments/*.json` this session. No flag moved
+on this branch.
+
+### The measured per-load noise band
+
+`b4e-noise-band.json`, taken before any value was written: the same level render
+captured on two independent page loads (new bake, new environment capture),
+probed at column 0.5, candidate rows greedy-matched between the two. The largest
+disagreement across all 24 spots is **0.003909 of frame height** (kings-court
+`14.webp`) — **0.3254°** at the 72° gate lens, converted by inverting
+`pitch_fit.remap_rows` numerically rather than by a hand trig simplification.
+Per apartment: serenity n=11, max 0.003478, mean 0.000791; kings-court n=13, max
+0.003909, mean 0.000461. The headline figure is a deliberately conservative
+maximum, not a mean — read the per-apartment spread too.
+
+### Two different cameras read `pitch`
+
+The gate camera runs at a fixed **72°** vertical under `?fov=legacy`. The
+divider — the frame a reviewer actually stamps `poseVerified` on — runs at the
+**per-spot** fov. Measured this session on serenity by calling
+`window.__spotFov` against each photograph's real pixel dimensions:
+
+| serenity spots | Photograph | Divider fov | Gate fov |
+|---|---|---|---|
+| `1`–`8` (eight landscape spots) | 1200×675 | **88.5°** | 72° |
+| `10`, `11` (portrait) | 923×1200, 812×1200 | **120°** | 72° |
+| `9` (portrait, own `vfov` override) | 919×1200 | **65°** | 72° |
+
+So a tilt that merely aligns rows means two different things in the two places
+the key is read. **The plan's own text said "88.5–120°"; measured, the range is
+65–120°**, because `9.webp` carries an explicit `vfov: 65` that overrides
+`photoFovLong`. Corrected here rather than carried across.
+
+### The trap: a tight residual is a property of the method
+
+This is the most valuable thing the branch produced, and it caught **both**
+apartments' first attempts. A row read at a fixed column slides *monotonically*
+with tilt. So an **unrelated** render line can always be swept into agreement
+with an **unrelated** row in the photograph — and it converges tightly. The
+discarded kings-court pass reached residuals of **0.0002–0.0065** on four spots
+that were each measuring two different physical objects; serenity's first pass
+had the same defect on four of its own, including a render mirror-proxy matched
+against a photograph's sink counter. Neither was caught by any number. Both were
+caught by a reviewer cropping both frames and asking what the row *is*.
+
+**Only same-object identity, established by looking, separates a derivation from
+a coincidence.** A small residual is evidence that the sweep converged, not that
+the landmark was right.
+
+**And there was a THIRD instance, found by the final whole-branch review on
+2026-08-22 — which is the most useful thing in this section, because of *how* it
+survived.** `9.webp` was caught by the task-3 fix round, and that round
+**renamed** its landmark instead of re-cropping it: the new name conceded, in
+the committed record's own words, "Neither frame is showing bare architecture
+here", while the plan's step 1 says to prefer architecture over furniture — and
+the tilt was kept anyway, on the strength of a 0.0001 residual. Re-cropping it
+showed the photograph's row on the body of a white **table lamp** that has no
+counterpart anywhere in the render, against the render's **tabletop edge**.
+`4.webp`, flagged in the same review as merely "plausible", failed identically:
+the photograph's row is the near dining **chair's top rim**, the render's is
+**bare wall**. Both were withdrawn and their keys removed.
+
+**A rename is not a re-derivation.** When a landmark's name turns out to be
+wrong, the crop has to be redone from scratch and the spot re-decided — because
+the name was never what was load-bearing, the *object* was. The corollary the
+same review recorded: the pinhole cross-check cannot catch this either. It is
+fed the two recorded rows and asked what tilt maps one onto the other, so it
+agrees just as tightly when the two rows are two different objects — it agreed
+to well under a degree on both `4` and `9`. A gross disagreement can falsify a
+landmark (it did, on `1.webp`, by 21°); agreement can never confirm one.
+
+### The automatic method, measured and rejected
+
+`b4e-preflight-method-rejection.json`, run before the plan spent a single
+browser capture.
+
+- **Two-parameter (tilt + lens) fitting is degenerate.** ~~The fitted fov ran to
+  the 28° grid floor on **5 of 24** spots~~ **Corrected 2026-08-22, plan 4e task
+  5 fix round — the "5 of 24" was quoted verbatim from
+  `b4e-preflight-method-rejection.json`'s `whatThisChanges`, and that summary
+  line disagreed with the `twoParameter` block in the same file. Counted out of
+  that block this session: the fitted fov sits *exactly* on the 28° grid floor
+  on **2 of 24** spots (serenity `1.webp`, kings-court `2.webp`), **4 of 24** at
+  ≤30°, **8 of 24** at ≤34°. The source has been corrected in place too, so it
+  stops disagreeing with itself. And a **third** figure was in the record: the
+  plan (`2026-08-22-phase-b4e-pitch-sweep.md:21`) and its spec
+  (`…-design.md:106`) both say **4 of 24**. That one reconciles — it is the
+  ≤30° count, i.e. "at the floor or within one 1.5° grid step of it", which is a
+  fair reading of "ran to the floor". So of the three numbers in circulation, 4
+  and 2 are the same measurement under two thresholds and only the JSON's 5 was
+  wrong. The plan and the spec are dated planning documents and are left as
+  written.** The degeneracy conclusion does not rest on
+  the floor count and survives it. Counted the same way this session, the 24
+  fitted fovs run **28.0 – 107.5°** against one real gate lens of 72°: **8 pile
+  into the bottom of the grid (28–34°), 9 spread across 45–77.5°, and 7 sit at
+  ≥93°**, with a bare stretch between 34° and 45° where nothing lands. Two
+  frames of the same flat, shot on the same camera, cannot honestly want lenses
+  **3.8× apart** (107.5 ÷ 28.0) — that spread is a flat objective wandering, not
+  a lens being measured.
+- **One-parameter fitting is well posed, but its confidence score does not
+  predict correctness.** On serenity `10.webp`, whose captured tilt is known to
+  be 22°, the fit returned **21.5°** — and that correct answer carried the
+  **lowest sharpness of all 24 spots** (0.003). A reader who filtered by
+  confidence would have discarded the one answer that was right.
+- **The synthetic tests pass, and they prove only the algebra.** The synthetic
+  profiles are sparse spikes generated by the same projection the fit inverts.
+  Keep the tests; never read a green run as validation of the method on a
+  photograph.
+- **A plain bug found alongside it:** `MIN_OVERLAP` was 0.55, and the fraction of
+  a tilted photograph's rows falling inside a *level* render is a pure function
+  of tilt and lens (1.000 at 0°, 0.697 at 20°, 0.452 at 40°, at vfov 72). A 0.55
+  floor therefore capped the searchable tilt at about **33°** — the prediction
+  pass could never have proposed serenity `2.webp`'s shipped 40°, and the
+  refusal would have read as "no tilt found". Lowered to 0.25, with the overlap
+  now reported per spot.
+- **No conversion coefficient exists.** How much a fitted tilt shifts per degree
+  of assumed vfov was measured across both flats' spots: median **0.15**, range
+  **−0.617 to +1.217**. Every tilt this branch ships is conditional on the
+  assumed 72° gate lens and **cannot** be rescaled by one constant if
+  `meta.photoFovLong` moves.
+
+The shipped method is therefore: the fit may **propose** a neighbourhood; a
+named, crop-confirmed landmark measured in both frames **decides**; ΔE decides
+nothing.
+
+### Lens evidence, gathered and deliberately not acted on
+
+`b4e-lens-evidence.json`. On kings-court `2.webp` and `20.webp`, two landmarks
+crop-confirmed as the *same physical object* in one frame, measured at the same
+column across the same nine captures, each have a clean interior minimum — and
+the minima are **9°** apart on `2.webp` and **6–9°** apart on `20.webp`. One
+camera has one tilt, so the gap cannot be tilt, and the residual scales with
+distance from the principal point, which is a focal-length signature. Solving
+`2.webp`'s two rows simultaneously implies a tan-half-angle factor of roughly
+**2.2–2.4** ~~(re-derived independently by the reviewer at about 2.41)~~
+**[parenthetical withdrawn 2026-08-22, plan 4e task 5 fix round. That 2.41 came
+from a reviewer's independent re-derivation whose working lives only under
+`.superpowers/`, which is gitignored (`.gitignore:28`), and it is not
+recoverable from the tree: `b4e-lens-evidence.json` commits the residuals, the
+cross-residuals and the implied tilts, but **not** the landmark row positions
+the solve consumes, so nobody reading this repo can reproduce 2.41. Making it
+derivable would mean re-running task 4's nine-capture sweep, not editing a JSON
+— so it is withdrawn rather than propped up. The load-bearing claim is the
+2.2–2.4 range, it is committed in `b4e-lens-evidence.json`
+(`willNotConvergeCount.note`), and nothing below depends on the withdrawn
+figure.]** **State
+this as direction and magnitude class, not as a measurement**: it is a two-point
+estimate from one frame, it assumes the render's own geometry is right, the
+pre-flight above already showed a two-parameter fit is degenerate, and
+`2.webp`'s second landmark is a **television** — this same record twice argues
+that this apartment's TV models sit at different heights than the photographs'.
+It does **not** narrow the existing ~2.1 prior (`meta.photoFovLong` documented
+120, measured ~57–58° by two earlier independent methods).
+`meta.photoFovLong` was **not** edited by this branch. Plan 5 owns it.
+
+### Structural sweep
+
+`window.__issues` empty on serenity, kings-court **and** horkyone-10 — which
+this plan never touched, checked anyway because that is what a sweep is — and no
+console errors on any of the three. Draw calls at serenity's own entrance,
+through the post chain with `info.autoReset` disabled and reset by hand, three
+runs each: **80** on HEAD and **80** on BASE, same machine, same browser
+session. This plan adds no geometry and the two trees agree, so the 80 is this
+machine and not this branch — the same class of difference already recorded for
+phase A's 69 against plan 4a's 72. ~~`CLAUDE.md`'s budget row still says 78 and
+was deliberately **not** edited here: this task changed no shipped file, and a
+third machine's reading is not a correction to the second's.~~ **Reversed
+2026-08-22, plan 4e task 5 fix round: `CLAUDE.md` now records the 80, in both
+its budget row and its "Draw calls in a spot" recipe comment. The reasoning
+above was right that 80 is not a correction to 78 and wrong that this meant
+leaving it out — this repository's worst claim class is one that goes stale
+with nobody editing the file, and rule 4's budget paragraph already carries the
+precedent clause for exactly this ("This said 69 from phase A until
+2026-08-16…"). The 80 is written there as that sentence's next clause: a third
+machine's reading of the same recipe on an unchanged tree, not a regression and
+not a new budget figure. The 78 is not struck — it stands as the second
+machine's reading.**
