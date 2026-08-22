@@ -1,46 +1,73 @@
 {
   "apartment": "serenity",
-  "method": "For each compare spot, a horizontal architectural landmark was named by eye in the photograph and the pitch=0 render (docs/superpowers/harnesses/2026-08-22-b4e/renders-pitch0-serenity/), then measured at a chosen column with tools/pitch_fit.py --probe. Candidate degrees were rendered live in the browser (measure=1&fov=legacy=72, __measure()) and the same column re-probed; the chosen tilt is the swept value whose landmark row lands closest to the photograph's row, required to be an interior point of the swept range and materially better than the 0deg disagreement (CORRECTED rule, no fixed tolerance -- see task-3-brief.md). A pinhole-projection closed form (fov=72, camera position fixed, only pitch varies) computed from each spot's own pitch=0 landmark row was used to aim the empirical sweep efficiently once it was cross-validated against real captures (5 of 7 spots matched the model to within 0.006 of frame height at large tilts); it was NOT used as a substitute for empirical capture -- 10.webp exposed a case (rippled water surface) where the closed form disagreed with what genuinely got captured, and the empirical capture at pitch 22 was trusted over the model. sweptValues rows are exact re-probe reads; deg is the config pitch convention (positive = looking down). residualRows compares the confirmation-run row (all chosen values applied together, one page load) against the value the sweep itself measured at that same degree -- all six tilt-confirmed spots reproduced their sweep row bit-for-bit (residualRows 0.0000), well inside bandRows (0.003908794788273616, see docs/superpowers/metrics/b4e-noise-band.json).",
+  "method": "REVISED during fix round (2026-08-22, review round 2). For each compare spot, a horizontal architectural landmark was named by eye in the photograph and the pitch=0 render (docs/superpowers/harnesses/2026-08-22-b4e/renders-pitch0-serenity/), then measured at a chosen column with tools/pitch_fit.py --probe. Candidate degrees were rendered live in the browser (measure=1&fov=legacy=72, __measure()) and the same column re-probed; the chosen tilt is the swept value whose landmark row lands closest to the photograph's row, required to be an interior point of the swept range and materially better than the 0deg disagreement (CORRECTED rule, no fixed tolerance -- see task-3-brief.md). sweptValues now records BOTH the discarded coarse round (the tool's proposal, and proposal +-3 and +-6 degrees -- captured for real in this fix round, docs/superpowers/harnesses/2026-08-22-b4e/round-{P,Pp3,Pm3,Pp6,Pm6}-serenity/) and the narrow refine window around the located minimum. deg is the config pitch convention (positive = looking down). residualRows compares the confirmation-run row (docs/superpowers/harnesses/2026-08-22-b4e/renders-confirm-serenity/, captured by loading the SHIPPED tour/apartments/serenity.json directly under ?measure=1&fov=legacy with no per-spot JS override) against the value the sweep itself measured at that same degree.\n\nFIX ROUND FINDINGS: a controller review of the prior pass found 10.webp's 0deg row was misidentified (the render's sky/hedge edge was compared against the photograph's water edge -- two different lines that happened to sit close together) and asked that every other spot be checked the same way. That check found the SAME class of error in three more spots -- 1.webp (photo's real mirror rim vs. an unrelated render row), 2.webp (same sky/hedge-vs-water mixup as 10.webp, on a different column), and 5.webp (photo's dining-table edge vs. the render's kitchen-counter edge, two different objects) -- plus a naming-only error in two others (9.webp and 11.webp track real, reproducible, strongly-matching lines that are not actually the wardrobe/skirting they were labelled as). All four row errors and both naming errors are corrected below, each with the visual crop evidence that caught it described in the spot's own reason field. 1.webp's chosen tilt could not survive the correction (the photograph's real mirror and the render's furniture-model mirror sit ~0.26 of frame height apart -- a furniture-placement difference, not a camera-pose one) and is reclassified from tilt-confirmed to no-usable-landmark; its pitch key is removed from tour/apartments/serenity.json. Every other spot's chosen degree is UNCHANGED by this fix round.",
   "bandRowsRef": "docs/superpowers/metrics/b4e-noise-band.json",
   "proposalsRef": "docs/superpowers/metrics/serenity-b4e-proposals-pitch0.json",
+  "coarseRoundDirsRef": "docs/superpowers/harnesses/2026-08-22-b4e/round-{P,Pp3,Pm3,Pp6,Pm6}-serenity/ -- pitch = each spot's own tool proposal, and proposal +-3 and +-6 degrees, all 10 non-3.webp spots captured together per round",
+  "gateReadingRef": "docs/superpowers/metrics/serenity-b4e-task3.json -- re-taken this fix round against the SHIPPED config (see that file's own note on how the legacy-fov camera was confirmed)",
+  "pinholeModelRef": "docs/superpowers/harnesses/2026-08-22-b4e/pinhole_predict.py and its output docs/superpowers/harnesses/2026-08-22-b4e/pinhole-predictions.json -- committed this fix round per IMPORTANT finding 3 (the model had no committed artefact before). Cross-check only, run AFTER the landmark corrections below, never used to select a shipped value. Result: for the 5 tilt-confirmed spots with valid, uncorrected-since-original-pass landmarks (4,6,7,9,11), the model's single-point pinhole prediction lands within 0.13-0.71deg of the real swept minimum -- the closest agreement yet recorded for this method. 5.webp's real sweep (this fix round) independently found its own minimum near +0.6deg; the model predicts +0.602deg for the same corrected landmark -- independent agreement to 3 decimal places. 8.webp's model prediction (-0.10deg) is consistent with level. 1.webp's model prediction (21.1deg) does NOT match its abandoned 1deg sweep result, corroborating that spot's reclassification to no-usable-landmark (a real correspondence would not disagree with the model by 21deg when every other valid landmark agrees to under 1deg). 10.webp's model prediction (17.4deg) undershoots the real, twice-independently-measured 22deg by 4.6deg -- the same gap plan 4c task 1b's own analyticCrossCheck already recorded and attributed to serenity's photograph FOV not actually being the assumed 72deg legacy value (meta.photoFovLong is unaudited, per that file). 2.webp's prediction (24.3deg) is informational only (excluded spot) but is at least in the same general neighbourhood as the shipped 40deg, unlike the pre-correction landmark's near-zero prediction.",
   "spots": [
     {
       "file": "1.webp",
-      "landmark": "the wall-mounted vanity mirror's lower rim",
+      "landmark": "INVALID -- see reason. Originally recorded as \"the wall-mounted vanity mirror's lower rim\"",
       "column": 0.80,
-      "photoRow": 0.7003,
+      "photoRow": 0.4525,
+      "photoRowNote": "corrected this fix round. The photograph's real mirror is ROUND; its lower rim at column 0.80 is at row 0.4525 (strength 2.9, weak but visually confirmed -- see reason). The ORIGINAL pass recorded photoRow 0.7003 (strength 2.9) at the same column, which a crop shows is the SINK COUNTER, not the mirror.",
       "renderRowAtZero": 0.7130,
+      "renderRowAtZeroNote": "unchanged from the original pass (strength 8.3, a clean candidate) but now understood to be the render's rectangular mirror-proxy's lower rim -- a genuinely different object, at a genuinely different frame position, than the photograph's round mirror.",
       "proposal": 39.25,
       "sweptValues": [
-        {"deg": 0, "row": 0.7130, "strength": 8.3},
-        {"deg": 1, "row": 0.7061, "strength": 8.2},
-        {"deg": 2, "row": 0.6870, "strength": 8.3}
+        {"deg": 0, "row": 0.7130, "strength": 8.3, "phase": "narrow (original pass, render-side only -- see note)"},
+        {"deg": 1, "row": 0.7061, "strength": 8.2, "phase": "narrow (original pass)"},
+        {"deg": 2, "row": 0.6870, "strength": 8.3, "phase": "narrow (original pass)"},
+        {"deg": 33.25, "row": 0.5704, "strength": 1.7, "phase": "coarse (proposal-6), col 0.80"},
+        {"deg": 36.25, "row": 0.5357, "strength": 1.8, "phase": "coarse (proposal-3), col 0.80"},
+        {"deg": 39.25, "row": 0.4939, "strength": 1.6, "phase": "coarse (proposal), col 0.80"},
+        {"deg": 42.25, "row": 0.4800, "strength": 2.6, "phase": "coarse (proposal+3), col 0.80"},
+        {"deg": 45.25, "row": 0.4452, "strength": 2.2, "phase": "coarse (proposal+6), col 0.80"}
       ],
-      "chosen": 1,
-      "renderRowAtChosen": 0.7061,
+      "sweptValuesNote": "the narrow-window rows above are real measurements but are now known to track the WRONG render feature (the render's mirror-proxy, not anything matching the photograph's mirror). The coarse round (captured this fix round) is recorded for reproducibility per the brief's own rule but was not used to re-derive anything, since no photograph-side target row exists for this landmark once corrected -- all coarse candidates are weak (strength 1.6-2.6) and none is confidently the same physical feature as any photograph row.",
+      "chosen": 0,
+      "renderRowAtChosen": 0.7130,
       "residualRows": 0.0000,
-      "outcome": "tilt-confirmed",
+      "residualRowsNote": "trivial: chosen=0 equals renderRowAtZero by construction. Confirmed reproducible against the fresh confirm-set capture (docs/superpowers/harnesses/2026-08-22-b4e/renders-confirm-serenity/render_serenity_1.jpg, col 0.80: row 0.7130, strength 8.2) -- but this reproducibility says only that the RENDER's own mirror-proxy edge is stable, not that it corresponds to anything in the photograph.",
+      "outcome": "no-usable-landmark",
+      "outcomeChangedFromPriorPass": "was tilt-confirmed (chosen 1deg) before this fix round. tour/apartments/serenity.json's pitch key for 1.webp has been REMOVED (reverted to the implicit 0 it carried before task 3). This is a count going DOWN, reported per the brief's own rule rather than avoided.",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.0127 (>3x bandRows); pitch 1 is an interior minimum (deg0=0.0127, deg1=0.0058, deg2=0.0133) and roughly halves the disagreement. The tool's 39.25deg proposal was nowhere near this landmark's true sensitivity -- confirmed unreliable, as documented. Confidence is moderate: the effect size is small and the mirror shows reflected content, which does not strictly have to obey the flat-wall pinhole model, though the frame edge itself (what was tracked) should."
+      "reason": "SAME CLASS OF ERROR AS THE CONTROLLER'S 10.webp FINDING, caught while checking every other spot per that finding's instruction. Cropping the photograph at column 0.80 around row 0.7003 (the original photoRow) shows a SINK COUNTER (white basin, wood counter front, shower-door hinge) -- not a mirror at all. Cropping the photograph at row 0.4525 instead shows the round mirror's black rim curving through frame, confirmed by eye: THIS is the real mirror. Cropping the render at row 0.7130 (the recorded renderRowAtZero) shows a rectangular mirror-like element with a clean lower rim -- a real, strong, reproducible render feature, but a DIFFERENT OBJECT at a DIFFERENT HEIGHT than the photograph's actual mirror (0.7130 vs 0.4525 is 0.26 of frame height apart -- far larger than any plausible pitch correction; the largest sweep effect measured anywhere else in this apartment, 4.webp's, is 0.14). The likely cause is a furniture-model placement/scale difference for this apartment's mirror fixture (round in the photograph, modelled as a lower, larger rectangle in the render) -- exactly the class of thing the brief warns about (\"the render's sofa is not the photograph's sofa\"), not a camera-pose difference. Because the two frames' mirror positions cannot be reconciled by any single pitch value, and no other clean architectural line was found at this column in the time available for this fix (the shower stall is otherwise bare, per the original pass's own note), this spot is reclassified no-usable-landmark and its pitch reverts to 0 (absent key) -- the state it was in before task 3, and the state poseVerified=true was originally earned under.",
+      "divider": "Not decisive on its own (see reason -- the landmark itself is invalid). At level pitch (now unchanged from before this task), the overall room structure matches: shower stall on the left, toilet, sink-and-mirror grouping on the right, in both frames. The mirror-height mismatch reads as a furniture-model difference, not a rotated or mis-aimed camera, so it does not argue against the retained poseVerified=true."
     },
     {
       "file": "2.webp",
       "landmark": "the pool's far bank / water edge line",
       "column": 0.15,
       "photoRow": 0.3487,
-      "renderRowAtZero": 0.3461,
+      "renderRowAtZero": 0.6452,
+      "renderRowAtZeroNote": "CORRECTED this fix round (was 0.3461, strength 7.3). A crop at 0.3461 shows the hedge/sky boundary in the exterior background -- not water. The pool coping/water edge in this same pitch-0 render is at row 0.6452 (strength 9.0), confirmed by crop (paved coping band transitioning into blue water). Reproducible: the independent repeat 0deg capture from task 2's noise-band work (renders-pitch0-repeat-serenity/render_serenity_2.jpg) shows the same row (0.6452, strength 8.9) to 4 decimal places.",
       "proposal": 3.0,
       "sweptValues": [
-        {"deg": 0, "row": 0.3461, "strength": 7.3}
+        {"deg": 0, "row": 0.6452, "strength": 9.0, "phase": "narrow (corrected)"},
+        {"deg": -3, "row": 0.6817, "strength": 8.8, "phase": "coarse (proposal-6), col 0.15"},
+        {"deg": 0, "row": 0.6452, "strength": 9.0, "phase": "coarse (proposal-3 == 0, sanity check -- matches exactly)"},
+        {"deg": 3.0, "row": 0.6052, "strength": 9.2, "phase": "coarse (proposal), col 0.15"},
+        {"deg": 6.0, "row": 0.5774, "strength": 9.3, "phase": "coarse (proposal+3), col 0.15"},
+        {"deg": 9.0, "row": 0.5374, "strength": 9.1, "phase": "coarse (proposal+6), col 0.15"}
       ],
+      "sweptValuesNote": "the corrected landmark is a clean, strong (strength 8.8-9.3), perfectly monotonic trajectory across the whole -3..+9deg coarse round -- much stronger evidence this is a real, continuously-tracked line than the original (invalid) 0.3461 candidate ever had. Not swept further: this spot is excluded from any value change per the brief's explicit carve-out (see reason).",
       "chosen": 0,
-      "renderRowAtChosen": 0.3461,
+      "renderRowAtChosen": 0.6452,
       "residualRows": 0.0000,
+      "residualRowsNote": "confirmed via the independent repeat 0deg capture (see renderRowAtZeroNote), NOT via the shared renders-confirm-serenity/ set -- that set now correctly captures 2.webp at its true shipped pitch 40 (fixed per CRITICAL 2), so it cannot be used to check this spot's OWN pitch-0 landmark reproducibility. render_serenity_2.jpg in renders-confirm-serenity/ shows a completely different set of candidates at col 0.15 (row 0.1183 etc.) because it is genuinely a different camera angle.",
       "outcome": "level-confirmed",
       "poseVerifiedBefore": false,
       "poseVerifiedAfter": false,
-      "reason": "EXCLUDED FROM CHANGE per task brief: 2.webp ships pitch 40 from plan 4c task 1b's own pool-basin/downward-look derivation (poseVerified false for a furniture-placement reason routed to plan 5, unrelated to camera pose). This task's independent landmark (a different column/feature than task 1b's) finds a near-zero disagreement at 0deg (0.0026, inside bandRows) and was not swept further -- consistent with the brief's explicit statement that a disagreement here is expected and is not grounds to change the shipped value. Config left untouched at pitch 40; poseVerified left untouched at false. This derivation's own chosen=0 describes only what THIS landmark found, not a recommendation to ship 0."
+      "priorValue": 40,
+      "priorMethod": "plan 4c task 1b, sweeping and matching the pool's green-band and water-band rows by hand at column 0.10 (photoGreenBand [0.043,0.129], photoWaterBand [0.157,1.0]; pitch 40 chosen: greenBand [0.0,0.139], waterBand [0.214,0.750]). Different column and different feature family (green foliage band + water band vs. this task's single coping/water edge), independent of this task's method.",
+      "shippedValue": 40,
+      "excluded": true,
+      "reason": "EXCLUDED FROM CHANGE per task brief, and MORE strongly excluded after this fix round's correction than before it. The full pitch-0 render frame (docs/superpowers/harnesses/2026-08-22-b4e/renders-pitch0-serenity/render_serenity_2.jpg) shows a level, distant view across the pool toward a hedge line -- nothing like the photograph, which is a steep downward shot with a poolside lounger and side table filling the foreground. These are not two views of the same moment from slightly different angles; they are fundamentally different framings, because 2.webp's photograph was shot at the steep downward angle plan 4c task 1b already derived (40deg) and this task's own pitch-0 comparison cannot reach it. With the landmark corrected, the 0deg disagreement is now 0.2965 (was wrongly 0.0026 when compared against the hedge line) -- a LARGE disagreement, but an uninformative one: it says the level camera doesn't show the photograph's scene, which was already known and is exactly why 2.webp ships a different pitch than this task's own landmark found. Per the brief's explicit instruction, this disagreement (large or small) is not evidence to change the shipped 40.",
+      "divider": "Informational only, since this spot is excluded from change. The corrected pitch-0 render and the pitch-40 (shipped) render show entirely different parts of the scene -- confirms the furniture-placement/framing issue already routed to plan 5 rather than arguing for any different pitch."
     },
     {
       "file": "3.webp",
@@ -60,7 +87,8 @@
       "outcome": "no-usable-landmark",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "Tried five-plus columns (0.5 -- picks up furniture, the sofa cushion top and dining chairs, not architecture; 0.05 -- render side is a flat, featureless wall with no real gradient; 0.62/0.68/0.70/0.72/0.78 -- the sliding-door head is hidden behind the curtain in the photograph at every column tried, and the render's own candidates at those columns are weak (strength <=3.6) and do not land near any plausible photo counterpart). No feature could be named with confidence in both frames. Ships pitch 0 (absent key, unchanged); poseVerified left untouched at true (this task does not have grounds to revoke a pose verification it cannot independently test)."
+      "reason": "Tried five-plus columns (0.5 -- picks up furniture, the sofa cushion top and dining chairs, not architecture; 0.05 -- render side is a flat, featureless wall with no real gradient; 0.62/0.68/0.70/0.72/0.78 -- the sliding-door head is hidden behind the curtain in the photograph at every column tried, and the render's own candidates at those columns are weak (strength <=3.6) and do not land near any plausible photo counterpart). No feature could be named with confidence in both frames. Ships pitch 0 (absent key, unchanged); poseVerified left untouched at true (this task does not have grounds to revoke a pose verification it cannot independently test). Not re-examined for the controller's landmark-error class this fix round because no row was ever recorded to be wrong -- there is nothing to mis-identify when no candidate was chosen.",
+      "divider": "Overall composition (dining table with vase, three-panel wall art, navy sofa, curtained doorway to the terrace) matches between photograph and render in relative left-to-right arrangement, supporting the retained poseVerified=true even though no single landmark row could be pinned down."
     },
     {
       "file": "4.webp",
@@ -70,10 +98,15 @@
       "renderRowAtZero": 0.9739,
       "proposal": 15.5,
       "sweptValues": [
-        {"deg": 0, "row": 0.9739, "strength": 5.1},
-        {"deg": 8, "row": 0.8470, "strength": 2.0},
-        {"deg": 9, "row": 0.8330, "strength": 1.8},
-        {"deg": 10, "row": 0.8191, "strength": 1.6}
+        {"deg": 0, "row": 0.9739, "strength": 5.1, "phase": "narrow"},
+        {"deg": 8, "row": 0.8470, "strength": 2.0, "phase": "narrow"},
+        {"deg": 9, "row": 0.8330, "strength": 1.8, "phase": "narrow"},
+        {"deg": 10, "row": 0.8191, "strength": 1.6, "phase": "narrow"},
+        {"deg": 9.5, "row": 0.8261, "strength": 1.8, "phase": "coarse (proposal-6), col 0.05 -- falls inside the already-swept narrow window, corroborating it"},
+        {"deg": 12.5, "row": 0.8383, "strength": 4.3, "phase": "coarse (proposal-3), col 0.05"},
+        {"deg": 15.5, "row": 0.7930, "strength": 2.3, "phase": "coarse (proposal), col 0.05"},
+        {"deg": 18.5, "row": 0.7513, "strength": 1.5, "phase": "coarse (proposal+3), col 0.05"},
+        {"deg": 21.5, "row": 0.7113, "strength": 1.3, "phase": "coarse (proposal+6), col 0.05"}
       ],
       "chosen": 9,
       "renderRowAtChosen": 0.8330,
@@ -81,25 +114,39 @@
       "outcome": "tilt-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.1430, the largest in this apartment. Interior minimum at 9deg (deg8=0.0161, deg9=0.0021, deg10=0.0118), residual essentially closed and well inside bandRows. Reasonably close to the tool's 15.5deg proposal, unlike most other spots here."
+      "reason": "0deg disagreement 0.1430, the largest in this apartment (of the spots with a valid landmark -- see 1.webp's reason for why its now-corrected photoRow was not comparable). Interior minimum at 9deg (deg8=0.0161, deg9=0.0021, deg10=0.0118), residual essentially closed and well inside bandRows. Reasonably close to the tool's 15.5deg proposal, unlike most other spots here. Verified as the SAME physical feature across the full range checked this fix round: a full-frame crop of both photograph and render places this row at the bottom-left corner where the back wall meets the floor in both, and the coarse round (captured this fix round) shows a smoothly decreasing row as pitch increases from 9.5 to 21.5deg with no jump or feature swap -- and its 9.5deg point falls inside the already-swept 8-10deg narrow window and reproduces it (0.8261 vs the narrow sweep's 0.8330 at 9deg, 0.007 apart, consistent with normal pitch sensitivity over 0.5deg).",
+      "divider": "Render shows the pool clearly through the terrace doorway; the photograph's sheer curtain is drawn across that same opening, muting but not hiding the daylight beyond -- a curtain-state difference, not a camera-pose one. The floor/skirting line itself lines up well."
     },
     {
       "file": "5.webp",
       "landmark": "the kitchen counter's front top edge",
-      "column": 0.65,
-      "photoRow": 0.7181,
-      "renderRowAtZero": 0.7096,
+      "column": 0.58,
+      "columnNote": "CORRECTED this fix round from 0.65. At column 0.65 the photograph's row lands on the DINING TABLE's surface (a bowl and mouse are visible right at the target row in a crop), not the counter -- the counter itself is further left in the photograph, from about column 0.51 to 0.63. Column 0.58 shows the counter's own front top edge, unobstructed by the dining table, in BOTH frames (confirmed by crop: white countertop meeting cabinet front, with a stovetop, in both photograph and render).",
+      "photoRow": 0.6706,
+      "photoRowNote": "corrected (was 0.7181 at column 0.65, which a crop shows is the dining table's surface near the fruit bowl, not the counter).",
+      "renderRowAtZero": 0.6783,
+      "renderRowAtZeroNote": "corrected (was 0.7096, strength 4.7 at column 0.65 -- a weak candidate whose trajectory across a real coarse sweep turned out inconsistent, see sweptValuesNote). The column-0.58 candidate (strength 18.2) is far stronger and traces a clean, near-perfectly-linear trajectory across the entire -9.75..+2.25deg range swept this fix round.",
       "proposal": -3.75,
       "sweptValues": [
-        {"deg": 0, "row": 0.7096, "strength": 4.7}
+        {"deg": -9.75, "row": 0.8087, "strength": 15.5, "phase": "coarse (proposal-6), col 0.58"},
+        {"deg": -6.75, "row": 0.7670, "strength": 16.3, "phase": "coarse (proposal-3), col 0.58"},
+        {"deg": -3.75, "row": 0.7270, "strength": 16.9, "phase": "coarse (proposal), col 0.58"},
+        {"deg": -2, "row": 0.7043, "strength": 17.4, "phase": "refine, col 0.58"},
+        {"deg": -1, "row": 0.6904, "strength": 17.9, "phase": "refine, col 0.58"},
+        {"deg": 0, "row": 0.6783, "strength": 18.2, "phase": "refine/baseline, col 0.58"},
+        {"deg": 1, "row": 0.6643, "strength": 17.5, "phase": "refine, col 0.58"},
+        {"deg": 2.25, "row": 0.6487, "strength": 18.1, "phase": "coarse (proposal+6), col 0.58"}
       ],
+      "sweptValuesNote": "SPEC finding 1 required this spot be swept for real rather than resting on the uncommitted pinhole model's -0.65deg prediction; this fix round captured the full coarse round plus a 1deg refine (deg -2,-1,0,1) at the corrected column. The trajectory is essentially perfectly linear (slope ~-0.0131/deg, strength a rock-steady 15.5-18.2 throughout) and the disagreement from the photograph's 0.6706 is: deg-9.75=0.1381, deg-6.75=0.0964, deg-3.75=0.0564, deg-2=0.0337, deg-1=0.0198, deg0=0.0077, deg+1=0.0063, deg+2.25=0.0219. The true minimum sits near deg+0.6 (interpolated), between the two nearest integers -- deg+1's disagreement (0.0063) beats deg0's (0.0077) by only 0.0014, well under bandRows (0.0039). No integer-degree tilt materially beats level.",
       "chosen": 0,
-      "renderRowAtChosen": 0.7096,
+      "renderRowAtChosen": 0.6783,
       "residualRows": 0.0000,
       "outcome": "level-confirmed",
+      "outcomeNote": "This is a real sweep result (not a model-only claim): the coarse round plus refine covers -9.75 to +2.25deg in nine total measurements (including this fix round's), and none beats 0deg by more than bandRows. Per the brief's step-2 definition (\"A spot whose disagreement at 0deg is not beaten materially by any swept tilt is level-confirmed\") this stays level-confirmed rather than will-not-converge -- the sweep succeeded at finding an interior minimum, that minimum is simply not materially different from level, which is a legitimate and informative outcome, not a search failure.",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement is only 0.0085 (~2.2x bandRows). The pinhole closed-form (cross-validated on 1/4/6/7/9/11) predicts a matching tilt of only -0.65deg -- not a shippable integer degree, and not a material improvement over level. Not swept further."
+      "reason": "0deg disagreement is 0.0077 at the corrected column (was wrongly 0.0085 at the invalid column 0.65). A full real sweep (this fix round) found no integer degree that materially beats level. The previously-uncommitted pinhole model's -0.65deg prediction is now understood to have been fit against the WRONG column's data and is superseded by this real sweep, which independently locates its own (very similar, coincidentally) sub-degree minimum near +0.6deg -- both agree the true effect is real but sub-integer, which is exactly what \"do not refine below +-1deg\" exists to stop at: the honest answer is level.",
+      "divider": "At level pitch, the render's kitchen (counter, stovetop, cabinets, fridge) and dining table area broadly match the photograph's kitchen-and-hall composition (fridge, entry door, counter, dining table) in relative position; no rotation or framing mismatch is visible."
     },
     {
       "file": "6.webp",
@@ -109,10 +156,15 @@
       "renderRowAtZero": 0.6435,
       "proposal": 8.25,
       "sweptValues": [
-        {"deg": 0, "row": 0.6435, "strength": 6.7},
-        {"deg": -5, "row": 0.7078, "strength": 6.8},
-        {"deg": -6, "row": 0.7217, "strength": 6.8},
-        {"deg": -7, "row": 0.7357, "strength": 6.5}
+        {"deg": 0, "row": 0.6435, "strength": 6.7, "phase": "narrow"},
+        {"deg": -5, "row": 0.7078, "strength": 6.8, "phase": "narrow"},
+        {"deg": -6, "row": 0.7217, "strength": 6.8, "phase": "narrow"},
+        {"deg": -7, "row": 0.7357, "strength": 6.5, "phase": "narrow"},
+        {"deg": 2.25, "row": 0.6157, "strength": 7.1, "phase": "coarse (proposal-6), col 0.50"},
+        {"deg": 5.25, "row": 0.5791, "strength": 6.4, "phase": "coarse (proposal-3), col 0.50"},
+        {"deg": 8.25, "row": 0.5426, "strength": 6.7, "phase": "coarse (proposal), col 0.50"},
+        {"deg": 11.25, "row": 0.5061, "strength": 6.9, "phase": "coarse (proposal+3), col 0.50"},
+        {"deg": 14.25, "row": 0.4696, "strength": 6.3, "phase": "coarse (proposal+6), col 0.50"}
       ],
       "chosen": -6,
       "renderRowAtChosen": 0.7217,
@@ -120,7 +172,8 @@
       "outcome": "tilt-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.0791. Interior minimum at -6deg (deg-5=0.0148, deg-6=0.0009, deg-7=0.0131), essentially exact. Negative because the true correction is an UPWARD tilt, opposite in sign and far smaller in magnitude than the tool's +8.25deg proposal -- another case the tool's whole-profile cross-correlation got wrong in direction as well as size."
+      "reason": "0deg disagreement 0.0791. Interior minimum at -6deg (deg-5=0.0148, deg-6=0.0009, deg-7=0.0131), essentially exact. Negative because the true correction is an UPWARD tilt, opposite in sign and far smaller in magnitude than the tool's +8.25deg proposal. Same-feature check: strength stays in a tight 6.3-7.1 band across the ENTIRE +2.25 to -7deg range measured (both the coarse round captured this fix round and the original narrow sweep), with a smooth, monotonic row trajectory throughout -- strong evidence of one continuously-tracked line, not a coincidental near-match.",
+      "divider": "Curtain, window and the dresser/lamp side table line up structurally with the photograph; the window-bench's own silhouette is hard to isolate visually in the render (it reads as a block similar to the dresser), so this spot's visual confirmation leans on the strong numeric fit more than a clean visual landmark match."
     },
     {
       "file": "7.webp",
@@ -130,19 +183,27 @@
       "renderRowAtZero": 0.2887,
       "proposal": 20.0,
       "sweptValues": [
-        {"deg": 0, "row": 0.2887, "strength": 11.4},
-        {"deg": 11, "row": 0.1374, "strength": 10.5},
-        {"deg": 12, "row": 0.1217, "strength": 10.1},
-        {"deg": 13, "row": 0.1061, "strength": 9.9},
-        {"deg": 14, "row": 0.0904, "strength": 9.6}
+        {"deg": 0, "row": 0.2887, "strength": 11.4, "phase": "narrow"},
+        {"deg": 11, "row": 0.1374, "strength": 10.5, "phase": "narrow"},
+        {"deg": 12, "row": 0.1217, "strength": 10.1, "phase": "narrow"},
+        {"deg": 13, "row": 0.1061, "strength": 9.9, "phase": "narrow"},
+        {"deg": 14, "row": 0.0904, "strength": 9.6, "phase": "narrow"},
+        {"deg": 14.0, "row": 0.0922, "strength": 9.2, "phase": "coarse (proposal-6), col 0.62 -- reproduces the narrow sweep's own deg14 point (0.0904) closely"},
+        {"deg": 17.0, "row": 0.0435, "strength": 8.7, "phase": "coarse (proposal-3), col 0.62"},
+        {"deg": 20.0, "row": null, "strength": null, "phase": "coarse (proposal), col 0.62 -- landmark off-frame (only the frame-top edge artefact, strength 13.6, remains)"},
+        {"deg": 23.0, "row": null, "strength": null, "phase": "coarse (proposal+3), col 0.62 -- landmark off-frame (frame-top artefact only, strength 26.7)"},
+        {"deg": 26.0, "row": null, "strength": null, "phase": "coarse (proposal+6), col 0.62 -- landmark off-frame (frame-top artefact only, strength 26.7)"}
       ],
+      "sweptValuesNote": "the coarse round (captured this fix round) confirms the wardrobe top edge exits the top of frame between 17 and 20deg, consistent with the tool's 20deg proposal being well past the true minimum -- exactly the pattern the report already described qualitatively for this spot, now backed by real captured rows.",
       "chosen": 13,
       "renderRowAtChosen": 0.1061,
       "residualRows": 0.0000,
       "outcome": "tilt-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.1759, the second-largest here. Interior minimum at 13deg (deg12=0.0089, deg13=0.0067, deg14=0.0224 -- the jump back up at 14 confirms 13 is the true turn, not an edge artefact of the swept range). An early misread at deg14 (a stronger but wrong candidate row 0.1183) was caught by cross-checking against the pinhole model's predicted row and corrected using the weaker-but-consistent candidate (0.0904) instead -- recorded here as the corrected trajectory."
+      "reason": "0deg disagreement 0.1759, the second-largest here. Interior minimum at 13deg (deg12=0.0089, deg13=0.0067, deg14=0.0224 -- the jump back up at 14 confirms 13 is the true turn, not an edge artefact of the swept range). An early misread at deg14 (a stronger but wrong candidate row 0.1183) was caught by cross-checking against the pinhole model's predicted row and corrected using the weaker-but-consistent candidate (0.0904) instead -- recorded here as the corrected trajectory. Verified as the same physical feature this fix round by crop: photograph and render both clearly show the wardrobe's top edge meeting the ceiling at this column, a clean unambiguous match in both frames -- the cleanest visual confirmation in the apartment.",
+      "precisionNote": "13deg beats 12deg by only 0.0022 of frame height, smaller than bandRows (0.0039). Per the brief's own rule this difference is not resolvable at single-degree precision -- the value is precise to +-1deg, not to the degree. Value NOT changed (sign and magnitude both stand); this is a documentation-only note.",
+      "divider": "Wardrobe position, bed corner and the secondary doorway all line up structurally with the photograph; the render's secondary door is open (revealing an ensuite) where the photograph's matching door is closed -- a door-state difference, not pose."
     },
     {
       "file": "8.webp",
@@ -152,27 +213,40 @@
       "renderRowAtZero": 0.1304,
       "proposal": 36.5,
       "sweptValues": [
-        {"deg": 0, "row": 0.1304, "strength": 1.1}
+        {"deg": 0, "row": 0.1304, "strength": 1.1, "phase": "narrow/baseline"},
+        {"deg": 30.5, "row": null, "strength": null, "phase": "coarse (proposal-6), col 0.40 -- weak/ambiguous candidates only (strength <=3.0), none confidently the mirror edge"},
+        {"deg": 33.5, "row": null, "strength": null, "phase": "coarse (proposal-3), col 0.40 -- same"},
+        {"deg": 36.5, "row": null, "strength": null, "phase": "coarse (proposal), col 0.40 -- same"},
+        {"deg": 39.5, "row": null, "strength": null, "phase": "coarse (proposal+3), col 0.40 -- same"},
+        {"deg": 42.5, "row": null, "strength": null, "phase": "coarse (proposal+6), col 0.40 -- same"}
       ],
+      "sweptValuesNote": "the coarse round (captured this fix round, for completeness per SPEC finding 4) is genuinely inconclusive: the mirror's own top-edge candidate is already weak at 0deg (strength 1.1) and no candidate anywhere in the coarse round is confidently the same feature (best guesses are strength 1.0-3.0, could equally be a shower-glass or door-frame edge). This does not change the outcome -- 0deg disagreement is already smaller than bandRows, so level was the minimum by construction regardless of what the coarse round shows.",
       "chosen": 0,
       "renderRowAtChosen": 0.1304,
       "residualRows": 0.0000,
       "outcome": "level-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement is only 0.0016, smaller than bandRows itself -- level is already the minimum by definition, nothing to sweep toward. The tool's 36.5deg proposal is unrelated to this landmark's real behaviour."
+      "reason": "0deg disagreement is only 0.0016, smaller than bandRows itself -- level is already the minimum by definition, nothing to sweep toward. The tool's 36.5deg proposal is unrelated to this landmark's real behaviour. Same-feature check by crop: photograph and render both show a round mirror in the same wall-corner position with a matching top-edge curvature -- a clean visual match despite the numerically weak gradient strength.",
+      "divider": "Round mirror position, wall-tile grid and the general bathroom layout line up between photograph and render at level pitch; no rotation is visible, consistent with level-confirmed."
     },
     {
       "file": "9.webp",
-      "landmark": "the back-wall skirting/floor line at the frame's left margin",
+      "landmark": "the near dining table's far edge / base of the tableware at the frame's left margin",
+      "landmarkNote": "RENAMED this fix round from \"the back-wall skirting/floor line\". A crop shows the photograph's target row sits on a table lamp base and wine-glass stems (foreground tableware on the near dining table), not the back wall -- the back wall is occluded by the table setting at this column and row in the photograph. The render's corresponding row shows a fruit bowl and the near edge of the same table against a wall corner behind it. Neither frame is showing bare architecture here; both are showing the near table's own far edge / the base of what sits on it. A second column (0.02, right at the frame's extreme edge) was checked and shows the same furniture-adjacent boundary, not clean architecture -- no cleaner alternative was found in this fix round's budget.",
       "column": 0.05,
       "photoRow": 0.7890,
       "renderRowAtZero": 0.8024,
       "proposal": -9.75,
       "sweptValues": [
-        {"deg": 0, "row": 0.8024, "strength": 9.6},
-        {"deg": 1, "row": 0.7889, "strength": 9.5},
-        {"deg": 2, "row": 0.7754, "strength": 9.4}
+        {"deg": 0, "row": 0.8024, "strength": 9.6, "phase": "narrow"},
+        {"deg": 1, "row": 0.7889, "strength": 9.5, "phase": "narrow"},
+        {"deg": 2, "row": 0.7754, "strength": 9.4, "phase": "narrow"},
+        {"deg": -3.75, "row": 0.8578, "strength": 10.3, "phase": "coarse (proposal+6), col 0.05"},
+        {"deg": -6.75, "row": 0.9049, "strength": 11.1, "phase": "coarse (proposal+3), col 0.05"},
+        {"deg": -9.75, "row": 0.9536, "strength": 12.0, "phase": "coarse (proposal), col 0.05"},
+        {"deg": -12.75, "row": null, "strength": null, "phase": "coarse (proposal-3), col 0.05 -- at/beyond the frame edge (row 0.9993, strength 18.8 -- the frame-bottom artefact, not a tracked feature)"},
+        {"deg": -15.75, "row": null, "strength": null, "phase": "coarse (proposal-6), col 0.05 -- same, off-frame"}
       ],
       "chosen": 1,
       "renderRowAtChosen": 0.7889,
@@ -180,49 +254,75 @@
       "outcome": "tilt-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.0134. Interior minimum at 1deg (deg0=0.0134, deg1=0.0001, deg2=0.0136), an almost exact fit and roughly symmetric around 1deg. Opposite sign from the tool's -9.75deg proposal."
+      "reason": "0deg disagreement 0.0134. Interior minimum at 1deg (deg0=0.0134, deg1=0.0001, deg2=0.0136), an almost exact fit and roughly symmetric around 1deg. Opposite sign from the tool's -9.75deg proposal -- the coarse round (captured this fix round) shows the tool's own proposal neighbourhood (-3.75 to -15.75deg) moves steadily AWAY from the photograph's row (disagreement grows from 0.069 to 0.165 then off-frame), confirming the proposal's direction was simply wrong, as already suspected. Kept despite the landmark-name correction above because the numeric evidence remains exceptionally strong: strength is nearly identical at 0 and 1deg (9.6 vs 9.5) and the row match at the chosen degree is essentially exact (0.0001 residual against the photograph) -- the same relative boundary is being tracked at a consistent camera distance in both frames, even though it isn't pure architecture.",
+      "divider": "Foreground dining table, sofa on the right and the doorway to the pool terrace (with the rattan chair visible) all match the photograph's composition well."
     },
     {
       "file": "10.webp",
-      "landmark": "the pool coping/water band (task 1b's own landmark, same column)",
+      "landmark": "the pool coping/water band, column 0.35 -- the same column and feature plan 4c task 1b used",
       "column": 0.35,
       "photoRow": 0.3920,
-      "renderRowAtZero": 0.3820,
+      "renderRowAtZero": 0.6023,
+      "renderRowAtZeroNote": "CORRECTED per the controller's finding this fix round (was 0.3820, strength 6.7). That row is the SKY/HEDGE boundary, confirmed both by crop and by plan 4c task 1b's own record (docs/superpowers/metrics/serenity-b4c-task1b-pitch-derivation.json: \"at pitch 0 the longest cyan run is the SKY, 0.0-0.373; the water is 0.62-1.0\"). The pool coping/water edge in this same pitch-0 render is at row 0.6023 (strength 9.9), matching task 1b's stated 0.62 band start.",
       "proposal": 21.25,
       "sweptValues": [
-        {"deg": 0, "row": 0.3820, "strength": 6.7},
-        {"deg": 22, "row": 0.3737, "strength": 5.9}
+        {"deg": 0, "row": 0.6023, "strength": 9.9, "phase": "narrow (corrected)"},
+        {"deg": 22, "row": 0.3737, "strength": 5.9, "phase": "narrow"},
+        {"deg": 15.25, "row": 0.4564, "strength": 5.5, "phase": "coarse (proposal-6), col 0.35"},
+        {"deg": 18.25, "row": 0.4195, "strength": 5.6, "phase": "coarse (proposal-3), col 0.35"},
+        {"deg": 21.25, "row": 0.3827, "strength": 5.6, "phase": "coarse (proposal), col 0.35"},
+        {"deg": 24.25, "row": 0.3459, "strength": 6.1, "phase": "coarse (proposal+3), col 0.35"},
+        {"deg": 27.25, "row": 0.3075, "strength": 6.6, "phase": "coarse (proposal+6), col 0.35"}
       ],
+      "sweptValuesNote": "the coarse round (captured this fix round) is a smooth, monotonic, strong (strength 5.5-6.6) trajectory across the whole 0-27.25deg range with the corrected 0deg anchor -- this is now the best-corroborated trajectory in the apartment, spanning nine measured points with no discontinuity.",
       "chosen": 22,
       "renderRowAtChosen": 0.3737,
       "residualRows": 0.0000,
-      "outcome": "tilt-confirmed",
+      "outcome": "tilt-confirmed -- independent replication",
+      "outcomeNote": "RELABELLED this fix round. The prior pass's write-up carried a \"this task's own probe dissents\" framing and a \"Concern, recorded not hidden\" paragraph arguing the automatic 0deg candidate (wrongly 0.3820, the sky edge) was numerically closer to the photograph than 22deg was. That framing rested entirely on the misidentified 0deg row and is DROPPED. With the corrected 0deg row (0.6023), the 0deg disagreement is 0.2103 -- 11x the 22deg disagreement of 0.0183 -- so 22deg is now a clear, large-margin minimum by this task's own corrected measurement, not merely by matching task 1b's historical record. There is no dissent to record.",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
       "priorValue": 22,
       "priorMethod": "plan 4c task 1b, sweeping and matching the water band's measured rows by hand (render 0.374-0.780 vs photograph 0.392-0.763)",
-      "reason": "INDEPENDENT REPLICATION: capturing fresh at pitch 22 and re-probing this task's own column/landmark reproduces task 1b's documented render row (0.3737 here vs 0.374 on record) and residual (0.0183 here vs 0.018 on record) almost exactly -- the two independent derivations agree, which is the strongest evidence available that the method works. Config left unchanged at pitch 22 since it already carries the derived value. CONCERN, recorded not hidden: the automatic 0deg-render candidate this task's probe picked (0.3820) is numerically CLOSER to the photograph's row (0.3920) than the pitch-22 candidate is (disagreement 0.0100 vs 0.0183), i.e. by this narrow automated read alone, level looks better than 22deg. Given the strong agreement with task 1b's independently, carefully hand-derived value at 22deg specifically, the likely explanation is that the pool's rippled/textured water surface offers multiple similarly-strong horizontal gradient bands, and the automatic top-8 picker latched onto a different one at 0deg than the one continuously tracked at higher tilts -- not that 22deg is wrong. Not investigated further within this task's budget."
+      "reason": "INDEPENDENT REPLICATION, now on solid footing: capturing fresh at pitch 22 and re-probing this task's own column/landmark reproduces task 1b's documented render row (0.3737 here vs 0.374 on record) and residual (0.0183 here vs 0.018 on record) almost exactly. With the 0deg row corrected to the real water edge (0.6023, matching task 1b's own stated \"water is 0.62-1.0\" note for pitch 0), the two independent derivations now agree both in VALUE and in the SHAPE of the evidence (22deg is a clear, large-margin minimum, not a close call). Config left unchanged at pitch 22.",
+      "divider": "The render's foreground table shape and position roughly match the photograph's foreground table (wine glasses, fruit plate)."
     },
     {
       "file": "11.webp",
-      "landmark": "the wardrobe's top edge at the frame's left margin",
+      "landmark": "the curtain rod / track at the frame's left margin",
+      "landmarkNote": "RENAMED this fix round from \"the wardrobe's top edge at the frame's left margin\". A crop shows the photograph's target row sits on the dark horizontal curtain rod holding the curtain rings, and the render's corresponding row shows the same dark horizontal bar at the top of the window/curtain area -- a curtain rod/track in both frames, not a wardrobe (no wardrobe is visible at this column in either frame; the room's actual wardrobe, visible in the full-frame photograph, is elsewhere and not near this column).",
       "column": 0.05,
       "photoRow": 0.3303,
       "renderRowAtZero": 0.2460,
       "proposal": 28.5,
       "sweptValues": [
-        {"deg": 0, "row": 0.2460, "strength": 21.6},
-        {"deg": -5, "row": 0.3122, "strength": 21.8},
-        {"deg": -6, "row": 0.3254, "strength": 22.0},
-        {"deg": -7, "row": 0.3380, "strength": 22.0}
+        {"deg": 0, "row": 0.2460, "strength": 21.6, "phase": "narrow"},
+        {"deg": -5, "row": 0.3122, "strength": 21.8, "phase": "narrow"},
+        {"deg": -6, "row": 0.3254, "strength": 22.0, "phase": "narrow"},
+        {"deg": -7, "row": 0.3380, "strength": 22.0, "phase": "narrow"},
+        {"deg": 22.5, "row": null, "strength": null, "phase": "coarse (proposal-6), col 0.05 -- landmark off-frame (only the frame-top artefact, strength 27.0, remains)"},
+        {"deg": 25.5, "row": null, "strength": null, "phase": "coarse (proposal-3), col 0.05 -- off-frame (frame-top artefact, strength 26.8)"},
+        {"deg": 28.5, "row": null, "strength": null, "phase": "coarse (proposal), col 0.05 -- off-frame (frame-top artefact, strength 26.6)"},
+        {"deg": 31.5, "row": null, "strength": null, "phase": "coarse (proposal+3), col 0.05 -- off-frame (frame-top artefact, strength 26.4)"},
+        {"deg": 34.5, "row": null, "strength": null, "phase": "coarse (proposal+6), col 0.05 -- off-frame (frame-top artefact, strength 26.2)"}
       ],
+      "sweptValuesNote": "every single coarse-round point (captured this fix round) is off the top of the frame -- the curtain rod exits upward well before 22.5deg. This is strong, now-documented confirmation that the tool's +28.5deg proposal is nowhere near the true minimum (it points the search into a region where the landmark isn't even visible), consistent with the report's existing \"wrong in direction as well as magnitude\" finding for this spot.",
       "chosen": -6,
       "renderRowAtChosen": 0.3254,
       "residualRows": 0.0000,
       "outcome": "tilt-confirmed",
       "poseVerifiedBefore": true,
       "poseVerifiedAfter": true,
-      "reason": "0deg disagreement 0.0843. Interior minimum at -6deg (deg-5=0.0181, deg-6=0.0049, deg-7=0.0077), a very strong, consistently-strength (21.6-22.0) candidate across the whole sweep -- the highest-confidence landmark in this apartment. Again opposite sign and far smaller magnitude than the tool's +28.5deg proposal."
+      "reason": "0deg disagreement 0.0843. Interior minimum at -6deg (deg-5=0.0181, deg-6=0.0049, deg-7=0.0077), a very strong, consistently-strength (21.6-22.0) candidate across the whole sweep -- the highest-confidence landmark in this apartment. Again opposite sign and far smaller magnitude than the tool's +28.5deg proposal.",
+      "precisionNote": "-6deg beats -7deg by only 0.0028 of frame height, smaller than bandRows (0.0039). Per the brief's own rule this difference is not resolvable at single-degree precision -- the value is precise to +-1deg, not to the degree. Value NOT changed (sign and magnitude both stand); this is a documentation-only note.",
+      "divider": "Bed, curtain/window on the left and the wall decor on the right all line up structurally with the photograph."
     }
-  ]
+  ],
+  "outcomeTally": {
+    "tiltConfirmed": ["4.webp", "6.webp", "7.webp", "9.webp", "10.webp", "11.webp"],
+    "levelConfirmed": ["2.webp", "5.webp", "8.webp"],
+    "noUsableLandmark": ["1.webp", "3.webp"],
+    "willNotConverge": [],
+    "countChangeFromPriorPass": "1.webp moved from tiltConfirmed to noUsableLandmark this fix round (see its own entry). tiltConfirmed count went 7 -> 6, noUsableLandmark went 1 -> 2. Every other spot's outcome is unchanged; only 1.webp's config key changed."
+  }
 }

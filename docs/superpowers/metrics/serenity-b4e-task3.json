@@ -2,62 +2,62 @@
   "apartment": "serenity",
   "phase": "b4e-task3",
   "population": "all-spot",
-  "mean": 15.3,
+  "mean": 14.36,
   "spots": [
     {
       "file": "1.webp",
       "name": "Bathroom",
-      "deltaE": 18.87
+      "deltaE": 19.39
     },
     {
       "file": "2.webp",
       "name": "Pool Terrace",
-      "deltaE": 17.82
+      "deltaE": 15.78
     },
     {
       "file": "3.webp",
       "name": "Living Room",
-      "deltaE": 17.64
+      "deltaE": 16.52
     },
     {
       "file": "4.webp",
       "name": "Living Room",
-      "deltaE": 17.42
+      "deltaE": 18.01
     },
     {
       "file": "5.webp",
       "name": "Kitchen & Hall",
-      "deltaE": 10.96
+      "deltaE": 10.54
     },
     {
       "file": "6.webp",
       "name": "Bedroom",
-      "deltaE": 12.49
+      "deltaE": 9.64
     },
     {
       "file": "7.webp",
       "name": "Bedroom",
-      "deltaE": 13.09
+      "deltaE": 13.17
     },
     {
       "file": "8.webp",
       "name": "Bathroom",
-      "deltaE": 11.13
+      "deltaE": 11.07
     },
     {
       "file": "9.webp",
       "name": "Living Room",
-      "deltaE": 18.28
+      "deltaE": 18.62
     },
     {
       "file": "10.webp",
       "name": "Pool Terrace",
-      "deltaE": 19.39
+      "deltaE": 12.83
     },
     {
       "file": "11.webp",
       "name": "Bedroom",
-      "deltaE": 11.17
+      "deltaE": 12.37
     }
   ],
   "scored": 11,

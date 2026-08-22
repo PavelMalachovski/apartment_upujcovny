@@ -1,0 +1,101 @@
+{
+  "fovDeg": 72.0,
+  "model": "single-point pinhole closed form, both cameras at the same position, pitch-only",
+  "note": "NOT used to select any shipped tilt -- cross-check only, computed AFTER this fix round corrected the landmark rows for 1.webp/2.webp/5.webp/10.webp. 1.webp and 3.webp have no valid landmark and are skipped.",
+  "predictions": [
+    {
+      "file": "1.webp",
+      "photoRow": 0.4525,
+      "renderRowAtZero": 0.713,
+      "predictedDeg": 21.146,
+      "chosenDeg": 0,
+      "diffFromChosen": 21.146,
+      "outcome": "no-usable-landmark"
+    },
+    {
+      "file": "2.webp",
+      "photoRow": 0.3487,
+      "renderRowAtZero": 0.6452,
+      "predictedDeg": 24.313,
+      "chosenDeg": 0,
+      "diffFromChosen": 24.313,
+      "outcome": "level-confirmed"
+    },
+    {
+      "file": "3.webp",
+      "skipped": "no valid landmark row"
+    },
+    {
+      "file": "4.webp",
+      "photoRow": 0.8309,
+      "renderRowAtZero": 0.9739,
+      "predictedDeg": 8.873,
+      "chosenDeg": 9,
+      "diffFromChosen": -0.127,
+      "outcome": "tilt-confirmed"
+    },
+    {
+      "file": "5.webp",
+      "photoRow": 0.6706,
+      "renderRowAtZero": 0.6783,
+      "predictedDeg": 0.602,
+      "chosenDeg": 0,
+      "diffFromChosen": 0.602,
+      "outcome": "level-confirmed"
+    },
+    {
+      "file": "6.webp",
+      "photoRow": 0.7226,
+      "renderRowAtZero": 0.6435,
+      "predictedDeg": -6.146,
+      "chosenDeg": -6,
+      "diffFromChosen": -0.146,
+      "outcome": "tilt-confirmed"
+    },
+    {
+      "file": "7.webp",
+      "photoRow": 0.1128,
+      "renderRowAtZero": 0.2887,
+      "predictedDeg": 12.295,
+      "chosenDeg": 13,
+      "diffFromChosen": -0.705,
+      "outcome": "tilt-confirmed"
+    },
+    {
+      "file": "8.webp",
+      "photoRow": 0.132,
+      "renderRowAtZero": 0.1304,
+      "predictedDeg": -0.103,
+      "chosenDeg": 0,
+      "diffFromChosen": -0.103,
+      "outcome": "level-confirmed"
+    },
+    {
+      "file": "9.webp",
+      "photoRow": 0.789,
+      "renderRowAtZero": 0.8024,
+      "predictedDeg": 0.942,
+      "chosenDeg": 1,
+      "diffFromChosen": -0.058,
+      "outcome": "tilt-confirmed"
+    },
+    {
+      "file": "10.webp",
+      "photoRow": 0.392,
+      "renderRowAtZero": 0.6023,
+      "predictedDeg": 17.374,
+      "chosenDeg": 22,
+      "diffFromChosen": -4.626,
+      "outcome": "tilt-confirmed -- independent replication"
+    },
+    {
+      "file": "11.webp",
+      "photoRow": 0.3303,
+      "renderRowAtZero": 0.246,
+      "predictedDeg": -6.406,
+      "chosenDeg": -6,
+      "diffFromChosen": -0.406,
+      "outcome": "tilt-confirmed"
+    }
+  ]
+}
