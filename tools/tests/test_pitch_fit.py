@@ -75,12 +75,79 @@ def test_confirmation_pass_returns_the_tilt_the_render_was_captured_at():
     assert abs(r['pitch'] - 22.0) <= 0.5, r
 
 
-def test_refuses_when_nothing_overlaps():
-    """A tilt so large the frames share no rows must return no proposal."""
+def test_refuses_a_flat_render_with_no_gradient_to_correlate():
+    """A featureless render must be refused outright, not scored.
+
+    RENAMED AND STRENGTHENED 2026-08-22 (plan 4e final review, MINOR 5).
+    This used to be called `test_refuses_when_nothing_overlaps` and assert
+    `r['pitch'] is None or r['overlap'] >= MIN_OVERLAP`, which is satisfied
+    BY CONSTRUCTION for any input whatsoever -- `fit` never returns a
+    candidate below the floor, because `_score` returns None below it. It
+    could not fail. It also never exercised the overlap branch it named: a
+    `np.zeros(511)` render trips the zero-variance `denom` guard first. Both
+    faults are fixed here -- this test now names what it really covers and
+    asserts the refusal itself, and the overlap floor gets its own test
+    below.
+    """
     photo = synth_profile(0.0, 72.0, [-30.0])
     render = np.zeros(511)
     r = pitch_fit.fit(photo, render)
-    assert r['pitch'] is None or r['overlap'] >= pitch_fit.MIN_OVERLAP, r
+    assert r['pitch'] is None, r
+    assert 'refused' in r, r
+
+
+def test_refuses_when_no_candidate_keeps_enough_overlap():
+    """The MIN_OVERLAP floor, exercised for real -- and it can fail.
+
+    Every candidate tilt in the search is checked against the floor with a
+    real, textured render, so nothing here is short-circuited by the
+    zero-variance guard. The floor is raised above 1.0 for the duration, so
+    NO candidate can satisfy it and `fit` must refuse. With the floor
+    removed from `_score` this call returns a pitch and the assert fails --
+    which is the property the old test was meant to have and did not.
+    """
+    photo = synth_profile(0.0, 72.0, EDGES)
+    render = synth_profile(0.0, 72.0, EDGES)
+    saved = pitch_fit.MIN_OVERLAP
+    pitch_fit.MIN_OVERLAP = 1.5
+    try:
+        r = pitch_fit.fit(photo, render)
+    finally:
+        pitch_fit.MIN_OVERLAP = saved
+    assert r['pitch'] is None, r
+    assert r['refused'] == 'no candidate kept enough overlap', r
+
+
+def test_probe_rejects_a_column_outside_the_frame():
+    """--col is a fraction, and an out-of-range one used to return nan.
+
+    Added 2026-08-22 (plan 4e final review, MINOR 6). Before the guard,
+    `--col 350` produced an empty strip, two RuntimeWarnings and a table of
+    `nan` strengths that read like a measurement.
+    """
+    img = np.zeros((80, 60), dtype=np.uint8)
+    img[40:, :] = 255
+    for bad in (-0.1, 1.4, 350):
+        try:
+            pitch_fit.probe(img, col=bad)
+        except ValueError:
+            continue
+        raise AssertionError('probe accepted col=%r' % (bad,))
+
+
+def test_remap_rows_is_exact_at_zero_tilt():
+    """Identity when nothing moves -- the half-row bias broke this.
+
+    Added 2026-08-22 (plan 4e final review, MINOR 6). With theta_p ==
+    theta_r the resampling must be the identity, because every photograph
+    row sees exactly the world angle the same render row sees. Under the old
+    `idx = v_r * n` the profile came back shifted half a sample and this
+    assert fails; under `v_r * n - 0.5` it is exact.
+    """
+    p = synth_profile(0.0, 72.0, EDGES)
+    out, valid = pitch_fit.remap_rows(p, 0.0, 72.0, 0.0)
+    assert valid.all()
+    assert float(np.abs(out - p).max()) < 1e-9, float(np.abs(out - p).max())
 
 
 def test_row_profile_is_zero_mean_unit_scale():

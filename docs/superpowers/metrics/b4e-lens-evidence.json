@@ -26,7 +26,7 @@
         "B": 9
       },
       "sweptRange": "-3, 0, 3, 6, 9, 12, 15, 18, 21 deg -- both landmarks tracked across all nine captures; both minima interior (each turns back up on the far side)",
-      "note": "This is the cleanest single piece of lens evidence in the plan: same frame, same column, same captures, two architecturally unambiguous lines, 9 degrees apart."
+      "note": "This is the cleanest single piece of lens evidence in the plan: same frame, same column, same captures, two lines 9 degrees apart. CORRECTED IN PLACE 2026-08-22 (plan 4e final review, MINOR 3): this sentence used to call them \"two architecturally unambiguous lines\", which contradicted this object's own landmark field on the line above -- landmark B is the TV SCREEN'S TOP EDGE, a furniture model, not architecture. Only A (the TV wall's ceiling-to-wall junction) is architecture. The caveat existed in docs/superpowers/metrics/README.md and docs/PHASE-B-RESUME.md but not here, and this repository's rule is to quote the committed artefact -- so a reader who quoted this file got the wrong claim. It matters to the interpretation, not just the wording: if the render's TV hangs at a different height from the photograph's, part of the 9-degree gap is furniture placement rather than focal length, which is exactly why the 2.2-2.4 factor is offered as a direction and a magnitude class and nothing more."
     },
     {
       "apt": "kings-court",

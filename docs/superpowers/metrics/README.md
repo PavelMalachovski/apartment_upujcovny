@@ -2927,7 +2927,7 @@ kings-court's, on one machine in one session — so plan 5's open "what varies
 across a page load" is not uniform across apartments, and a single-apartment
 probe would have concluded otherwise.
 
-## Plan 4e: the tilt sweep — six cameras on serenity, none on kings-court
+## Plan 4e: the tilt sweep — ~~six~~ **four** cameras on serenity, none on kings-court
 
 Written 2026-08-22 by plan 4e task 5.
 
@@ -2938,21 +2938,33 @@ because a single reading is not a measurement here):
 
 | Apartment | Population | BASE (run 1 / repeat) | HEAD (run 1 / repeat) | Δ |
 |---|---|---|---|---|
-| serenity | all-spot, 11 | 14.32 / 14.32 | **14.36 / 14.37** | **+0.04** |
+| serenity | all-spot, 11 | ~~14.32 / 14.32~~ **14.33 / 14.34** | ~~**14.36 / 14.37**~~ **14.33 / 14.34** | ~~**+0.04**~~ **0.00** — re-taken 2026-08-22 by plan 4e's final whole-branch review after `4.webp`'s and `9.webp`'s tilts were withdrawn, BASE `705ac42` on `:8743` and HEAD `?v=138` on `:8742` served simultaneously again, twice again, `--all-spots`; raw `serenity-b4e-final-{fix,BASE}.json` and their `-repeat.json`. BASE moved 14.32→14.33 between sessions on the same machine, which is the reload drift this record keeps warning about — read the paired Δ, never the absolute |
 | kings-court | all-spot, 13 | 17.60 / 17.57 | **17.59 / 17.57** | **0.00** |
 
 Raw: `{serenity,kings-court}-b4e-gate-BASE-legacy-allspots.json` and
 `-repeat.json`, `{serenity,kings-court}-b4e-gate-legacy-allspots.json` and
-`-repeat.json`. Shipped at `?v=137`; the branch's only `tour/` changes are five
-new `pitch` keys on serenity and that one bump.
+`-repeat.json`. ~~Shipped at `?v=137`; the branch's only `tour/` changes are five
+new `pitch` keys on serenity and that one bump.~~
+**Corrected 2026-08-22 by the final whole-branch review: shipped at `?v=138`, and the branch's only `tour/` changes are
+THREE new `pitch` keys on serenity (`6`, `7`, `11`) and that bump. `4`'s and `9`'s keys were written by task 3 and
+withdrawn by this review — see the trap section below.**
 
 **The movement is an instrument correction, and the sign of it is not the
 point.** Nothing about how the scene is lit, shaded or drawn changed on this
 branch — no material, no bake constant, no exposure, no geometry. The harness
-stopped capturing a camera the photographer never used. serenity's +0.04 lives
+stopped capturing a camera the photographer never used.
+~~serenity's +0.04 lives
 almost entirely in two spots, `7.webp` **+0.37** (tilt 13°) and `4.webp`
 **+0.18** (tilt 9°), against `6.webp` −0.07 and `11.webp` −0.08 (both −6°);
-every other spot moves by ≤0.06. This is the same effect plan 4c wrote up one
+every other spot moves by ≤0.06.~~ **Re-attributed 2026-08-22 by the final
+whole-branch review, because two of the tilts it attributed the movement to no
+longer ship. serenity's Δ is now 0.00, and the per-spot movement that remains
+is `7.webp` +0.16 / +0.27 (tilt 13°) against `6.webp` −0.13 / −0.12 and
+`11.webp` −0.06 / −0.07 (both −6°); every other spot, `4.webp` and `9.webp`
+included, moves by ≤0.04 and those two are back at their BASE readings because
+they now carry the same level camera BASE does. Both pairings are quoted
+because they differ: `7.webp` alone spans 0.16 to 0.27 across the two, which is
+what a single-reading attribution would have hidden.** This is the same effect plan 4c wrote up one
 section above and it is worth restating in its own words: **saturated colour in
 a misaligned cell scores worse than the flat grey it replaced**, and where a
 spot's divider got visibly better while its ΔE rose, this instrument cannot
@@ -2960,17 +2972,30 @@ arbitrate between them. It was not asked to: no value on this branch was chosen
 by ΔE.
 
 **kings-court's 0.00 is a same-state reproduction, not a result.** Its config is
-byte-identical to `main`, so BASE and HEAD are the same tree served twice.
-Per-spot |HEAD − BASE| reaches at most **0.10** (`11.webp`), against a
+byte-identical to `main`, so BASE and HEAD are the same tree served twice, and
+**that identity — not any per-spot number — is what makes every per-spot
+movement noise by construction.**
+~~Per-spot |HEAD − BASE| reaches at most **0.10** (`11.webp`), against a
 BASE-to-BASE reload spread on that same spot of **0.16** — the reload noise is
-larger than the "difference".
+larger than the "difference".~~ **Corrected 2026-08-22 by plan 4e's final
+review (MINOR 4): the 0.10 held only under the run-1↔run-1 pairing, and this
+paragraph never said which pairing it meant. All four pairings, recomputed from
+the four committed gate files: run-1↔run-1 max **0.10** (`11.webp`, against a
+0.16 BASE-to-BASE reload spread on that spot); run-2↔run-2 max **0.19**
+(`14.webp`, against only **0.09** there); and the cross-pairing maximum is
+**0.21** (`13.webp`, HEAD run 2 against BASE run 1, against 0.15 BASE-to-BASE
+and 0.12 HEAD-to-HEAD on that spot). **Quote the 0.21 cross-max**, and note
+what the 14.webp row means: one spot in one pairing does exceed its own reload
+spread, so "every per-spot difference is smaller than the reload noise" was
+never true as a general statement. The conclusion is unaffected because it never
+rested on that comparison — the two trees are the same bytes.**
 
 **What shipped, counted out of the derivation files rather than recalled**
 (`{serenity,kings-court}-b4e-derivation.json`):
 
 | Apartment | tilt-confirmed | level-confirmed | no-usable-landmark | will-not-converge | Ships |
 |---|---|---|---|---|---|
-| serenity | 6 (`4`, `6`, `7`, `9`, `10`, `11`) | 3 (`2`, `5`, `8`) | 2 (`1`, `3`) | 0 | 9°, −6°, 13°, 1°, 22°, −6° — plus `2.webp`'s pre-existing 40°, excluded from change by the plan's own carve-out |
+| serenity | ~~6 (`4`, `6`, `7`, `9`, `10`, `11`)~~ **4 (`6`, `7`, `10`, `11`)** | 3 (`2`, `5`, `8`) | ~~2 (`1`, `3`)~~ **4 (`1`, `3`, `4`, `9`)** | 0 | ~~9°, −6°, 13°, 1°, 22°, −6°~~ **−6°, 13°, 22°, −6°** — plus `2.webp`'s pre-existing 40°, excluded from change by the plan's own carve-out. **Corrected in this row 2026-08-22 by the final whole-branch review: `4`'s 9° and `9`'s 1° were withdrawn after re-cropping showed each measured two different physical objects, and their keys are removed from the config** |
 | kings-court | 0 | 1 (`10`) | 10 | 2 (`2`, `20`) | **nothing** — `tour/apartments/kings-court.json` is byte-identical to `main` |
 
 kings-court shipping nothing is an honest, allowed outcome: its renders and its
@@ -3051,6 +3076,28 @@ caught by a reviewer cropping both frames and asking what the row *is*.
 **Only same-object identity, established by looking, separates a derivation from
 a coincidence.** A small residual is evidence that the sweep converged, not that
 the landmark was right.
+
+**And there was a THIRD instance, found by the final whole-branch review on
+2026-08-22 — which is the most useful thing in this section, because of *how* it
+survived.** `9.webp` was caught by the task-3 fix round, and that round
+**renamed** its landmark instead of re-cropping it: the new name conceded, in
+the committed record's own words, "Neither frame is showing bare architecture
+here", while the plan's step 1 says to prefer architecture over furniture — and
+the tilt was kept anyway, on the strength of a 0.0001 residual. Re-cropping it
+showed the photograph's row on the body of a white **table lamp** that has no
+counterpart anywhere in the render, against the render's **tabletop edge**.
+`4.webp`, flagged in the same review as merely "plausible", failed identically:
+the photograph's row is the near dining **chair's top rim**, the render's is
+**bare wall**. Both were withdrawn and their keys removed.
+
+**A rename is not a re-derivation.** When a landmark's name turns out to be
+wrong, the crop has to be redone from scratch and the spot re-decided — because
+the name was never what was load-bearing, the *object* was. The corollary the
+same review recorded: the pinhole cross-check cannot catch this either. It is
+fed the two recorded rows and asked what tilt maps one onto the other, so it
+agrees just as tightly when the two rows are two different objects — it agreed
+to well under a degree on both `4` and `9`. A gross disagreement can falsify a
+landmark (it did, on `1.webp`, by 21°); agreement can never confirm one.
 
 ### The automatic method, measured and rejected
 

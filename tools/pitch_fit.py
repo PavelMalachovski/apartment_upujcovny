@@ -31,6 +31,11 @@ Run:
 
 Renders are <dir>/render_<apt>_<n>.jpg, the names tools/serve.py's save
 endpoint writes.
+
+PATHS. Every path argument -- --probe, --renders, --render-pitch-json, --out
+-- is resolved RELATIVE TO THE REPO ROOT when it is relative, and taken as
+given when it is absolute. See `_resolve`; before 2026-08-22 two of the four
+were cwd-relative instead.
 """
 import argparse
 import json
@@ -41,6 +46,23 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _resolve(path):
+    """Every path argument means the same thing: relative to the REPO ROOT.
+
+    Chosen 2026-08-22 (plan 4e final review, MINOR 6) to settle an
+    inconsistency: `--out` and `--renders` already joined to ROOT while
+    `--render-pitch-json` and `--probe` opened relative to the current
+    working directory, so the same relative string meant two different files
+    depending on which flag carried it. ROOT-relative won because the two
+    flags that already had a convention used it, and because every recipe in
+    the record runs this tool from the repo root, where the two agree --
+    so nothing that has been run before resolves differently now.
+    Absolute paths are passed through untouched.
+    """
+    return path if os.path.isabs(path) else os.path.join(ROOT, path)
+
 
 ROWS = 512
 COLS = 256
@@ -85,6 +107,17 @@ def remap_rows(render_profile, theta_p_deg, fov_deg,
     (theta_p, fov), then ask which render row sees that angle under
     (theta_r, fov). Exact -- deliberately not a small-angle shift-and-stretch,
     because serenity's 2.webp already sits at 40 degrees.
+
+    HALF-ROW BIAS, FOUND AND CORRECTED 2026-08-22 (plan 4e final review,
+    MINOR 6). Rows are SAMPLED at their centres, `(i + 0.5) / n`, so the
+    inverse has to subtract that same half sample before indexing: the line
+    below reads `v_r * n - 0.5`, where it used to read `v_r * n`. The old
+    form biased every resampled row by a constant half sample -- about 0.001
+    of frame height, ~0.08 degrees at the 72-degree gate lens -- which is
+    below `b4e-noise-band.json`'s measured 0.0039 per-load band, so **no
+    shipped value moves** and none was re-derived because of it. It is fixed
+    anyway, because this docstring calls the function "exact" and that word
+    now has to be true.
     """
     n = len(render_profile)
     v_p = (np.arange(n) + 0.5) / n
@@ -92,7 +125,7 @@ def remap_rows(render_profile, theta_p_deg, fov_deg,
     alpha = np.arctan((2.0 * v_p - 1.0) * half) + math.radians(theta_p_deg)
     v_r = 0.5 + 0.5 * np.tan(alpha - math.radians(theta_r_deg)) / half
     valid = (v_r >= 0.0) & (v_r < 1.0)
-    idx = np.clip(v_r * n, 0, n - 1)
+    idx = np.clip(v_r * n - 0.5, 0, n - 1)
     return np.interp(idx, np.arange(n), render_profile), valid
 
 
@@ -113,6 +146,19 @@ def fit(photo_profile, render_profile, theta_r_deg=0.0, fov_deg=LEGACY_VFOV):
 
     `sharpness` is reported because a reader deserves to see it. It is not a
     gate: it was measured not to predict correctness.
+
+    TWO MECHANISMS, not one, explain an unstable proposal. The first is plain
+    degeneracy on real frames (the module docstring). The second, named here
+    2026-08-22 (plan 4e final review, MINOR 6): `_score` normalises the NCC
+    over each candidate's OWN overlap subset and applies no penalty for a
+    small subset, so a large tilt that keeps only the `MIN_OVERLAP` floor of
+    the frame competes on equal terms with one that keeps all of it. That
+    structurally favours large tilts, and it is a plausible cause of the
+    instability already on record -- kings-court's 11.webp proposed 38.00 and
+    then 28.25 on identical repeats. **The scoring is deliberately NOT
+    changed**: every shipped tilt on this branch was swept against these
+    numbers, and re-tuning the score would invalidate that record for a tool
+    that only proposes. Named so the next reader does not rediscover it.
     """
     scores = {}
     for th in np.arange(PITCH_MIN, PITCH_MAX + 1e-9, PITCH_STEP):
@@ -140,7 +186,16 @@ def probe(src, col=0.5, top=8, band=0.06):
     4c task 1b's independent hand measurements of serenity 10.webp: at column
     0.35 this finds 0.392 in the photograph and 0.374 in the render captured
     at pitch 22, which are exactly the rows task 1b recorded.
+
+    `col` is validated (added 2026-08-22, plan 4e final review, MINOR 6). It
+    used to be taken on trust, and a --col outside [0, 1] produced an empty
+    strip, two RuntimeWarnings and a table of `nan` strengths that read like
+    a measurement.
     """
+    if not (isinstance(col, (int, float)) and 0.0 <= float(col) <= 1.0):
+        raise ValueError(
+            'col must be a fraction of image width in [0, 1]; got %r. '
+            'It is a fraction, not a pixel column.' % (col,))
     im = Image.fromarray(src) if isinstance(src, np.ndarray) else Image.open(src)
     g = np.asarray(im.convert('L'), dtype=np.float64)
     h, w = g.shape
@@ -172,7 +227,10 @@ def main():
     args = ap.parse_args()
 
     if args.probe:
-        h, rows = probe(args.probe, args.col)
+        try:
+            h, rows = probe(_resolve(args.probe), args.col)
+        except ValueError as e:
+            ap.error(str(e))
         print('%s  height %d  column %.2f' % (args.probe, h, args.col))
         for r, s in rows:
             print('  row %5d   %.4f of height   strength %8.1f' % (r, r / (h - 1.0), s))
@@ -186,14 +244,15 @@ def main():
     base = cfg['meta']['photoBase']
     captured = {}
     if args.render_pitch_json:
-        captured = json.load(open(args.render_pitch_json, encoding='utf-8'))
+        captured = json.load(open(_resolve(args.render_pitch_json),
+                                  encoding='utf-8'))
 
     rows = []
     for s in cfg['photoSpots']:
         if not s.get('compare'):
             continue
         photo = os.path.join(ROOT, 'tour', base, s['file'])
-        render = os.path.join(ROOT, args.renders, 'render_%s_%s'
+        render = os.path.join(_resolve(args.renders), 'render_%s_%s'
                               % (args.apt, s['file'].replace('.webp', '.jpg')))
         if not os.path.exists(render):
             rows.append({'file': s['file'], 'refused': 'render missing: ' + render})
@@ -214,7 +273,7 @@ def main():
            'status': 'PROPOSALS ONLY -- a named landmark decides the value. '
                      'sharpness is reported and is NOT a gate.',
            'spots': rows}
-    with open(os.path.join(ROOT, args.out), 'w', encoding='utf-8') as f:
+    with open(_resolve(args.out), 'w', encoding='utf-8') as f:
         json.dump(out, f, indent=1)
     for r in rows:
         if 'refused' in r:

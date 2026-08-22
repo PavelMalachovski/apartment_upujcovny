@@ -997,7 +997,7 @@ recorded as a defect.
 Edit `tour/apartments/kings-court.json` as in task 3 step 7.
 
 Then, and **only after the last edit under `tour/`**, bump the single module tag
-in `tour/index.html:254` from `?v=136` to `?v=137`. Verify the bump landed by
+in `tour/index.html:254` from `?v=136` to `?v=137` **[the tree is at `?v=138` as of 2026-08-22: the final whole-branch review withdrew `4.webp`'s and `9.webp`'s tilts, which is a second `tour/` change and took a second bump. This task-4 instruction is left as written because it is a record of what task 4 did]**. Verify the bump landed by
 comparing a field of `APT` in the console against the file, and check the loaded
 script versions — a cached `index.html` produces exactly the symptom of a missing
 bump:
