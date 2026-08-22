@@ -1,0 +1,233 @@
+{
+  "purpose": "Plan 5 task 1: measure every documented constant against the code/config/runtime it is claimed to describe, and record value + provenance + agreement. Changes nothing. Every later plan-5 task reads this file and edits docs to match it; nothing downstream re-derives a value.",
+  "date": "2026-08-22",
+  "branch": "phaseB-plan5-revalidate-docs",
+  "measuredAgainstCommit": "bfba994d4326433196bfe17004f5ab1247dfa79b",
+  "harness": "docs/superpowers/harnesses/2026-08-16-b5/measure_constants.py (source/config constants) plus manual browser recipes from CLAUDE.md 'Debug recipes' for draw calls and bake time, run against `python tools/serve.py` on this machine",
+  "constants": [
+    {
+      "constant": "WALL_TH (wall thickness)",
+      "documentedValue": "0.14 (centreline ± 0.07)",
+      "documentedAt": "CLAUDE.md:74",
+      "measuredValue": 0.14,
+      "howMeasured": "grep -n WALL_TH tour/builder.js -> tour/builder.js:185 `const WALL_TH = 0.14;`",
+      "agrees": true
+    },
+    {
+      "constant": "DOOR_H / PASS_H (door / passage height)",
+      "documentedValue": "2.05 / 2.2",
+      "documentedAt": "CLAUDE.md:75",
+      "measuredValue": "DOOR_H=2.05, PASS_H=2.2",
+      "howMeasured": "tour/builder.js:186 `const DOOR_H = 2.05, PASS_H = 2.2, WIN_SILL = 0.85, WIN_HEAD = 2.45;`",
+      "agrees": true
+    },
+    {
+      "constant": "WIN_SILL / WIN_HEAD (window sill / head)",
+      "documentedValue": "0.85 / 2.45",
+      "documentedAt": "CLAUDE.md:76",
+      "measuredValue": "WIN_SILL=0.85, WIN_HEAD=2.45",
+      "howMeasured": "tour/builder.js:186 (same line as DOOR_H/PASS_H)",
+      "agrees": true
+    },
+    {
+      "constant": "Eye height",
+      "documentedValue": 1.6,
+      "documentedAt": "CLAUDE.md:77",
+      "measuredValue": 1.6,
+      "howMeasured": "tour/controls.js:14 `this.eye = 1.6;`",
+      "agrees": true
+    },
+    {
+      "constant": "Player radius (documented as living in controls.js and mirrored in validate.js)",
+      "documentedValue": "0.24 in both files",
+      "documentedAt": "CLAUDE.md:78",
+      "measuredValue": "controls.js: 0.24, validate.js: 0.24",
+      "howMeasured": "tour/controls.js:17 `this.radius = 0.24;`; tour/validate.js:16 `const RADIUS = 0.24;  // player radius (same as controls)`",
+      "agrees": true,
+      "notes": "Mirror checked explicitly, per task-1-brief step 2 instruction. Still in sync -- not a drifted mirror."
+    },
+    {
+      "constant": "Walk / run speed",
+      "documentedValue": "1.9 / 3.4 m/s",
+      "documentedAt": "CLAUDE.md:79",
+      "measuredValue": "walk 1.9, run 3.4",
+      "howMeasured": "tour/controls.js:188 `const speed = (this.keys.ShiftLeft || this.keys.ShiftRight) ? 3.4 : 1.9;`",
+      "agrees": true
+    },
+    {
+      "constant": "Reachability grid step / max step-up",
+      "documentedValue": "0.25 m / 0.35 m",
+      "documentedAt": "CLAUDE.md:80",
+      "measuredValue": "STEP=0.25, STEP_UP=0.35",
+      "howMeasured": "tour/validate.js:15 `const STEP = 0.25;` and tour/validate.js:17 `const STEP_UP = 0.35;`",
+      "agrees": true
+    },
+    {
+      "constant": "HDR headroom EXP (documented as \"= lightMapIntensity\")",
+      "documentedValue": "1.7 (= lightMapIntensity)",
+      "documentedAt": "CLAUDE.md:81",
+      "measuredValue": "EXP itself is 1.7 (bake.js:66), but the property the row names, mesh.material.lightMapIntensity, is actually set to 1.7 * Math.PI ~= 5.3407 (bake.js:498), not literally 1.7",
+      "howMeasured": "tour/bake.js:66 `const EXP = 1.7;`; tour/bake.js:498 `mesh.material.lightMapIntensity = 1.7 * Math.PI;`",
+      "agrees": false,
+      "notes": "Not a functional bug -- bake.js:481-497's own comment explains the *Math.PI is deliberate, cancelling r185's shader-side *RECIPROCAL_PI so the delivered contribution still equals EXP=1.7, matching r128. But the CLAUDE.md row's parenthetical '(= lightMapIntensity)' reads as the property equalling 1.7, and it does not -- the property is EXP*PI. A documentation-precision finding, not a rendering defect."
+    },
+    {
+      "constant": "Bloom threshold / strength",
+      "documentedValue": "threshold 1.8, strength 0.1",
+      "documentedAt": "CLAUDE.md hard rule 4a prose (e.g. \"bloom unchanged at threshold 1.8 / strength 0.1\"); docs/PHASE-B-RESUME.md:134",
+      "measuredValue": "new UnrealBloomPass(size, strength=0.1, radius=0.5, threshold=1.8)",
+      "howMeasured": "tour/post.js:255 `const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);`",
+      "agrees": true
+    },
+    {
+      "constant": "Module cache-buster ?v=",
+      "documentedValue": "138 (plan 5's own dispatch note: 'the tree is at ?v=138', task-1-brief.md preamble)",
+      "documentedAt": "task-1-brief.md dispatch note / .superpowers/sdd/2026-08-16-phase-b5-revalidate-and-docs/progress.md:15",
+      "measuredValue": 138,
+      "howMeasured": "tour/index.html:254 `<script type=\"module\" src=\"main.js?v=138\"`; confirmed live in browser: `[...document.querySelectorAll('script')].map(s => s.src.split('?').pop())` returned v=138 on every classic-script tag after a cache-busted load (`?apt=serenity&cb=1`)",
+      "agrees": true
+    },
+    {
+      "constant": "Serenity draw calls at entrance (through post chain, APT.start)",
+      "documentedValue": "78 is the row's headline figure; the row already also records a third-machine reading of 80 as an acknowledged machine-spread, not a new budget",
+      "documentedAt": "CLAUDE.md:82",
+      "measuredValue": 80,
+      "howMeasured": "CLAUDE.md 'Draw calls in a spot' recipe (info.autoReset disabled/reset, composer.render, through the post chain) run 3x against `python tools/serve.py`, apartment=serenity, camera set to APT.start {x:3.6,z:0.75,yaw:178}. All 3 runs (fresh page loads with cb=1/2/3) returned 80.",
+      "agrees": true,
+      "notes": "Matches the row's own already-documented 'a third machine reads 80' clause, not the 78 headline. This session is effectively a fourth machine confirming the spread, not a new number."
+    },
+    {
+      "constant": "Kings-court draw calls at entrance (through post chain, own APT.start)",
+      "documentedValue": null,
+      "documentedAt": "No documented figure for kings-court's own-start entrance under the current tree. CLAUDE.md hard rule 4's kings-court figures (150 -> 282 mobile calls) are from the rejected GTAO experiment at a different camera position/resolution and are not a claim about the current chain's draw-call count -- not comparable.",
+      "measuredValue": 165,
+      "howMeasured": "Same recipe as serenity, apartment=kings-court, camera set to APT.start {x:22.6,z:5,yaw:90} (read from tour/apartments/kings-court.json, NOT serenity's coordinates). 3 runs (cb=1/2/3) all returned 165.",
+      "agrees": null,
+      "notes": "No prior claim exists to compare against -- recorded so a later plan has a real baseline instead of an absent row."
+    },
+    {
+      "constant": "Horkyone-10 draw calls at entrance (through post chain, own APT.start)",
+      "documentedValue": null,
+      "documentedAt": "No documented figure exists for this apartment's draw-call count anywhere in CLAUDE.md or docs/PHASE-B-RESUME.md.",
+      "measuredValue": 86,
+      "howMeasured": "Same recipe, apartment=horkyone-10, camera set to APT.start {x:7.75,z:5.85,yaw:0}. 3 runs (cb=1/2/3) all returned 86.",
+      "agrees": null
+    },
+    {
+      "constant": "Bake time medians and cross-apartment ratios",
+      "documentedValue": "serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms (medians of 3 runs, one machine, phase B3 task 2); implied ratios kings-court/serenity ~4.37x, horkyone/serenity ~1.04x. Rule 4a states explicitly that these absolute figures are machine-dependent and only ratios within one machine's own before/after pair are meant to be compared -- but the row still states these as the reference numbers.",
+      "documentedAt": "CLAUDE.md:83, and hard rule 4a's fuller discussion below the table",
+      "measuredValue": "This session, this machine, 3 fresh-page-load runs each via `window.__bakeReady.then(() => window.__bakeMs)`: serenity 834.4 / 822.8 / 950.6 ms (median 834.4); kings-court 22294.2 / 22448.8 / 22081.0 ms (median 22294.2); horkyone-10 2656.9 / 2835.1 / 2481.5 ms (median 2656.9). Ratios: kings-court/serenity ~26.72x, horkyone-10/serenity ~3.18x, kings-court/horkyone-10 ~8.39x.",
+      "howMeasured": "CLAUDE.md rule 4a recipe, `python tools/serve.py`, 3 separate cache-busted page loads per apartment, camera position irrelevant to bake time",
+      "agrees": false,
+      "notes": "Both absolute times and the cross-apartment RATIOS diverge substantially from every previously recorded machine (documented kings-court/serenity ~4.37x vs this session's ~26.72x). Rule 4a already warns absolute bake times are not comparable across machines and that even kings-court's own before/after ratio has read anywhere from 1.36x to ~3x on different machines -- but this is the first record of the cross-APARTMENT ratio itself moving this far, since prior rows only compare one apartment's own before/after. Recorded as measured, not corrected; whether the browser tab, server load, or genuine machine variance explains it is unestablished and out of this task's scope."
+    },
+    {
+      "constant": "Dynamic PointLights per apartment (budget: <=8, flagged `dyn` in config)",
+      "documentedValue": "<=8",
+      "documentedAt": "CLAUDE.md:84 (Numbers that matter table) and CLAUDE.md hard rule 4 ('No new dynamic PointLights')",
+      "measuredValue": "serenity: 3 dyn of 9 total lights; kings-court: 11 dyn of 20 total lights; horkyone-10: 3 dyn of 8 total lights",
+      "howMeasured": "python: count `lights[]` entries with `dyn` truthy in each tour/apartments/<id>.json; cross-checked live in the browser after `__bakeReady` via `a.scene.traverse(o => { if (o.isPointLight) n++; })` -- returned 3 (serenity), 11 (kings-court), 3 (horkyone-10), matching the config counts exactly. tour/builder.js:1599-1607 confirms every `dyn:true` entry unconditionally gets a `new T.PointLight(...)` added to the scene (tour/builder.js:1604), with no level-based culling and no cap enforced anywhere in code.",
+      "agrees": false,
+      "notes": "REAL DEFECT, not a documentation nit: kings-court ships 11 live PointLights against a hard-ruled budget of <=8, confirmed both from the config and from the live built scene. Serenity and horkyone-10 are both within budget at 3 each."
+    },
+    {
+      "constant": "Shipped `exposure` values",
+      "documentedValue": "serenity 0.31, kings-court 0.52, horkyone-10 0.42",
+      "documentedAt": "CLAUDE.md:96 (config-keys `exposure` row); docs/PHASE-B-RESUME.md:134",
+      "measuredValue": "serenity 0.31, kings-court 0.52, horkyone-10 0.42",
+      "howMeasured": "python: json.load each tour/apartments/<id>.json, read .get('exposure')",
+      "agrees": true
+    },
+    {
+      "constant": "Pose verification counts (compare-flagged spots only)",
+      "documentedValue": "serenity: 1 of 11 fail (=10 of 11 pass); kings-court: 3 of 13 fail (=10 of 13 pass)",
+      "documentedAt": "docs/PHASE-B-RESUME.md:166 (\"1 of serenity's 11\" ... \"3 of kings-court's 13\")",
+      "measuredValue": "serenity: 10 of 11 pass, fail=[2.webp]; kings-court: 10 of 13 pass (14 photoSpots total, 1 not compare-flagged), fail=[14.webp, 17.webp, 18.webp]; horkyone-10: 0 of 0 (zero compare-flagged spots)",
+      "howMeasured": "python per task-1-brief.md step 4 recipe: filter photoSpots by `compare`, count `poseVerified` truthy",
+      "agrees": true
+    },
+    {
+      "constant": "Shipped `pitch` keys",
+      "documentedValue": "serenity ships FIVE keys: `6` (-6), `7` (13), `10` (22), `11` (-6), `2` (40, carve-out, level-confirmed but kept). kings-court ships none.",
+      "documentedAt": "CLAUDE.md:102 (pitch row, post plan-4e-final-review correction)",
+      "measuredValue": "serenity: 2.webp=40, 6.webp=-6, 7.webp=13, 10.webp=22, 11.webp=-6 (exactly 5 keys); kings-court: none",
+      "howMeasured": "python: json.load each config, list photoSpots with a `pitch` key present",
+      "agrees": true
+    },
+    {
+      "constant": "Two-camera FOV finding: divider (per-spot) vs gate (fixed 72 deg)",
+      "documentedValue": "gate fixed 72 deg vertical under `?fov=legacy`; divider per-spot fov measured 88.5 deg on serenity's eight 16:9 landscape spots, 120 deg on `10`/`11`, 65 deg on `9.webp`'s own `vfov` override",
+      "documentedAt": "CLAUDE.md:102 (pitch row, 'Two different cameras read this key' clause)",
+      "measuredValue": "Reproduced independently this session. Gate: tour/app.js:149 constructs the camera at fov=72; tour/measure.js:74-75 skips `__spotFov` entirely when `?fov=legacy` is present, leaving that 72 default in place. Divider: tour/main.js:120-130 `__spotFov(spot, aspect)` -- if `spot.vfov` is a positive number it is returned directly (9.webp: vfov=65, confirmed in tour/apartments/serenity.json); otherwise for aspect>=1 (landscape) it computes `2*atan(tan(photoFovLong/2 deg)/aspect)/1deg` with photoFovLong=120 (both apartments' meta.photoFovLong), which for aspect=16/9=1.7778 evaluates to 88.507 deg; for aspect<1 (portrait) it returns photoFovLong directly = 120 deg. Cross-checked against the REAL photo files with PIL: serenity's 1,2,3,4,5,6,7,8.webp are all 1200x675 (aspect 1.7778, landscape) -> 88.5 deg; 10.webp is 923x1200 (aspect 0.769, portrait) -> 120 deg; 11.webp is 812x1200 (aspect 0.677, portrait) -> 120 deg; 9.webp is 919x1200 but carries its own vfov:65 override so the aspect is irrelevant.",
+      "howMeasured": "Read tour/main.js, tour/measure.js, tour/app.js source directly; independently recomputed the __spotFov formula in Python against real photo pixel dimensions (PIL) rather than trusting the prior citation",
+      "agrees": true
+    },
+    {
+      "constant": "quality.aoRays default",
+      "documentedValue": "defaults to 8 when the block or key is absent",
+      "documentedAt": "CLAUDE.md:99",
+      "measuredValue": 8,
+      "howMeasured": "tour/bake.js:727 `const rays = (APT.quality && APT.quality.aoRays) || 8;`",
+      "agrees": true
+    },
+    {
+      "constant": "AMB_DIST / AMB_RAYS (hemisphere ambient sampler)",
+      "documentedValue": "16 cosine-weighted rays to AMB_DIST 0.65 m",
+      "documentedAt": "CLAUDE.md 'Architecture (tour/)' table, bake.js row",
+      "measuredValue": "AMB_DIST=0.65, AMB_RAYS=16",
+      "howMeasured": "tour/bake.js:172 `const AMB_DIST = 0.65;`; tour/bake.js:193 `const AMB_RAYS = 16;`",
+      "agrees": true
+    },
+    {
+      "constant": "SEG (wall lightmap segment size)",
+      "documentedValue": "segmented at ~0.45 m",
+      "documentedAt": "CLAUDE.md 'Architecture (tour/)' table, bake.js row",
+      "measuredValue": 0.45,
+      "howMeasured": "tour/bake.js:623 `const SEG = 0.45;`",
+      "agrees": true
+    },
+    {
+      "constant": "WEXP (wall exposure headroom)",
+      "documentedValue": null,
+      "documentedAt": "No explicit numeric claim in CLAUDE.md -- only the qualitative note 'walls don't overexpose -- less HDR headroom than floors' exists in the source comment itself, not in CLAUDE.md's tables.",
+      "measuredValue": 1.25,
+      "howMeasured": "tour/bake.js:624 `const WEXP = 1.25; // walls don't overexpose -- less HDR headroom than floors`",
+      "agrees": null,
+      "notes": "Recorded because the brief says not to omit an inconvenient constant. Nothing to disagree with -- CLAUDE.md never states this number."
+    },
+    {
+      "constant": "photoSpots count per apartment",
+      "documentedValue": null,
+      "documentedAt": "No standalone documented count exists.",
+      "measuredValue": "serenity=11, kings-court=14 (13 compare-flagged + 1 non-compare, 4.webp), horkyone-10=2 (0 compare-flagged)",
+      "howMeasured": "python: len(d.get('photoSpots', []))",
+      "agrees": null
+    },
+    {
+      "constant": "serenity mainCeilH -- FLAGGED, routed to plan 6, NOT re-measured or fixed here",
+      "documentedValue": "config ships 2.6. Photographic band (both routes off `4.webp` alone): curtain-rod method 2.86-2.92 m; air-conditioner method 3.1-3.2 m. Both routes rest on 4.webp alone and the band itself is explicitly marked as needing RE-MEASUREMENT before anyone edits the constant.",
+      "documentedAt": "docs/PHASE-B-RESUME.md:803 (open-item table); docs/PHASE-B-OBSERVATIONS.md:161",
+      "measuredValue": 2.6,
+      "howMeasured": "python: tour/apartments/serenity.json .get('mainCeilH'). Per task instructions, the photographic band itself was NOT re-measured in this task -- only the shipped config value was confirmed and the documented band was transcribed with its source.",
+      "agrees": false,
+      "notes": "PRE-EXISTING, KNOWN, ROUTED TO PLAN 6 -- not a new finding. This row exists so plan 6 has a citation-checked starting point, not so this task fixes it. Do not edit mainCeilH from this audit."
+    },
+    {
+      "constant": "kings-court meta.photoFovLong -- FLAGGED, routed to plan 6, NOT re-measured or fixed here",
+      "documentedValue": "config ships 120. Measured ~57 deg (10.webp, angular separation of identified features) and ~58 deg (2.webp, object size), two independent methods. Plan 4e's third line of evidence (2.webp/20.webp: a TV-screen landmark and a ceiling-junction landmark, crop-confirmed the same physical object, each demanding a different tilt if it were tilt) implies a focal-length factor of roughly 2.2-2.4 between render and photograph -- offered explicitly as direction/magnitude class only, not a measurement, and does not narrow the ~57-58 deg prior.",
+      "documentedAt": "docs/PHASE-B-RESUME.md:591 (measured ~57/~58 deg); docs/PHASE-B-RESUME.md:608 (plan 4e's 2.2-2.4 factor); docs/superpowers/metrics/b4e-lens-evidence.json",
+      "measuredValue": 120,
+      "howMeasured": "python: tour/apartments/kings-court.json .get('meta',{}).get('photoFovLong'). Per task instructions, no new lens measurement was attempted here -- only the shipped config value confirmed and the documented evidence transcribed with its source. Also noted: serenity's meta.photoFovLong is ALSO 120 (tour/apartments/serenity.json), but the ~57-58 deg measurement and the 2.2-2.4 factor are specific to kings-court's own photographs, not measured for serenity.",
+      "agrees": false,
+      "notes": "PRE-EXISTING, KNOWN, ROUTED TO PLAN 6 -- not a new finding. This row exists so plan 6 has a citation-checked starting point, not so this task fixes it. Do not edit meta.photoFovLong from this audit."
+    }
+  ],
+  "summary": {
+    "totalConstants": 26,
+    "agreeTrue": 17,
+    "agreeFalse": 5,
+    "agreeNullNoComparableClaim": 4,
+    "note": "agreeFalse breaks down as: 2 pre-existing/known items explicitly routed to plan 6 (mainCeilH, meta.photoFovLong -- flagged not fixed, per task instructions), 1 real defect newly confirmed this session (kings-court ships 11 dynamic PointLights against a documented <=8 budget, verified both in config and in the live built scene), 1 documentation-precision nit (CLAUDE.md's EXP row states lightMapIntensity literally equals 1.7, but the shipped property is 1.7*Math.PI -- the delivered contribution still equals 1.7 by design, only the property's own value disagrees with the row's parenthetical), and 1 measured-but-expected-to-vary figure (bake-time cross-apartment ratios, which rule 4a already warns are machine-dependent, though this session's spread from the documented ratio is larger than any previously recorded pair)."
+  }
+}
