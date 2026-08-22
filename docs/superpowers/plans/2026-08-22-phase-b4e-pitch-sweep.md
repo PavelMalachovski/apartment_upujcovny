@@ -680,20 +680,68 @@ ships `pitch: 0`, and the reason is written out. That is a legitimate outcome,
 not a failure to try harder — and deciding it here, before any sweep, stops a
 sweep from inventing a landmark to justify itself.
 
+### CORRECTED 2026-08-22, after task 2 measured the band — read before steps 2–4
+
+**As first written, steps 2, 3 and 4 compared a render-versus-photograph row
+disagreement against `bandRows`. That was wrong, and task 2's own measurement
+proves it.** `bandRows` came out at **0.0039 of frame height (0.33°)**, which is
+exactly what task 2 was asked to measure: how far a landmark row moves between
+two *identical* page loads. That is **capture noise on one side of the
+comparison**. Render-versus-photograph disagreement is a different and much
+larger quantity — it also carries furniture differences, lens error and
+modelling error.
+
+The proof is in this repository's own shipped record: plan 4c task 1b accepted
+`10.webp` at photograph row **0.392** against render row **0.374**, a
+disagreement of **0.018** — **4.6× the band**. The shipped, `poseVerified`,
+−12.51 ΔE result would fail this plan's original acceptance test.
+
+**The replacement, ruled by the human partner 2026-08-22: choose the minimum,
+do not threshold.** There is no defensible fixed tolerance to invent here, and
+task 1b did not use one — it picked the closest match. So:
+
+- The chosen tilt is the one that **minimises** the landmark row disagreement.
+- Two conditions make that minimum trustworthy, and both are checkable without
+  inventing a number: the minimum must lie **inside** the swept range rather
+  than at its edge, and it must be **materially better than the disagreement at
+  0°** — otherwise the sweep has found nothing and the spot was level or is
+  unreconcilable.
+- The residual is **recorded, not gated**. Every derivation JSON carries
+  `residualRows` so a later reader can judge it against whatever they know.
+
+**`bandRows` keeps its real job**: it bounds the precision of a single row
+measurement, so a difference smaller than `bandRows` is not a difference at all.
+Use it for that and for nothing else.
+
 - [ ] **Step 2: Classify the obvious cases before sweeping anything**
 
-If the photograph's row and the level render's row already agree within
-`bandRows`, the spot is **`level-confirmed`**: no key is written, and its
-`poseVerified` stamp is now tested rather than assumed. Write these into
-`serenity-b4e-derivation.json` now.
+Measure the disagreement between the photograph's landmark row and the level
+render's. Sweep the spot anyway unless the level render is already the minimum —
+you cannot know that without looking. A spot whose disagreement at 0° is not
+beaten **materially** by any swept tilt is **`level-confirmed`**: no key is
+written, and its `poseVerified` stamp is now tested rather than assumed.
 
-Everything else goes to the sweep.
+Record the 0° disagreement for every spot before sweeping. It is the baseline
+every later comparison in this task is made against, and writing it down first
+stops a sweep from grading its own homework.
 
 - [ ] **Step 3: Sweep each remaining spot around its proposal**
 
 Start from the proposal in `serenity-b4e-proposals-pitch0.json` and capture that
-spot at the proposal and at proposal ±3° and ±6°. Five values, not two hundred —
-that is what the proposal buys.
+spot at **0°, the proposal, and proposal ±3° and ±6°** — six values, not two
+hundred, which is what the proposal buys. **0° is in the sweep on purpose**: it
+is the baseline the minimum has to beat, and measuring it in the same run as the
+rest keeps it comparable.
+
+Then **refine**: once the coarse minimum is located, capture that value ±1°.
+Without this the grid is coarser than the effect being measured — at 72° one
+degree is about 0.0136 of frame height, roughly 16 px in a 1200 px frame, while
+the row measurement itself is good to about 0.0039 (`bandRows`). A ±3° grid
+would leave the answer uncertain by more than four times the measurement's own
+precision.
+
+**Do not refine below ±1°.** Below that the sweep is chasing noise it cannot
+resolve, and the honest answer is the degree, not the fraction of one.
 
 ```js
 await window.__bakeReady;
@@ -716,11 +764,16 @@ applied backwards somewhere: `main.js:105` negates, so a positive config value
 means *tilted down*, and a downward tilt moves a fixed world feature **up** the
 frame. Check that before sweeping further.
 
-**A spot where no swept value brings the rows within `bandRows` is
-`will-not-converge`**: it ships `pitch: 0`, and every swept value is recorded so
-nobody repeats the sweep. This outcome is also the plan's lens evidence — a
-landmark that no tilt can reconcile is saying something is wrong that is not
-tilt, and `meta.photoFovLong` is the leading candidate.
+**A spot is `will-not-converge` when the sweep's minimum sits at an edge of the
+swept range, or when no swept tilt beats 0° by more than `bandRows`.** Either
+way it ships `pitch: 0` and every swept value is recorded, so nobody repeats the
+sweep. An edge minimum means the true value is outside the range you looked in —
+widen it once and re-sweep before declaring it, and say in the JSON that you
+did.
+
+This outcome is also the plan's lens evidence: a landmark that no tilt can
+reconcile is saying something is wrong that is not tilt, and `meta.photoFovLong`
+is the leading candidate.
 
 - [ ] **Step 4: Capture the confirmation set in one run**
 
@@ -745,9 +798,24 @@ mv tools/shots/render_serenity_*.jpg docs/superpowers/harnesses/2026-08-22-b4e/r
 Write the same map to
 `docs/superpowers/harnesses/2026-08-22-b4e/serenity-captured-pitch.json`, then
 re-probe every spot's landmark in the confirmation render and record
-`residualRows`. **A spot whose residual exceeds `bandRows` here is demoted to
-`will-not-converge` and ships `pitch: 0`.** Do not nudge the value to chase the
-residual — that turns a confirmation back into the sweep it was meant to check.
+`residualRows`.
+
+**What the confirmation checks is reproducibility, not size.** The chosen tilt
+was picked in a sweep where each value was captured on its own; this run
+captures every spot's chosen value together, in one page load. So the test is:
+**does the confirmation render reproduce the row the sweep measured at that same
+tilt, to within `bandRows`?** That is precisely what `bandRows` measures — two
+captures of the same state — and it is the one place in this task where a fixed
+tolerance is the right instrument.
+
+A spot whose confirmation row does **not** reproduce its sweep row is demoted to
+`will-not-converge` and ships `pitch: 0`: the measurement did not hold still, so
+there is nothing to ship. **Do not compare `residualRows` against `bandRows` to
+judge whether the tilt is right** — that is the mistake this section corrects,
+and the render-versus-photograph residual is recorded for the reader, not gated.
+
+Do not nudge the value to chase the residual — that turns a confirmation back
+into the sweep it was meant to check.
 
 - [ ] **Step 5: Look at the dividers, and let the reviewer overrule the tool**
 
@@ -847,13 +915,17 @@ carried in rather than rediscovered:
 
 - [ ] **Step 2: Classify the obvious cases**
 
-Identical to task 3 step 2: rows already agreeing within `bandRows` are
-`level-confirmed`, no key written, stamp now tested rather than assumed.
+Identical to task 3 step 2 **as corrected** — read the correction block above
+task 3 step 2 before starting, it governs this task too. Record the 0°
+disagreement for every spot first; a spot no swept tilt materially beats at 0°
+is `level-confirmed`, no key written, stamp now tested rather than assumed.
 
 - [ ] **Step 3: Sweep each remaining spot around its proposal**
 
-Identical to task 3 step 3 — proposal, ±3°, ±6°, chosen by landmark row, never
-by score and never by ΔE:
+Identical to task 3 step 3 **as corrected** — 0°, the proposal, ±3° and ±6°,
+then a ±1° refinement around the coarse minimum. The chosen tilt **minimises**
+the landmark row disagreement; there is no fixed tolerance to pass. Never chosen
+by the tool's score, never by ΔE:
 
 ```js
 await window.__bakeReady;
