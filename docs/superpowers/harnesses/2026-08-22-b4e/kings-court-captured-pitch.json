@@ -1,0 +1,16 @@
+{
+  "method": "Pitches actually in effect during the committed docs/superpowers/harnesses/2026-08-22-b4e/renders-confirm-kings-court/ capture. Captured by loading http://localhost:8742/index.html?apt=kings-court&measure=1&fov=legacy&cb=4 directly (the SHIPPED tour/apartments/kings-court.json, no per-spot JS pitch override) and calling window.__measure() once __bakeReady resolved -- matching plan 4e task 3's CRITICAL 1 fix rather than the original (overridden) method. Verified before capture: currentCameraFov read exactly 72 (the legacy value) and legacyFov (fov=legacy in the URL) was true, confirming the gate camera -- not a per-photograph fov override -- was in effect. pitchDeg values below were also read directly off APT.photoSpots at capture time (deg = pitch ? -(pitch*180/PI) : 0, i.e. the same sign convention main.js applies) and match tour/apartments/kings-court.json exactly.",
+  "2.webp": -4,
+  "7.webp": 0,
+  "20.webp": 15,
+  "8.webp": 0,
+  "11.webp": 0,
+  "12.webp": 12,
+  "14.webp": 0,
+  "17.webp": 0,
+  "19.webp": 0,
+  "3.webp": 0,
+  "10.webp": 0,
+  "13.webp": 12,
+  "18.webp": 0
+}
