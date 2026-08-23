@@ -160,7 +160,10 @@ fixed on the strength of a number that never described it.
 >
 > **New, found while disproving B1:** `mainCeilH: 2.6` is ~0.3–0.4 m too short.
 > Deferred with an owner — `docs/PHASE-B-RESUME.md`, "Deferred, with owners".
-> (Re-routed 2026-08-19 by task 5 from plan 4c to **plan 5**; see that table.)
+> ~~(Re-routed 2026-08-19 by task 5 from plan 4c to **plan 5**; see that table.)~~
+> **Corrected 2026-08-23 by plan 5 task 5: plan 5 is done and this was never
+> in its five written tasks. Re-routed again to plan 6 — see "What plan 5
+> closed, and what plan 6 inherits" in `docs/PHASE-B-RESUME.md`.**
 
 > **B1's pose half is closed, 2026-08-19 (plan 4b task 2, `1e0d4e5`); its
 > object half is not.** Kept in place; this is what changed under it.
