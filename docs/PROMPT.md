@@ -244,7 +244,7 @@ rather than reused.
   "groundZones": [{         // walkable floor heights — the physics floor
     "x1": 0, "z1": 0, "x2": 0, "z2": 0,
     "y": 0,                 // flat zone
-    "ramp": { "axis": "x", "from": 11.3, "to": 7.5, "y0": 0, "y1": 3.1 }  // or a ramp (stairs)
+    "ramp": { "axis": "x", "from": 9.4, "to": 6.0, "y0": 0, "y1": 3.0 }  // or a ramp (stairs)
   }],
 
   "roomLabels": [{ "x1": 0, "z1": 0, "x2": 0, "z2": 0,
