@@ -3,6 +3,7 @@
   "date": "2026-08-22",
   "branch": "phaseB-plan5-revalidate-docs",
   "measuredAgainstCommit": "bfba994d4326433196bfe17004f5ab1247dfa79b",
+  "lineNumberDrift": "Added 2026-08-23 by plan 5 task 5. Every `file:line` in this audit's `documentedAt` and `howMeasured` fields is as of the commit above and MUST be read that way. Plan 5 tasks 2, 4 and 5 have since edited CLAUDE.md, docs/PROMPT.md, docs/PHASE-B-OBSERVATIONS.md and docs/PHASE-B-RESUME.md; task 5 in particular inserted two whole sections into docs/PHASE-B-RESUME.md, so every citation into that file (:134, :166, :430, :591, :608, :803) now points at the wrong line in the working tree. The citations are NOT rewritten here, because doing so would falsify the audit's own `measuredAgainstCommit` contract and would need redoing after the next edit. Resolve them with `git show bfba994:<path>`, or find the row by its quoted text. Source lines under tour/ are unaffected -- plan 5 changed no file under tour/.",
   "harness": "docs/superpowers/harnesses/2026-08-16-b5/measure_constants.py (source/config constants) plus manual browser recipes from CLAUDE.md 'Debug recipes' for draw calls and bake time, run against `python tools/serve.py` on this machine",
   "notCovered": {
     "purpose": "This audit is not a line-by-line read of every document in docs/. Recording plainly what was and was not covered, so a later task treats absence-of-a-row as 'not yet checked' rather than 'checked and fine' for anything outside this list.",

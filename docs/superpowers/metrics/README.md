@@ -2304,7 +2304,24 @@ read here.
 > `check_metrics_readme.py` never opens `sweep.json`, nor anything else in
 > task 2's or task 3's harness — it reads the section of this README headed
 > "Plan 4a's readings are a third render", and for data it reads `metrics/`
-> plus the **task-4** harness directory, by literal filename, no glob.
+> plus the **task-4** harness directory, ~~by literal filename, no glob~~
+> **mostly by literal filename, plus one glob and one source file — corrected
+> 2026-08-23 by plan 5 task 5, discharging an item parked at plan 4a's branch
+> close on 2026-08-16.** Line 203 of the checker globs
+> `metrics/*b4a-*allspots.json`, and line 178 defaults `--bake` to
+> `tour/bake.js`, which it parses to recompute the `grid()` claim from the
+> code's own argument lists. Neither re-inflates the narrowing this paragraph
+> exists to make — the narrowing is substantively correct — but an inaccuracy
+> inside the one paragraph whose job is accuracy is worth fixing on sight.
+> **And a larger fact the parked note did not have, found while verifying it:
+> `check_metrics_readme.py`, `check_metrics_readme_selftest.py` and
+> `write_metrics.py` do not exist under `tools/` at all.** They live only in
+> `docs/superpowers/harnesses/2026-08-15-b4a-task2/`, so nothing runs them on a
+> routine basis and no test suite invokes them; `tools/checks/stale_claims.py`
+> is the only checker in this repository on a normal path. Run them by hand
+> from that directory — plan 5 task 5 did, 100 checks, 0 failures — and do not
+> read "two committed checkers guard the metrics README" as meaning anything
+> automatic guards it.
 > **Machine-checked:** task 1's before/after/paintings series, task 2's
 > per-file state table and the three file counts, the `grid()` claim against
 > `bake.js`'s own argument lists, and all of task 4 — the gate pair, the

@@ -171,7 +171,10 @@ fixed on the strength of a number that never described it.
 > turning it, and the divider at the shipped pose shows the photograph's
 > composition. Six serenity spots were re-pointed and `8.webp` — a bathroom
 > photograph attached to a spot standing in the bedroom — was moved into the
-> bathroom. **serenity's `poseVerified` went 2 of 11 → 9 of 11.** So B1's
+> bathroom. **serenity's `poseVerified` went 2 of 11 → 9 of 11** — plan 4b's
+> own movement, correct as such; **live today it is 10 of 11, only `2.webp`
+> failing, counted out of `tour/apartments/serenity.json` on 2026-08-23 by plan
+> 5 task 5** (`10.webp` flipped later, by plan 4c task 1b). So B1's
 > acceptance criterion ("a human A/B at spot 3") is now *meetable*, where task
 > 1 could not meet it; the note above says exactly that and it came true.
 >
