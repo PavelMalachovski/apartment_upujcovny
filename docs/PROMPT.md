@@ -7,10 +7,16 @@ property without a programmer.
 
 > **Last reconciled against measurement: 2026-08-23.** Every value below
 > that is a real measurement rather than an illustration was checked
-> this day against `docs/superpowers/metrics/constants-b5-audit.json`
-> (33 constants measured at commit `bfba994`, dated 2026-08-22) and
-> against `CLAUDE.md` as of that same audit, or read directly out of the
-> source it describes. Anything the audit did not cover is either
+> this day — **in the reference project this specification was extracted
+> from, whose own repository is the only place the artefacts named here
+> exist; none of these paths or commits will be present in your project,
+> and this note is provenance for the numbers, not a task for you**
+> (frame added 2026-08-23, because the rest of this file is scrubbed of
+> reference-project identifiers and this blockquote was not) — against
+> that project's `docs/superpowers/metrics/constants-b5-audit.json`
+> (~~33~~ **34** constants measured at commit `bfba994`, dated
+> 2026-08-22, one added 2026-08-23) and against its `CLAUDE.md` as of
+> that same audit, or read directly out of the source it describes. Anything the audit did not cover is either
 > phrased qualitatively or read from code and cited as such. The
 > previous revision of this file was written before the engine
 > migration and described a stack that no longer exists; it was replaced
@@ -157,23 +163,38 @@ are labelled "(reference project — measure your own)" because they are
 the reference project's real, shipped calibration and must be re-measured
 rather than reused.
 
+> **Corrected 2026-08-23 by plan 5's final whole-branch review.** That
+> promise was false when it was written: `mainCeilH`, `upperFloorY`,
+> `terraceY`, the wall `h`, and the whole `attic`, `stairs` and
+> `terraceSteps` blocks below were the reference project's exact shipped
+> coordinates, verbatim and unlabelled — which is precisely what §12's
+> "it must not accumulate one property's coordinates" forbids, and the
+> failure that rule anticipates is a new project copying a real flat's
+> stair geometry because it looked like a default. They have been
+> **replaced with arbitrary illustrative numbers**, keeping the shapes,
+> the key names and the internal relationships (`rise` = `upperFloorY`,
+> wall `h` = `mainCeilH`, `terraceY` between `mainCeilH` + slab and
+> `upperFloorY`). Nothing below this line in the schema is a
+> measurement. Derive every one of them from your own floor plan.
+
 ```jsonc
 {
   "mainFloorY": 0,          // ground floor level
-  "mainCeilH": 2.8,         // ground floor ceiling height
-  "upperFloorY": 3.1,       // optional: upper floor slab top
-  "terraceY": 2.98,         // optional: terrace deck — MUST clear mainCeilH + slab
+  "mainCeilH": 2.7,         // ground floor ceiling height (illustrative)
+  "upperFloorY": 3.0,       // optional: upper floor slab top (illustrative)
+  "terraceY": 2.92,         // optional: terrace deck — MUST clear mainCeilH + slab
 
   "attic": {                // optional: sloped roof over the upper floor
-    "ridgeZ": 0.8, "ridgeH": 3,     // ridge line position and height
-    "northZ": -2.6, "northH": 1.8,  // one eave
-    "southZ": 6.6, "southH": 1.4    // the other eave (knee wall, below head height)
+                            // every number in this block is illustrative
+    "ridgeZ": 1.5, "ridgeH": 3.2,   // ridge line position and height
+    "northZ": -3.0, "northH": 1.7,  // one eave
+    "southZ": 7.2, "southH": 1.5    // the other eave (knee wall, below head height)
   },
 
   "walls": [{
     "lvl": "main" | "upper",
     "x1": 0, "z1": 0, "x2": 0, "z2": 0,  // CENTRELINE, axis-aligned
-    "h": 2.8,
+    "h": 2.7,               // normally mainCeilH; illustrative here
     "ext": true,            // optional: exterior wall, gets outside cladding
     "gable": "w" | "e",     // optional: gable end, follows the roof slope
     "tv": true,             // optional: wall carries a TV panel treatment
@@ -199,12 +220,12 @@ rather than reused.
   },
   "mainCeil": [{ "x1": 0, "z1": 0, "x2": 0, "z2": 0 }],  // ground floor ceiling rectangles
 
-  "stairs": {               // optional
-    "x1": 7.5, "x2": 11.3, "z1": -2.5, "z2": -1.3,
-    "rise": 3.1,
-    "lowX": 11.3, "highX": 7.5      // climb direction: bottom -> top
+  "stairs": {               // optional; every number here is illustrative
+    "x1": 6.0, "x2": 9.4, "z1": -3.0, "z2": -1.6,
+    "rise": 3.0,                    // = upperFloorY
+    "lowX": 9.4, "highX": 6.0       // climb direction: bottom -> top
   },
-  "terraceSteps": { "doorX": 4.2, "z1": 2.8, "z2": 3.8 },   // optional
+  "terraceSteps": { "doorX": 3.5, "z1": 3.2, "z2": 4.2 },   // optional, illustrative
 
   "furniture": [{
     "type": "bed",          // one of your F.* constructors
@@ -263,11 +284,16 @@ rather than reused.
     "file": "8.webp", "name": "Bedroom 1",
     "x": 0, "z": 0, "g": 0, "yaw": -5.7,
     "pitch": 22,            // optional: downward tilt in DEGREES, positive = looking down;
-                            // absent or non-finite -> 0. 22 is one reference-project spot's
-                            // own derived tilt (reference project — measure your own), not a
-                            // typical value. See §10 before setting one.
+                            // absent or non-finite -> 0. 22 and 65 below are values carried by
+                            // TWO DIFFERENT spots elsewhere in the reference project — not by
+                            // this example spot, and not by each other (attribution corrected
+                            // 2026-08-23; the comments used to call them "that spot's own",
+                            // which was false: the illustrated spot carries neither key).
+                            // (reference project — measure your own) — not typical values.
+                            // See §10 before setting one.
     "vfov": 65,             // optional: per-spot vertical fov override, degrees; 65 is
-                            // likewise that spot's own reference-project measurement
+                            // likewise a value some other spot in the reference project
+                            // carries (reference project — measure your own)
     "compare": true,        // optional: include this spot in the resemblance harness
     "poseVerified": true,   // optional: a human has looked at the divider and accepted the pose
     "poseNote": "<why>"     // optional: what was checked, or why it could not be
@@ -464,6 +490,13 @@ paste into the config.
   current per-apartment baselines **(reference project — measure your
   own)** are 78–80, 165 and 86, all inside the desktop ceiling; those
   were desktop readings and say nothing either way about the mobile one.
+  **Warning added 2026-08-23: the number 165 appears twice in this
+  document meaning two different things, and they are NOT comparable.**
+  Here it is the largest apartment's own start-position baseline. In the
+  rejected-experiments list at the end it is that apartment's *desktop*
+  reading under the rejected GTAO pass (150 → 282 mobile, 165 → 311
+  desktop) — a different camera, a different resolution and a different
+  render chain. Never subtract one from the other.
 - Merge every static mesh by **(material, level)** into a handful of big
   meshes. Skip only meshes carrying their own lightmap and the merged
   walls — the dollhouse cutaway needs those separable per level.
@@ -536,8 +569,11 @@ see the rejected list at the end of this document.
 
 Real photographs at their shooting positions are the single biggest
 trust generator in the whole product. Budget time for them: convert to
-webp ≤1200 px, commit them, and place each spot where the camera
-actually stood.
+webp **≤1200 px on the long edge** — say which edge in your own rules and
+check it, because the reference project wrote only "≤1200 px" and five of its
+27 photographs turned out to be 1200×1800 or 1200×1500, complying on width and
+not on the long edge; nobody measured it for eight plans — commit them, and
+place each spot where the camera actually stood.
 
 ## 8. Write the layout self-check first, not last
 
@@ -845,6 +881,10 @@ verdict: if yours differs, the answer may differ too.
   mobile draw-call ceiling. Its depth/normal prepass is a second full
   scene pass, so the largest apartment's entry hall went **150 → 282**
   mobile calls against a ≤250 ceiling (desktop 165 → 311, inside ≤400).
+  **The 165 here is the GTAO experiment's desktop before-figure at that
+  experiment's own camera and resolution — it is not the same quantity as
+  the 165 per-apartment baseline in §6, and the two must not be compared
+  (warning added 2026-08-23).**
   It also blackened whole walls on every device — it was the first thing
   in the project to read scene normals, and the walls were presenting
   their far face (§4). Occlusion lives in the bake instead.

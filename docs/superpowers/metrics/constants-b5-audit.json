@@ -91,10 +91,11 @@
     {
       "constant": "Bloom threshold / strength",
       "documentedValue": "threshold 1.8, strength 0.1",
-      "documentedAt": "CLAUDE.md hard rule 4a prose (e.g. \"bloom unchanged at threshold 1.8 / strength 0.1\"); docs/PHASE-B-RESUME.md:134",
+      "documentedAt": "docs/PHASE-B-RESUME.md:134 (as of the audit commit; docs/PHASE-B-RESUME.md:174 in the working tree after task 5's inserted sections) -- \"bloom unchanged at threshold 1.8 / strength 0.1\". CORRECTED 2026-08-23 by plan 5's final whole-branch review: this field previously also cited \"CLAUDE.md hard rule 4a prose\", which is a FABRICATED citation. `grep -n` for 1.8, 0.1 and \"bloom\" over CLAUDE.md returns no bloom number anywhere in that file, and hard rule 4a is about bake time, not bloom. CLAUDE.md mentions bloom only qualitatively (\"restrained bloom\" in the post.js architecture row; \"the bloom/grain/vignette chain\" in hard rule 4). The measuredValue and howMeasured below are unchanged and were never in doubt.",
       "measuredValue": "new UnrealBloomPass(size, strength=0.1, radius=0.5, threshold=1.8)",
       "howMeasured": "tour/post.js:255 `const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);`",
-      "agrees": true
+      "agrees": true,
+      "notesAddedByFinalReview": "A bad `documentedAt` is worse than a missing one: it invites a future task to \"correct\" CLAUDE.md against a claim that file never made. Verified by grep this session that CLAUDE.md contains no bloom threshold or strength figure."
     },
     {
       "constant": "Module cache-buster ?v=",
@@ -155,7 +156,8 @@
       "documentedAt": "CLAUDE.md:96 (config-keys `exposure` row); docs/PHASE-B-RESUME.md:134",
       "measuredValue": "serenity 0.31, kings-court 0.52, horkyone-10 0.42",
       "howMeasured": "python: json.load each tour/apartments/<id>.json, read .get('exposure')",
-      "agrees": true
+      "agrees": true,
+      "notesAddedByFinalReview": "CORRECTION, 2026-08-23, plan 5's final whole-branch review -- this row's FINDING was reached by a partial comparison, additively corrected here. `documentedAt` names CLAUDE.md:96 as a whole, but that cell contained TWO present-tense claims about serenity's exposure and this row compared only against the later one (\"serenity ships 0.31\"). The earlier clause in the same cell read \"**Compensates for the scene running about three and a half times as hot at source** (1.05 / 0.295 =~ 3.6): serenity's fitted value is 0.295, kings-court's 0.52\" -- 0.295 asserted as the live value, contradicting the same row 900 words later, and giving a wrong derived ratio (the shipped 0.31 gives 1.05/0.31 =~ 3.39). `0.295` appeared six times in that cell. The clause was struck in place on 2026-08-23 and the ratio corrected. `agrees` is deliberately LEFT AT true and `measuredValue` is untouched: the measurement was and is correct, and the shipped values do agree with the cell's live-value clause -- what was wrong was that the audit did not notice the cell also contradicted itself. Read `agrees: true` here as 'the shipped values match what CLAUDE.md's live-value clause says', not as 'CLAUDE.md:96 was internally consistent on 2026-08-22'. Same caveat applies to any other row whose documentedAt points at a long CLAUDE.md cell: this audit compared against a claim, not against every claim in the cell."
     },
     {
       "constant": "Pose verification counts (compare-flagged spots only)",
@@ -257,10 +259,11 @@
     {
       "constant": "SEG (wall lightmap segment size)",
       "documentedValue": "segmented at ~0.45 m",
-      "documentedAt": "CLAUDE.md 'Architecture (tour/)' table, bake.js row",
+      "documentedAt": "docs/PROMPT.md:199 as of the audit commit `bfba994` (`git show bfba994:docs/PROMPT.md | sed -n 199p` -> \"geometry with **per-vertex** baked light, segmented at ~0.45 m\"); the same claim is at docs/PROMPT.md:362 and, as a table row, docs/PROMPT.md:379 in the working tree after task 4's rewrite. CORRECTED 2026-08-23 by plan 5's final whole-branch review: this field previously cited \"CLAUDE.md 'Architecture (tour/)' table, bake.js row\", which is a FABRICATED citation -- that row names `SEG` twice but states no number, and CLAUDE.md's only \"0.45\" is at CLAUDE.md:96, inside the `exposure` row's 0.45->0.46 lineage, which is a different quantity entirely. The measuredValue and howMeasured below are unchanged.",
       "measuredValue": 0.45,
       "howMeasured": "tour/bake.js:623 `const SEG = 0.45;`",
-      "agrees": true
+      "agrees": true,
+      "notesAddedByFinalReview": "Same class as the Bloom row's fabricated citation, found in the same pass. The number itself (tour/bake.js:623 `const SEG = 0.45;`) was always right."
     },
     {
       "constant": "WEXP (wall exposure headroom)",
@@ -296,13 +299,23 @@
       "howMeasured": "python: tour/apartments/kings-court.json .get('meta',{}).get('photoFovLong'). Per task instructions, no new lens measurement was attempted here -- only the shipped config value confirmed and the documented evidence transcribed with its source. Also noted: serenity's meta.photoFovLong is ALSO 120 (tour/apartments/serenity.json), but the ~57-58 deg measurement and the 2.2-2.4 factor are specific to kings-court's own photographs, not measured for serenity.",
       "agrees": false,
       "notes": "PRE-EXISTING, KNOWN, ROUTED TO PLAN 6 -- not a new finding. This row exists so plan 6 has a citation-checked starting point, not so this task fixes it. Do not edit meta.photoFovLong from this audit."
+    },
+    {
+      "constant": "Photo long-edge cap (<=1200 px)",
+      "documentedValue": "\"<=1200 px\", stated three times and never qualified by edge: CLAUDE.md:375 (hard rule 6), CLAUDE.md:502 (\"Adding an apartment\" step 2) and docs/PROMPT.md:539, all as of the audit commit `bfba994`",
+      "documentedAt": "CLAUDE.md:375; CLAUDE.md:502; docs/PROMPT.md:539",
+      "measuredValue": "27 shipped webp across three apartments: max WIDTH 1200 in all 27; max LONG EDGE 1200 for serenity (11 files, 3 of them portrait) and horkyone-10 (2 files, max 1200x680), but 1800 for kings-court. Five kings-court files exceed 1200 on the long edge: 10.webp, 14.webp, 17.webp at 1200x1800 and 7.webp, 19.webp at 1200x1500.",
+      "howMeasured": "python + Pillow, run 2026-08-23 from the repo root: for each apt in serenity/kings-court/horkyone-10, `Image.open(f).size` over `sorted(glob.glob('tour/photos/<apt>/*.webp'))`, reporting max(w), max(h) and the files with max(w,h) > 1200.",
+      "agrees": false,
+      "notesAddedByFinalReview": "ADDED 2026-08-23 by plan 5's final whole-branch review. No row in the original audit covered this claim, so its absence meant 'not checked', per this file's own notCovered contract -- and it had gone unmeasured for eight plans. The rule is read as the LONG edge and is therefore VIOLATED by five files; it is deliberately NOT being redefined as '<=1200 px wide' (which would be true everywhere and would launder those five), on the same principle the 'Dynamic PointLights per apartment' row applies: the rule is right and the tree is wrong. Plan 5 changes no file under tour/, so re-encoding the five is routed to plan 6. All three documentation sites were made explicit about the edge on 2026-08-23 and carry the violation."
     }
   ],
   "summary": {
-    "totalConstants": 33,
+    "totalConstants": 34,
     "agreeTrue": 22,
-    "agreeFalse": 6,
+    "agreeFalse": 7,
     "agreeNullNoComparableClaim": 5,
-    "note": "agreeFalse (6) breaks down as: 2 pre-existing/known items explicitly routed to plan 6 (mainCeilH, meta.photoFovLong -- flagged not fixed, per task instructions); 1 real defect newly confirmed this session (kings-court ships 11 dynamic PointLights against a documented <=8 budget, verified both in config and in the live built scene); 1 documentation-precision nit with its lineage now recorded (CLAUDE.md's EXP row states lightMapIntensity literally equals 1.7, true until migration commit 67e5582 changed the property to 1.7*Math.PI without updating CLAUDE.md -- the delivered contribution still equals 1.7 by design, only the property's own value disagrees with the row's parenthetical); 1 documentation-vs-code disagreement on the `?v=` cache-buster (the documents still say 113 at two cited file:line locations, the code ships 138 -- previously misrecorded as 'agrees: true' by comparing against an already-corrected dispatch note instead of the documents); and 1 newly-added structural defect (bake.js:498 hardcodes `1.7 * Math.PI` rather than reading the `EXP` constant at bake.js:66 -- an unlinked mirror that currently agrees by coincidence and will silently drift the next time EXP is tuned). agreeNull (5) breaks down as: 2 own-start draw-call baselines with no prior documented figure to compare (kings-court 165, horkyone-10 86); WEXP (1.25, never stated numerically in CLAUDE.md); raw photoSpots counts per apartment (never tabulated); and the bake-time cross-apartment ratio row, changed from `agrees: false` to `agrees: null` in this fix round because CLAUDE.md rule 4a itself declares absolute bake times and their ratios non-comparable across machines/sessions -- `false` would have asserted the documented figure was simply wrong about something the rule says has no single right answer."
+    "note": "agreeFalse (6) breaks down as: 2 pre-existing/known items explicitly routed to plan 6 (mainCeilH, meta.photoFovLong -- flagged not fixed, per task instructions); 1 real defect newly confirmed this session (kings-court ships 11 dynamic PointLights against a documented <=8 budget, verified both in config and in the live built scene); 1 documentation-precision nit with its lineage now recorded (CLAUDE.md's EXP row states lightMapIntensity literally equals 1.7, true until migration commit 67e5582 changed the property to 1.7*Math.PI without updating CLAUDE.md -- the delivered contribution still equals 1.7 by design, only the property's own value disagrees with the row's parenthetical); 1 documentation-vs-code disagreement on the `?v=` cache-buster (the documents still say 113 at two cited file:line locations, the code ships 138 -- previously misrecorded as 'agrees: true' by comparing against an already-corrected dispatch note instead of the documents); and 1 newly-added structural defect (bake.js:498 hardcodes `1.7 * Math.PI` rather than reading the `EXP` constant at bake.js:66 -- an unlinked mirror that currently agrees by coincidence and will silently drift the next time EXP is tuned). agreeNull (5) breaks down as: 2 own-start draw-call baselines with no prior documented figure to compare (kings-court 165, horkyone-10 86); WEXP (1.25, never stated numerically in CLAUDE.md); raw photoSpots counts per apartment (never tabulated); and the bake-time cross-apartment ratio row, changed from `agrees: false` to `agrees: null` in this fix round because CLAUDE.md rule 4a itself declares absolute bake times and their ratios non-comparable across machines/sessions -- `false` would have asserted the documented figure was simply wrong about something the rule says has no single right answer.",
+    "finalReviewAddendum": "AMENDED 2026-08-23 by plan 5's final whole-branch review. (a) One constant was ADDED -- \"Photo long-edge cap (<=1200 px)\", agrees: false -- taking the tally from 33 (22/6/5) to 34 (22 agree, 7 disagree, 5 no comparable claim). Its finding: five kings-court photographs are 1200x1800 or 1200x1500, so the documented cap holds on width but not on the long edge; routed to plan 6 because it needs a tour/ change. (b) Two `documentedAt` citations were FABRICATED and are corrected in place -- the Bloom row cited CLAUDE.md hard rule 4a prose (CLAUDE.md carries no bloom number at all; rule 4a is about bake time) and the SEG row cited CLAUDE.md's bake.js architecture row (which names SEG but states no number; CLAUDE.md's only 0.45 is exposure lineage at :96). Both rows' measuredValue, howMeasured and agrees are unchanged -- only the provenance was wrong. (c) The \"Shipped `exposure` values\" row's FINDING was reached by comparing against only one of two contradicting present-tense claims inside CLAUDE.md:96; a note records this and `agrees` is deliberately left at true, because the measurement was right and the cell's self-contradiction is what the audit missed. No measuredValue anywhere in this file was altered by that review."
   }
 }
