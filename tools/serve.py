@@ -16,8 +16,40 @@ os.makedirs(SHOTS, exist_ok=True)
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    # Set while a response's Content-type says text/html, so end_headers can
+    # attach a cache policy to exactly the HTML responses. Consumed (and reset)
+    # by end_headers, which every response path calls.
+    _is_html = False
+
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=TOUR, **kw)
+
+    def send_header(self, keyword, value):
+        if keyword.lower() == 'content-type' and str(value).startswith('text/html'):
+            self._is_html = True
+        super().send_header(keyword, value)
+
+    def end_headers(self):
+        # SimpleHTTPRequestHandler sends Last-Modified but no Cache-Control at
+        # all, and a response with no Cache-Control may be reused without
+        # asking: browsers fall back to heuristic freshness (commonly 10% of
+        # the Last-Modified age). For index.html that is not a theoretical
+        # cost. It carries the single <script type="module" src="main.js?v=N">
+        # tag whose ?v= versions the config fetch, every classic script and
+        # both measurement harnesses, so a stale copy pins all of them to the
+        # OLD version -- and buildFurniture does `if (!fn) continue`, so
+        # constructors that only exist in the new code are skipped in silence
+        # and the scene renders with geometry simply missing. That happened
+        # (three F.* constructors, plan 4c task 1): the edit was in the file,
+        # curl proved the server was serving it, and the page ran the old code.
+        # Never store the HTML, so a ?v= bump always arrives on the next load.
+        # This mirrors the explicit HTML rule vercel.json sets for production;
+        # dev is stricter (no-store, not revalidate) because there is no
+        # bandwidth argument for caching from localhost.
+        if self._is_html:
+            self.send_header('Cache-Control', 'no-store')
+            self._is_html = False
+        super().end_headers()
 
     def do_POST(self):
         if not self.path.startswith('/save/'):

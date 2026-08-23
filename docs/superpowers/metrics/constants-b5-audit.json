@@ -1,0 +1,321 @@
+{
+  "purpose": "Plan 5 task 1: measure every documented constant against the code/config/runtime it is claimed to describe, and record value + provenance + agreement. Changes nothing. Every later plan-5 task reads this file and edits docs to match it; nothing downstream re-derives a value.",
+  "date": "2026-08-22",
+  "branch": "phaseB-plan5-revalidate-docs",
+  "measuredAgainstCommit": "bfba994d4326433196bfe17004f5ab1247dfa79b",
+  "lineNumberDrift": "Added 2026-08-23 by plan 5 task 5. Every `file:line` in this audit's `documentedAt` and `howMeasured` fields is as of the commit above and MUST be read that way. Plan 5 tasks 2, 4 and 5 have since edited CLAUDE.md, docs/PROMPT.md, docs/PHASE-B-OBSERVATIONS.md and docs/PHASE-B-RESUME.md; task 5 in particular inserted two whole sections into docs/PHASE-B-RESUME.md, so every citation into that file (:134, :166, :430, :591, :608, :803) now points at the wrong line in the working tree. The citations are NOT rewritten here, because doing so would falsify the audit's own `measuredAgainstCommit` contract and would need redoing after the next edit. Resolve them with `git show bfba994:<path>`, or find the row by its quoted text. Source lines under tour/ are unaffected -- plan 5 changed no file under tour/.",
+  "harness": "docs/superpowers/harnesses/2026-08-16-b5/measure_constants.py (source/config constants) plus manual browser recipes from CLAUDE.md 'Debug recipes' for draw calls and bake time, run against `python tools/serve.py` on this machine",
+  "notCovered": {
+    "purpose": "This audit is not a line-by-line read of every document in docs/. Recording plainly what was and was not covered, so a later task treats absence-of-a-row as 'not yet checked' rather than 'checked and fine' for anything outside this list.",
+    "documentsReadSelectively": [
+      {
+        "document": "docs/PHASE-B-RESUME.md",
+        "totalLines": 889,
+        "note": "Read for its markdown tables and the specific passages the task-1 brief and CLAUDE.md pointed at, NOT line by line end to end. Only the following lines were actually cited/quoted anywhere in this audit: line 134 (bloom threshold, exposure figures), line 166 (pose-verification counts, 'X of serenity's 11' / 'X of kings-court's 13'), line 430 (the `?v=` correction paragraph -- itself found to be stale documentation, see the `?v=` row), line 591 (kings-court's measured ~57-58deg photoFovLong evidence), line 608 (plan 4e's 2.2-2.4x lens-factor evidence), line 803 (serenity mainCeilH open-item table). Any table or narrative passage in this document NOT at one of those six lines was not read closely enough to audit, and a later task should re-check it directly rather than assume this file's silence means agreement."
+      }
+    ],
+    "tablesNotAudited": [
+      "docs/PHASE-B-RESUME.md's own top-level status/progress tables (e.g. plan-by-plan merge status, PR list) were not cross-checked against git/gh in this task -- only the specific rows named above were read.",
+      "Any numeric claim in docs/PHASE-B-RESUME.md outside lines 134, 166, 430, 591, 608, 803 (the six lines actually cited above) is unaudited by this task, positive or negative.",
+      "docs/PHASE-B-OBSERVATIONS.md was read only for the mainCeilH open item (cited once, alongside PHASE-B-RESUME.md:803, in the mainCeilH row) -- no other part of that document was audited.",
+      "docs/superpowers/metrics/README.md's superseded-value blockquotes were not individually re-verified against current CLAUDE.md text in this task; only the values CLAUDE.md itself currently states were measured."
+    ]
+  },
+  "constants": [
+    {
+      "constant": "WALL_TH (wall thickness)",
+      "documentedValue": "0.14 (centreline ± 0.07)",
+      "documentedAt": "CLAUDE.md:74",
+      "measuredValue": 0.14,
+      "howMeasured": "grep -n WALL_TH tour/builder.js -> tour/builder.js:185 `const WALL_TH = 0.14;`",
+      "agrees": true
+    },
+    {
+      "constant": "DOOR_H / PASS_H (door / passage height)",
+      "documentedValue": "2.05 / 2.2",
+      "documentedAt": "CLAUDE.md:75",
+      "measuredValue": "DOOR_H=2.05, PASS_H=2.2",
+      "howMeasured": "tour/builder.js:186 `const DOOR_H = 2.05, PASS_H = 2.2, WIN_SILL = 0.85, WIN_HEAD = 2.45;`",
+      "agrees": true
+    },
+    {
+      "constant": "WIN_SILL / WIN_HEAD (window sill / head)",
+      "documentedValue": "0.85 / 2.45",
+      "documentedAt": "CLAUDE.md:76",
+      "measuredValue": "WIN_SILL=0.85, WIN_HEAD=2.45",
+      "howMeasured": "tour/builder.js:186 (same line as DOOR_H/PASS_H)",
+      "agrees": true
+    },
+    {
+      "constant": "Eye height",
+      "documentedValue": 1.6,
+      "documentedAt": "CLAUDE.md:77",
+      "measuredValue": 1.6,
+      "howMeasured": "tour/controls.js:14 `this.eye = 1.6;`",
+      "agrees": true
+    },
+    {
+      "constant": "Player radius (documented as living in controls.js and mirrored in validate.js)",
+      "documentedValue": "0.24 in both files",
+      "documentedAt": "CLAUDE.md:78",
+      "measuredValue": "controls.js: 0.24, validate.js: 0.24",
+      "howMeasured": "tour/controls.js:17 `this.radius = 0.24;`; tour/validate.js:16 `const RADIUS = 0.24;  // player radius (same as controls)`",
+      "agrees": true,
+      "notes": "Mirror checked explicitly, per task-1-brief step 2 instruction. Still in sync -- not a drifted mirror."
+    },
+    {
+      "constant": "Walk / run speed",
+      "documentedValue": "1.9 / 3.4 m/s",
+      "documentedAt": "CLAUDE.md:79",
+      "measuredValue": "walk 1.9, run 3.4",
+      "howMeasured": "tour/controls.js:188 `const speed = (this.keys.ShiftLeft || this.keys.ShiftRight) ? 3.4 : 1.9;`",
+      "agrees": true
+    },
+    {
+      "constant": "Reachability grid step / max step-up",
+      "documentedValue": "0.25 m / 0.35 m",
+      "documentedAt": "CLAUDE.md:80",
+      "measuredValue": "STEP=0.25, STEP_UP=0.35",
+      "howMeasured": "tour/validate.js:15 `const STEP = 0.25;` and tour/validate.js:17 `const STEP_UP = 0.35;`",
+      "agrees": true
+    },
+    {
+      "constant": "HDR headroom EXP (documented as \"= lightMapIntensity\")",
+      "documentedValue": "1.7 (= lightMapIntensity)",
+      "documentedAt": "CLAUDE.md:81",
+      "measuredValue": "EXP itself is 1.7 (bake.js:66), but the property the row names, mesh.material.lightMapIntensity, is actually set to 1.7 * Math.PI ~= 5.3407 (bake.js:498), not literally 1.7",
+      "howMeasured": "tour/bake.js:66 `const EXP = 1.7;`; tour/bake.js:498 `mesh.material.lightMapIntensity = 1.7 * Math.PI;`",
+      "agrees": false,
+      "notes": "Not a functional bug -- bake.js:481-497's own comment explains the *Math.PI is deliberate, cancelling r185's shader-side *RECIPROCAL_PI so the delivered contribution still equals EXP=1.7, matching r128. But the CLAUDE.md row's parenthetical '(= lightMapIntensity)' reads as the property equalling 1.7, and it does not -- the property is EXP*PI. A documentation-precision finding, not a rendering defect. Lineage, verified directly rather than assumed: `git show fad9ada:tour/bake.js` (pre-r185-migration) had `mesh.material.lightMapIntensity = 1.7;` literally (line 169 of that blob) -- so CLAUDE.md's '(= lightMapIntensity)' WAS true at the time it was presumably written. The r128->r185 migration commit `67e5582` ('Close the r128<->r185 lighting/colour gap...') changed it to `1.7 * Math.PI` (its own commit message: 'tour/bake.js: lightMapIntensity 1.7 -> 1.7*PI. r185's MeshBasicMaterial lightmap shader chunk gained a `* RECIPROCAL_PI` r128 never had...') and did not touch CLAUDE.md in the same change. The row went stale at that specific commit, not gradually."
+    },
+    {
+      "constant": "Bloom threshold / strength",
+      "documentedValue": "threshold 1.8, strength 0.1",
+      "documentedAt": "docs/PHASE-B-RESUME.md:134 (as of the audit commit; docs/PHASE-B-RESUME.md:174 in the working tree after task 5's inserted sections) -- \"bloom unchanged at threshold 1.8 / strength 0.1\". CORRECTED 2026-08-23 by plan 5's final whole-branch review: this field previously also cited \"CLAUDE.md hard rule 4a prose\", which is a FABRICATED citation. `grep -n` for 1.8, 0.1 and \"bloom\" over CLAUDE.md returns no bloom number anywhere in that file, and hard rule 4a is about bake time, not bloom. CLAUDE.md mentions bloom only qualitatively (\"restrained bloom\" in the post.js architecture row; \"the bloom/grain/vignette chain\" in hard rule 4). The measuredValue and howMeasured below are unchanged and were never in doubt.",
+      "measuredValue": "new UnrealBloomPass(size, strength=0.1, radius=0.5, threshold=1.8)",
+      "howMeasured": "tour/post.js:255 `const bloom = new UnrealBloomPass(size, 0.1, 0.5, 1.8);`",
+      "agrees": true,
+      "notesAddedByFinalReview": "A bad `documentedAt` is worse than a missing one: it invites a future task to \"correct\" CLAUDE.md against a claim that file never made. Verified by grep this session that CLAUDE.md contains no bloom threshold or strength figure."
+    },
+    {
+      "constant": "Module cache-buster ?v=",
+      "documentedValue": "113 -- what the DOCUMENTS themselves currently say: docs/superpowers/plans/2026-08-16-phase-b5-revalidate-and-docs.md:21 ('tour/index.html itself carries the tag -- currently `?v=113` at line 254, though 4b will move it') and docs/PHASE-B-RESUME.md:430 ('...at `?v=113`, not `c2bb0bd`...'). Both are stale.",
+      "documentedAt": "docs/superpowers/plans/2026-08-16-phase-b5-revalidate-and-docs.md:21; docs/PHASE-B-RESUME.md:430",
+      "measuredValue": 138,
+      "howMeasured": "tour/index.html:254 `<script type=\"module\" src=\"main.js?v=138\"`; confirmed live in browser: `[...document.querySelectorAll('script')].map(s => s.src.split('?').pop())` returned v=138 on every classic-script tag after a cache-busted load (`?apt=serenity&cb=1`)",
+      "agrees": false,
+      "notes": "The documents disagree with the code, 113 vs 138 -- that is the actual finding. A prior draft of this row sourced `documentedValue` to a dispatch note (.superpowers/sdd/2026-08-16-phase-b5-revalidate-and-docs/progress.md:15-16, 'Carried into task 1's dispatch: the plan's text says \"?v=113\"; the tree is at 138') that had ALREADY corrected the number, then set `agrees: true` against that correction -- which recorded the fix instead of the defect and would have let a later task read 'agrees' and leave both documents at 113. Not fixed here: this task changes no document, per its own rule."
+    },
+    {
+      "constant": "Serenity draw calls at entrance (through post chain, APT.start)",
+      "documentedValue": "78 is the row's headline figure; the row already also records a third-machine reading of 80 as an acknowledged machine-spread, not a new budget",
+      "documentedAt": "CLAUDE.md:82",
+      "measuredValue": 80,
+      "howMeasured": "CLAUDE.md 'Draw calls in a spot' recipe (info.autoReset disabled/reset, composer.render, through the post chain) run 3x against `python tools/serve.py`, apartment=serenity, camera set to APT.start {x:3.6,z:0.75,yaw:178}. All 3 runs (fresh page loads with cb=1/2/3) returned 80.",
+      "agrees": true,
+      "notes": "Matches the row's own already-documented 'a third machine reads 80' clause, not the 78 headline. This session is effectively a fourth machine confirming the spread, not a new number."
+    },
+    {
+      "constant": "Kings-court draw calls at entrance (through post chain, own APT.start)",
+      "documentedValue": null,
+      "documentedAt": "No documented figure for kings-court's own-start entrance under the current tree. CLAUDE.md hard rule 4's kings-court figures (150 -> 282 mobile calls) are from the rejected GTAO experiment at a different camera position/resolution and are not a claim about the current chain's draw-call count -- not comparable.",
+      "measuredValue": 165,
+      "howMeasured": "Same recipe as serenity, apartment=kings-court, camera set to APT.start {x:22.6,z:5,yaw:90} (read from tour/apartments/kings-court.json, NOT serenity's coordinates). 3 runs (cb=1/2/3) all returned 165.",
+      "agrees": null,
+      "notes": "No prior claim exists to compare against -- recorded so a later plan has a real baseline instead of an absent row."
+    },
+    {
+      "constant": "Horkyone-10 draw calls at entrance (through post chain, own APT.start)",
+      "documentedValue": null,
+      "documentedAt": "No documented figure exists for this apartment's draw-call count anywhere in CLAUDE.md or docs/PHASE-B-RESUME.md.",
+      "measuredValue": 86,
+      "howMeasured": "Same recipe, apartment=horkyone-10, camera set to APT.start {x:7.75,z:5.85,yaw:0}. 3 runs (cb=1/2/3) all returned 86.",
+      "agrees": null
+    },
+    {
+      "constant": "Bake time medians and cross-apartment ratios",
+      "documentedValue": "serenity 2620 ms, horkyone-10 2715 ms, kings-court 11460 ms (medians of 3 runs, one machine, phase B3 task 2); implied ratios kings-court/serenity ~4.37x, horkyone/serenity ~1.04x. Rule 4a states explicitly that these absolute figures are machine-dependent and only ratios within one machine's own before/after pair are meant to be compared -- but the row still states these as the reference numbers.",
+      "documentedAt": "CLAUDE.md:83, and hard rule 4a's fuller discussion below the table",
+      "measuredValue": "This session, this machine, 3 fresh-page-load runs each via `window.__bakeReady.then(() => window.__bakeMs)`: serenity 834.4 / 822.8 / 950.6 ms (median 834.4); kings-court 22294.2 / 22448.8 / 22081.0 ms (median 22294.2); horkyone-10 2656.9 / 2835.1 / 2481.5 ms (median 2656.9).",
+      "howMeasured": "CLAUDE.md rule 4a recipe, `python tools/serve.py`, 3 separate cache-busted page loads per apartment, camera position irrelevant to bake time",
+      "agrees": null,
+      "notes": "Set to null, not false: this row's absolute figures and their ratios are a class CLAUDE.md rule 4a itself declares NOT comparable across machines/sessions ('the three sets are not comparable: they were taken on three different machines'), so `agrees: false` would assert 'the documented figure is wrong' about a figure the rule says has no single right answer -- and would invite a later task to edit CLAUDE.md's bake row into a rule-4a violation by chasing this session's number. Recorded, not corrected. Basis for that null, made explicit: (1) rule 4a already records an 11301-21768 ms spread across THREE LOADS OF AN IDENTICAL BUILD on kings-court -- a ~2x same-build spread on one machine. This session's kings-court median, 22294.2 ms, sits at or above the TOP of that already-known band, so part of the apparent divergence is inside a spread CLAUDE.md already documents, not new. (2) serenity measured 834.4 ms this session against a documented 2620 ms -- roughly 3x FASTER, the OPPOSITE direction from kings-court's ~2x-8x SLOWER reading. A single explanation such as 'this machine/session is more loaded' cannot produce both a apartment running faster and another running slower than the documented reference at the same time; that inconsistency is recorded here, not resolved. (3) This session ran three page loads per apartment with no machine identity recorded, no cold/warm distinction, and the three apartments were not served against a common reference build in the same batch (unlike, e.g., plan 3's closing-gate method of serving BASE and HEAD simultaneously). Given (1)-(3), the ~26.7x kings-court/serenity and ~3.18x horkyone-10/serenity cross-apartment ratios computed from these numbers are directionally interesting -- this session's spread between apartments is wide -- but are NOT a supportable ratio claim in the sense rule 4a means when it says 'compare ratios within one machine's before/after pair and nothing else': this session has no before/after pair, only one snapshot on an unidentified machine. Whether browser-tab contention, server load, or genuine hardware variance explains any of it is unestablished and out of this task's scope."
+    },
+    {
+      "constant": "Dynamic PointLights per apartment (budget: <=8, flagged `dyn` in config)",
+      "documentedValue": "<=8",
+      "documentedAt": "CLAUDE.md:84 (Numbers that matter table) and CLAUDE.md hard rule 4 ('No new dynamic PointLights')",
+      "measuredValue": "serenity: 3 dyn of 9 total lights; kings-court: 11 dyn of 20 total lights; horkyone-10: 3 dyn of 8 total lights",
+      "howMeasured": "python: count `lights[]` entries with `dyn` truthy in each tour/apartments/<id>.json; cross-checked live in the browser after `__bakeReady` via `a.scene.traverse(o => { if (o.isPointLight) n++; })` -- returned 3 (serenity), 11 (kings-court), 3 (horkyone-10), matching the config counts exactly. tour/builder.js:1599-1607 confirms every `dyn:true` entry unconditionally gets a `new T.PointLight(...)` added to the scene (tour/builder.js:1604), with no level-based culling and no cap enforced anywhere in code.",
+      "agrees": false,
+      "notes": "REAL DEFECT, not a documentation nit: kings-court ships 11 live PointLights against a hard-ruled budget of <=8, confirmed both from the config and from the live built scene. Serenity and horkyone-10 are both within budget at 3 each."
+    },
+    {
+      "constant": "Shipped `exposure` values",
+      "documentedValue": "serenity 0.31, kings-court 0.52, horkyone-10 0.42",
+      "documentedAt": "CLAUDE.md:96 (config-keys `exposure` row); docs/PHASE-B-RESUME.md:134",
+      "measuredValue": "serenity 0.31, kings-court 0.52, horkyone-10 0.42",
+      "howMeasured": "python: json.load each tour/apartments/<id>.json, read .get('exposure')",
+      "agrees": true,
+      "notesAddedByFinalReview": "CORRECTION, 2026-08-23, plan 5's final whole-branch review -- this row's FINDING was reached by a partial comparison, additively corrected here. `documentedAt` names CLAUDE.md:96 as a whole, but that cell contained TWO present-tense claims about serenity's exposure and this row compared only against the later one (\"serenity ships 0.31\"). The earlier clause in the same cell read \"**Compensates for the scene running about three and a half times as hot at source** (1.05 / 0.295 =~ 3.6): serenity's fitted value is 0.295, kings-court's 0.52\" -- 0.295 asserted as the live value, contradicting the same row 900 words later, and giving a wrong derived ratio (the shipped 0.31 gives 1.05/0.31 =~ 3.39). `0.295` appeared six times in that cell. The clause was struck in place on 2026-08-23 and the ratio corrected. `agrees` is deliberately LEFT AT true and `measuredValue` is untouched: the measurement was and is correct, and the shipped values do agree with the cell's live-value clause -- what was wrong was that the audit did not notice the cell also contradicted itself. Read `agrees: true` here as 'the shipped values match what CLAUDE.md's live-value clause says', not as 'CLAUDE.md:96 was internally consistent on 2026-08-22'. Same caveat applies to any other row whose documentedAt points at a long CLAUDE.md cell: this audit compared against a claim, not against every claim in the cell."
+    },
+    {
+      "constant": "Pose verification counts (compare-flagged spots only)",
+      "documentedValue": "serenity: 1 of 11 fail (=10 of 11 pass); kings-court: 3 of 13 fail (=10 of 13 pass)",
+      "documentedAt": "docs/PHASE-B-RESUME.md:166 (\"1 of serenity's 11\" ... \"3 of kings-court's 13\")",
+      "measuredValue": "serenity: 10 of 11 pass, fail=[2.webp]; kings-court: 10 of 13 pass (14 photoSpots total, 1 not compare-flagged), fail=[14.webp, 17.webp, 18.webp]; horkyone-10: 0 of 0 (zero compare-flagged spots)",
+      "howMeasured": "python per task-1-brief.md step 4 recipe: filter photoSpots by `compare`, count `poseVerified` truthy",
+      "agrees": true
+    },
+    {
+      "constant": "Shipped `pitch` keys",
+      "documentedValue": "serenity ships FIVE keys: `6` (-6), `7` (13), `10` (22), `11` (-6), `2` (40, carve-out, level-confirmed but kept). kings-court ships none.",
+      "documentedAt": "CLAUDE.md:102 (pitch row, post plan-4e-final-review correction)",
+      "measuredValue": "serenity: 2.webp=40, 6.webp=-6, 7.webp=13, 10.webp=22, 11.webp=-6 (exactly 5 keys); kings-court: none",
+      "howMeasured": "python: json.load each config, list photoSpots with a `pitch` key present",
+      "agrees": true
+    },
+    {
+      "constant": "Two-camera FOV finding: divider (per-spot) vs gate (fixed 72 deg)",
+      "documentedValue": "gate fixed 72 deg vertical under `?fov=legacy`; divider per-spot fov measured 88.5 deg on serenity's eight 16:9 landscape spots, 120 deg on `10`/`11`, 65 deg on `9.webp`'s own `vfov` override",
+      "documentedAt": "CLAUDE.md:102 (pitch row, 'Two different cameras read this key' clause)",
+      "measuredValue": "Reproduced independently this session. Gate: tour/app.js:149 constructs the camera at fov=72; tour/measure.js:74-75 skips `__spotFov` entirely when `?fov=legacy` is present, leaving that 72 default in place. Divider: tour/main.js:120-130 `__spotFov(spot, aspect)` -- if `spot.vfov` is a positive number it is returned directly (9.webp: vfov=65, confirmed in tour/apartments/serenity.json); otherwise for aspect>=1 (landscape) it computes `2*atan(tan(photoFovLong/2 deg)/aspect)/1deg` with photoFovLong=120 (both apartments' meta.photoFovLong), which for aspect=16/9=1.7778 evaluates to 88.507 deg; for aspect<1 (portrait) it returns photoFovLong directly = 120 deg. Cross-checked against the REAL photo files with PIL: serenity's 1,2,3,4,5,6,7,8.webp are all 1200x675 (aspect 1.7778, landscape) -> 88.5 deg; 10.webp is 923x1200 (aspect 0.769, portrait) -> 120 deg; 11.webp is 812x1200 (aspect 0.677, portrait) -> 120 deg; 9.webp is 919x1200 but carries its own vfov:65 override so the aspect is irrelevant.",
+      "howMeasured": "Read tour/main.js, tour/measure.js, tour/app.js source directly; independently recomputed the __spotFov formula in Python against real photo pixel dimensions (PIL) rather than trusting the prior citation",
+      "agrees": true
+    },
+    {
+      "constant": "`sky` config key",
+      "documentedValue": "Optional `{top, bottom, fog}`, each `\"#rrggbb\"` and each optional; absent -> the flat `0xbcd5e8` clear this scene has always had. Enabled on serenity only -- kings-court and horkyone-10 do not move.",
+      "documentedAt": "CLAUDE.md:97",
+      "measuredValue": "serenity ships `sky: {top: '#b5e2ff', bottom: '#e0f4ff', fog: '#e0f4ff'}` (tour/apartments/serenity.json:6); kings-court and horkyone-10 have no `sky` key at all (`d.get('sky')` is `None` for both). Fallback constant confirmed: `const SKY_FALLBACK = 0xbcd5e8;` at tour/app.js:114.",
+      "howMeasured": "python: json.load each tour/apartments/<id>.json, .get('sky'); grep -n SKY_FALLBACK tour/app.js",
+      "agrees": true
+    },
+    {
+      "constant": "`palette` config key",
+      "documentedValue": "Map of material key -> `#rrggbb`, every key optional; an invalid or absent value falls back to the hardcoded constant via `Materials.color`.",
+      "documentedAt": "CLAUDE.md:98",
+      "measuredValue": "serenity ships 5 palette keys: floorWood, wall, sofa, tileGray, counter. kings-court and horkyone-10 ship no `palette` key at all (empty/absent).",
+      "howMeasured": "python: json.load each tour/apartments/<id>.json, list((d.get('palette') or {}).keys())",
+      "agrees": true
+    },
+    {
+      "constant": "`env.capture` config key",
+      "documentedValue": "`{x, y, z}` override for where the environment-reflection panorama is shot from; falls back to `roomCenter.main`, then `start`, then the world origin.",
+      "documentedAt": "CLAUDE.md:100",
+      "measuredValue": "None of the three shipped apartments set `env.capture` -- all three read `None`/absent, so all three currently exercise the fallback chain rather than an explicit override (not independently verified here which fallback rung each lands on -- only that the key itself is unset everywhere).",
+      "howMeasured": "python: json.load each tour/apartments/<id>.json, (d.get('env') or {}).get('capture')",
+      "agrees": true
+    },
+    {
+      "constant": "`lightmaps` config key (historical -- row's own claim: nothing reads it, loader is out of the tree)",
+      "documentedValue": "\"Historical -- nothing reads this key today, and the loader that did is no longer in the tree.\" Serenity's pilot pack was reverted along with `tour/lightmaps.js`.",
+      "documentedAt": "CLAUDE.md:101",
+      "measuredValue": "Confirmed both halves in one command each: `tour/lightmaps.js` is absent (`ls tour/lightmaps.js` -> 'No such file or directory'); no apartment JSON ships a `lightmaps` key (`grep -rl '\"lightmaps\"' tour/apartments/*.json` -> no matches, and python `.get('lightmaps')` returns `None` for all three).",
+      "howMeasured": "shell: `ls tour/lightmaps.js` (fails); `grep -rl '\"lightmaps\"' tour/apartments/*.json` (no output); python .get('lightmaps') per apartment",
+      "agrees": true
+    },
+    {
+      "constant": "`exposure` fallback constant (1.05)",
+      "documentedValue": "\"The bare default 1.05 is only what an apartment with an absent or invalid key falls back to.\"",
+      "documentedAt": "CLAUDE.md:96 (exposure row)",
+      "measuredValue": 1.05,
+      "howMeasured": "tour/app.js:84 `let exposure = 1.05;` (tour/app.js:83 reads `const rawExposure = APT.exposure;` first; the fallback is only used when rawExposure is not a finite number > 0, per the guard at tour/app.js:85-90)",
+      "agrees": true
+    },
+    {
+      "constant": "`pitch` sign negation (main.js negates the config value)",
+      "documentedValue": "\"The sign is negated in `main.js` because `controls.pitch` feeds `camera.rotation.x`, where positive looks *up* -- established by sweep, not assumed.\"",
+      "documentedAt": "CLAUDE.md:102 (pitch row)",
+      "measuredValue": "tour/main.js:105 `p.pitch = -rad(p.pitch);` -- confirms the negation is present exactly as documented (config `pitch: 22`, positive/down, becomes a negative radian before it reaches `controls.pitch`/`camera.rotation.x`).",
+      "howMeasured": "tour/main.js:105 (also greps clean via the harness's existing `p\\.pitch = -rad\\(p\\.pitch\\)` pattern, main.js section, which was already in the script but had no corresponding audit row)",
+      "agrees": true
+    },
+    {
+      "constant": "EXP mirror at bake.js:498 -- unlinked hardcoded copy, not a reference to the EXP constant",
+      "documentedValue": "Not documented as a separate constant anywhere -- this row exists because the brief's step-2 instruction (\"where a value is documented as mirrored in two files ... check both and record whether they still agree -- a drifted mirror is a real defect, not a documentation nit\") applies just as much to a value effectively mirrored twice within one file.",
+      "documentedAt": "n/a -- no document claims bake.js:498 reads EXP; this row records that it does not, in code",
+      "measuredValue": "tour/bake.js:66 `const EXP = 1.7;` vs tour/bake.js:498 `mesh.material.lightMapIntensity = 1.7 * Math.PI;` -- line 498 hardcodes the literal `1.7`, it does NOT reference the `EXP` identifier at all. The two values happen to agree numerically today (both correspond to 1.7) purely because nobody has edited either one since the r185 migration commit introduced the `*Math.PI` factor.",
+      "howMeasured": "grep -n \"const EXP\\|lightMapIntensity =\" tour/bake.js -> lines 66 and 498",
+      "agrees": false,
+      "notes": "REAL, currently-latent defect: editing EXP at bake.js:66 does NOT change bake.js:498, because 498 never reads the variable. Today's numeric agreement is coincidental, not structural -- the next person who tunes EXP for exposure/HDR reasons will silently leave line 498 at the old value, which is exactly the drifted-mirror class the brief's player-radius check was written to catch. `agrees: false` here means 'not a real, linked mirror', not 'the numbers currently differ' -- they don't, yet."
+    },
+    {
+      "constant": "quality.aoRays default",
+      "documentedValue": "defaults to 8 when the block or key is absent",
+      "documentedAt": "CLAUDE.md:99",
+      "measuredValue": 8,
+      "howMeasured": "tour/bake.js:727 `const rays = (APT.quality && APT.quality.aoRays) || 8;`",
+      "agrees": true
+    },
+    {
+      "constant": "AMB_DIST / AMB_RAYS (hemisphere ambient sampler)",
+      "documentedValue": "16 cosine-weighted rays to AMB_DIST 0.65 m",
+      "documentedAt": "CLAUDE.md 'Architecture (tour/)' table, bake.js row",
+      "measuredValue": "AMB_DIST=0.65, AMB_RAYS=16",
+      "howMeasured": "tour/bake.js:172 `const AMB_DIST = 0.65;`; tour/bake.js:193 `const AMB_RAYS = 16;`",
+      "agrees": true
+    },
+    {
+      "constant": "SEG (wall lightmap segment size)",
+      "documentedValue": "segmented at ~0.45 m",
+      "documentedAt": "docs/PROMPT.md:199 as of the audit commit `bfba994` (`git show bfba994:docs/PROMPT.md | sed -n 199p` -> \"geometry with **per-vertex** baked light, segmented at ~0.45 m\"); the same claim is at docs/PROMPT.md:388 and, as a table row, docs/PROMPT.md:405 in the working tree after task 4's rewrite. CORRECTED 2026-08-23 by plan 5's final whole-branch review: this field previously cited \"CLAUDE.md 'Architecture (tour/)' table, bake.js row\", which is a FABRICATED citation -- that row names `SEG` twice but states no number, and CLAUDE.md's only \"0.45\" is at CLAUDE.md:96, inside the `exposure` row's 0.45->0.46 lineage, which is a different quantity entirely. The measuredValue and howMeasured below are unchanged.",
+      "measuredValue": 0.45,
+      "howMeasured": "tour/bake.js:623 `const SEG = 0.45;`",
+      "agrees": true,
+      "notesAddedByFinalReview": "Same class as the Bloom row's fabricated citation, found in the same pass. The number itself (tour/bake.js:623 `const SEG = 0.45;`) was always right."
+    },
+    {
+      "constant": "WEXP (wall exposure headroom)",
+      "documentedValue": null,
+      "documentedAt": "No explicit numeric claim in CLAUDE.md -- only the qualitative note 'walls don't overexpose -- less HDR headroom than floors' exists in the source comment itself, not in CLAUDE.md's tables.",
+      "measuredValue": 1.25,
+      "howMeasured": "tour/bake.js:624 `const WEXP = 1.25; // walls don't overexpose -- less HDR headroom than floors`",
+      "agrees": null,
+      "notes": "Recorded because the brief says not to omit an inconvenient constant. Nothing to disagree with -- CLAUDE.md never states this number."
+    },
+    {
+      "constant": "photoSpots count per apartment",
+      "documentedValue": null,
+      "documentedAt": "No standalone documented count exists.",
+      "measuredValue": "serenity=11, kings-court=14 (13 compare-flagged + 1 non-compare, 4.webp), horkyone-10=2 (0 compare-flagged)",
+      "howMeasured": "python: len(d.get('photoSpots', []))",
+      "agrees": null
+    },
+    {
+      "constant": "serenity mainCeilH -- FLAGGED, routed to plan 6, NOT re-measured or fixed here",
+      "documentedValue": "config ships 2.6. Photographic band (both routes off `4.webp` alone): curtain-rod method 2.86-2.92 m; air-conditioner method 3.1-3.2 m. Both routes rest on 4.webp alone and the band itself is explicitly marked as needing RE-MEASUREMENT before anyone edits the constant.",
+      "documentedAt": "docs/PHASE-B-RESUME.md:803 (open-item table); docs/PHASE-B-OBSERVATIONS.md:161",
+      "measuredValue": 2.6,
+      "howMeasured": "python: tour/apartments/serenity.json .get('mainCeilH'). Per task instructions, the photographic band itself was NOT re-measured in this task -- only the shipped config value was confirmed and the documented band was transcribed with its source.",
+      "agrees": false,
+      "notes": "PRE-EXISTING, KNOWN, ROUTED TO PLAN 6 -- not a new finding. This row exists so plan 6 has a citation-checked starting point, not so this task fixes it. Do not edit mainCeilH from this audit."
+    },
+    {
+      "constant": "kings-court meta.photoFovLong -- FLAGGED, routed to plan 6, NOT re-measured or fixed here",
+      "documentedValue": "config ships 120. Measured ~57 deg (10.webp, angular separation of identified features) and ~58 deg (2.webp, object size), two independent methods. Plan 4e's third line of evidence (2.webp/20.webp: a TV-screen landmark and a ceiling-junction landmark, crop-confirmed the same physical object, each demanding a different tilt if it were tilt) implies a focal-length factor of roughly 2.2-2.4 between render and photograph -- offered explicitly as direction/magnitude class only, not a measurement, and does not narrow the ~57-58 deg prior.",
+      "documentedAt": "docs/PHASE-B-RESUME.md:591 (measured ~57/~58 deg); docs/PHASE-B-RESUME.md:608 (plan 4e's 2.2-2.4 factor); docs/superpowers/metrics/b4e-lens-evidence.json",
+      "measuredValue": 120,
+      "howMeasured": "python: tour/apartments/kings-court.json .get('meta',{}).get('photoFovLong'). Per task instructions, no new lens measurement was attempted here -- only the shipped config value confirmed and the documented evidence transcribed with its source. Also noted: serenity's meta.photoFovLong is ALSO 120 (tour/apartments/serenity.json), but the ~57-58 deg measurement and the 2.2-2.4 factor are specific to kings-court's own photographs, not measured for serenity.",
+      "agrees": false,
+      "notes": "PRE-EXISTING, KNOWN, ROUTED TO PLAN 6 -- not a new finding. This row exists so plan 6 has a citation-checked starting point, not so this task fixes it. Do not edit meta.photoFovLong from this audit."
+    },
+    {
+      "constant": "Photo long-edge cap (<=1200 px)",
+      "documentedValue": "\"<=1200 px\", stated three times and never qualified by edge: CLAUDE.md:344 (hard rule 6), CLAUDE.md:471 (\"Adding an apartment\" step 2) and docs/PROMPT.md:283, all as of the audit commit `bfba994`",
+      "documentedAt": "CLAUDE.md:344; CLAUDE.md:471; docs/PROMPT.md:283",
+      "measuredValue": "27 shipped webp across three apartments: max WIDTH 1200 in all 27; max LONG EDGE 1200 for serenity (11 files, 3 of them portrait) and horkyone-10 (2 files, max 1200x680), but 1800 for kings-court. Five kings-court files exceed 1200 on the long edge: 10.webp, 14.webp, 17.webp at 1200x1800 and 7.webp, 19.webp at 1200x1500.",
+      "howMeasured": "python + Pillow, run 2026-08-23 from the repo root: for each apt in serenity/kings-court/horkyone-10, `Image.open(f).size` over `sorted(glob.glob('tour/photos/<apt>/*.webp'))`, reporting max(w), max(h) and the files with max(w,h) > 1200.",
+      "agrees": false,
+      "notesAddedByFinalReview": "ADDED 2026-08-23 by plan 5's final whole-branch review. No row in the original audit covered this claim, so its absence meant 'not checked', per this file's own notCovered contract -- and it had gone unmeasured for eight plans. The rule is read as the LONG edge and is therefore VIOLATED by five files; it is deliberately NOT being redefined as '<=1200 px wide' (which would be true everywhere and would launder those five), on the same principle the 'Dynamic PointLights per apartment' row applies: the rule is right and the tree is wrong. Plan 5 changes no file under tour/, so re-encoding the five is routed to plan 6. All three documentation sites were made explicit about the edge on 2026-08-23 and carry the violation."
+    }
+  ],
+  "summary": {
+    "totalConstants": 34,
+    "agreeTrue": 22,
+    "agreeFalse": 7,
+    "agreeNullNoComparableClaim": 5,
+    "note": "agreeFalse (7) breaks down as: 2 pre-existing/known items explicitly routed to plan 6 (mainCeilH, meta.photoFovLong -- flagged not fixed, per task instructions); 1 real defect newly confirmed this session (kings-court ships 11 dynamic PointLights against a documented <=8 budget, verified both in config and in the live built scene); 1 documentation-precision nit with its lineage now recorded (CLAUDE.md's EXP row states lightMapIntensity literally equals 1.7, true until migration commit 67e5582 changed the property to 1.7*Math.PI without updating CLAUDE.md -- the delivered contribution still equals 1.7 by design, only the property's own value disagrees with the row's parenthetical); 1 documentation-vs-code disagreement on the `?v=` cache-buster (the documents still say 113 at two cited file:line locations, the code ships 138 -- previously misrecorded as 'agrees: true' by comparing against an already-corrected dispatch note instead of the documents); 1 newly-added structural defect (bake.js:498 hardcodes `1.7 * Math.PI` rather than reading the `EXP` constant at bake.js:66 -- an unlinked mirror that currently agrees by coincidence and will silently drift the next time EXP is tuned); and 1 newly-added photo-size defect (the documented <=1200 px cap holds on width but not on the long edge -- five kings-court photographs ship at 1200x1800 or 1200x1500 -- added by plan 5's final whole-branch review, routed to plan 6 because it needs a tour/ change). agreeNull (5) breaks down as: 2 own-start draw-call baselines with no prior documented figure to compare (kings-court 165, horkyone-10 86); WEXP (1.25, never stated numerically in CLAUDE.md); raw photoSpots counts per apartment (never tabulated); and the bake-time cross-apartment ratio row, changed from `agrees: false` to `agrees: null` in this fix round because CLAUDE.md rule 4a itself declares absolute bake times and their ratios non-comparable across machines/sessions -- `false` would have asserted the documented figure was simply wrong about something the rule says has no single right answer.",
+    "finalReviewAddendum": "AMENDED 2026-08-23 by plan 5's final whole-branch review. (a) One constant was ADDED -- \"Photo long-edge cap (<=1200 px)\", agrees: false -- taking the tally from 33 (22/6/5) to 34 (22 agree, 7 disagree, 5 no comparable claim). Its finding: five kings-court photographs are 1200x1800 or 1200x1500, so the documented cap holds on width but not on the long edge; routed to plan 6 because it needs a tour/ change. (b) Two `documentedAt` citations were FABRICATED and are corrected in place -- the Bloom row cited CLAUDE.md hard rule 4a prose (CLAUDE.md carries no bloom number at all; rule 4a is about bake time) and the SEG row cited CLAUDE.md's bake.js architecture row (which names SEG but states no number; CLAUDE.md's only 0.45 is exposure lineage at :96). Both rows' measuredValue, howMeasured and agrees are unchanged -- only the provenance was wrong. (c) The \"Shipped `exposure` values\" row's FINDING was reached by comparing against only one of two contradicting present-tense claims inside CLAUDE.md:96; a note records this and `agrees` is deliberately left at true, because the measurement was right and the cell's self-contradiction is what the audit missed. No measuredValue anywhere in this file was altered by that review."
+  }
+}

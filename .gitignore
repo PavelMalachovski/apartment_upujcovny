@@ -33,7 +33,18 @@ tools/shots/
 # Python bytecode from the measurement tools.
 # `tools/**/__pycache__/` alone covers both `tools/__pycache__/` itself and
 # nested directories such as `tools/checks/__pycache__/` — created by every
-# run of stale_claims.py, which plan 4b added — so a separate top-level rule
-# is redundant. The general "no generic __pycache__ rule" row is still
-# deferred; this covers the directories this branch created.
+# run of stale_claims.py, which plan 4b added.
+# ~~The general "no generic __pycache__ rule" row is still deferred~~
+# **CLOSED 2026-08-23 by plan 5 task 5** with the generic rule below.
 tools/**/__pycache__/
+
+# The generic rule the deferred table asked for, added 2026-08-23 by plan 5
+# task 5. It is NOT redundant with the line above: Python also lives under
+# `docs/superpowers/harnesses/`, and line 15's `!docs/superpowers/harnesses/**`
+# negation un-ignores everything there — including a `__pycache__/` a harness
+# import would create. This rule sits AFTER that negation deliberately, because
+# in gitignore the last matching rule wins. Placing it earlier would leave the
+# harness directories uncovered, which is the shape of the hole this row
+# existed to close: a stray `.pyc` was removed by hand once, "which worked
+# because someone was paying attention, which is not a mechanism".
+__pycache__/

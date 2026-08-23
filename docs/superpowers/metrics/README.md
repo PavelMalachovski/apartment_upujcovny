@@ -184,7 +184,11 @@ line between that series and the pose-verified one.
 > - **~~"Plan 4 fixes the geometry defects above"~~ — plan 4b did.** `poseVerified`
 >   went **2 of 11 → 9 of 11** on serenity and **8 of 14 → 10 of 13** on
 >   kings-court: **10 of 25 spots showed their photograph's subject when this
->   section was written, and 19 of 24 do now.**
+>   section was written, and ~~19 of 24 do now~~ 20 of 24 do as of
+>   2026-08-22 (corrected 2026-08-23 by plan 5 task 5, same count as the
+>   already-fixed twin above — the 19 was falsified on 2026-08-19 when plan
+>   4c task 1b flipped serenity's `10.webp` and this copy was not caught by
+>   that pass).**
 >
 > **And the thing that must travel with those numbers:** serenity moved
 > **16.00 → 15.49** and kings-court **18.59 → 18.17** on one fixed 14-spot
@@ -2304,7 +2308,24 @@ read here.
 > `check_metrics_readme.py` never opens `sweep.json`, nor anything else in
 > task 2's or task 3's harness — it reads the section of this README headed
 > "Plan 4a's readings are a third render", and for data it reads `metrics/`
-> plus the **task-4** harness directory, by literal filename, no glob.
+> plus the **task-4** harness directory, ~~by literal filename, no glob~~
+> **mostly by literal filename, plus one glob and one source file — corrected
+> 2026-08-23 by plan 5 task 5, discharging an item parked at plan 4a's branch
+> close on 2026-08-16.** Line 203 of the checker globs
+> `metrics/*b4a-*allspots.json`, and line 178 defaults `--bake` to
+> `tour/bake.js`, which it parses to recompute the `grid()` claim from the
+> code's own argument lists. Neither re-inflates the narrowing this paragraph
+> exists to make — the narrowing is substantively correct — but an inaccuracy
+> inside the one paragraph whose job is accuracy is worth fixing on sight.
+> **And a larger fact the parked note did not have, found while verifying it:
+> `check_metrics_readme.py`, `check_metrics_readme_selftest.py` and
+> `write_metrics.py` do not exist under `tools/` at all.** They live only in
+> `docs/superpowers/harnesses/2026-08-15-b4a-task2/`, so nothing runs them on a
+> routine basis and no test suite invokes them; `tools/checks/stale_claims.py`
+> is the only checker in this repository on a normal path. Run them by hand
+> from that directory — plan 5 task 5 did, 100 checks, 0 failures — and do not
+> read "two committed checkers guard the metrics README" as meaning anything
+> automatic guards it.
 > **Machine-checked:** task 1's before/after/paintings series, task 2's
 > per-file state table and the three file counts, the `grid()` claim against
 > `bake.js`'s own argument lists, and all of task 4 — the gate pair, the
@@ -2784,8 +2805,11 @@ Two things follow, and the second is a live disagreement inside this branch:
 | kings-court | **8 of 14** | **10 of 13** |
 
 Read together: **10 of 25 spots showed their photograph's subject at the
-merge-base; 19 of 24 do now.** That is the change this plan was written to
-make. ~~And every ΔE movement above is downstream of it.~~ **That last clause
+merge-base; 19 of 24 did at this plan's (4b's) tip.** That is the change this plan was written to
+make. (**Scoped 2026-08-23 by plan 5 task 5**: "do now" was present tense and
+went stale on 2026-08-19 when plan 4c task 1b flipped serenity's `10.webp`;
+the live count is **20 of 24** — same figure as the header correction at
+`:32` and the "Pose verification (phase B2)" section above.) ~~And every ΔE movement above is downstream of it.~~ **That last clause
 was false for kings-court and is struck, 2026-08-19 by the whole-branch
 review**, which computed both apartments independently from the committed
 `spots[]` (two-round means, kings-court on pop14) against `poseVerified` in
@@ -2830,7 +2854,10 @@ path is human asset curation nobody has scheduled — and only three of the five
 are asset work. `14.webp`'s **divider glass** is an `F.shower` constructor
 change and `17.webp`'s **wardrobe** is a coordinate error in
 `kings-court.json` (`x 23.4, d 2.4, rot -90` → x-extent 22.20–24.60); neither
-needs a photographer, and both now belong to **plan 5**, by the identical
+needs a photographer, and ~~both now belong to **plan 5**~~ **both now belong
+to plan 6 (corrected 2026-08-23 by plan 5 task 5: plan 5 is done and neither
+was in its five written tasks) — see "What plan 5 closed, and what plan 6
+inherits" in `docs/PHASE-B-RESUME.md`**, by the identical
 argument this branch already accepted when it re-routed `mainCeilH` off 4c.
 Staying with **4c**: the pool vista (`2`/`10`, no pool geometry and no sky),
 the rattan set (`18`), and `14.webp`'s **mirroring**, which is a genuine
@@ -2923,7 +2950,10 @@ than asserted: kings-court rendered from both trees puts BASE-vs-HEAD at mean
 abs pixel diff **0.2549**, *inside* the **0.2447** between two loads of the
 *same* BASE tree. The right word is **indistinguishable**. The same probe on
 horkyone-10 gives a same-tree spread of **2.01** — roughly eight times
-kings-court's, on one machine in one session — so plan 5's open "what varies
+kings-court's, on one machine in one session — so ~~plan 5's open~~ **plan 6's
+open (corrected 2026-08-23 by plan 5 task 5: plan 5 is done and this item was
+never in its five written tasks; see "What plan 5 closed, and what plan 6
+inherits" in `docs/PHASE-B-RESUME.md`)** "what varies
 across a page load" is not uniform across apartments, and a single-apartment
 probe would have concluded otherwise.
 
@@ -3018,7 +3048,10 @@ plan 4e task 5's fix round). A ninth, `3.webp`, is the same class again — the
 two televisions are mounted at different heights in the world — leaving only
 `14.webp`, whose cause is the lens (`meta.photoFovLong`). **So the kings-court
 result is a measurement this apartment's content blocked, not a finding about
-its cameras. Most of it is content work already routed to plan 5 through the
+its cameras. Most of it is content work ~~already routed to plan 5~~ now
+routed to plan 6 (corrected 2026-08-23 by plan 5 task 5: plan 5 is done and
+this was never in its five written tasks; see "What plan 5 closed, and what
+plan 6 inherits" in `docs/PHASE-B-RESUME.md`) through the
 individual `poseNote`s; a future pass that fixes the furniture will be able to
 sweep these spots for the first time, and it should not be told they were
 checked.** serenity's `10.webp` 22°
