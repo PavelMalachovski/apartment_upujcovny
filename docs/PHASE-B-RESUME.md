@@ -856,8 +856,25 @@ lets whoever writes it start from evidence rather than from this paragraph.
     type.** Turn `cleanUrls` off or add a third entry point and HTML silently
     reverts to the platform default. `vercel.json` cannot carry comments, so
     this document is the only place it can be said.
-25. **Run the post-merge cache-header gate — it has never run, and it was not
-    on this list until 2026-08-23.** Added by plan 5's final whole-branch
+25. ~~**Run the post-merge cache-header gate — it has never run, and it was not
+    on this list until 2026-08-23.**~~ **RUN AND PASSED 2026-08-23, immediately
+    after `phaseB-plan5-revalidate-docs` merged as PR #37 (`282a927`). All four
+    probes against `https://apartment-upujcovny.vercel.app`:
+    `/lib/three-0.185.0/build/three.module.js` and
+    `/lib/three-mesh-bvh-0.9.14/src/index.js` both returned
+    `public, max-age=31536000, immutable`; `/` and `/catalog` both returned
+    `public, max-age=0, must-revalidate` AND `x-cache-policy: html-explicit`.
+    Two things that could only be learned here: the `/lib/` paths returned
+    `max-age=300` before this merge, so the last-match-wins rule ordering is
+    now confirmed by observation rather than by compiling the route table;
+    and the diagnostic header proves the HTML rule is in force rather than
+    Vercel's identical platform default answering for it, which is exactly
+    why it was added. Task 3's unmet step 6 is therefore closed, and its
+    routing-utils substitution is retrospectively validated. Site sanity in
+    the same pass: production serves `?v=138`, serenity `exposure` 0.31 and
+    plan 4e's five `pitch` keys.** The original instruction is kept below as
+    the procedure to re-run whenever `vercel.json` changes.
+    **Original:** Added by plan 5's final whole-branch
     review, which found it living only inside a cell of the "Deferred, with
     owners" table below, where nothing routes it. After
     `phaseB-plan5-revalidate-docs` merges, `curl` the production alias and
