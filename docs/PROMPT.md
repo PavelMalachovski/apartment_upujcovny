@@ -25,11 +25,16 @@ Everything between the horizontal rules is prompt text meant for the
 model. The sections after them are notes for you; pasting them along
 costs little and helps.
 
-Numbers in the schema example are *illustrative defaults*, not this or
-any other flat's measurements — the model derives real coordinates from
-the plan. Where a figure below is a real measurement from the reference
-implementation, it is labelled **(reference project — measure your own)**
-and must not be copied as a universal constant.
+Most numbers in the schema example are illustrative defaults — the model
+derives real coordinates from the plan, not from this file. A handful are
+not: `exposure`, `sky`, and the `pitch`/`vfov` shown on a photo spot are
+the reference project's own shipped, measured values, kept because they
+carry calibration a new builder benefits from seeing (a plausible
+exposure, a plausible sky gradient, a plausible tilt) — not because they
+transfer to a different flat. Wherever a figure in this document is a
+real measurement rather than a placeholder, including these four, it is
+labelled **(reference project — measure your own)** and must be
+re-derived for a new property, never copied.
 
 ---
 
@@ -147,7 +152,10 @@ mistake it for a survey.
 ## 3. The JSON schema
 
 Produce this shape. Blocks marked *optional* are omitted for flats that
-lack the feature. Numbers here are illustrative.
+lack the feature. Most numbers here are illustrative placeholders; four
+are labelled "(reference project — measure your own)" because they are
+the reference project's real, shipped calibration and must be re-measured
+rather than reused.
 
 ```jsonc
 {
@@ -232,14 +240,17 @@ lack the feature. Numbers here are illustrative.
                                                    // visible through the windows
 
   // ---- rendering and photographic-match keys (all optional) ----
-  "exposure": 0.42,         // renderer.toneMappingExposure override, fitted per apartment.
-                            // Must be a finite number > 0; anything else warns and falls
-                            // back to 1.05. See §5 — this is NOT a free-floating knob.
+  "exposure": 0.42,         // renderer.toneMappingExposure override, fitted per apartment;
+                            // 0.42 is the reference project's own fit (reference project —
+                            // measure your own), not a default. Must be a finite number > 0;
+                            // anything else warns and falls back to 1.05. See §5 — this is
+                            // NOT a free-floating knob.
   "sky": { "top": "#b5e2ff", "bottom": "#e0f4ff", "fog": "#e0f4ff" },
-                            // vertical gradient background + matching fog. Each field
-                            // optional, the block optional. Absent -> a flat clear colour.
-                            // A malformed value must warn by name and fall back, never
-                            // produce a black screen.
+                            // vertical gradient background + matching fog; these three hex
+                            // values are the reference project's own sky (reference project
+                            // — measure your own), not a default. Each field optional, the
+                            // block optional. Absent -> a flat clear colour. A malformed
+                            // value must warn by name and fall back, never a black screen.
   "palette": { "floorWood": "#rrggbb" },   // material key -> hex albedo override; every key
                                            // optional, absent falls back to the hardcoded
                                            // constant. See §5 for how NOT to derive these.
@@ -252,8 +263,11 @@ lack the feature. Numbers here are illustrative.
     "file": "8.webp", "name": "Bedroom 1",
     "x": 0, "z": 0, "g": 0, "yaw": -5.7,
     "pitch": 22,            // optional: downward tilt in DEGREES, positive = looking down;
-                            // absent or non-finite -> 0. See §10 before setting one.
-    "vfov": 65,             // optional: per-spot vertical fov override, degrees
+                            // absent or non-finite -> 0. 22 is one reference-project spot's
+                            // own derived tilt (reference project — measure your own), not a
+                            // typical value. See §10 before setting one.
+    "vfov": 65,             // optional: per-spot vertical fov override, degrees; 65 is
+                            // likewise that spot's own reference-project measurement
     "compare": true,        // optional: include this spot in the resemblance harness
     "poseVerified": true,   // optional: a human has looked at the divider and accepted the pose
     "poseNote": "<why>"     // optional: what was checked, or why it could not be
@@ -261,8 +275,10 @@ lack the feature. Numbers here are illustrative.
 
   "meta": { "id": "<slug>", "title": "<Property name>",
             "description": "<one line>", "photoBase": "photos/<slug>/",
-            "photoFovLong": 120 }   // optional: assumed fov along the photographs' LONG
-                                    // edge, degrees. Measure it; do not assume it (§10).
+            "photoFovLong": "<measure it>" }  // degrees, across the photographs' LONG edge.
+                                    // Do not ship an assumed number — an assumed value can
+                                    // be off by a factor of two, and everything fitted on
+                                    // top of it inherits the error (§10).
 }
 ```
 
@@ -451,6 +467,10 @@ paste into the config.
 - Merge every static mesh by **(material, level)** into a handful of big
   meshes. Skip only meshes carrying their own lightmap and the merged
   walls — the dollhouse cutaway needs those separable per level.
+- **Do not zone-split those merged meshes for frustum culling without
+  measuring first.** It reads like a natural win and can instead raise
+  draw calls, depending entirely on the property's shape — full numbers
+  under "What was built, measured and rejected" below.
 - **Sprites do not batch.** Map markers must be one `THREE.Points` per
   level, not one sprite each; a dozen photo spots otherwise cost a dozen
   draw calls on their own.
@@ -543,6 +563,19 @@ Any constant this check mirrors from the walking code — the player
 radius above all — is a mirror that can drift. State in both files that
 it is a mirror, and re-check both whenever either moves; a validator
 using a stale radius passes things the player cannot walk through.
+
+The same risk exists anywhere a constant is duplicated instead of
+shared — copied into a second file, or baked as a literal inside an
+expression rather than a reference to the named value. Watch especially
+for an **engine or library upgrade that changes what a constant means
+without changing its name or its delivered effect**: a rename or a unit
+change inside the dependency can force a compensating factor into your
+own code, the visible output stays identical, and any comment or doc
+that quoted the old raw value is now wrong while looking untouched.
+After any such upgrade, grep for the constant's numeric literal, not
+just its name — a hardcoded copy will not turn up in a search for the
+identifier, and will not move the next time the named constant is
+tuned.
 
 **The list must be empty before every commit.** Written last, this check
 found two live bugs within seconds of first running — write it early.
