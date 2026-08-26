@@ -3282,3 +3282,34 @@ camera poses end up inside the furniture. It is not in the tree. The reason it
 is written down is that it is the cleanest example this repository has of the
 thing the section above keeps warning about: an 8×8 grid of cell mean colours
 will happily prefer a broken frame.
+
+## Engine defects and camera poses, 2026-08-26 (second pass)
+
+Files: `serenity-b7-BASE-{legacy,truelens}.json`,
+`serenity-b7-oldpose-{legacy,truelens}.json`,
+`serenity-b7-{final-legacy,newpose-truelens}.json`, and for kings-court
+`kings-court-kc-BASE.json` / `kings-court-kc-HEAD-occh.json`. Plan:
+`docs/superpowers/plans/2026-08-26b-engine-defects-and-poses.md`.
+
+| | legacy gate (72° vertical, aspect only) | true lens (`meta.photoFovLong` 85) |
+|---|---|---|
+| BASE (`main`) | **13.13** | **13.20** |
+| this pass's config, old poses | 13.27 | 13.14 |
+| this pass, shipped | **13.52** | **13.18** |
+
+**Read the right column.** At the lens that models the photographs the pass is
+flat — 13.20 → 13.18, inside the ±0.1 run-to-run spread. The +0.39 in the left
+column is the gate, not the poses: rendered through the gate's *own* camera,
+serenity's old 6.webp pose shows a window and a blank wall, and the new one
+shows the window, the seat with its cushions, the lamp and the bed. The old
+frame scored 9.23 and the new one 12.32. This is the third time in this file
+that ΔE2000 has preferred a frame with less in it (the mirrored-bedroom
+variant and the pool at 10.webp being the other two), and the first time the
+preference is large enough to move the headline.
+
+kings-court moves for a different reason and by a different amount:
+17.58 → 17.53 overall, from giving `shelfTower` and `tvWallUnit` their real
+occlusion heights instead of the silent 0.8 m default. The effect is
+concentrated exactly where those objects are — 12.webp's BASE-vs-HEAD mean
+pixel difference is 10.7 against a ~3 noise floor, and its ΔE goes
+18.76 → 17.99 — which is the shape a correct localised change should have.

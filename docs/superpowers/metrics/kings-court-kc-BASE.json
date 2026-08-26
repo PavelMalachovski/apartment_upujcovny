@@ -1,0 +1,77 @@
+{
+  "apartment": "kings-court",
+  "phase": "kc-BASE",
+  "population": "all-spot",
+  "mean": 17.58,
+  "spots": [
+    {
+      "file": "2.webp",
+      "name": "Living room",
+      "deltaE": 16.57
+    },
+    {
+      "file": "7.webp",
+      "name": "Dining room",
+      "deltaE": 10.28
+    },
+    {
+      "file": "20.webp",
+      "name": "Kitchen",
+      "deltaE": 14.01
+    },
+    {
+      "file": "8.webp",
+      "name": "Bedroom 1",
+      "deltaE": 11.03
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom 1 \u00b7 desk",
+      "deltaE": 21.64
+    },
+    {
+      "file": "12.webp",
+      "name": "Bedroom 2",
+      "deltaE": 18.77
+    },
+    {
+      "file": "14.webp",
+      "name": "Bathroom 2",
+      "deltaE": 21.46
+    },
+    {
+      "file": "17.webp",
+      "name": "Guest WC",
+      "deltaE": 13.77
+    },
+    {
+      "file": "19.webp",
+      "name": "Laundry",
+      "deltaE": 21.15
+    },
+    {
+      "file": "3.webp",
+      "name": "Upper living room",
+      "deltaE": 15.8
+    },
+    {
+      "file": "10.webp",
+      "name": "Upper bedroom",
+      "deltaE": 16.98
+    },
+    {
+      "file": "13.webp",
+      "name": "Upper bathroom",
+      "deltaE": 26.57
+    },
+    {
+      "file": "18.webp",
+      "name": "Terrace",
+      "deltaE": 20.49
+    }
+  ],
+  "scored": 13,
+  "compareTotal": 13,
+  "skippedPoseVerification": 0,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

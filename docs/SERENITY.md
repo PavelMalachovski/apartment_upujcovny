@@ -99,3 +99,35 @@ changed in this file's terms:
 Still absent and deliberately not blocking anything: the foreground table of
 fruit and the two glasses in 2.webp/10.webp, the table setting in 9.webp, and
 the pool fountain.
+
+## Camera poses, 2026-08-26 (second pass)
+
+Record: `docs/superpowers/plans/2026-08-26b-engine-defects-and-poses.md`.
+
+The lens correction in the pass above (120 → 85) left several camera poses no
+longer framing their photograph. Three were re-posed **by looking**, which is
+what `poseVerified` has always meant here, and one was withdrawn:
+
+- **6.webp** (2.15, 5.30) → **(1.85, 4.45) yaw 174 pitch 7**. The old camera
+  stood 1.35 m from the window and at 85° framed neither the window seat nor
+  the bed — the seat fell below the frame and the render was a wall of curtain.
+- **7.webp** (2.55, 5.15) → **(2.66, 6.00) yaw 27 pitch 10**. The photograph
+  looks along the bed from its head end toward the wardrobe; the old camera
+  stood level with the bed's middle.
+- **2.webp** (5.45, 6.60) → **(5.50, 7.20) yaw 112 pitch 32**. `poseVerified`
+  stays false, for the reasons its own note gives.
+- **1.webp — `poseVerified` withdrawn, camera deliberately unchanged.**
+  Cropping both edges of the photograph shows a sliding-door leaf with a
+  recessed flush pull at close range and the bathroom seen through the gap:
+  the photographer stood **outside** the room. Both alternatives were built
+  and rendered and neither works — the bedroom-door line puts the camera
+  inside the wardrobe, and from the hall door the vanity and the shower cannot
+  both be in frame at the photograph's angular span. **No pose in the modelled
+  bathroom reproduces this photograph**, which is evidence the modelled
+  bathroom is not the proportions of the real one. Left for a pass that can
+  revisit the plan.
+
+The pose work also surfaced a furniture error: 6.webp and 11.webp both put the
+lamp table **between** the window seat and the bed, and the config had bed,
+seat, table. Re-ordered to bed (1.38) | table (0.50) | seat (1.00) across the
+2.96 m room, with the window moved over the seat.

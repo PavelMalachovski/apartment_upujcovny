@@ -1,0 +1,67 @@
+{
+  "apartment": "serenity",
+  "phase": "b7-oldpose-legacy",
+  "population": "all-spot",
+  "mean": 13.27,
+  "spots": [
+    {
+      "file": "1.webp",
+      "name": "Bathroom",
+      "deltaE": 16.75
+    },
+    {
+      "file": "2.webp",
+      "name": "Pool Terrace",
+      "deltaE": 16.06
+    },
+    {
+      "file": "3.webp",
+      "name": "Living Room",
+      "deltaE": 14.33
+    },
+    {
+      "file": "4.webp",
+      "name": "Living Room",
+      "deltaE": 13.7
+    },
+    {
+      "file": "5.webp",
+      "name": "Kitchen & Hall",
+      "deltaE": 9.7
+    },
+    {
+      "file": "6.webp",
+      "name": "Bedroom",
+      "deltaE": 10.51
+    },
+    {
+      "file": "7.webp",
+      "name": "Bedroom",
+      "deltaE": 13.31
+    },
+    {
+      "file": "8.webp",
+      "name": "Bathroom",
+      "deltaE": 9.42
+    },
+    {
+      "file": "9.webp",
+      "name": "Living Room",
+      "deltaE": 17.3
+    },
+    {
+      "file": "10.webp",
+      "name": "Pool Terrace",
+      "deltaE": 13.5
+    },
+    {
+      "file": "11.webp",
+      "name": "Bedroom",
+      "deltaE": 11.42
+    }
+  ],
+  "scored": 11,
+  "compareTotal": 11,
+  "skippedPoseVerification": 0,
+  "caveat": "Absolute values are meaningless: render and photograph differ in lens, exposure and furniture model. Only the trend between phases carries information."
+}

@@ -19,6 +19,18 @@ const Builder = (() => {
   const bakeData = { occluders: [], lights: [], windows: [], surfaces: [], wallPieces: [] };
   // Openings (doors/passages) for the layout check: see validate.js
   const doorways = [];
+  // Config-level defects found while building, folded into window.__issues by
+  // validate.js so `?check=1` shows them and the "list must be empty before
+  // commit" rule covers them too. Two classes so far, both of which used to
+  // be silent:
+  //   unknown furniture type   -- a name with no F.* constructor. The object
+  //     simply never appears, `buildFurniture` moves on, and nothing says so.
+  //     Three F.* constructors were skipped exactly this way once (see the
+  //     stale-index.html note in CLAUDE.md rule 3) and the scene rendered with
+  //     the geometry missing, which cost an hour to find.
+  //   no occlusion height      -- a colliding type absent from OCC_H silently
+  //     takes the 0.8 m default, so a 2.45 m shelf tower bakes a 0.8 m shadow.
+  const configIssues = [];
   function addOccluder(cx, cy, cz, sx, sy, sz) {
     bakeData.occluders.push({
       x1: cx - sx / 2, y1: cy - sy / 2, z1: cz - sz / 2,
@@ -308,13 +320,38 @@ const Builder = (() => {
         const cc = o.curtain ? curMap[o.curtain]
           : (w.ext && Math.abs(uz) < 0.5 && w.z1 > 5 ? curtainColorFor(w.lvl, cx) : null);
         if (cc) {
+          // Parked drape panels. The old rule placed a fixed 0.55 m panel
+          // centred 0.14 outside the opening edge -- so its inner edge sat
+          // 0.135 INSIDE the reveal, which is what a bunched curtain does --
+          // and then clamped the centre into [0.33, L-0.33] so it could not
+          // poke past the end of the wall run.
+          //
+          // That clamp moves the panel WITHOUT narrowing it, so a window near
+          // the end of a short wall gets its drape slid across the glass.
+          // Measured across all three apartments before this was touched:
+          // kings-court never triggers it at all (its window wall is 28.4 m),
+          // serenity's bedroom window was 0.02 over, and horkyone-10's second
+          // living-room window had **0.445 m of a 1.02 m opening covered** --
+          // 44% of the glass behind a curtain, in a shipped apartment.
+          //
+          // Now the panel keeps its inner edge exactly where it always was and
+          // is NARROWED to whatever room is left between the opening and the
+          // end of the run, which is what a real curtain does when the window
+          // is 0.16 m from a corner. With room to spare the width stays 0.55
+          // and every number below reduces to the old ones exactly, so an
+          // opening that was never clamped does not move a millimetre.
+          const FULL = 0.55;
+          const INSET = FULL / 2 - 0.14;   // 0.135, the old inner-edge overlap
+          const ENDGAP = 0.055;            // what the old 0.33 clamp reserved
           for (const side of [-1, 1]) {
-            // park position clamped inside the wall run
-            let s = (p.from + p.to) / 2 + side * (o.w / 2 + 0.14);
-            s = Math.max(0.33, Math.min(L - 0.33, s));
+            const room = (side < 0 ? p.from : L - p.to) + INSET - ENDGAP;
+            if (room < 0.12) continue;     // a sliver is worse than nothing
+            const wdt = Math.min(FULL, room);
+            const s = side < 0 ? p.from + INSET - wdt / 2
+                               : p.to - INSET + wdt / 2;
             const px = w.x1 + ux * s;
             const pz = w.z1 + uz * s;
-            const cur = wavyPlane(0.55, topH - 0.18, cc, 5);
+            const cur = wavyPlane(wdt, topH - 0.18, cc, 5);
             cur.position.set(px - Math.sin(ang) * 0.2, baseY + (topH - 0.18) / 2 + 0.06, pz - Math.cos(ang) * 0.2);
             cur.rotation.y = -ang;
             scene.add(cur);
@@ -1926,7 +1963,13 @@ const Builder = (() => {
     wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
     deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
     planter: 1.2, plantMass: 2.2, slatFence: 2.0, windowBench: 0.5, lounger: 0.5,
-    fridge: 1.4, washer: 0.85, palm: 0.4
+    fridge: 1.4, washer: 0.85, palm: 0.4,
+    // Added 2026-08-26 after the "no occlusion height" diagnostic below found
+    // them: both are full-height kings-court units that were baking their
+    // shadow at the 0.8 m default. Heights read off the constructors --
+    // shelfTower's carcass is 2.45, tvWallUnit's panel 2.35, which is also
+    // what the neighbouring tvPanel entry (2.3) already assumes.
+    shelfTower: 2.45, tvWallUnit: 2.35
   };
   const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern', 'palm'];
 
@@ -1934,9 +1977,17 @@ const Builder = (() => {
   function buildFurniture(scene) {
     CHAMFER = 0.005;
     try {
+      const noOccH = new Set();
       for (const item of APT.furniture) {
         const fn = F[item.type];
-        if (!fn) continue;
+        if (!fn) {
+          configIssues.push({
+            kind: 'unknown furniture type',
+            where: String(item.type),
+            detail: `x ${item.x}, z ${item.z} names no F.* constructor — the object is silently absent`
+          });
+          continue;
+        }
         const g = new T.Group();
         furnGroups.push(g);
         const baseY = item.lvl === 'main' ? APT.mainFloorY : item.lvl === 'upper' ? APT.upperFloorY : APT.terraceY;
@@ -1958,6 +2009,18 @@ const Builder = (() => {
         } else if (!res.noCollide) {
           addBoxCollider(item.x, item.z, res.w || item.w || 0.5, res.d || item.d || 0.5, clvl, item.rot || 0);
           if (canOcclude) {
+            // Reported, not corrected: raising a type's occluder changes the
+            // baked light for every apartment that uses it, so the entry goes
+            // in OCC_H deliberately and with a measurement, never as a side
+            // effect of adding a constructor.
+            if (OCC_H[item.type] === undefined && !noOccH.has(item.type)) {
+              noOccH.add(item.type);
+              configIssues.push({
+                kind: 'no occlusion height',
+                where: String(item.type),
+                detail: `not in OCC_H — bakes its shadow at the 0.8 m default, whatever the object's real height`
+              });
+            }
             const bb = colliders.boxes[colliders.boxes.length - 1];
             addOccluder((bb.x1 + bb.x2) / 2, baseY + occH / 2, (bb.z1 + bb.z2) / 2,
               bb.x2 - bb.x1, occH, bb.z2 - bb.z1);
@@ -2147,5 +2210,5 @@ const Builder = (() => {
   }
 
   return { build, colliders, atticH, bakeData, mergeStatic, openings: doorways,
-           M, chamferBoxGeometry };
+           configIssues, M, chamferBoxGeometry };
 })();

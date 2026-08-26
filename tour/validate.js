@@ -207,7 +207,11 @@ const Validate = (() => {
   }
 
   function run(colliders) {
-    const issues = [];
+    // Defects the builder found in the config itself (an unknown furniture
+    // type, a colliding type with no OCC_H entry). They are pushed first so
+    // they head the console table and the ?check=1 badge: a named object that
+    // never got built explains every other issue below it.
+    const issues = (Builder.configIssues || []).slice();
     checkOpenings(colliders, issues);
     checkMarkers(colliders, issues);
     const cells = checkReachability(colliders, issues);
