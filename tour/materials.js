@@ -51,7 +51,15 @@ const Materials = (() => {
   }
 
   // Parquet: boards with individual tone, seams and lively grain
-  function floorTex() {
+  // `base` is an optional [r,g,b] plank colour. Absent -> (184,149,95), the
+  // honey oak every apartment has always had, so a config that does not ask
+  // for one renders exactly as before. serenity asks for one because its
+  // photographs show a pale grey-washed oak, and `palette.floorWood` cannot
+  // reach it: that key is a multiplier on the map, and no multiplier can
+  // raise a channel (the render needs MORE green and blue than the honey
+  // base has, not less).
+  function floorTex(base) {
+    const R0 = base ? base[0] : 184, G0 = base ? base[1] : 149, B0 = base ? base[2] : 95;
     return canvasTex(1024, 1024, (g) => {
       const rowH = 128;
       for (let y = 0; y < 1024; y += rowH) {
@@ -59,12 +67,14 @@ const Materials = (() => {
         while (x < 1024) {
           const len = 260 + Math.random() * 300;
           const tone = 0.82 + Math.random() * 0.36;
-          const r = Math.min(255, 184 * tone), gr = Math.min(255, 149 * tone), b = Math.min(255, 95 * tone);
+          const r = Math.min(255, R0 * tone), gr = Math.min(255, G0 * tone), b = Math.min(255, B0 * tone);
           g.fillStyle = `rgb(${r | 0},${gr | 0},${b | 0})`;
           g.fillRect(x, y, len, rowH);
           // grain
           for (let i = 0; i < 26; i++) {
-            g.strokeStyle = `rgba(110,80,50,${0.04 + Math.random() * 0.08})`;
+            g.strokeStyle = base
+              ? `rgba(150,132,112,${0.03 + Math.random() * 0.06})`
+              : `rgba(110,80,50,${0.04 + Math.random() * 0.08})`;
             g.lineWidth = 0.8 + Math.random() * 1.6;
             const yy = y + Math.random() * rowH;
             g.beginPath();
@@ -152,6 +162,49 @@ const Materials = (() => {
             g.stroke();
           }
         }
+      } else if (style === 'urchin' || style === 'starfish' || style === 'shell') {
+        // The three nautical canvases above the sofa in 3.webp/4.webp/9.webp:
+        // indigo line art on an off-white canvas, one motif per panel.
+        g.fillStyle = '#efece5'; g.fillRect(0, 0, 256, 320);
+        g.strokeStyle = '#2c4272'; g.fillStyle = '#2c4272';
+        const cx = 128, cy = 160;
+        if (style === 'urchin') {
+          g.lineWidth = 2;
+          for (let i = 0; i < 44; i++) {
+            const a = i / 44 * Math.PI * 2;
+            g.beginPath(); g.moveTo(cx + Math.cos(a) * 30, cy + Math.sin(a) * 30);
+            g.lineTo(cx + Math.cos(a) * 96, cy + Math.sin(a) * 96); g.stroke();
+          }
+          for (const r of [30, 52, 74, 96]) {
+            g.lineWidth = 1.5;
+            g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+          }
+        } else if (style === 'starfish') {
+          g.beginPath();
+          for (let i = 0; i < 10; i++) {
+            const a = -Math.PI / 2 + i / 10 * Math.PI * 2;
+            const r = (i % 2 === 0) ? 100 : 38;
+            const px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+            if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
+          }
+          g.closePath(); g.lineWidth = 3; g.stroke();
+          g.globalAlpha = 0.18; g.fill(); g.globalAlpha = 1;
+          for (let i = 0; i < 5; i++) {
+            const a = -Math.PI / 2 + i / 5 * Math.PI * 2;
+            g.lineWidth = 1.2;
+            g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * 92, cy + Math.sin(a) * 92); g.stroke();
+          }
+        } else {
+          g.lineWidth = 2;
+          for (let i = 0; i < 16; i++) {
+            const a = Math.PI * (0.08 + i / 16 * 0.84);
+            g.beginPath(); g.moveTo(cx, cy + 84);
+            g.quadraticCurveTo(cx + Math.cos(a) * -70, cy - 10, cx + Math.cos(a) * -96, cy + 84);
+            g.stroke();
+          }
+          g.lineWidth = 3;
+          g.beginPath(); g.arc(cx, cy + 84, 98, Math.PI, 0); g.stroke();
+        }
       } else { // mono
         g.fillStyle = '#e8e6e1'; g.fillRect(0, 0, 256, 320);
         g.fillStyle = '#b9bdc2'; g.beginPath(); g.ellipse(120, 130, 75, 95, 0.3, 0, Math.PI * 2); g.fill();
@@ -159,6 +212,102 @@ const Materials = (() => {
         g.fillStyle = 'rgba(255,255,255,0.65)'; g.beginPath(); g.ellipse(110, 110, 40, 50, 0.5, 0, Math.PI * 2); g.fill();
       }
     });
+  }
+
+  // ---- textures added for the serenity photorealism pass ----------------
+  // All of these are new functions with new callers; nothing below replaces
+  // a texture another apartment already renders.
+
+  // Large-format stone-look wall tile: the bathroom in 1.webp/8.webp is clad
+  // floor-to-ceiling in it, and the platform had no wall tile at all.
+  // `cols`/`rows` are tiles per texture repeat, so the grout pitch follows
+  // the panel the material is mapped onto rather than being baked in.
+  function stoneTileTex(cols = 2, rows = 4, base = '#d9d6d0', grout = '#bdb9b2') {
+    return canvasTex(512, 512, (g) => {
+      g.fillStyle = base; g.fillRect(0, 0, 512, 512);
+      // cloudy mineral mottling, low contrast -- the photograph's tile is
+      // almost flat and a strong marble vein reads as a different material
+      for (let i = 0; i < 130; i++) {
+        const x = Math.random() * 512, y = Math.random() * 512;
+        const r = 18 + Math.random() * 70;
+        const grd = g.createRadialGradient(x, y, 0, x, y, r);
+        const d = Math.random() < 0.5 ? 0 : 255;
+        grd.addColorStop(0, `rgba(${d},${d},${d},${0.015 + Math.random() * 0.035})`);
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = grd;
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+      g.strokeStyle = grout; g.lineWidth = 2;
+      for (let i = 0; i <= cols; i++) {
+        const x = i * 512 / cols;
+        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 512); g.stroke();
+      }
+      for (let i = 0; i <= rows; i++) {
+        const y = i * 512 / rows;
+        g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke();
+      }
+    });
+  }
+
+  // Kitchen splashback mosaic (5.webp): small grey squares on a dark grout.
+  function mosaicTex() {
+    return canvasTex(256, 256, (g) => {
+      g.fillStyle = '#6f7377'; g.fillRect(0, 0, 256, 256);
+      const n = 16, s = 256 / n;
+      for (let y = 0; y < n; y++) {
+        for (let x = 0; x < n; x++) {
+          const t = 0.78 + Math.random() * 0.44;
+          const v = Math.min(255, 176 * t);
+          g.fillStyle = `rgb(${v | 0},${(v * 0.99) | 0},${(v * 0.97) | 0})`;
+          g.fillRect(x * s + 1.2, y * s + 1.2, s - 2.4, s - 2.4);
+        }
+      }
+    });
+  }
+
+  // Woven rattan/wicker: the terrace lounger and side table in 2.webp and
+  // 10.webp both read as weave, not as a flat plastic slab.
+  function wickerTex(base = '#b6a993') {
+    return canvasTex(256, 256, (g) => {
+      g.fillStyle = base; g.fillRect(0, 0, 256, 256);
+      const s = 16;
+      for (let y = 0; y < 256; y += s) {
+        for (let x = 0; x < 256; x += s) {
+          const over = ((x / s) + (y / s)) % 2 === 0;
+          g.fillStyle = over ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.16)';
+          if (over) g.fillRect(x + 1, y + 3, s - 2, s - 6);
+          else g.fillRect(x + 3, y + 1, s - 6, s - 2);
+        }
+      }
+      g.strokeStyle = 'rgba(0,0,0,0.10)'; g.lineWidth = 1;
+      for (let y = 0; y <= 256; y += s) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); }
+      for (let x = 0; x <= 256; x += s) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
+    });
+  }
+
+  // Macrame wall hanging (11.webp): a dowel, a grid of navy/white discs and
+  // a cream fringe. Drawn with alpha so the fringe silhouette is real
+  // rather than a rectangle of cream.
+  function macrameTex() {
+    return canvasTex(256, 256, (g) => {
+      g.clearRect(0, 0, 256, 256);
+      g.fillStyle = '#c9b79c'; g.fillRect(24, 18, 208, 14);   // dowel
+      const cols = 5;
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < cols - r; c++) {
+          const x = 128 + (c - (cols - r - 1) / 2) * 34;
+          const y = 56 + r * 30;
+          g.fillStyle = ((r + c) % 2) ? '#f2efe8' : '#27407a';
+          g.beginPath(); g.arc(x, y, 11, 0, Math.PI * 2); g.fill();
+        }
+      }
+      g.strokeStyle = '#efe9dc'; g.lineWidth = 4; g.lineCap = 'round';
+      for (let i = 0; i < 26; i++) {
+        const x = 40 + i * 7;
+        const drop = 150 + Math.sin(i * 0.55) * 34;
+        g.beginPath(); g.moveTo(x, 140); g.lineTo(x + Math.sin(i) * 3, drop + 90); g.stroke();
+      }
+    }, 1, 1);
   }
 
   function quiltTex(base, line) {
@@ -358,10 +507,21 @@ const Materials = (() => {
     return parseInt(v.slice(1), 16);
   }
 
+  // Same validated-hex lookup as color(), but returned as an [r,g,b] triple
+  // for the procedural texture generators, which draw with CSS colour
+  // strings rather than a THREE.Color. Absent/invalid -> null, and every
+  // caller falls back to the constant it always had.
+  function rgb(key) {
+    const v = APT.palette && APT.palette[key];
+    if (typeof v !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(v)) return null;
+    const n = parseInt(v.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
   function init(palette) {
     const col = color;
 
-    const wood = floorTex();
+    const wood = floorTex(rgb('floorWoodBase'));
     wood.repeat.set(3, 3);
     M.floorWood = new T.MeshStandardMaterial({ map: wood, color: col('floorWood', 0xffffff), roughness: 0.55, metalness: 0.04 });
     const ash = woodTex('#cdbc9f', 'rgba(150,130,105,0)', false);
@@ -410,7 +570,7 @@ const Materials = (() => {
     // task 1). New keys only -- no existing entry above or below is touched,
     // because task 4 re-fits `exposure` and a silently altered old colour
     // would land inside that fit and be unattributable.
-    M.poolCoping = new T.MeshStandardMaterial({ color: col('poolCoping', 0xcfc9bd), roughness: 0.88 });
+    M.poolCoping = new T.MeshStandardMaterial({ color: col('poolCoping', 0xcfc9bd), roughness: 0.82, metalness: 0.02 });
     M.poolWall = new T.MeshStandardMaterial({ color: col('poolWall', 0xd8eff1), roughness: 0.35 });
     // Ripple, not a flat fill. 10.webp's water is the largest single surface
     // in that frame and a constant colour reads as painted concrete at any
@@ -431,7 +591,10 @@ const Materials = (() => {
       }
       g.globalAlpha = 1;
     }, 6, 6);
-    M.poolWater = new T.MeshStandardMaterial({ map: ripple, color: col('poolWater', 0xffffff), roughness: 0.10, metalness: 0.20 });
+    // roughness 0.10 + metalness 0.20 concentrated the sun into one blown
+    // white blob on the surface; the photographs' water is finely rippled
+    // with no single specular hotspot.
+    M.poolWater = new T.MeshStandardMaterial({ map: ripple, color: col('poolWater', 0xffffff), roughness: 0.34, metalness: 0.06 });
     M.hedgeDark = new T.MeshStandardMaterial({ color: col('hedgeDark', 0x3f5f3a), roughness: 0.95 });
     // Canopy fronds. These are crossed quads, and with an opaque material
     // they read as a green skyline of rectangles -- measured, not guessed:
@@ -471,6 +634,30 @@ const Materials = (() => {
     M.frond = new T.MeshStandardMaterial({
       map: frondAlpha, alphaTest: 0.45, roughness: 0.95, side: T.DoubleSide
     });
+    const palmAlpha = canvasTex(256, 128, (g) => {
+      g.clearRect(0, 0, 256, 128);
+      // rachis
+      g.strokeStyle = '#3d5c2e'; g.lineWidth = 4;
+      g.beginPath(); g.moveTo(4, 64); g.quadraticCurveTo(140, 34, 252, 70); g.stroke();
+      // leaflets, shorter toward the tip
+      for (let i = 0; i < 34; i++) {
+        const t = i / 33;
+        const x = 4 + t * 248;
+        const y = 64 + (t * t * 40) - t * 48;
+        const len = 44 * Math.sin(Math.PI * Math.min(1, t * 1.25)) + 6;
+        g.strokeStyle = `rgb(${58 + i % 3 * 7},${96 + i % 4 * 8},${44 + i % 3 * 6})`;
+        g.lineWidth = 3.2;
+        for (const s of [-1, 1]) {
+          g.beginPath(); g.moveTo(x, y);
+          g.quadraticCurveTo(x + 10 * s * 0.2, y + s * len * 0.55, x + 16, y + s * len);
+          g.stroke();
+        }
+      }
+    });
+    palmAlpha.wrapS = palmAlpha.wrapT = T.ClampToEdgeWrapping;
+    M.palmLeaf = new T.MeshStandardMaterial({
+      map: palmAlpha, alphaTest: 0.4, roughness: 0.92, side: T.DoubleSide
+    });
     M.fenceWhite = new T.MeshStandardMaterial({ color: col('fenceWhite', 0xe4e1d8), roughness: 0.9 });
     M.pot = new T.MeshStandardMaterial({ color: 0xefefec, roughness: 0.8 });
     M.curtainBeige = new T.MeshStandardMaterial({ color: 0xc4b49e, roughness: 1, side: T.DoubleSide });
@@ -490,6 +677,43 @@ const Materials = (() => {
     M.amberGlass = new T.MeshStandardMaterial({ color: 0x9a6a2f, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.75 });
     M.artFrame = new T.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.6 });
     M.clearGlass = new T.MeshStandardMaterial({ color: 0xe8f0f2, roughness: 0.05, metalness: 0.05, transparent: true, opacity: 0.35, side: T.DoubleSide });
+
+    // ---- serenity photorealism pass: new materials, no existing one
+    // replaced. Every one of these is reached only from a new opt-in
+    // constructor or a new opt-in flag, so kings-court and horkyone-10
+    // never touch them.
+    const stoneWall = stoneTileTex(2, 4, '#bab6ae', '#9d9992');
+    stoneWall.repeat.set(1, 1);
+    M.stoneTile = new T.MeshStandardMaterial({ map: stoneWall, color: col('stoneTile', 0xffffff), roughness: 0.42 });
+    const stoneFl = stoneTileTex(3, 3, '#c6c3bd', '#a9a59e');
+    M.stoneFloorTile = new T.MeshStandardMaterial({ map: stoneFl, color: col('stoneTile', 0xffffff), roughness: 0.38 });
+    M.mosaic = new T.MeshStandardMaterial({ map: mosaicTex(), roughness: 0.35, metalness: 0.05 });
+    M.wicker = new T.MeshStandardMaterial({ map: wickerTex(col2('wicker', '#b6a993')), roughness: 0.92 });
+    M.wickerDark = new T.MeshStandardMaterial({ map: wickerTex('#8a6a4a'), roughness: 0.9 });
+    M.macrame = new T.MeshStandardMaterial({ map: macrameTex(), roughness: 1, transparent: true, side: T.DoubleSide });
+    M.walnut = new T.MeshStandardMaterial({ map: woodTex('#7d6247', 'rgba(45,32,20,0.5)', false), roughness: 0.62 });
+    M.oakPale = new T.MeshStandardMaterial({ map: woodTex('#cfc3ad', 'rgba(150,135,110,0.3)', false), roughness: 0.7 });
+    // A mirror in a scene with no reflection probe of its own still has the
+    // apartment's captured environment map, so a smooth low-roughness metal
+    // reads as a mirror rather than as a grey card.
+    M.mirror = new T.MeshStandardMaterial({ color: 0xdfe6ea, roughness: 0.10, metalness: 0.45 });
+    M.tintGlass = new T.MeshStandardMaterial({ color: 0x6fada8, roughness: 0.08, metalness: 0.25, transparent: true, opacity: 0.42, side: T.DoubleSide });
+    M.sheer = new T.MeshStandardMaterial({ color: 0xf8f8f4, roughness: 1, transparent: true, opacity: 0.30, side: T.DoubleSide });
+    M.palmTrunk = new T.MeshStandardMaterial({ map: woodTex('#8b7f68', 'rgba(60,50,35,0.5)', false), roughness: 0.95 });
+    M.terracottaPot = new T.MeshStandardMaterial({ color: 0xc9c4bb, roughness: 0.85 });
+    M.acBody = new T.MeshStandardMaterial({ color: 0xf7f7f5, roughness: 0.45 });
+    M.rust = new T.MeshStandardMaterial({ color: 0xa8492f, roughness: 0.92 });
+    M.petrol = new T.MeshStandardMaterial({ color: 0x2f5f7e, roughness: 0.94 });
+    M.steelDark = new T.MeshStandardMaterial({ color: 0xb9bcc0, roughness: 0.35, metalness: 0.75 });
+    M.doorGray = new T.MeshStandardMaterial({ map: woodTex('#9c9a97', 'rgba(90,88,86,0.35)', false), roughness: 0.72 });
+    M.doorSlate = new T.MeshStandardMaterial({ map: woodTex('#6e7175', 'rgba(45,47,50,0.4)', false), roughness: 0.6 });
+  }
+
+  // CSS-string sibling of color(): the canvas generators need '#rrggbb',
+  // not a THREE colour int, and the same validation has to gate both.
+  function col2(key, fallback) {
+    const v = APT.palette && APT.palette[key];
+    return (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)) ? v : fallback;
   }
 
   return { M, init, canvasTex, artTex, throwMat, dotsMat, color };

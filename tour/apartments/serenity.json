@@ -1,986 +1,1195 @@
 {
-  "mainFloorY": 0,
-  "mainCeilH": 2.6,
-  "terraceY": -0.05,
-  "exposure": 0.31,
-  "sky": {
-    "top": "#b5e2ff",
-    "bottom": "#e0f4ff",
-    "fog": "#e0f4ff"
-  },
-  "palette": {
-    "floorWood": "#fdffff",
-    "wall": "#fffffc",
-    "sofa": "#132743",
-    "tileGray": "#fadfc6",
-    "counter": "#fcfff6"
-  },
-  "roomCenter": {
-    "main": {
-      "x": 2.9,
-      "z": 3.3
-    }
-  },
-  "walls": [
-    {
-      "lvl": "main",
-      "x1": 0,
-      "z1": 0,
-      "x2": 0,
-      "z2": 6.65,
-      "h": 2.6,
-      "ext": true
-    },
-    {
-      "lvl": "main",
-      "x1": 0,
-      "z1": 0,
-      "x2": 5.75,
-      "z2": 0,
-      "h": 2.6,
-      "ext": true,
-      "openings": [
-        {
-          "at": 3.55,
-          "w": 0.9,
-          "type": "door",
-          "entrance": true
-        }
-      ]
-    },
-    {
-      "lvl": "main",
-      "x1": 5.75,
-      "z1": 0,
-      "x2": 5.75,
-      "z2": 5.25,
-      "h": 2.6,
-      "ext": true
-    },
-    {
-      "lvl": "main",
-      "x1": 0,
-      "z1": 6.65,
-      "x2": 3.1,
-      "z2": 6.65,
-      "h": 2.6,
-      "ext": true,
-      "openings": [
-        {
-          "at": 1.6,
-          "w": 1.3,
-          "type": "win",
-          "curtain": "beige"
-        }
-      ]
-    },
-    {
-      "lvl": "main",
-      "x1": 3.1,
-      "z1": 5.25,
-      "x2": 5.75,
-      "z2": 5.25,
-      "h": 2.6,
-      "ext": true,
-      "openings": [
-        {
-          "at": 0.25,
-          "w": 1.8,
-          "type": "door",
-          "terrace": true,
-          "daylight": true,
-          "curtain": "gray"
-        }
-      ]
-    },
-    {
-      "lvl": "main",
-      "x1": 3.1,
-      "z1": 6.75,
-      "x2": 3.1,
-      "z2": 1.55,
-      "h": 2.6,
-      "openings": [
-        {
-          "at": 4.15,
-          "w": 1.05,
-          "type": "pass",
-          "slider": true
-        }
-      ]
-    },
-    {
-      "lvl": "main",
-      "x1": 5.75,
-      "z1": 5.25,
-      "x2": 5.75,
-      "z2": 6.95,
-      "h": 2.6,
-      "ext": true
-    },
-    {
-      "lvl": "main",
-      "x1": 0,
-      "z1": 1.55,
-      "x2": 3.1,
-      "z2": 1.55,
-      "h": 2.6,
-      "openings": [
-        {
-          "at": 1.6,
-          "w": 0.8,
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "lvl": "main",
-      "x1": 2.8,
-      "z1": 0,
-      "x2": 2.8,
-      "z2": 1.55,
-      "h": 2.6,
-      "openings": [
-        {
-          "at": 0.65,
-          "w": 0.85,
-          "type": "door"
-        }
-      ]
-    }
-  ],
-  "floors": {
-    "main": [
-      {
-        "x1": -0.07,
-        "z1": -0.07,
-        "x2": 2.8,
-        "z2": 1.55,
-        "mat": "tileGray"
-      },
-      {
-        "x1": 2.8,
-        "z1": -0.07,
-        "x2": 3.1,
-        "z2": 1.55,
-        "mat": "wood"
-      },
-      {
-        "x1": -0.07,
-        "z1": 1.55,
-        "x2": 3.1,
-        "z2": 6.72,
-        "mat": "wood"
-      },
-      {
-        "x1": 3.1,
-        "z1": -0.07,
-        "x2": 5.82,
-        "z2": 5.32,
-        "mat": "wood"
-      }
-    ],
-    "terrace": [
-      {
-        "x1": 3.03,
-        "z1": 5.32,
-        "x2": 5.82,
-        "z2": 7.65,
-        "mat": "tileGray"
-      }
-    ]
-  },
-  "mainCeil": [
-    {
-      "x1": -0.07,
-      "z1": -0.07,
-      "x2": 2.8,
-      "z2": 1.55
-    },
-    {
-      "x1": 2.8,
-      "z1": -0.07,
-      "x2": 3.1,
-      "z2": 1.55
-    },
-    {
-      "x1": -0.07,
-      "z1": 1.55,
-      "x2": 3.1,
-      "z2": 6.72
-    },
-    {
-      "x1": 3.1,
-      "z1": -0.07,
-      "x2": 5.82,
-      "z2": 5.32
-    },
-    {
-      "x1": 3.03,
-      "z1": 5.32,
-      "x2": 5.82,
-      "z2": 7.58
-    }
-  ],
-  "surroundings": [
-    {
-      "x": 0.6,
-      "z": 7.7,
-      "w": 20.0,
-      "d": 1.1,
-      "mat": "stone",
-      "y": -0.17,
-      "h": 0.12
-    },
-    {
-      "x": 0.6,
-      "z": 15.0,
-      "w": 20.0,
-      "d": 0.9,
-      "mat": "stone",
-      "y": -0.17,
-      "h": 0.12
-    },
-    {
-      "x": -7.1,
-      "z": 11.4,
-      "w": 1.2,
-      "d": 6.4,
-      "mat": "stone",
-      "y": -0.17,
-      "h": 0.12
-    },
-    {
-      "x": 8.3,
-      "z": 11.4,
-      "w": 1.2,
-      "d": 6.4,
-      "mat": "stone",
-      "y": -0.17,
-      "h": 0.12
-    },
-    {
-      "x": 8.1,
-      "z": 6.4,
-      "w": 4.2,
-      "d": 2.8,
-      "h": 2.7,
-      "y": -0.05,
-      "mat": "bldg2",
-      "occ": true
-    },
-    {
-      "x": -9.5,
-      "z": 4.2,
-      "w": 4.2,
-      "d": 2.8,
-      "h": 2.7,
-      "y": -0.05,
-      "mat": "bldg2",
-      "occ": true
-    }
-  ],
-  "furniture": [
-    {
-      "type": "bed",
-      "x": 1.0,
-      "z": 5.43,
-      "lvl": "main",
-      "rot": 180,
-      "w": 1.6,
-      "len": 2.05,
-      "throwPat": "grayblue"
-    },
-    {
-      "type": "cushions",
-      "x": 1.0,
-      "z": 6.2,
-      "lvl": "main",
-      "rot": 180,
-      "h": 0.55,
-      "set": [
-        "blue",
-        "navy"
-      ]
-    },
-    {
-      "type": "windowBench",
-      "x": 2.36,
-      "z": 6.33,
-      "lvl": "main",
-      "w": 1.0,
-      "d": 0.5,
-      "h": 0.44
-    },
-    {
-      "type": "cushions",
-      "x": 2.36,
-      "z": 6.3,
-      "lvl": "main",
-      "rot": 180,
-      "h": 0.5,
-      "set": [
-        "blue",
-        "olive"
-      ]
-    },
-    {
-      "type": "vaseFlowers",
-      "x": 2.0,
-      "z": 6.33,
-      "lvl": "main",
-      "h": 0.5
-    },
-    {
-      "type": "painting",
-      "x": 0.62,
-      "z": 6.56,
-      "lvl": "main",
-      "rot": 180,
-      "w": 0.42,
-      "h": 0.55,
-      "style": "warm",
-      "light": true
-    },
-    {
-      "type": "painting",
-      "x": 1.3,
-      "z": 6.56,
-      "lvl": "main",
-      "rot": 180,
-      "w": 0.42,
-      "h": 0.62,
-      "style": "warm",
-      "light": true
-    },
-    {
-      "type": "wardrobe",
-      "x": 0.83,
-      "z": 1.93,
-      "lvl": "main",
-      "rot": -90,
-      "w": 0.6,
-      "d": 1.5
-    },
-    {
-      "type": "rug",
-      "x": 1.9,
-      "z": 4.1,
-      "lvl": "main",
-      "w": 1.1,
-      "d": 1.7
-    },
-    {
-      "type": "shower",
-      "x": 0.55,
-      "z": 0.75,
-      "lvl": "main",
-      "w": 0.9,
-      "d": 1.25
-    },
-    {
-      "type": "wc",
-      "x": 1.55,
-      "z": 0.4,
-      "lvl": "main",
-      "w": 0.42,
-      "d": 0.62
-    },
-    {
-      "type": "vanity",
-      "x": 2.33,
-      "z": 0.33,
-      "lvl": "main",
-      "w": 0.65,
-      "d": 0.48
-    },
-    {
-      "type": "toiletries",
-      "x": 2.2,
-      "z": 0.35,
-      "lvl": "main",
-      "h": 0.92
-    },
-    {
-      "type": "towels",
-      "x": 2.62,
-      "z": 0.35,
-      "lvl": "main",
-      "h": 0.92,
-      "n": 2
-    },
-    {
-      "type": "bathMat",
-      "x": 1.55,
-      "z": 0.95,
-      "lvl": "main"
-    },
-    {
-      "type": "tallUnits",
-      "x": 3.17,
-      "z": 0.38,
-      "lvl": "main",
-      "w": 0.55,
-      "d": 0.62
-    },
-    {
-      "type": "tallUnits",
-      "x": 5.36,
-      "z": 0.37,
-      "lvl": "main",
-      "rot": -90,
-      "w": 0.6,
-      "d": 0.62
-    },
-    {
-      "type": "kitchenRun",
-      "x": 5.36,
-      "z": 1.49,
-      "lvl": "main",
-      "rot": -90,
-      "w": 1.63,
-      "d": 0.62,
-      "sink": -0.45,
-      "hob": 0.35
-    },
-    {
-      "type": "kettle",
-      "x": 5.3,
-      "z": 1.15,
-      "lvl": "main",
-      "h": 0.92
-    },
-    {
-      "type": "cups",
-      "x": 5.4,
-      "z": 1.3,
-      "lvl": "main",
-      "h": 0.92
-    },
-    {
-      "type": "fruitBowl",
-      "x": 5.05,
-      "z": 3.7,
-      "lvl": "main",
-      "h": 0.76
-    },
-    {
-      "type": "sofa",
-      "x": 3.6,
-      "z": 4.15,
-      "lvl": "main",
-      "rot": -90,
-      "w": 1.7,
-      "d": 0.8,
-      "col": "navy"
-    },
-    {
-      "type": "cushions",
-      "x": 3.55,
-      "z": 4.15,
-      "lvl": "main",
-      "rot": 90,
-      "h": 0.52,
-      "set": [
-        "blue",
-        "navy"
-      ]
-    },
-    {
-      "type": "throwBlanket",
-      "x": 3.62,
-      "z": 3.65,
-      "lvl": "main",
-      "rot": 90,
-      "h": 0.48
-    },
-    {
-      "type": "rug",
-      "x": 4.55,
-      "z": 4.15,
-      "lvl": "main",
-      "w": 1.5,
-      "d": 2.1
-    },
-    {
-      "type": "diningTable",
-      "x": 5.22,
-      "z": 3.7,
-      "lvl": "main",
-      "w": 0.9,
-      "d": 0.85,
-      "ends": false
-    },
-    {
-      "type": "sideboard",
-      "x": 3.44,
-      "z": 2.82,
-      "lvl": "main",
-      "rot": -90,
-      "w": 0.9,
-      "d": 0.42
-    },
-    {
-      "type": "tvOnWall",
-      "x": 3.22,
-      "z": 2.82,
-      "lvl": "main",
-      "rot": 90,
-      "w": 1.1
-    },
-    {
-      "type": "books",
-      "x": 3.44,
-      "z": 2.67,
-      "lvl": "main",
-      "h": 0.5,
-      "n": 4,
-      "candle": true
-    },
-    {
-      "type": "painting",
-      "x": 3.2,
-      "z": 4.3,
-      "lvl": "main",
-      "rot": 90,
-      "w": 0.5,
-      "h": 0.62,
-      "style": "grayblue",
-      "light": true
-    },
-    {
-      "type": "painting",
-      "x": 3.2,
-      "z": 4.9,
-      "lvl": "main",
-      "rot": 90,
-      "w": 0.42,
-      "h": 0.55,
-      "style": "grayblue",
-      "light": true
-    },
-    {
-      "type": "painting",
-      "x": 5.65,
-      "z": 3.35,
-      "lvl": "main",
-      "rot": -90,
-      "w": 0.45,
-      "h": 0.58,
-      "style": "grayblue",
-      "light": true
-    },
-    {
-      "type": "painting",
-      "x": 5.65,
-      "z": 3.95,
-      "lvl": "main",
-      "rot": -90,
-      "w": 0.45,
-      "h": 0.5,
-      "style": "grayblue",
-      "light": true
-    },
-    {
-      "type": "lounger",
-      "x": 4.1,
-      "z": 6.3,
-      "lvl": "terrace",
-      "rot": 90,
-      "w": 0.72,
-      "d": 1.95
-    },
-    {
-      "type": "terraceChair",
-      "x": 3.4,
-      "z": 7.2,
-      "lvl": "terrace",
-      "rot": 160
-    },
-    {
-      "type": "terraceTable",
-      "x": 3.95,
-      "z": 6.95,
-      "lvl": "terrace",
-      "w": 0.45,
-      "d": 0.45
-    },
-    {
-      "type": "lantern",
-      "x": 5.6,
-      "z": 7.5,
-      "lvl": "terrace"
-    },
-    {
-      "type": "poolEdge",
-      "x": 0.6,
-      "z": 11.4,
-      "lvl": "terrace",
-      "w": 13.0,
-      "d": 5.6,
-      "cop": 0.4,
-      "drop": 0.22,
-      "deep": 1.25
-    },
-    {
-      "type": "plantMass",
-      "x": -2.4,
-      "z": 12.4,
-      "lvl": "terrace",
-      "w": 3.2,
-      "d": 1.5,
-      "h": 0.5,
-      "crown": 1.0
-    },
-    {
-      "type": "plantMass",
-      "x": 0.6,
-      "z": 15.9,
-      "lvl": "terrace",
-      "w": 20.0,
-      "d": 0.9,
-      "h": 1.35,
-      "crown": 3.0
-    },
-    {
-      "type": "plantMass",
-      "x": -8.3,
-      "z": 11.4,
-      "lvl": "terrace",
-      "rot": 90,
-      "w": 8.0,
-      "d": 0.9,
-      "h": 1.35,
-      "crown": 2.8
-    },
-    {
-      "type": "slatFence",
-      "x": 0.6,
-      "z": 16.7,
-      "lvl": "terrace",
-      "w": 20.0,
-      "h": 2.6
-    }
-  ],
-  "lights": [
-    {
-      "x": 4.4,
-      "z": 4.0,
-      "lvl": "main",
-      "dyn": true
-    },
-    {
-      "x": 4.4,
-      "z": 2.9,
-      "lvl": "main"
-    },
-    {
-      "x": 5.1,
-      "z": 1.2,
-      "lvl": "main"
-    },
-    {
-      "x": 3.6,
-      "z": 0.6,
-      "lvl": "main",
-      "dyn": true
-    },
-    {
-      "x": 1.5,
-      "z": 4.3,
-      "lvl": "main",
-      "dyn": true
-    },
-    {
-      "x": 1.5,
-      "z": 2.4,
-      "lvl": "main"
-    },
-    {
-      "x": 0.6,
-      "z": 6.2,
-      "lvl": "main"
-    },
-    {
-      "x": 1.4,
-      "z": 0.8,
-      "lvl": "main"
-    },
-    {
-      "x": 4.4,
-      "z": 6.2,
-      "lvl": "terrace"
-    }
-  ],
-  "groundZones": [
-    {
-      "x1": -0.07,
-      "z1": -0.07,
-      "x2": 5.82,
-      "z2": 5.25,
-      "y": 0
-    },
-    {
-      "x1": -0.07,
-      "z1": 5.25,
-      "x2": 3.1,
-      "z2": 6.72,
-      "y": 0
-    },
-    {
-      "x1": 3.1,
-      "z1": 5.25,
-      "x2": 5.82,
-      "z2": 7.65,
-      "y": -0.05
-    }
-  ],
-  "roomLabels": [
-    {
-      "x1": 0.07,
-      "z1": 1.62,
-      "x2": 3.03,
-      "z2": 6.58,
-      "y": 0,
-      "name": "Bedroom"
-    },
-    {
-      "x1": 0.07,
-      "z1": 0.07,
-      "x2": 2.73,
-      "z2": 1.48,
-      "y": 0,
-      "name": "Bathroom"
-    },
-    {
-      "x1": 2.87,
-      "z1": 0.07,
-      "x2": 5.68,
-      "z2": 2.6,
-      "y": 0,
-      "name": "Kitchen & Hall"
-    },
-    {
-      "x1": 3.17,
-      "z1": 2.6,
-      "x2": 5.68,
-      "z2": 5.18,
-      "y": 0,
-      "name": "Living Room"
-    },
-    {
-      "x1": 3.1,
-      "z1": 5.25,
-      "x2": 5.82,
-      "z2": 7.65,
-      "y": -0.05,
-      "name": "Pool Terrace"
-    }
-  ],
-  "areas": [
-    {
-      "name": "Bedroom",
-      "m2": 14.7,
-      "x": 1.55,
-      "z": 4.1,
-      "g": 0
-    },
-    {
-      "name": "Bathroom",
-      "m2": 3.8,
-      "x": 1.4,
-      "z": 0.78,
-      "g": 0
-    },
-    {
-      "name": "Kitchen & Hall",
-      "m2": 7.1,
-      "x": 4.3,
-      "z": 1.3,
-      "g": 0
-    },
-    {
-      "name": "Living Room",
-      "m2": 6.5,
-      "x": 4.4,
-      "z": 3.9,
-      "g": 0
-    },
-    {
-      "name": "Pool Terrace",
-      "m2": 5.8,
-      "x": 4.45,
-      "z": 6.45,
-      "g": -0.05
-    }
-  ],
-  "spawns": [
-    {
-      "name": "Entrance",
-      "x": 3.6,
-      "z": 0.8,
-      "yaw": 180,
-      "g": 0
-    },
-    {
-      "name": "Living Room",
-      "x": 4.35,
-      "z": 4.95,
-      "yaw": 180,
-      "g": 0
-    },
-    {
-      "name": "Bedroom",
-      "x": 2.35,
-      "z": 3.2,
-      "yaw": 205,
-      "g": 0
-    },
-    {
-      "name": "Bathroom",
-      "x": 2.25,
-      "z": 0.9,
-      "yaw": 90,
-      "g": 0
-    },
-    {
-      "name": "Pool Terrace",
-      "x": 4.35,
-      "z": 5.65,
-      "yaw": 180,
-      "g": -0.05
-    }
-  ],
-  "photoSpots": [
-    {
-      "file": "1.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Bathroom",
-      "x": 2.7,
-      "z": 1.25,
-      "g": 0,
-      "yaw": 55
-    },
-    {
-      "file": "2.webp",
-      "compare": true,
-      "poseVerified": false,
-      "poseNote": "Re-shot against real geometry and given pitch 40 on 2026-08-19 (plan 4c tasks 1 and 1b): the pool is a basin, the hedge slab that stood between this camera and the water is gone, and the downward tilt this photograph was taken at is now reproduced -- 18.09 -> 16.41 all-spot legacy. poseVerified stays FALSE for a content reason, not a camera one. The photograph's foreground is a wicker lounger, a rattan chair and a side table arranged along the building wall to the camera's RIGHT (north, z < 6.6). The config puts F.bench dead ahead at (3.55, 6.65) and the chair behind-left at (5.25, 5.95), and F.bench reads as a plain white box rather than a lounger. That is a furniture-layout defect of exactly the class plan 4c task 2 owns, and it is routed there rather than fixed with a camera.",
-      "name": "Pool Terrace",
-      "x": 5.45,
-      "z": 6.6,
-      "g": -0.05,
-      "yaw": 108,
-      "pitch": 40
-    },
-    {
-      "file": "3.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Living Room",
-      "x": 4.3,
-      "z": 2.4,
-      "g": 0,
-      "yaw": 175
-    },
-    {
-      "file": "4.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Living Room",
-      "x": 4.2,
-      "z": 2.0,
-      "g": 0,
-      "yaw": 178
-    },
-    {
-      "file": "5.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Kitchen & Hall",
-      "x": 4.85,
-      "z": 4.85,
-      "g": 0,
-      "yaw": 5
-    },
-    {
-      "file": "6.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Bedroom",
-      "x": 2.15,
-      "z": 5.3,
-      "g": 0,
-      "yaw": 172,
-      "pitch": -6
-    },
-    {
-      "file": "7.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Bedroom",
-      "x": 2.55,
-      "z": 5.15,
-      "g": 0,
-      "yaw": 46,
-      "pitch": 13
-    },
-    {
-      "file": "8.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Bathroom",
-      "x": 1.88,
-      "z": 1.2,
-      "g": 0,
-      "yaw": 335
-    },
-    {
-      "file": "9.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Living Room",
-      "x": 4.4,
-      "z": 2.2,
-      "g": 0,
-      "yaw": 180,
-      "vfov": 65
-    },
-    {
-      "file": "10.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Pool Terrace",
-      "x": 4.6,
-      "z": 7.3,
-      "g": -0.05,
-      "yaw": 128,
-      "pitch": 22,
-      "poseNote": "Verified 2026-08-19 (plan 4c tasks 1 and 1b). Two separate changes, measured separately. Task 1 built the pool as a basin -- coping band, submerged wall, rippled water 0.31 m below the deck -- with a planting mass, alpha-cut canopy fronds, a boundary fence and a gradient sky, and removed the hedge cube that stood inside the water. That alone moved this spot the WRONG way, 25.35 -> 26.37, because the bands were now in the right ORDER and the wrong PLACE. Task 1b found why: measure.js pinned c.pitch = 0, and this photograph is shot looking down -- it puts the pool's far edge at 0.41 of frame height, above the horizon, which a level camera cannot produce. pitch 22 was derived by sweeping and matching the water band's measured rows (render 0.374-0.780 against the photograph's 0.392-0.763), never by ΔE. With it the spot reads 13.32, from 25.35 at the branch point. Props still absent and deliberately not blocking the flag: the hanging chair, the fountain, and the foreground table of fruit."
-    },
-    {
-      "file": "11.webp",
-      "compare": true,
-      "poseVerified": true,
-      "name": "Bedroom",
-      "x": 1.35,
-      "z": 3.9,
-      "g": 0,
-      "yaw": 178,
-      "pitch": -6
-    }
-  ],
-  "start": {
-    "x": 3.6,
-    "z": 0.75,
-    "yaw": 178
-  },
-  "meta": {
-    "id": "serenity",
-    "title": "Serenity Pool Access",
-    "description": "One-bedroom pool-access apartment, 45 m²",
-    "photoBase": "photos/serenity/",
-    "photoFovLong": 120
+ "mainFloorY": 0,
+ "mainCeilH": 2.6,
+ "terraceY": -0.05,
+ "exposure": 0.327,
+ "sky": {
+  "top": "#9fd6ff",
+  "bottom": "#dff2ff",
+  "fog": "#dff2ff",
+  "clouds": 0.55
+ },
+ "palette": {
+  "floorWoodBase": "#c6bcab",
+  "floorWood": "#fdffff",
+  "wall": "#fffffc",
+  "sofa": "#1d3550",
+  "tileGray": "#cdd2d2",
+  "stoneTile": "#dbd6cd",
+  "counter": "#fcfff6",
+  "wicker": "#bcb0a0",
+  "poolCoping": "#d5d1c8"
+ },
+ "roomCenter": {
+  "main": {
+   "x": 2.9,
+   "z": 3.3
   }
+ },
+ "walls": [
+  {
+   "lvl": "main",
+   "x1": 0,
+   "z1": 0,
+   "x2": 0,
+   "z2": 6.65,
+   "h": 2.6,
+   "ext": true
+  },
+  {
+   "lvl": "main",
+   "x1": 0,
+   "z1": 0,
+   "x2": 5.75,
+   "z2": 0,
+   "h": 2.6,
+   "ext": true,
+   "openings": [
+    {
+     "at": 4.05,
+     "w": 0.85,
+     "type": "door",
+     "entrance": true,
+     "leafMat": "gray"
+    }
+   ]
+  },
+  {
+   "lvl": "main",
+   "x1": 5.75,
+   "z1": 0,
+   "x2": 5.75,
+   "z2": 5.25,
+   "h": 2.6,
+   "ext": true
+  },
+  {
+   "lvl": "main",
+   "x1": 0,
+   "z1": 6.65,
+   "x2": 3.1,
+   "z2": 6.65,
+   "h": 2.6,
+   "ext": true,
+   "openings": [
+    {
+     "at": 1.45,
+     "w": 1.2,
+     "type": "win",
+     "curtain": "gray",
+     "sheer": true
+    }
+   ]
+  },
+  {
+   "lvl": "main",
+   "x1": 3.1,
+   "z1": 5.25,
+   "x2": 5.75,
+   "z2": 5.25,
+   "h": 2.6,
+   "ext": true,
+   "openings": [
+    {
+     "at": 0.25,
+     "w": 1.8,
+     "type": "door",
+     "terrace": true,
+     "daylight": true,
+     "curtain": "gray",
+     "sheer": true
+    }
+   ]
+  },
+  {
+   "lvl": "main",
+   "x1": 3.1,
+   "z1": 6.75,
+   "x2": 3.1,
+   "z2": 1.55,
+   "h": 2.6,
+   "openings": [
+    {
+     "at": 4.15,
+     "w": 1.05,
+     "type": "pass",
+     "slider": true,
+     "panelMat": "slate"
+    }
+   ]
+  },
+  {
+   "lvl": "main",
+   "x1": 5.75,
+   "z1": 5.25,
+   "x2": 5.75,
+   "z2": 6.95,
+   "h": 2.6,
+   "ext": true
+  },
+  {
+   "lvl": "main",
+   "x1": 0,
+   "z1": 1.55,
+   "x2": 3.1,
+   "z2": 1.55,
+   "h": 2.6,
+   "openings": [
+    {
+     "at": 1.6,
+     "w": 0.8,
+     "type": "door"
+    }
+   ]
+  },
+  {
+   "lvl": "main",
+   "x1": 2.8,
+   "z1": 0,
+   "x2": 2.8,
+   "z2": 1.55,
+   "h": 2.6,
+   "openings": [
+    {
+     "at": 0.65,
+     "w": 0.85,
+     "type": "door"
+    }
+   ]
+  }
+ ],
+ "floors": {
+  "main": [
+   {
+    "x1": -0.07,
+    "z1": -0.07,
+    "x2": 2.8,
+    "z2": 1.55,
+    "mat": "tileGray"
+   },
+   {
+    "x1": 2.8,
+    "z1": -0.07,
+    "x2": 3.1,
+    "z2": 1.55,
+    "mat": "wood"
+   },
+   {
+    "x1": -0.07,
+    "z1": 1.55,
+    "x2": 3.1,
+    "z2": 6.72,
+    "mat": "wood"
+   },
+   {
+    "x1": 3.1,
+    "z1": -0.07,
+    "x2": 5.82,
+    "z2": 5.32,
+    "mat": "wood"
+   }
+  ],
+  "terrace": [
+   {
+    "x1": 3.03,
+    "z1": 5.32,
+    "x2": 5.82,
+    "z2": 7.65,
+    "mat": "tileGray"
+   }
+  ]
+ },
+ "mainCeil": [
+  {
+   "x1": -0.07,
+   "z1": -0.07,
+   "x2": 2.8,
+   "z2": 1.55
+  },
+  {
+   "x1": 2.8,
+   "z1": -0.07,
+   "x2": 3.1,
+   "z2": 1.55
+  },
+  {
+   "x1": -0.07,
+   "z1": 1.55,
+   "x2": 3.1,
+   "z2": 6.72
+  },
+  {
+   "x1": 3.1,
+   "z1": -0.07,
+   "x2": 5.82,
+   "z2": 5.32
+  },
+  {
+   "x1": 3.03,
+   "z1": 5.32,
+   "x2": 5.82,
+   "z2": 7.58
+  }
+ ],
+ "surroundings": [
+  {
+   "x": 0.6,
+   "z": 7.7,
+   "w": 20.0,
+   "d": 1.1,
+   "mat": "stone",
+   "y": -0.17,
+   "h": 0.12
+  },
+  {
+   "x": 0.6,
+   "z": 14.6,
+   "w": 20.0,
+   "d": 0.9,
+   "mat": "stone",
+   "y": -0.17,
+   "h": 0.12
+  },
+  {
+   "x": -7.1,
+   "z": 11.4,
+   "w": 1.2,
+   "d": 6.4,
+   "mat": "stone",
+   "y": -0.17,
+   "h": 0.12
+  },
+  {
+   "x": 8.3,
+   "z": 11.4,
+   "w": 1.2,
+   "d": 6.4,
+   "mat": "stone",
+   "y": -0.17,
+   "h": 0.12
+  },
+  {
+   "x": 8.1,
+   "z": 6.4,
+   "w": 4.2,
+   "d": 2.8,
+   "h": 2.7,
+   "y": -0.05,
+   "mat": "bldg2",
+   "occ": true
+  },
+  {
+   "x": -9.5,
+   "z": 4.2,
+   "w": 4.2,
+   "d": 2.8,
+   "h": 2.7,
+   "y": -0.05,
+   "mat": "bldg2",
+   "occ": true
+  }
+ ],
+ "furniture": [
+  {
+   "type": "bed",
+   "x": 0.83,
+   "z": 5.45,
+   "lvl": "main",
+   "rot": 180,
+   "w": 1.5,
+   "len": 2.0,
+   "head": "gray",
+   "headW": 1.62,
+   "headH": 0.92,
+   "throw": "petrol",
+   "scatter": true
+  },
+  {
+   "type": "cushions",
+   "x": 0.83,
+   "z": 6.28,
+   "lvl": "main",
+   "rot": 180,
+   "h": 0.52,
+   "set": [
+    "white",
+    "white"
+   ],
+   "size": 0.44
+  },
+  {
+   "type": "macrame",
+   "x": 0.5,
+   "z": 6.56,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.26,
+   "h": 0.44,
+   "y": 1.88
+  },
+  {
+   "type": "macrame",
+   "x": 1.16,
+   "z": 6.56,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.3,
+   "h": 0.5,
+   "y": 1.93
+  },
+  {
+   "type": "windowBench",
+   "x": 2.05,
+   "z": 6.33,
+   "lvl": "main",
+   "w": 1.18,
+   "d": 0.55,
+   "h": 0.42,
+   "bolster": true
+  },
+  {
+   "type": "cushions",
+   "x": 2.05,
+   "z": 6.26,
+   "lvl": "main",
+   "rot": 180,
+   "h": 0.5,
+   "set": [
+    "wave",
+    "rust",
+    "white"
+   ],
+   "size": 0.34
+  },
+  {
+   "type": "sideTable",
+   "x": 2.86,
+   "z": 6.3,
+   "lvl": "main"
+  },
+  {
+   "type": "acUnit",
+   "x": 2.05,
+   "z": 6.55,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.86,
+   "y": 2.22
+  },
+  {
+   "type": "wardrobe",
+   "x": 0.83,
+   "z": 1.93,
+   "lvl": "main",
+   "rot": -90,
+   "w": 0.6,
+   "d": 1.32,
+   "h": 2.42,
+   "sliding": true,
+   "mirror": true
+  },
+  {
+   "type": "floatShelf",
+   "x": 1.5,
+   "z": 1.72,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.3,
+   "d": 0.26,
+   "y": 0.62,
+   "dish": true
+  },
+  {
+   "type": "rug",
+   "x": 1.95,
+   "z": 4.3,
+   "lvl": "main",
+   "w": 1.05,
+   "d": 1.6
+  },
+  {
+   "type": "wallTile",
+   "x": 0.09,
+   "z": 0.775,
+   "lvl": "main",
+   "rot": 90,
+   "w": 1.41,
+   "h": 2.6
+  },
+  {
+   "type": "wallTile",
+   "x": 1.4,
+   "z": 0.09,
+   "lvl": "main",
+   "rot": 0,
+   "w": 2.66,
+   "h": 2.6
+  },
+  {
+   "type": "wallTile",
+   "x": 2.71,
+   "z": 0.36,
+   "lvl": "main",
+   "rot": -90,
+   "w": 0.58,
+   "h": 2.6
+  },
+  {
+   "type": "wallTile",
+   "x": 0.835,
+   "z": 1.46,
+   "lvl": "main",
+   "rot": 180,
+   "w": 1.53,
+   "h": 2.6
+  },
+  {
+   "type": "wallTile",
+   "x": 2.565,
+   "z": 1.46,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.33,
+   "h": 2.6
+  },
+  {
+   "type": "shower",
+   "x": 0.55,
+   "z": 0.75,
+   "lvl": "main",
+   "w": 0.9,
+   "d": 1.25,
+   "divider": "e",
+   "valve": true,
+   "handheld": true,
+   "rain": true,
+   "niche": true
+  },
+  {
+   "type": "wc",
+   "x": 1.55,
+   "z": 0.4,
+   "lvl": "main",
+   "w": 0.42,
+   "d": 0.62
+  },
+  {
+   "type": "vanity",
+   "x": 2.33,
+   "z": 0.35,
+   "lvl": "main",
+   "w": 0.66,
+   "d": 0.46,
+   "wood": "walnut",
+   "open": true,
+   "mirror": "none",
+   "y": 0.5
+  },
+  {
+   "type": "mirrorRound",
+   "x": 2.33,
+   "z": 0.09,
+   "lvl": "main",
+   "rot": 0,
+   "r": 0.25,
+   "y": 1.56
+  },
+  {
+   "type": "towelHook",
+   "x": 1.66,
+   "z": 0.09,
+   "lvl": "main",
+   "rot": 0,
+   "y": 1.44,
+   "len": 0.58
+  },
+  {
+   "type": "toiletries",
+   "x": 2.2,
+   "z": 0.36,
+   "lvl": "main",
+   "h": 0.99
+  },
+  {
+   "type": "bathMat",
+   "x": 1.55,
+   "z": 0.98,
+   "lvl": "main"
+  },
+  {
+   "type": "fridge",
+   "x": 3.52,
+   "z": 0.42,
+   "lvl": "main",
+   "w": 0.62,
+   "d": 0.62,
+   "h": 1.42
+  },
+  {
+   "type": "kitchenRun",
+   "x": 5.36,
+   "z": 1.25,
+   "lvl": "main",
+   "rot": -90,
+   "w": 1.15,
+   "d": 0.62,
+   "sink": -0.3,
+   "hob": 0.28,
+   "cab": "white",
+   "upper": "white",
+   "splash": "mosaic",
+   "noShelf": true
+  },
+  {
+   "type": "microwave",
+   "x": 5.3,
+   "z": 0.8,
+   "lvl": "main",
+   "rot": -90,
+   "w": 0.46,
+   "h": 0.27,
+   "d": 0.34,
+   "y": 1.42
+  },
+  {
+   "type": "washer",
+   "x": 5.36,
+   "z": 2.13,
+   "lvl": "main",
+   "rot": -90,
+   "w": 0.6,
+   "d": 0.6
+  },
+  {
+   "type": "kettle",
+   "x": 5.3,
+   "z": 1.05,
+   "lvl": "main",
+   "h": 0.92
+  },
+  {
+   "type": "cups",
+   "x": 5.32,
+   "z": 1.45,
+   "lvl": "main",
+   "h": 0.92
+  },
+  {
+   "type": "sofa",
+   "x": 5.28,
+   "z": 4.5,
+   "lvl": "main",
+   "rot": 90,
+   "w": 1.3,
+   "d": 0.8,
+   "col": "navy",
+   "style": "sofabed"
+  },
+  {
+   "type": "cushions",
+   "x": 5.14,
+   "z": 4.5,
+   "lvl": "main",
+   "rot": -90,
+   "h": 0.5,
+   "set": [
+    "white",
+    "wave"
+   ],
+   "size": 0.34
+  },
+  {
+   "type": "artSet",
+   "x": 5.655,
+   "z": 4.78,
+   "lvl": "main",
+   "rot": -90,
+   "n": 3,
+   "w": 0.33,
+   "h": 0.42,
+   "gap": 0.03,
+   "y": 1.8
+  },
+  {
+   "type": "acUnit",
+   "x": 4.8,
+   "z": 5.14,
+   "lvl": "main",
+   "rot": 180,
+   "w": 0.86,
+   "y": 2.22
+  },
+  {
+   "type": "glazing",
+   "x": 4.92,
+   "z": 5.25,
+   "lvl": "main",
+   "rot": 0,
+   "w": 0.44,
+   "h": 2.3,
+   "panes": 1
+  },
+  {
+   "type": "diningTable",
+   "x": 5.05,
+   "z": 3.15,
+   "lvl": "main",
+   "w": 0.9,
+   "d": 0.82,
+   "ends": false,
+   "chairs": "shell",
+   "set": "mats"
+  },
+  {
+   "type": "rug",
+   "x": 4.05,
+   "z": 4.55,
+   "lvl": "main",
+   "w": 1.0,
+   "d": 1.45
+  },
+  {
+   "type": "sideboard",
+   "x": 3.42,
+   "z": 3.35,
+   "lvl": "main",
+   "rot": -90,
+   "w": 0.9,
+   "d": 0.42
+  },
+  {
+   "type": "books",
+   "x": 3.42,
+   "z": 3.2,
+   "lvl": "main",
+   "h": 0.5,
+   "n": 4,
+   "candle": true
+  },
+  {
+   "type": "fruitBowl",
+   "x": 4.3,
+   "z": 3.05,
+   "lvl": "main",
+   "h": 0.76
+  },
+  {
+   "type": "lounger",
+   "x": 4.95,
+   "z": 6.05,
+   "lvl": "terrace",
+   "rot": 0,
+   "w": 0.74,
+   "d": 1.35,
+   "mat": "wicker",
+   "recline": 0.55
+  },
+  {
+   "type": "terraceChair",
+   "x": 3.6,
+   "z": 6.9,
+   "lvl": "terrace",
+   "rot": 205,
+   "style": "sling"
+  },
+  {
+   "type": "terraceTable",
+   "x": 5.1,
+   "z": 7.3,
+   "lvl": "terrace",
+   "w": 0.44,
+   "d": 0.44,
+   "mat": "wicker"
+  },
+  {
+   "type": "poolEdge",
+   "x": 0.6,
+   "z": 11.4,
+   "lvl": "terrace",
+   "w": 13.0,
+   "d": 5.6,
+   "cop": 0.4,
+   "drop": 0.22,
+   "deep": 1.25,
+   "step": 0.9
+  },
+  {
+   "type": "poolIsland",
+   "x": -1.3,
+   "z": 12.1,
+   "lvl": "terrace",
+   "r": 1.15,
+   "y": -0.22,
+   "bushes": 6
+  },
+  {
+   "type": "hangingChair",
+   "x": -3.6,
+   "z": 13.2,
+   "lvl": "terrace",
+   "rot": 110,
+   "h": 2.55,
+   "reach": 1.05
+  },
+  {
+   "type": "palm",
+   "x": -5.8,
+   "z": 14.6,
+   "lvl": "terrace",
+   "h": 5.4,
+   "frond": 2.4,
+   "fronds": 9,
+   "lean": 0.1
+  },
+  {
+   "type": "palm",
+   "x": -2.7,
+   "z": 14.9,
+   "lvl": "terrace",
+   "h": 6.2,
+   "frond": 2.7,
+   "fronds": 10,
+   "lean": -0.06
+  },
+  {
+   "type": "palm",
+   "x": 0.9,
+   "z": 14.7,
+   "lvl": "terrace",
+   "h": 4.8,
+   "frond": 2.2,
+   "fronds": 9,
+   "lean": 0.14
+  },
+  {
+   "type": "palm",
+   "x": 3.9,
+   "z": 14.95,
+   "lvl": "terrace",
+   "h": 5.9,
+   "frond": 2.6,
+   "fronds": 10,
+   "lean": -0.11
+  },
+  {
+   "type": "palm",
+   "x": 6.6,
+   "z": 14.55,
+   "lvl": "terrace",
+   "h": 5.1,
+   "frond": 2.3,
+   "fronds": 9,
+   "lean": 0.08
+  },
+  {
+   "type": "palm",
+   "x": -8.6,
+   "z": 13.7,
+   "lvl": "terrace",
+   "h": 4.6,
+   "frond": 2.1,
+   "fronds": 8,
+   "lean": 0.18
+  },
+  {
+   "type": "plantMass",
+   "x": -2.4,
+   "z": 12.4,
+   "lvl": "terrace",
+   "w": 3.2,
+   "d": 1.5,
+   "h": 0.5,
+   "crown": 1.0
+  },
+  {
+   "type": "plantMass",
+   "x": 0.6,
+   "z": 15.5,
+   "lvl": "terrace",
+   "w": 20.0,
+   "d": 0.9,
+   "h": 1.7,
+   "crown": 2.8
+  },
+  {
+   "type": "plantMass",
+   "x": -8.3,
+   "z": 11.4,
+   "lvl": "terrace",
+   "rot": 90,
+   "w": 8.0,
+   "d": 0.9,
+   "h": 1.6,
+   "crown": 2.6
+  },
+  {
+   "type": "slatFence",
+   "x": 0.6,
+   "z": 16.3,
+   "lvl": "terrace",
+   "w": 20.0,
+   "h": 2.4
+  },
+  {
+   "type": "palm",
+   "x": -7.4,
+   "z": 16.0,
+   "lvl": "terrace",
+   "h": 6.6,
+   "frond": 2.9,
+   "fronds": 10,
+   "lean": -0.09
+  },
+  {
+   "type": "palm",
+   "x": -0.6,
+   "z": 16.2,
+   "lvl": "terrace",
+   "h": 7.1,
+   "frond": 3.1,
+   "fronds": 11,
+   "lean": 0.05
+  },
+  {
+   "type": "palm",
+   "x": 5.1,
+   "z": 16.1,
+   "lvl": "terrace",
+   "h": 6.3,
+   "frond": 2.8,
+   "fronds": 10,
+   "lean": -0.13
+  },
+  {
+   "type": "palm",
+   "x": 2.2,
+   "z": 13.8,
+   "lvl": "terrace",
+   "h": 4.2,
+   "frond": 2.0,
+   "fronds": 8,
+   "lean": 0.16
+  }
+ ],
+ "lights": [
+  {
+   "x": 4.4,
+   "z": 4.0,
+   "lvl": "main",
+   "dyn": true
+  },
+  {
+   "x": 4.4,
+   "z": 2.9,
+   "lvl": "main"
+  },
+  {
+   "x": 5.1,
+   "z": 1.2,
+   "lvl": "main"
+  },
+  {
+   "x": 3.6,
+   "z": 0.6,
+   "lvl": "main",
+   "dyn": true
+  },
+  {
+   "x": 1.5,
+   "z": 4.3,
+   "lvl": "main",
+   "dyn": true
+  },
+  {
+   "x": 1.5,
+   "z": 2.4,
+   "lvl": "main"
+  },
+  {
+   "x": 0.6,
+   "z": 6.2,
+   "lvl": "main"
+  },
+  {
+   "x": 1.4,
+   "z": 0.8,
+   "lvl": "main"
+  },
+  {
+   "x": 4.4,
+   "z": 6.2,
+   "lvl": "terrace"
+  }
+ ],
+ "groundZones": [
+  {
+   "x1": -0.07,
+   "z1": -0.07,
+   "x2": 5.82,
+   "z2": 5.25,
+   "y": 0
+  },
+  {
+   "x1": -0.07,
+   "z1": 5.25,
+   "x2": 3.1,
+   "z2": 6.72,
+   "y": 0
+  },
+  {
+   "x1": 3.1,
+   "z1": 5.25,
+   "x2": 5.82,
+   "z2": 7.65,
+   "y": -0.05
+  }
+ ],
+ "roomLabels": [
+  {
+   "x1": 0.07,
+   "z1": 1.62,
+   "x2": 3.03,
+   "z2": 6.58,
+   "y": 0,
+   "name": "Bedroom"
+  },
+  {
+   "x1": 0.07,
+   "z1": 0.07,
+   "x2": 2.73,
+   "z2": 1.48,
+   "y": 0,
+   "name": "Bathroom"
+  },
+  {
+   "x1": 2.87,
+   "z1": 0.07,
+   "x2": 5.68,
+   "z2": 2.6,
+   "y": 0,
+   "name": "Kitchen & Hall"
+  },
+  {
+   "x1": 3.17,
+   "z1": 2.6,
+   "x2": 5.68,
+   "z2": 5.18,
+   "y": 0,
+   "name": "Living Room"
+  },
+  {
+   "x1": 3.1,
+   "z1": 5.25,
+   "x2": 5.82,
+   "z2": 7.65,
+   "y": -0.05,
+   "name": "Pool Terrace"
+  }
+ ],
+ "areas": [
+  {
+   "name": "Bedroom",
+   "m2": 14.7,
+   "x": 1.55,
+   "z": 4.1,
+   "g": 0
+  },
+  {
+   "name": "Bathroom",
+   "m2": 3.8,
+   "x": 1.4,
+   "z": 0.78,
+   "g": 0
+  },
+  {
+   "name": "Kitchen & Hall",
+   "m2": 7.1,
+   "x": 4.3,
+   "z": 1.3,
+   "g": 0
+  },
+  {
+   "name": "Living Room",
+   "m2": 6.5,
+   "x": 4.4,
+   "z": 3.9,
+   "g": 0
+  },
+  {
+   "name": "Pool Terrace",
+   "m2": 5.8,
+   "x": 4.45,
+   "z": 6.45,
+   "g": -0.05
+  }
+ ],
+ "spawns": [
+  {
+   "name": "Entrance",
+   "x": 4.45,
+   "z": 1.0,
+   "yaw": 180,
+   "g": 0
+  },
+  {
+   "name": "Living Room",
+   "x": 4.35,
+   "z": 4.95,
+   "yaw": 180,
+   "g": 0
+  },
+  {
+   "name": "Bedroom",
+   "x": 2.35,
+   "z": 3.2,
+   "yaw": 205,
+   "g": 0
+  },
+  {
+   "name": "Bathroom",
+   "x": 2.25,
+   "z": 0.9,
+   "yaw": 90,
+   "g": 0
+  },
+  {
+   "name": "Pool Terrace",
+   "x": 4.35,
+   "z": 5.65,
+   "yaw": 180,
+   "g": -0.05
+  }
+ ],
+ "photoSpots": [
+  {
+   "file": "1.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Bathroom",
+   "x": 2.7,
+   "z": 1.25,
+   "g": 0,
+   "yaw": 55
+  },
+  {
+   "file": "2.webp",
+   "compare": true,
+   "poseVerified": false,
+   "poseNote": "Camera restored to its recorded (5.45, 6.6) in the serenity photorealism pass. The terrace is now arranged the way this spot's own earlier note described the photograph -- wicker lounger, sling chair and side table along the building wall to the camera's north -- with F.lounger rendering as a woven sunbed and F.terraceChair as the folding teak-and-cord lounge chair the photograph actually shows. poseVerified stays FALSE: the photograph's foreground table of fruit and its two glasses are still absent.",
+   "name": "Pool Terrace",
+   "x": 5.45,
+   "z": 6.6,
+   "g": -0.05,
+   "yaw": 108,
+   "pitch": 40
+  },
+  {
+   "file": "3.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Living Room",
+   "x": 4.3,
+   "z": 2.4,
+   "g": 0,
+   "yaw": 175
+  },
+  {
+   "file": "4.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Living Room",
+   "x": 4.2,
+   "z": 2.0,
+   "g": 0,
+   "yaw": 178
+  },
+  {
+   "file": "5.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Kitchen & Hall",
+   "x": 4.85,
+   "z": 4.85,
+   "g": 0,
+   "yaw": 5
+  },
+  {
+   "file": "6.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Bedroom",
+   "x": 2.15,
+   "z": 5.3,
+   "g": 0,
+   "yaw": 172,
+   "pitch": -6
+  },
+  {
+   "file": "7.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Bedroom",
+   "x": 2.55,
+   "z": 5.15,
+   "g": 0,
+   "yaw": 46,
+   "pitch": 13
+  },
+  {
+   "file": "8.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Bathroom",
+   "x": 1.88,
+   "z": 1.2,
+   "g": 0,
+   "yaw": 335
+  },
+  {
+   "file": "9.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Living Room",
+   "x": 4.4,
+   "z": 2.2,
+   "g": 0,
+   "yaw": 180,
+   "vfov": 65
+  },
+  {
+   "file": "10.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Pool Terrace",
+   "x": 4.6,
+   "z": 7.3,
+   "g": -0.05,
+   "yaw": 128,
+   "pitch": 22,
+   "poseNote": "Verified 2026-08-19 (plan 4c tasks 1 and 1b). Two separate changes, measured separately. Task 1 built the pool as a basin -- coping band, submerged wall, rippled water 0.31 m below the deck -- with a planting mass, alpha-cut canopy fronds, a boundary fence and a gradient sky, and removed the hedge cube that stood inside the water. That alone moved this spot the WRONG way, 25.35 -> 26.37, because the bands were now in the right ORDER and the wrong PLACE. Task 1b found why: measure.js pinned c.pitch = 0, and this photograph is shot looking down -- it puts the pool's far edge at 0.41 of frame height, above the horizon, which a level camera cannot produce. pitch 22 was derived by sweeping and matching the water band's measured rows (render 0.374-0.780 against the photograph's 0.392-0.763), never by ΔE. With it the spot reads 13.32, from 25.35 at the branch point. Props still absent and deliberately not blocking the flag: the hanging chair, the fountain, and the foreground table of fruit."
+  },
+  {
+   "file": "11.webp",
+   "compare": true,
+   "poseVerified": true,
+   "name": "Bedroom",
+   "x": 1.35,
+   "z": 3.9,
+   "g": 0,
+   "yaw": 178,
+   "pitch": -6
+  }
+ ],
+ "start": {
+  "x": 4.45,
+  "z": 0.95,
+  "yaw": 178
+ },
+ "meta": {
+  "id": "serenity",
+  "title": "Serenity Pool Access",
+  "description": "One-bedroom pool-access apartment, 45 m²",
+  "photoBase": "photos/serenity/",
+  "photoFovLong": 85.0
+ }
 }
