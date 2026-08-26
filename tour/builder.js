@@ -319,6 +319,17 @@ const Builder = (() => {
             cur.rotation.y = -ang;
             scene.add(cur);
           }
+          // Opt-in sheer layer across the full opening (`sheer: true`).
+          // Every serenity window and the terrace slider carry a white
+          // voile INSIDE the drapes; without it the opening reads as a
+          // bare hole between two parked panels. Absent -> unchanged.
+          if (o.sheer) {
+            const sh = wavyPlane(o.w + 0.12, topH - 0.18, M.sheer, 9);
+            sh.position.set(cx - Math.sin(ang) * 0.15, baseY + (topH - 0.18) / 2 + 0.06,
+              cz - Math.cos(ang) * 0.15);
+            sh.rotation.y = -ang;
+            scene.add(sh);
+          }
           // curtain rod, clamped so it never pokes past the wall ends
           const rodMid = (p.from + p.to) / 2;
           const rodLen = 2 * Math.min((o.w + 1.5) / 2, rodMid - 0.05, L - rodMid - 0.05);
@@ -358,7 +369,10 @@ const Builder = (() => {
           }
           if (o.entrance) {
             // the entrance door stays closed
-            const leaf = new T.Mesh(new T.BoxGeometry(o.w - 0.08, hh - 0.05, 0.06), o.white ? M.white : M.doorWood);
+            // `leafMat: 'gray'` (opt-in): serenity's front door is a grey
+            // wood-look leaf in a grey frame (5.webp), not honey oak.
+            const leafMat = o.white ? M.white : (o.leafMat === 'gray' ? M.doorGray : M.doorWood);
+            const leaf = new T.Mesh(new T.BoxGeometry(o.w - 0.08, hh - 0.05, 0.06), leafMat);
             leaf.position.set(cx, baseY + hh / 2, cz);
             leaf.rotation.y = -ang;
             scene.add(leaf);
@@ -386,7 +400,11 @@ const Builder = (() => {
           const sx = w.x1 + ux * park;
           const sz = w.z1 + uz * park;
           const ph = (o.type === 'door' ? DOOR_H : PASS_H) + 0.2;
-          const panel = new T.Mesh(new T.BoxGeometry(o.w * 0.8, ph, 0.05), M.ashV);
+          // `panelMat: 'slate'` (opt-in) is the dark grey leaf 4.webp and
+          // 7.webp both show parked beside the bedroom pass; absent -> the
+          // pale ash panel every other slider has always used.
+          const panelMat = o.panelMat === 'slate' ? M.doorSlate : M.ashV;
+          const panel = new T.Mesh(new T.BoxGeometry(o.w * 0.8, ph, 0.05), panelMat);
           panel.position.set(sx - Math.sin(ang) * (WALL_TH / 2 + 0.06), baseY + ph / 2, sz - Math.cos(ang) * (WALL_TH / 2 + 0.06));
           panel.rotation.y = -ang;
           scene.add(panel);
@@ -814,12 +832,22 @@ const Builder = (() => {
 
   F.cushions = (o, g) => {
     const y = o.h || 0.5;
+    // `rust`, `white` and `wave` are new keys, not replacements: the lookup
+    // has always fallen back to M.gray for an unknown name, so no existing
+    // config's cushions change. 6.webp's window seat is a wave-patterned
+    // blue, a terracotta and a white one; the sofa carries a white and a
+    // teal-wave accent over two navy backs.
     const mats = {
       yellow: M.yellow, navy: M.navy, olive: M.olive, blue: M.lightBlue,
-      dots: M.gray, sage: M.sage, pink: M.pink
+      dots: M.gray, sage: M.sage, pink: M.pink,
+      rust: M.rust, white: M.bedding, wave: M.rugGB
     };
+    // `size` is opt-in; with the key absent every literal below is the one
+    // this constructor has always used, so no existing caller moves at all.
+    const cs = o.size || 0.4;
+    const x0 = o.size ? -(cs * 0.625) : -0.25, dx = o.size ? cs * 1.05 : 0.42;
     (o.set || ['yellow', 'navy']).forEach((c, i) => {
-      const p = box(0.4, 0.4, 0.12, mats[c] || M.gray, -0.25 + i * 0.42, y + 0.2, 0, g);
+      const p = box(cs, cs, cs * 0.3, mats[c] || M.gray, x0 + i * dx, y + (o.size ? cs / 2 : 0.2), 0, g);
       p.rotation.x = -0.18;
       p.rotation.y = (i % 2 ? -1 : 1) * 0.12;
     });
@@ -871,17 +899,45 @@ const Builder = (() => {
 
   F.bed = (o, g) => {
     const L = o.len, W = o.w;
-    // headboard
-    const quilt = o.head === 'navy' ? M.navyQuilt : M.beigeQuilt;
-    box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
-    box(W, 0.32, L, M.gray, 0, 0.16, 0, g);          // base
+    // headboard. `head: 'gray'` (opt-in) is a PLAIN upholstered panel --
+    // 7.webp and 11.webp both show a soft grey slab with a rounded top and
+    // no quilting -- sized by the optional `headW`/`headH` instead of the
+    // fixed W+0.5 x 1.35 the quilted version always used. Absent -> the
+    // quilted headboard every other caller renders, unchanged.
+    if (o.head === 'gray') {
+      const hw = o.headW || W + 0.16, hh = o.headH || 0.95;
+      box(hw, hh, 0.14, M.knit, 0, 0.30 + hh / 2, -L / 2 - 0.07, g);
+      const cap = cyl(0.075, 0.075, hw, M.knit, 0, 0.30 + hh, -L / 2 - 0.07, g, 12);
+      cap.rotation.z = Math.PI / 2;
+    } else {
+      const quilt = o.head === 'navy' ? M.navyQuilt : M.beigeQuilt;
+      box(W + 0.5, 1.35, 0.12, quilt, 0, 0.675, -L / 2 - 0.06, g);
+    }
+    box(W, 0.32, L, o.head === 'gray' ? M.knit : M.gray, 0, 0.16, 0, g); // base
     box(W - 0.06, 0.22, L - 0.06, M.bedding, 0, 0.43, 0, g); // mattress + linen
-    const bl = o.throwPat ? Materials.throwMat(o.throwPat) : M.blanket;
-    box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g); // throw
-    if (o.throwPat) {
+    // `throw: 'blue'` (opt-in) is a plain petrol throw folded across the
+    // foot, which is what all three bedroom photographs show; throwPat's
+    // patterned mats stay the default for every existing caller.
+    const bl = o.throw === 'petrol' ? M.petrol : o.throw === 'blue' ? M.blueFab
+      : (o.throwPat ? Materials.throwMat(o.throwPat) : M.blanket);
+    // A plain throw covers the foot third (7.webp); the patterned mats keep
+    // the foot half and the exact centre they have always had, so every
+    // existing caller is unchanged to the millimetre.
+    if (o.throw) box(W - 0.06, 0.08, L * 0.34, bl, 0, 0.55, L * 0.30, g);
+    else box(W - 0.06, 0.08, L * 0.45, bl, 0, 0.55, L * 0.22, g);            // throw
+    if (o.throwPat || o.throw) {
       // draping throw edges
       const drape = box(W - 0.04, 0.42, 0.05, bl, 0, 0.32, L * 0.445, g);
       drape.rotation.x = 0.06;
+    }
+    // Opt-in bolster cushions in front of the pillows (11.webp: three
+    // striped scatter cushions stood up against the headboard).
+    if (o.scatter) {
+      for (let i = 0; i < 3; i++) {
+        const sc = box(0.38, 0.36, 0.13, i === 1 ? M.blueFab : M.rugGB,
+          (i - 1) * 0.40, 0.72, -L / 2 + 0.42, g);
+        sc.rotation.x = -0.30;
+      }
     }
     for (const s of [-1, 1]) {
       const p = new T.Mesh(new T.BoxGeometry(W / 2 - 0.12, 0.12, 0.4), M.bedding);
@@ -901,12 +957,45 @@ const Builder = (() => {
   };
 
   F.wardrobe = (o, g) => {
-    box(o.w, 2.5, o.d, M.ashV, 0, 1.25, 0, g);
-    const nDoors = Math.max(1, Math.round(o.d / 0.6));
-    for (let i = 0; i < nDoors; i++) {
-      box(0.02, 2.4, 0.02, M.white, o.w / 2 + 0.005, 1.25, -o.d / 2 + (i + 0.5) * (o.d / nDoors), g);
+    // `sliding` (opt-in, plan: serenity photorealism) rebuilds the front as
+    // two overlapping sliding leaves in a track, one of them the smoked-
+    // glass panel 7.webp shows. Absent -> the hinged-door carcass every
+    // other caller has always had, unchanged.
+    const H = o.h || 2.5;
+    box(o.w, H, o.d, M.ashV, 0, H / 2, 0, g);
+    if (o.sliding) {
+      const half = o.d / 2;
+      // track
+      box(0.05, 0.05, o.d, M.gray, o.w / 2 + 0.03, H - 0.02, 0, g);
+      box(0.05, 0.05, o.d, M.gray, o.w / 2 + 0.03, 0.03, 0, g);
+      for (let i = 0; i < 2; i++) {
+        const mat = (o.mirror && i === 1) ? M.tintGlass : M.oakPale;
+        const off = i === 0 ? 0.028 : 0.052;
+        box(0.022, H - 0.10, half - 0.01, mat, o.w / 2 + off, H / 2, -half / 2 + i * half, g);
+        // leaf frame
+        for (const sz of [-1, 1]) {
+          box(0.03, H - 0.10, 0.03, M.metalBlack, o.w / 2 + off,
+            H / 2, -half / 2 + i * half + sz * (half / 2 - 0.02), g);
+        }
+        box(0.03, 0.03, half - 0.01, M.metalBlack, o.w / 2 + off, H - 0.06, -half / 2 + i * half, g);
+        box(0.03, 0.03, half - 0.01, M.metalBlack, o.w / 2 + off, 0.06, -half / 2 + i * half, g);
+      }
+    } else {
+      const nDoors = Math.max(1, Math.round(o.d / 0.6));
+      for (let i = 0; i < nDoors; i++) {
+        box(0.02, H - 0.1, 0.02, M.white, o.w / 2 + 0.005, H / 2, -o.d / 2 + (i + 0.5) * (o.d / nDoors), g);
+      }
     }
-    return { w: o.w, d: o.d };
+    // open shelf column beside the carcass (7.webp: a narrow run of five
+    // cubbies between the wardrobe and the wall)
+    if (o.niche) {
+      const nw = o.niche;
+      box(nw, H, o.d * 0.62, M.white, 0, H / 2, -o.d / 2 - nw * 0 - o.d * 0.31 - 0.005, g);
+      for (let i = 1; i < 6; i++) {
+        box(nw - 0.03, 0.02, o.d * 0.6, M.ashV, 0.004, i * (H / 6), -o.d * 0.31 - o.d / 2 - 0.005, g);
+      }
+    }
+    return { w: o.w, d: o.d + (o.niche ? o.d * 0.62 : 0) };
   };
 
   F.wardrobeTv = (o, g) => {
@@ -936,6 +1025,21 @@ const Builder = (() => {
 
   F.sofa = (o, g) => {
     const col = M[o.col] || M.taupe;
+    if (o.style === 'sofabed') {
+      // The convertible 2-seater in 3, 4 and 9.webp: a squared-off storage
+      // plinth, a low seat, two loose back cushions and slab arms level
+      // with the back. Opt-in; absent -> the original massing.
+      box(o.w, 0.26, o.d, col, 0, 0.13, 0, g);                       // plinth / drawer
+      box(o.w - 0.02, 0.04, o.d - 0.02, M.black, 0, 0.26, 0.004, g); // drawer shadow line
+      box(o.w - 0.30, 0.18, o.d - 0.08, col, 0, 0.37, 0.02, g);      // seat
+      for (const s of [-1, 1]) box(0.15, 0.50, o.d, col, s * (o.w / 2 - 0.075), 0.49, 0, g);
+      for (let i = 0; i < 2; i++) {
+        const cw = (o.w - 0.34) / 2 - 0.02;
+        const bc = box(cw, 0.46, 0.17, col, (i - 0.5) * (cw + 0.03), 0.60, -o.d / 2 + 0.14, g);
+        bc.rotation.x = 0.12;
+      }
+      return { w: o.w, d: o.d };
+    }
     box(o.w, 0.4, o.d, col, 0, 0.25, 0, g);
     box(o.w, 0.42, 0.2, col, 0, 0.6, o.d / 2 - 0.1, g);
     for (const s of [-1, 1]) box(0.2, 0.52, o.d, col, s * (o.w / 2 - 0.1), 0.48, 0, g);
@@ -976,14 +1080,34 @@ const Builder = (() => {
       const leg = cyl(0.03, 0.02, 0.72, M.doorWood, sx * (o.w / 2 - 0.25), 0.36, sz * (o.d / 2 - 0.18), g, 8);
       leg.rotation.z = sx * 0.12; leg.rotation.x = -sz * 0.1;
     }
-    // chairs: 3 per long side + 2 ends
+    // chairs: 3 per long side + 2 ends.
+    // `chairs: 'shell'` (opt-in) swaps the flat white back for the
+    // upholstered wrap-around shell on splayed oak legs that all four
+    // serenity chairs are. Absent -> the original chair, unchanged.
+    const shell = o.chairs === 'shell';
     const chairAt = (cx, cz, rot) => {
       const ch = new T.Group();
-      box(0.42, 0.05, 0.4, M.white, 0, 0.45, 0, ch);
-      const back = new T.Mesh(new T.BoxGeometry(0.4, 0.45, 0.04), M.white);
-      back.position.set(0, 0.7, -0.19); back.rotation.x = 0.12; ch.add(back);
-      for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-        cyl(0.018, 0.014, 0.44, M.doorWood, sx * 0.17, 0.22, sz * 0.16, ch, 6);
+      if (shell) {
+        const fab = M.knit;
+        box(0.46, 0.07, 0.44, fab, 0, 0.44, 0, ch);
+        const back = new T.Mesh(new T.BoxGeometry(0.44, 0.42, 0.09), fab);
+        back.position.set(0, 0.68, -0.19); back.rotation.x = 0.16; ch.add(back);
+        for (const sx of [-1, 1]) {           // the shell wraps forward
+          const wing = new T.Mesh(new T.BoxGeometry(0.09, 0.30, 0.24), fab);
+          wing.position.set(sx * 0.185, 0.60, -0.09); wing.rotation.x = 0.10;
+          ch.add(wing);
+        }
+        for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          const lg = cyl(0.016, 0.024, 0.43, M.doorWood, sx * 0.16, 0.215, sz * 0.15, ch, 7);
+          lg.rotation.z = sx * 0.14; lg.rotation.x = -sz * 0.12;
+        }
+      } else {
+        box(0.42, 0.05, 0.4, M.white, 0, 0.45, 0, ch);
+        const back = new T.Mesh(new T.BoxGeometry(0.4, 0.45, 0.04), M.white);
+        back.position.set(0, 0.7, -0.19); back.rotation.x = 0.12; ch.add(back);
+        for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          cyl(0.018, 0.014, 0.44, M.doorWood, sx * 0.17, 0.22, sz * 0.16, ch, 6);
+        }
       }
       ch.position.set(cx, 0, cz); ch.rotation.y = rot;
       g.add(ch);
@@ -999,7 +1123,21 @@ const Builder = (() => {
       chairAt(o.w / 2 + 0.3, 0, -Math.PI / 2);
       chairAt(-o.w / 2 - 0.3, 0, Math.PI / 2);
     }
-    // table setting: plates, glasses, napkins
+    // table setting. `set: 'mats'` (opt-in) lays the four oval placemats
+    // and the little lidded pot that 3, 4 and 5.webp all show, instead of
+    // the full plate/glass/napkin cover the other apartments lay.
+    if (o.set === 'mats') {
+      for (const [mx, mz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const mat = cyl(0.135, 0.135, 0.006, M.beigeQuilt,
+          mx * o.w * 0.24, 0.766, mz * o.d * 0.23, g, 22);
+        mat.scale.z = 0.78;
+      }
+      const pot = cyl(0.055, 0.06, 0.07, M.white, 0, 0.798, -o.d * 0.06, g, 16);
+      pot.scale.set(1, 1, 1);
+      const lid = new T.Mesh(new T.SphereGeometry(0.055, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), M.white);
+      lid.position.set(0, 0.833, -o.d * 0.06); g.add(lid);
+      return { w: o.w + (o.ends !== false ? 1.1 : 0.2), d: o.d + 1.1 };
+    }
     const plateAt = (px, pz) => {
       cyl(0.115, 0.1, 0.012, M.white, px, 0.762, pz, g, 16);
       cyl(0.085, 0.085, 0.006, M.counter, px, 0.772, pz, g, 14);
@@ -1036,7 +1174,9 @@ const Builder = (() => {
     const cab = o.cab === 'white' ? M.white : M.ash;
     const top = o.top === 'wood' ? M.doorWood : M.counter;
     const upper = o.upper === 'black' ? M.black : M.ash;
-    const splash = o.top === 'wood' ? M.doorWood : M.ashV;
+    // `splash: 'mosaic'` (opt-in) is the small grey tile 5.webp shows
+    // between counter and wall units. Absent -> the panel this always drew.
+    const splash = o.splash === 'mosaic' ? M.mosaic : (o.top === 'wood' ? M.doorWood : M.ashV);
     box(o.w, 0.86, o.d, cab, 0, 0.43, 0, g);
     box(o.w, 0.04, o.d + 0.04, top, 0, 0.9, 0.02, g);
     box(o.w, 0.6, 0.02, splash, 0, 1.3, -o.d / 2 + 0.01, g);         // splashback
@@ -1234,8 +1374,18 @@ const Builder = (() => {
     if (o.divider === 'n') pane('n', o.w, 0, 0, -o.d / 2);
     if (o.divider === 'w') pane('w', o.d, Math.PI / 2, -o.w / 2, 0);
     cyl(0.012, 0.012, 1.9, M.chrome, -o.w / 2 + 0.1, 0.99, -o.d / 2 + 0.1, g, 8);
-    const head = new T.Mesh(new T.CylinderGeometry(0.11, 0.11, 0.02, 16), M.chrome);
+    // radial segments stay at 16 unless `rain` is asked for: bumping them
+    // unconditionally added 24 vertices to every shower in every apartment
+    // (kings-court builds five), which is not a no-op however small it looks.
+    const hr = o.rain ? 0.15 : 0.11;
+    const head = new T.Mesh(new T.CylinderGeometry(hr, hr, 0.02, o.rain ? 18 : 16), M.chrome);
     head.position.set(-o.w / 2 + 0.3, 2.0, -o.d / 2 + 0.25); g.add(head);
+    // Opt-in recessed shelf in the head wall (1.webp shows one). A shallow
+    // dark box reads as a niche where a flush tile does not.
+    if (o.niche) {
+      box(0.42, 0.30, 0.08, M.stoneTile, 0, 1.25, -o.d / 2 + 0.05, g);
+      box(0.38, 0.26, 0.02, M.black, 0, 1.25, -o.d / 2 + 0.075, g);
+    }
     if (o.valve) {
       box(0.16, 0.16, 0.03, M.chrome, -o.w / 2 + 0.06, 1.05, -o.d / 2 + 0.32, g);
     }
@@ -1248,21 +1398,40 @@ const Builder = (() => {
   };
 
   F.vanity = (o, g) => {
+    // Opt-in `wood: 'walnut'`, `open: true` (an open shelf under the
+    // drawer instead of a solid carcass) and `mirror: 'none'` (the round
+    // mirror is then a separate F.mirrorRound, because F.vanity's own is
+    // a backlit RECTANGLE and five other callers depend on it). Absent ->
+    // exactly the unit this constructor always built.
     const top = o.dark ? M.black : M.white;
-    box(o.w, 0.45, o.d, M.doorWood, 0, 0.55, 0, g);
-    box(o.w, 0.1, o.d + 0.03, top, 0, 0.85, 0.015, g);
-    if (o.dark) {
-      box(0.55, 0.06, 0.35, M.black, 0, 0.93, 0, g);
+    const carcass = o.wood === 'walnut' ? M.walnut : M.doorWood;
+    if (o.open) {
+      // wall-hung: drawer band on top, open shelf below, nothing on the floor
+      const y0 = o.y === undefined ? 0.5 : o.y;
+      box(o.w, 0.24, o.d, carcass, 0, y0 + 0.30, 0, g);
+      box(o.w, 0.03, o.d, carcass, 0, y0 + 0.02, 0, g);
+      for (const sx of [-1, 1]) box(0.03, 0.42, o.d, carcass, sx * (o.w / 2 - 0.015), y0 + 0.21, 0, g);
+      box(o.w, 0.10, o.d + 0.03, top, 0, y0 + 0.47, 0.015, g);
+      box(o.w * 0.72, 0.05, o.d * 0.62, top, 0, y0 + 0.50, 0.01, g);   // moulded bowl lip
+      cyl(0.012, 0.012, 0.18, M.chrome, -o.w * 0.28, y0 + 0.61, -o.d / 2 + 0.07, g, 8);
+      box(0.05, 0.11, 0.05, M.black, o.w * 0.16, y0 + 0.58, -o.d / 2 + 0.10, g); // soap pump
     } else {
-      const b = new T.Mesh(new T.CylinderGeometry(0.19, 0.16, 0.14, 20), M.white);
-      b.position.set(0, 0.97, 0); g.add(b);
+      box(o.w, 0.45, o.d, carcass, 0, 0.55, 0, g);
+      box(o.w, 0.1, o.d + 0.03, top, 0, 0.85, 0.015, g);
+      if (o.dark) {
+        box(0.55, 0.06, 0.35, M.black, 0, 0.93, 0, g);
+      } else {
+        const b = new T.Mesh(new T.CylinderGeometry(0.19, 0.16, 0.14, 20), M.white);
+        b.position.set(0, 0.97, 0); g.add(b);
+      }
+      cyl(0.012, 0.012, 0.18, M.chrome, 0, 1.12, -o.d / 2 + 0.05, g, 8);
     }
-    // backlit mirror
-    const mir = new T.Mesh(new T.BoxGeometry(o.w * 0.55, 0.9, 0.02), M.smoke);
-    mir.position.set(0, 1.75, -o.d / 2 - 0.0); g.add(mir);
-    const halo = new T.Mesh(new T.BoxGeometry(o.w * 0.55 + 0.08, 0.98, 0.005), M.lampShade);
-    halo.position.set(0, 1.75, -o.d / 2 - 0.012); g.add(halo);
-    cyl(0.012, 0.012, 0.18, M.chrome, 0, 1.12, -o.d / 2 + 0.05, g, 8);
+    if (o.mirror !== 'none') {
+      const mir = new T.Mesh(new T.BoxGeometry(o.w * 0.55, 0.9, 0.02), M.smoke);
+      mir.position.set(0, 1.75, -o.d / 2 - 0.0); g.add(mir);
+      const halo = new T.Mesh(new T.BoxGeometry(o.w * 0.55 + 0.08, 0.98, 0.005), M.lampShade);
+      halo.position.set(0, 1.75, -o.d / 2 - 0.012); g.add(halo);
+    }
     return { w: o.w, d: o.d };
   };
 
@@ -1317,6 +1486,29 @@ const Builder = (() => {
   };
 
   F.terraceChair = (o, g) => {
+    // `style: 'sling'` (opt-in): 2.webp / 9.webp / 10.webp all show the
+    // same folding teak-and-cord lounge chair -- a raked cord back on an
+    // A-frame -- and the boxy rattan tub chair below is not it.
+    if (o.style === 'sling') {
+      const seatY = 0.36;
+      for (const sx of [-1, 1]) {
+        const f = cyl(0.024, 0.024, 0.86, M.walnut, sx * 0.27, 0.43, 0.16, g, 8);
+        f.rotation.x = 0.30;
+        const r = cyl(0.024, 0.024, 1.02, M.walnut, sx * 0.25, 0.50, -0.16, g, 8);
+        r.rotation.x = -0.36;
+      }
+      const seat = box(0.54, 0.05, 0.50, M.wickerDark, 0, seatY, 0.02, g);
+      seat.rotation.x = 0.12;
+      const back = box(0.52, 0.05, 0.62, M.wickerDark, 0, 0.72, -0.24, g);
+      back.rotation.x = -0.42;
+      for (const sx of [-1, 1]) {
+        const arm = box(0.05, 0.04, 0.46, M.walnut, sx * 0.29, 0.60, -0.02, g);
+        arm.rotation.x = -0.14;
+      }
+      const pil = box(0.34, 0.11, 0.26, M.bedding, 0, 0.44, 0.06, g);
+      pil.rotation.x = 0.12;
+      return { w: 0.68, d: 0.78 };
+    }
     box(0.7, 0.45, 0.7, M.rattan, 0, 0.25, 0, g);
     box(0.7, 0.5, 0.14, M.rattan, 0, 0.65, 0.28, g);
     for (const s of [-1, 1]) box(0.14, 0.35, 0.7, M.rattan, s * 0.28, 0.55, 0, g);
@@ -1329,9 +1521,16 @@ const Builder = (() => {
   };
 
   F.terraceTable = (o, g) => {
-    box(o.w, 0.06, o.d, M.rattan, 0, 0.4, 0, g);
-    box(o.w - 0.15, 0.34, o.d - 0.15, M.rattan, 0, 0.2, 0, g);
-    box(o.w - 0.2, 0.01, o.d - 0.2, M.smoke, 0, 0.435, 0, g);
+    const mat = o.mat === 'wicker' ? M.wicker : M.rattan;
+    box(o.w, 0.06, o.d, mat, 0, 0.4, 0, g);
+    box(o.w - 0.15, 0.34, o.d - 0.15, mat, 0, 0.2, 0, g);
+    if (o.mat === 'wicker') {
+      for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        box(0.035, 0.4, 0.035, M.steelDark, sx * (o.w / 2 - 0.03), 0.2, sz * (o.d / 2 - 0.03), g);
+      }
+    } else {
+      box(o.w - 0.2, 0.01, o.d - 0.2, M.smoke, 0, 0.435, 0, g);
+    }
     return { w: o.w, d: o.d };
   };
 
@@ -1383,6 +1582,13 @@ const Builder = (() => {
       [0.08, d, -w / 2, 0], [0.08, d, +w / 2, 0]
     ]) box(bw, drop + deep, bd, M.poolWall, bx, -(drop + deep) / 2 - 0.09, bz, g);
     box(w, 0.05, d, M.poolWall, 0, -(drop + deep) - 0.09, 0, g);
+    // Opt-in submerged entry step along one long edge (10.webp shows the
+    // shelf running the near side of the basin). Absent -> unchanged.
+    if (o.step) {
+      const sw = o.step === true ? 0.9 : o.step;
+      box(w, 0.06, sw, M.poolWall, 0, -drop - 0.09 - 0.40, -d / 2 + sw / 2, g);
+      box(w, 0.40, 0.06, M.poolWall, 0, -drop - 0.09 - 0.20, -d / 2 + sw, g);
+    }
     box(w, 0.02, d, M.poolWater, 0, -drop - 0.09, 0, g);
     // A hole in the ground: no collider and no occluder. Giving it an
     // occluder height would shadow the deck beside it.
@@ -1437,6 +1643,12 @@ const Builder = (() => {
       box(w / n - 0.05, h - 0.18, 0.02, M.ashV, -w / 2 + (i + 0.5) * (w / n), (h - 0.08) / 2, d / 2 + 0.012, g);
     }
     box(w - 0.08, 0.10, d - 0.06, M.cream, 0, h + 0.05, 0, g);
+    // Opt-in rolled bolster along the window side (6.webp: the seat has a
+    // long padded roll at its back, not a bare wall). Absent -> unchanged.
+    if (o.bolster) {
+      const b = cyl(0.11, 0.11, w - 0.10, M.cream, 0, h + 0.20, -d / 2 + 0.13, g, 14);
+      b.rotation.z = Math.PI / 2;
+    }
     return { w, d };
   };
 
@@ -1445,16 +1657,265 @@ const Builder = (() => {
   // reads as a plain white box at every camera.
   F.lounger = (o, g) => {
     const w = o.w || 0.72, L = o.d || 1.95;
-    box(w, 0.10, L, M.rattan, 0, 0.34, 0, g);
-    box(w - 0.06, 0.11, L - 0.08, M.cream, 0, 0.44, 0, g);
+    // `mat: 'wicker'` (opt-in): 2.webp's lounger is an all-over woven
+    // sunbed, not a rattan frame with a cream pad.
+    const frame = o.mat === 'wicker' ? M.wicker : M.rattan;
+    const pad = o.mat === 'wicker' ? M.wicker : M.cream;
+    box(w, 0.10, L, frame, 0, 0.34, 0, g);
+    box(w - 0.06, 0.11, L - 0.08, pad, 0, 0.44, 0, g);
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
       cyl(0.022, 0.022, 0.29, M.metalBlack, sx * (w / 2 - 0.07), 0.145, sz * (L / 2 - 0.12), g, 8);
     }
-    const back = box(w, 0.09, 0.62, M.rattan, 0, 0.55, -L / 2 + 0.26, g);
-    back.rotation.x = -0.85;
-    const cus = box(w - 0.06, 0.10, 0.56, M.cream, 0, 0.63, -L / 2 + 0.23, g);
-    cus.rotation.x = -0.85;
+    const back = box(w, 0.09, 0.62, frame, 0, 0.55, -L / 2 + 0.26, g);
+    back.rotation.x = o.recline === undefined ? -0.85 : -o.recline;
+    const cus = box(w - 0.06, 0.10, 0.56, pad, 0, 0.63, -L / 2 + 0.23, g);
+    cus.rotation.x = o.recline === undefined ? -0.85 : -o.recline;
     return { w, d: L };
+  };
+
+  // ==========================================================
+  // Serenity photorealism pass. Everything below is NEW: new
+  // constructors with new type names, reached only from a config that
+  // asks for them by name. kings-court and horkyone-10 name none of
+  // them, so neither apartment can reach a line of this block.
+  // ==========================================================
+
+  // Wall split air-conditioner. Present high on the wall in 3, 4, 6 and
+  // 9.webp -- four of eleven photographs -- and the model had none, which
+  // left a conspicuously empty band of wall just under the ceiling in
+  // every one of those views.
+  F.acUnit = (o, g) => {
+    const w = o.w || 0.84, h = o.h || 0.29, d = o.d || 0.20;
+    const y = o.y === undefined ? 2.25 : o.y;
+    const body = box(w, h, d, M.acBody, 0, y + h / 2, 0, g);
+    body.geometry.translate(0, 0, 0);
+    // sloped louvre band across the lower face
+    const lv = box(w - 0.06, 0.055, d * 0.72, M.gray, 0, y + 0.045, d * 0.12, g);
+    lv.rotation.x = 0.32;
+    box(w * 0.16, 0.022, 0.004, M.yellow, w * 0.3, y + h * 0.62, d / 2 + 0.003, g);
+    return { noCollide: true };
+  };
+
+  // A row of identical-frame canvases: the nautical triptych over the
+  // sofa. F.painting hangs exactly one canvas, so the config was faking
+  // the set with two unrelated single paintings at different sizes.
+  F.artSet = (o, g) => {
+    const n = o.n || 3, w = o.w || 0.36, h = o.h || 0.46, gap = o.gap === undefined ? 0.04 : o.gap;
+    const styles = o.styles || ['urchin', 'starfish', 'shell'];
+    const y = o.y === undefined ? 1.72 : o.y;
+    const span = n * w + (n - 1) * gap;
+    for (let i = 0; i < n; i++) {
+      const x = -span / 2 + w / 2 + i * (w + gap);
+      box(w, h, 0.028, M.white, x, y, 0, g);
+      if (!artCache[styles[i % styles.length]]) {
+        artCache[styles[i % styles.length]] =
+          new T.MeshStandardMaterial({ map: artTex(styles[i % styles.length]), roughness: 0.9 });
+      }
+      const art = new T.Mesh(new T.PlaneGeometry(w - 0.02, h - 0.02), artCache[styles[i % styles.length]]);
+      art.position.set(x, y, 0.018);
+      g.add(art);
+    }
+    return { noCollide: true };
+  };
+
+  // Macrame wall hanging, the only art in the bedroom (11.webp). An
+  // alpha-cut plane, so the fringe reads as fringe rather than as a
+  // cream rectangle.
+  F.macrame = (o, g) => {
+    const w = o.w || 0.3, h = o.h || 0.5;
+    const y = o.y === undefined ? 1.85 : o.y;
+    const m = new T.Mesh(new T.PlaneGeometry(w, h), M.macrame);
+    m.position.set(0, y, 0.012);
+    g.add(m);
+    return { noCollide: true };
+  };
+
+  // Round mirror in a thin dark frame -- 1.webp and 8.webp both centre on
+  // one. F.vanity's own mirror is a backlit rectangle and could not be
+  // made round without changing what five other callers render.
+  F.mirrorRound = (o, g) => {
+    const r = o.r || 0.28;
+    const y = o.y === undefined ? 1.55 : o.y;
+    const ring = new T.Mesh(new T.TorusGeometry(r, 0.014, 8, 40), M.metalBlack);
+    ring.position.set(0, y, 0.03); g.add(ring);
+    const face = new T.Mesh(new T.CircleGeometry(r, 40), M.mirror);
+    face.position.set(0, y, 0.028); g.add(face);
+    return { noCollide: true };
+  };
+
+  // Free-standing two-door fridge (5.webp, immediately left of the front
+  // door). F.tallUnits was standing in for it as a plain cabinet.
+  F.fridge = (o, g) => {
+    const w = o.w || 0.6, d = o.d || 0.62, h = o.h || 1.42;
+    box(w, h, d, M.steelDark, 0, h / 2, 0, g);
+    box(w - 0.02, 0.012, 0.01, M.black, 0, h * 0.66, d / 2 + 0.006, g);   // door split
+    for (const yy of [h * 0.82, h * 0.36]) {
+      box(0.022, 0.16, 0.03, M.chrome, w / 2 - 0.07, yy, d / 2 + 0.02, g); // handles
+    }
+    cyl(0.05, 0.05, 0.012, M.navy, -w / 2 + 0.14, h + 0.03, 0, g, 14);     // the blue bowl on top
+    return { w, d };
+  };
+
+  F.microwave = (o, g) => {
+    const w = o.w || 0.46, h = o.h || 0.27, d = o.d || 0.34;
+    const y = o.y === undefined ? 1.45 : o.y;
+    box(w, h, d, M.white, 0, y + h / 2, 0, g);
+    box(w * 0.66, h - 0.06, 0.008, M.black, -w * 0.13, y + h / 2, d / 2 + 0.005, g);
+    return { noCollide: true };
+  };
+
+  // Single front-loading washing machine, 0.6 m, under the kitchen
+  // counter in 5.webp. F.washerDryer is a fixed 1.35 m pair and could not
+  // fit the slot -- recorded as a known omission in docs/SERENITY.md.
+  F.washer = (o, g) => {
+    const w = o.w || 0.6, d = o.d || 0.6, h = o.h || 0.85;
+    box(w, h, d, M.white, 0, h / 2, 0, g);
+    const door = new T.Mesh(new T.CylinderGeometry(0.19, 0.19, 0.03, 22), M.smoke);
+    door.rotation.x = Math.PI / 2;
+    door.position.set(0, h * 0.52, d / 2 + 0.015);
+    g.add(door);
+    box(w - 0.08, 0.07, 0.01, M.gray, 0, h - 0.06, d / 2 + 0.006, g);
+    return { w, d };
+  };
+
+  // Tiled wall cladding. builder.js gives every wall in every apartment
+  // the one flat M.wall material (see `const segMat = M.wall` in the wall
+  // builder), so a bathroom clad floor-to-ceiling in stone -- which is
+  // what both bathroom photographs show -- was not expressible at all.
+  // This is the cheap, contained answer: a 3 cm slab in front of the wall
+  // face, merged like any other furniture, rather than a second material
+  // path through the wall bake.
+  F.wallTile = (o, g) => {
+    const w = o.w, h = o.h || 2.6, t = o.t || 0.02;
+    const mat = o.mat === 'mosaic' ? M.mosaic : M.stoneTile;
+    const m = new T.Mesh(new T.BoxGeometry(w, h, t), mat);
+    // one texture repeat per ~1.2 m x 1.3 m of wall keeps the tile module
+    // the same size whatever panel this is stretched across
+    if (mat.map) {
+      const mm = mat.clone();
+      mm.map = mat.map.clone();
+      mm.map.needsUpdate = true;
+      mm.map.wrapS = mm.map.wrapT = T.RepeatWrapping;
+      mm.map.repeat.set(Math.max(1, w / (o.mat === 'mosaic' ? 0.5 : 1.2)),
+                        Math.max(1, h / (o.mat === 'mosaic' ? 0.5 : 1.3)));
+      m.material = mm;
+    }
+    m.position.set(0, (o.y || 0) + h / 2, 0);
+    g.add(m);
+    return { noCollide: true };
+  };
+
+  // Wall-hung floating shelf / bedside console (7.webp and 11.webp: a
+  // small white slab beside the wardrobe, and the lamp's perch).
+  F.floatShelf = (o, g) => {
+    const w = o.w || 0.42, d = o.d || 0.3, h = o.h || 0.07;
+    const y = o.y === undefined ? 0.5 : o.y;
+    box(w, h, d, M.white, 0, y, 0, g);
+    if (o.dish) cyl(0.05, 0.055, 0.025, M.navy, 0, y + h / 2 + 0.012, 0, g, 14);
+    return { noCollide: true };
+  };
+
+  // Black towel hook with a hanging towel (8.webp). F.towels stacks
+  // folded towels on a counter; this one hangs.
+  F.towelHook = (o, g) => {
+    const y = o.y === undefined ? 1.35 : o.y;
+    box(0.045, 0.045, 0.035, M.metalBlack, 0, y, 0.018, g);
+    const t = box(0.19, o.len || 0.62, 0.045, M.bedding, 0, y - (o.len || 0.62) / 2 - 0.02, 0.03, g);
+    t.rotation.z = 0.04;
+    return { noCollide: true };
+  };
+
+  // ---- pool environment -------------------------------------------------
+
+  // Coconut / fan palm. 10.webp's skyline is palms; the config's
+  // plantMass fronds are a hedge crown and cannot stand in for a 6 m tree.
+  F.palm = (o, g) => {
+    const h = o.h || 5.0, lean = o.lean || 0;
+    const seg = 5;
+    for (let i = 0; i < seg; i++) {
+      const t = i / seg;
+      const tr = cyl(0.10 - t * 0.045, 0.115 - t * 0.045, h / seg, M.palmTrunk,
+        Math.sin(lean) * t * h * 0.5, h / seg * (i + 0.5), 0, g, 8);
+      tr.rotation.z = -lean * 0.6;
+    }
+    const top = Math.sin(lean) * h * 0.5;
+    const n = o.fronds || 9;
+    const FL = o.frond || 2.2;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * Math.PI * 2 + (i % 2) * 0.18;
+      const droop = 0.42 + (i % 3) * 0.26;
+      // Each leaf is one plane rooted at the crown and swung outward, so
+      // the silhouette is a crown of long arching fronds rather than the
+      // ring of small tufts the hedge-crown material produced.
+      const leaf = new T.Mesh(new T.PlaneGeometry(FL, FL * 0.5), M.palmLeaf);
+      leaf.geometry.translate(FL / 2, 0, 0);      // root the leaf at its base
+      leaf.position.set(top, h - 0.08, 0);
+      leaf.rotation.order = 'YZX';
+      leaf.rotation.y = -a;
+      leaf.rotation.z = -droop;
+      g.add(leaf);
+    }
+    // crown boss
+    cyl(0.13, 0.09, 0.22, M.palmTrunk, top, h - 0.05, 0, g, 8);
+    return { w: 0.3, d: 0.3 };
+  };
+
+  // The planted island standing in the water in 10.webp: a low round
+  // coping ring with a shrub mass on it.
+  F.poolIsland = (o, g) => {
+    const r = o.r || 1.1, y = o.y === undefined ? -0.02 : o.y;
+    cyl(r, r, 0.22, M.poolCoping, 0, y - 0.11, 0, g, 26);
+    cyl(r - 0.14, r - 0.14, 0.06, M.hedgeDark, 0, y + 0.03, 0, g, 24);
+    const n = o.bushes || 5;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * Math.PI * 2, rr = (r - 0.35) * (i % 2 ? 0.35 : 0.8);
+      const s = 0.34 + (i % 3) * 0.12;
+      const b = new T.Mesh(new T.SphereGeometry(s, 10, 8), M.hedgeDark);
+      b.position.set(Math.cos(a) * rr, y + s * 0.72, Math.sin(a) * rr);
+      b.scale.y = 0.8;
+      g.add(b);
+    }
+    return { noCollide: true };
+  };
+
+  // Hanging macrame chair on a white shepherd's-crook stand -- the single
+  // most recognisable object in 10.webp, and the config had nothing for it.
+  F.hangingChair = (o, g) => {
+    const h = o.h || 2.35, reach = o.reach || 0.95;
+    cyl(0.34, 0.38, 0.07, M.fenceWhite, 0, 0.035, 0, g, 20);
+    cyl(0.045, 0.05, h - 0.5, M.fenceWhite, 0, (h - 0.5) / 2 + 0.05, 0, g, 12);
+    const arcN = 7;
+    for (let i = 0; i < arcN; i++) {
+      const t = (i + 0.5) / arcN, a = t * Math.PI / 2;
+      const seg = cyl(0.042, 0.042, (reach * 1.25) / arcN, M.fenceWhite,
+        Math.sin(a) * reach, h - 0.45 + Math.cos(a) * 0.45, 0, g, 10);
+      seg.rotation.z = -a;
+    }
+    cyl(0.006, 0.006, 0.5, M.fenceWhite, reach, h - 0.25, 0, g, 6);
+    const seat = new T.Mesh(new T.SphereGeometry(0.42, 14, 10, 0, Math.PI * 2, Math.PI * 0.45, Math.PI * 0.55), M.macrame);
+    seat.position.set(reach, h - 0.75, 0);
+    g.add(seat);
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * Math.PI * 2;
+      cyl(0.004, 0.004, 0.34, M.macrame, reach + Math.cos(a) * 0.36, h - 1.08, Math.sin(a) * 0.36, g, 4);
+    }
+    return { noCollide: true };
+  };
+
+  // Terrace glazing: the tinted sliding wall in 2.webp. The wall opening
+  // itself renders an open passage (interior leaves are never drawn, per
+  // the platform rule); this is the fixed glazed panel BESIDE the sliding
+  // leaf, which is architecture rather than a door.
+  F.glazing = (o, g) => {
+    const w = o.w, h = o.h || 2.35;
+    const n = o.panes || 2;
+    box(w, h, 0.03, M.tintGlass, 0, h / 2, 0, g);
+    box(w, 0.05, 0.05, M.white, 0, h, 0, g);
+    box(w, 0.05, 0.05, M.white, 0, 0.025, 0, g);
+    for (let i = 0; i <= n; i++) {
+      box(0.045, h, 0.05, M.white, -w / 2 + i * (w / n), h / 2, 0, g);
+    }
+    return { noCollide: true };
   };
 
   // Furniture heights for light occlusion (shadows bake into the floor)
@@ -1464,9 +1925,10 @@ const Builder = (() => {
     wardrobe: 2.5, wardrobeTv: 2.5, barStool: 0.8, tub: 0.6, vanity: 1.0,
     wc: 0.45, washerDryer: 0.9, bench: 0.45, sideboard: 0.5, sideTable: 0.45,
     deskNook: 0.78, tvPanel: 2.3, terraceChair: 0.8, terraceTable: 0.45,
-    planter: 1.2, plantMass: 2.2, slatFence: 2.0, windowBench: 0.5, lounger: 0.5
+    planter: 1.2, plantMass: 2.2, slatFence: 2.0, windowBench: 0.5, lounger: 0.5,
+    fridge: 1.4, washer: 0.85, palm: 0.4
   };
-  const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern'];
+  const OCC_SKIP = ['shower', 'plant', 'floorLamp', 'lantern', 'palm'];
 
   const furnGroups = [];
   function buildFurniture(scene) {

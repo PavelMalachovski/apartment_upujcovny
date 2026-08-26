@@ -3238,3 +3238,47 @@ precedent clause for exactly this ("This said 69 from phase A until
 machine's reading of the same recipe on an unchanged tree, not a regression and
 not a new budget figure. The 78 is not struck — it stands as the second
 machine's reading.**
+
+## Serenity photorealism pass, 2026-08-26
+
+`serenity-audit-base-legacy.json` is the calibration reading taken before a
+line was changed: **14.35**, against plan 4e's recorded gate of 14.36/14.37 on
+its own machine. That agreement is what licenses every other number here to be
+compared with this file's history rather than only with itself. It also means
+the post-processing spoof this session's harness uses (headless Chromium
+reports SwiftShader, which `post.js` correctly refuses) reproduces the chain
+the recorded figures were measured through.
+
+Files: `serenity-audit-legacy-BASE.json` (14.34) and `serenity-b6-final-legacy.json`
+(13.14), with `serenity-b6-final-legacy-repeat.json` (13.13) as the repeat.
+Both sides all-spot, `?fov=legacy`, one machine, one session, and **BASE is the
+pre-branch config rendered on this branch's engine**, so the −1.20 is the
+config's and not the engine's. Full working:
+`docs/superpowers/plans/2026-08-26-serenity-photorealism.md`.
+
+Three things in this run are worth reading before trusting any number in it.
+
+**The lens sweep is a measurement of the instrument, not of the product.**
+`serenity-fovsweep-{60,72,85,100,120}.json` sweep `meta.photoFovLong` and
+bottom out at 85 (13.21) against 14.37 at the shipped 120. That key is read
+only by `measure.js` off the legacy path and by `compare.js`'s divider; the
+scoring gate runs at a fixed 72 either way. So the sweep says the divider was
+framing the wrong camera, and it says nothing about what a visitor sees.
+
+**The exposure was fitted on luminance and it cost ΔE, again.**
+`serenity-expsweep-{0.31,0.325,0.34}.json` give mean linear luminance
+0.2817 / 0.2954 / 0.3077 against the photographs' 0.2924; the interpolated
+0.327 reads 0.2916. ΔE over that same move rises 13.07 → 13.14. Same trade
+plan 4c task 4 recorded, obeyed the same way. **And the p5 went the wrong
+way**: 0.0795 before the pass, 0.1097 after, against 0.0379. That is not the
+exposure's doing and the exposure cannot undo it — a paler floor and light
+stone cladding raise the darkest pixels, and the walls carry no baked
+occlusion at all to hold them down.
+
+**`serenity-variantB.json` is a rejected experiment, kept as the record.** It
+mirrors the bedroom about x = 1.55. It scores 13.13 against the kept
+arrangement's 13.24 at the time — *better* — and looks clearly worse: two
+camera poses end up inside the furniture. It is not in the tree. The reason it
+is written down is that it is the cleanest example this repository has of the
+thing the section above keeps warning about: an 8×8 grid of cell mean colours
+will happily prefer a broken frame.

@@ -127,15 +127,44 @@ window.initApp = function () {
     const top = skyColor(skyCfg.top, 0x3f8fd0);
     const bot = skyColor(skyCfg.bottom, SKY_FALLBACK);
     const hex = (n) => '#' + n.toString(16).padStart(6, '0');
+    // `sky.clouds` (optional, 0..1 = coverage; true means 0.5) widens the
+    // canvas and paints soft cumulus into the upper band. Absent or 0 ->
+    // the 8 x 256 pure gradient this has always drawn, so an apartment
+    // that does not ask for clouds is unchanged. 10.webp is roughly a
+    // third sky and every bit of it is broken cloud; a clean gradient
+    // cannot read as that sky at any colour.
+    const cloudAmt = skyCfg.clouds === true ? 0.5
+      : (typeof skyCfg.clouds === 'number' && skyCfg.clouds > 0 ? Math.min(1, skyCfg.clouds) : 0);
     const cv = document.createElement('canvas');
-    cv.width = 8; cv.height = 256;
+    cv.width = cloudAmt ? 1024 : 8; cv.height = cloudAmt ? 512 : 256;
     const cx = cv.getContext('2d');
-    const grad = cx.createLinearGradient(0, 0, 0, 256);
+    const grad = cx.createLinearGradient(0, 0, 0, cv.height);
     grad.addColorStop(0, hex(top));
     grad.addColorStop(0.78, hex(bot));
     grad.addColorStop(1, hex(bot));
     cx.fillStyle = grad;
-    cx.fillRect(0, 0, 8, 256);
+    cx.fillRect(0, 0, cv.width, cv.height);
+    if (cloudAmt) {
+      // Deterministic placement: a fixed LCG rather than Math.random, so
+      // two loads of the same tree produce the same sky and a
+      // BASE-vs-HEAD pixel comparison stays meaningful.
+      let seed = 20260826;
+      const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+      const puffs = Math.round(220 * cloudAmt);
+      cx.globalCompositeOperation = 'source-over';
+      for (let i = 0; i < puffs; i++) {
+        const bx = rnd() * cv.width;
+        const by = (0.05 + rnd() * 0.42) * cv.height;
+        const r = (10 + rnd() * 46) * (1 - by / cv.height * 0.5);
+        const a = 0.05 + rnd() * 0.22;
+        const gg = cx.createRadialGradient(bx, by, 0, bx, by, r);
+        gg.addColorStop(0, `rgba(255,255,255,${a})`);
+        gg.addColorStop(0.55, `rgba(255,255,255,${a * 0.5})`);
+        gg.addColorStop(1, 'rgba(255,255,255,0)');
+        cx.fillStyle = gg;
+        cx.beginPath(); cx.arc(bx, by, r, 0, Math.PI * 2); cx.fill();
+      }
+    }
     const tex = new THREE.CanvasTexture(cv);
     tex.mapping = THREE.EquirectangularReflectionMapping;
     tex.colorSpace = THREE.SRGBColorSpace;
